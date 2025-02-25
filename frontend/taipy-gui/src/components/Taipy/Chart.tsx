@@ -294,7 +294,7 @@ const getData = (
     data: Record<string, TraceValueType>,
     additionalDatas: Array<Record<string, TraceValueType>>,
     idx: number
-) => (idx === 0 ? data : (idx <= additionalDatas.length ? additionalDatas[idx - 1]: undefined));
+) => (idx === 0 ? data : idx <= additionalDatas.length ? additionalDatas[idx - 1] : undefined);
 
 const Chart = (props: ChartProp) => {
     const {
@@ -506,10 +506,11 @@ const Chart = (props: ChartProp) => {
             return lastDataPl.current || [];
         }
         let changed = false;
+        let baseDataPl = (lastDataPl.current.length && lastDataPl.current[0]) || {};
         const newDataPl = config.traces.map((trace, idx) => {
-            const currentData = idx < lastDataPl.current.length ? lastDataPl.current[idx] : {};
+            const currentData = (idx < lastDataPl.current.length && lastDataPl.current[idx]) || baseDataPl;
             const dataKey = idx < dataKeys.length ? dataKeys[idx] : dataKeys[0];
-            const lData = idx < dataList.length ? dataList[idx] : dataList[0];
+            const lData = (idx < dataList.length && dataList[idx]) || dataList[0];
             if (!lData || isDataRefresh(lData) || !Object.keys(lData).length) {
                 return currentData;
             }
@@ -517,12 +518,12 @@ const Chart = (props: ChartProp) => {
                 idx < config.columns?.length ? config.columns[idx] : undefined,
                 config.decimators
             )[1];
-            if (!dataKey.startsWith(dtKey) || !dtKey.length) {
+            if (!dataKey.startsWith(dtKey)) {
                 return currentData;
             }
             changed = true;
             const datum = lData[dataKey];
-            const columns = config.columns[idx];
+            const columns = config.columns[idx] || config.columns[0];
             const ret = {
                 ...getArrayValue(config.options, idx, {}),
                 type: config.types[idx],
@@ -597,6 +598,9 @@ const Chart = (props: ChartProp) => {
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {
                 ret.selected = { marker: selectedMarker };
+            }
+            if (idx == 0) {
+                baseDataPl = ret;
             }
             return ret as Data;
         });

@@ -15,7 +15,7 @@ from unittest import mock
 import pytest
 
 from taipy.common.config import Config
-from taipy.common.config.common.frequency import Frequency
+from taipy.core.common.frequency import Frequency
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 

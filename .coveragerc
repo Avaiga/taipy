@@ -1,0 +1,8 @@
+[run]
+omit =
+    tests/*
+
+[report]
+exclude_lines =
+    # Ignore pragma: no cover comments
+    pragma: no cover

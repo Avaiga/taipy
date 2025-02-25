@@ -60,6 +60,7 @@ import {
     FilterDesc,
     generateHeaderClassName,
     getClassName,
+    getColumnHeader,
     getFormatFn,
     getPageKey,
     getRowIndex,
@@ -288,107 +289,146 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         e.stopPropagation();
     }, []);
 
-    const [colsOrder, columns, cellClassNames, tooltips, formats, handleNan, filter, partialEditable, calcWidth] =
-        useMemo(() => {
-            let hNan = !!props.nanValue;
-            if (baseColumns) {
-                try {
-                    let filter = false;
-                    let partialEditable = editable;
-                    const newCols: Record<string, ColumnDesc> = {};
-                    Object.entries(baseColumns).forEach(([cId, cDesc]) => {
-                        const nDesc = (newCols[cId] = { ...cDesc });
-                        if (typeof nDesc.filter != "boolean") {
-                            nDesc.filter = !!props.filter;
-                        }
-                        filter = filter || nDesc.filter;
-                        if (typeof nDesc.notEditable == "boolean") {
-                            nDesc.notEditable = !editable;
-                        } else {
-                            partialEditable = partialEditable || !nDesc.notEditable;
-                        }
-                        if (nDesc.tooltip === undefined) {
-                            nDesc.tooltip = props.tooltip;
-                        }
-                        if (typeof nDesc.sortable != "boolean") {
-                            nDesc.sortable = sortable;
-                        }
-                    });
-                    addActionColumn(
-                        (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
-                            (active && filter ? 1 : 0) +
-                            (active && downloadable ? 1 : 0),
-                        newCols
-                    );
-                    const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
-                    let nbWidth = 0;
-                    const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
-                        if (newCols[col].className) {
-                            pv.classNames = pv.classNames || {};
-                            pv.classNames[newCols[col].dfid] = newCols[col].className as string;
-                        }
-                        hNan = hNan || !!newCols[col].nanValue;
-                        if (newCols[col].tooltip) {
-                            pv.tooltips = pv.tooltips || {};
-                            pv.tooltips[newCols[col].dfid] = newCols[col].tooltip as string;
-                        }
-                        if (newCols[col].formatFn) {
-                            pv.formats = pv.formats || {};
-                            pv.formats[newCols[col].dfid] = newCols[col].formatFn;
-                        }
-                        if (newCols[col].width !== undefined) {
-                            const cssWidth = getCssSize(newCols[col].width);
-                            if (cssWidth) {
-                                newCols[col].width = cssWidth;
-                                nbWidth++;
-                            }
-                        }
-                        return pv;
-                    }, {});
-                    nbWidth = nbWidth ? colsOrder.length - nbWidth : 0;
-                    if (props.rowClassName) {
-                        styTt.classNames = styTt.classNames || {};
-                        styTt.classNames[ROW_CLASS_NAME] = props.rowClassName;
+    const [
+        colsOrder,
+        columns,
+        cellClassNames,
+        tooltips,
+        formats,
+        handleNan,
+        filter,
+        partialEditable,
+        calcWidth,
+        nbColHeaders,
+        headersInfo,
+    ] = useMemo(() => {
+        let hNan = !!props.nanValue;
+        let nbColHeaders = 1;
+        if (baseColumns) {
+            try {
+                let filter = false;
+                let partialEditable = editable;
+                const newCols: Record<string, ColumnDesc> = {};
+                Object.entries(baseColumns).forEach(([cId, cDesc]) => {
+                    const nDesc = (newCols[cId] = { ...cDesc });
+                    if (typeof nDesc.filter != "boolean") {
+                        nDesc.filter = !!props.filter;
                     }
-                    return [
-                        colsOrder,
-                        newCols,
-                        styTt.classNames,
-                        styTt.tooltips,
-                        styTt.formats,
-                        hNan,
-                        filter,
-                        partialEditable,
-                        nbWidth > 0 ? `${100 / nbWidth}%` : undefined,
-                    ];
-                } catch (e) {
-                    console.info("ATable.columns: " + ((e as Error).message || e));
+                    filter = filter || nDesc.filter;
+                    if (typeof nDesc.notEditable == "boolean") {
+                        nDesc.notEditable = !editable;
+                    } else {
+                        partialEditable = partialEditable || !nDesc.notEditable;
+                    }
+                    if (nDesc.tooltip === undefined) {
+                        nDesc.tooltip = props.tooltip;
+                    }
+                    if (nDesc.multi !== undefined) {
+                        nDesc.sortable = false;
+                    } else if (typeof nDesc.sortable != "boolean") {
+                        nDesc.sortable = sortable;
+                    }
+                    nbColHeaders = Math.max(nbColHeaders, nDesc.headers?.length || 0);
+                });
+                addActionColumn(
+                    (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
+                        (active && filter ? 1 : 0) +
+                        (active && downloadable ? 1 : 0),
+                    newCols
+                );
+                const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
+                const headersInfo = [];
+                if (nbColHeaders > 1) {
+                    for (let i = 0; i < nbColHeaders; i++) {
+                        const headers = colsOrder.map((col, idx) => {
+                            const header = getColumnHeader(newCols, col, i);
+                            return idx > 0 && header === getColumnHeader(newCols, colsOrder[idx - 1], i)
+                                ? undefined
+                                : header;
+                        });
+                        const colSpans = headers.map((header, idx) => {
+                            if (header === undefined) {
+                                return 0;
+                            }
+                            const nh = headers.slice(idx + 1);
+                            const nb = nh.findIndex((h) => h !== undefined);
+                            return nb == -1 ? nh.length + 1 : nb + 1;
+                        });
+                        headersInfo.push({ headers, colSpans });
+                    }
                 }
+                let nbWidth = 0;
+                const styTt = colsOrder.reduce<Record<string, Record<string, string>>>((pv, col) => {
+                    if (newCols[col].className) {
+                        pv.classNames = pv.classNames || {};
+                        pv.classNames[newCols[col].dfid] = newCols[col].className as string;
+                    }
+                    hNan = hNan || !!newCols[col].nanValue;
+                    if (newCols[col].tooltip) {
+                        pv.tooltips = pv.tooltips || {};
+                        pv.tooltips[newCols[col].dfid] = newCols[col].tooltip as string;
+                    }
+                    if (newCols[col].formatFn) {
+                        pv.formats = pv.formats || {};
+                        pv.formats[newCols[col].dfid] = newCols[col].formatFn;
+                    }
+                    if (newCols[col].width !== undefined) {
+                        const cssWidth = getCssSize(newCols[col].width);
+                        if (cssWidth) {
+                            newCols[col].width = cssWidth;
+                            nbWidth++;
+                        }
+                    }
+                    return pv;
+                }, {});
+                nbWidth = nbWidth ? colsOrder.length - nbWidth : 0;
+                if (props.rowClassName) {
+                    styTt.classNames = styTt.classNames || {};
+                    styTt.classNames[ROW_CLASS_NAME] = props.rowClassName;
+                }
+                return [
+                    colsOrder,
+                    newCols,
+                    styTt.classNames,
+                    styTt.tooltips,
+                    styTt.formats,
+                    hNan,
+                    filter,
+                    partialEditable,
+                    nbWidth > 0 ? `${100 / nbWidth}%` : undefined,
+                    nbColHeaders,
+                    headersInfo,
+                ];
+            } catch (e) {
+                console.info("ATable.columns: " + ((e as Error).message || e));
             }
-            return [
-                [],
-                {} as Record<string, ColumnDesc>,
-                {} as Record<string, string>,
-                {} as Record<string, string>,
-                {} as Record<string, string>,
-                hNan,
-                false,
-                false,
-                "",
-            ];
-        }, [
-            active,
-            editable,
-            onAdd,
-            onDelete,
-            baseColumns,
-            props.rowClassName,
-            props.tooltip,
-            props.nanValue,
-            props.filter,
-            downloadable,
-            sortable,
-        ]);
+        }
+        return [
+            [],
+            {} as Record<string, ColumnDesc>,
+            {} as Record<string, string>,
+            {} as Record<string, string>,
+            {} as Record<string, string>,
+            hNan,
+            false,
+            false,
+            "",
+            1,
+            [],
+        ];
+    }, [
+        active,
+        editable,
+        onAdd,
+        onDelete,
+        baseColumns,
+        props.rowClassName,
+        props.tooltip,
+        props.nanValue,
+        props.filter,
+        downloadable,
+        sortable,
+    ]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -643,105 +683,153 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     <TableContainer>
                         <MuiTable sx={tableSx} aria-labelledby="tableTitle" size={size} stickyHeader={true}>
                             <TableHead>
-                                <TableRow ref={headerRow}>
-                                    {colsOrder.map((col) => (
-                                        <TableCell
-                                            key={`head${columns[col].dfid}`}
-                                            sortDirection={orderBy === columns[col].dfid && order}
-                                            sx={
-                                                columns[col].width
-                                                    ? { minWidth: columns[col].width }
-                                                    : calcWidth
-                                                    ? { width: calcWidth }
-                                                    : undefined
-                                            }
-                                            className={
-                                                col === "EDIT_COL"
-                                                    ? getSuffixedClassNames(className, "-action")
-                                                    : getSuffixedClassNames(
-                                                          className,
-                                                          generateHeaderClassName(columns[col].dfid)
-                                                      )
-                                            }
-                                        >
-                                            {columns[col].dfid === EDIT_COL ? (
-                                                [
-                                                    active && (editable || partialEditable) && onAdd ? (
-                                                        <Tooltip title="Add a row" key="addARow">
-                                                            <IconButton
-                                                                onClick={onAddRowClick}
-                                                                size="small"
-                                                                sx={iconInRowSx}
-                                                            >
-                                                                <AddIcon fontSize="inherit" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    ) : null,
-                                                    active && filter ? (
-                                                        <TableFilter
-                                                            key="filter"
-                                                            columns={columns}
-                                                            colsOrder={colsOrder}
-                                                            onValidate={setAppliedFilters}
-                                                            appliedFilters={appliedFilters}
-                                                            className={className}
-                                                            filteredCount={filteredCount}
-                                                        />
-                                                    ) : null,
-                                                    active && downloadable ? (
-                                                        <Tooltip title="Download as CSV" key="downloadCsv">
-                                                            <IconButton
-                                                                onClick={onDownload}
-                                                                size="small"
-                                                                sx={iconInRowSx}
-                                                            >
-                                                                <Download fontSize="inherit" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    ) : null,
-                                                ]
-                                            ) : (
-                                                <TableSortLabel
-                                                    active={orderBy === columns[col].dfid}
-                                                    direction={orderBy === columns[col].dfid ? order : "asc"}
-                                                    data-dfid={columns[col].dfid}
-                                                    onClick={onSort}
-                                                    disabled={!active || !columns[col].sortable}
-                                                    hideSortIcon={!active || !columns[col].sortable}
-                                                >
-                                                    <Box sx={headBoxSx}>
-                                                        {columns[col].groupBy ? (
-                                                            <IconButton
-                                                                onClick={onAggregate}
-                                                                size="small"
-                                                                title="aggregate"
+                                {Array.from(Array(nbColHeaders).keys()).map((idx) => {
+                                    if (idx < nbColHeaders - 1) {
+                                        return (
+                                            <TableRow key={`rowheader${idx}`}>
+                                                {colsOrder.map((col, i) => {
+                                                    const colSpan =
+                                                        headersInfo[idx] && headersInfo[idx].colSpans.length > i
+                                                            ? headersInfo[idx].colSpans[i]
+                                                            : 1;
+                                                    return colSpan == 0 ? null : (
+                                                        <TableCell
+                                                            colSpan={1}
+                                                            key={`head${columns[col].dfid}`}
+                                                            sx={
+                                                                columns[col].width
+                                                                    ? { minWidth: columns[col].width }
+                                                                    : calcWidth
+                                                                    ? { width: calcWidth }
+                                                                    : undefined
+                                                            }
+                                                            className={
+                                                                col === "EDIT_COL"
+                                                                    ? getSuffixedClassNames(className, "-action")
+                                                                    : getSuffixedClassNames(
+                                                                          className,
+                                                                          generateHeaderClassName(columns[col].dfid)
+                                                                      )
+                                                            }
+                                                        >
+                                                            {(headersInfo[idx] &&
+                                                                headersInfo[idx].headers.length > i &&
+                                                                headersInfo[idx].headers[i]) ||
+                                                                ""}
+                                                        </TableCell>
+                                                    );
+                                                })}
+                                            </TableRow>
+                                        );
+                                    } else {
+                                        return (
+                                            <TableRow ref={headerRow} key={`rowheader${idx}`}>
+                                                {colsOrder.map((col, i) => (
+                                                    <TableCell
+                                                        key={`head${columns[col].dfid}`}
+                                                        sortDirection={orderBy === columns[col].dfid && order}
+                                                        sx={
+                                                            columns[col].width
+                                                                ? { minWidth: columns[col].width }
+                                                                : calcWidth
+                                                                ? { width: calcWidth }
+                                                                : undefined
+                                                        }
+                                                        className={
+                                                            col === "EDIT_COL"
+                                                                ? getSuffixedClassNames(className, "-action")
+                                                                : getSuffixedClassNames(
+                                                                      className,
+                                                                      generateHeaderClassName(columns[col].dfid)
+                                                                  )
+                                                        }
+                                                    >
+                                                        {columns[col].dfid === EDIT_COL ? (
+                                                            [
+                                                                active && (editable || partialEditable) && onAdd ? (
+                                                                    <Tooltip title="Add a row" key="addARow">
+                                                                        <IconButton
+                                                                            onClick={onAddRowClick}
+                                                                            size="small"
+                                                                            sx={iconInRowSx}
+                                                                        >
+                                                                            <AddIcon fontSize="inherit" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                ) : null,
+                                                                active && filter ? (
+                                                                    <TableFilter
+                                                                        key="filter"
+                                                                        columns={columns}
+                                                                        colsOrder={colsOrder}
+                                                                        onValidate={setAppliedFilters}
+                                                                        appliedFilters={appliedFilters}
+                                                                        className={className}
+                                                                        filteredCount={filteredCount}
+                                                                    />
+                                                                ) : null,
+                                                                active && downloadable ? (
+                                                                    <Tooltip title="Download as CSV" key="downloadCsv">
+                                                                        <IconButton
+                                                                            onClick={onDownload}
+                                                                            size="small"
+                                                                            sx={iconInRowSx}
+                                                                        >
+                                                                            <Download fontSize="inherit" />
+                                                                        </IconButton>
+                                                                    </Tooltip>
+                                                                ) : null,
+                                                            ]
+                                                        ) : (
+                                                            <TableSortLabel
+                                                                active={orderBy === columns[col].dfid}
+                                                                direction={
+                                                                    orderBy === columns[col].dfid ? order : "asc"
+                                                                }
                                                                 data-dfid={columns[col].dfid}
-                                                                disabled={!active}
-                                                                sx={iconInRowSx}
+                                                                onClick={onSort}
+                                                                disabled={!active || !columns[col].sortable}
+                                                                hideSortIcon={!active || !columns[col].sortable}
                                                             >
-                                                                {aggregates.includes(columns[col].dfid) ? (
-                                                                    <DataSaverOff fontSize="inherit" />
-                                                                ) : (
-                                                                    <DataSaverOn fontSize="inherit" />
-                                                                )}
-                                                            </IconButton>
-                                                        ) : null}
-                                                        {columns[col].title === undefined
-                                                            ? columns[col].dfid
-                                                            : columns[col].title}
-                                                    </Box>
-                                                    {orderBy === columns[col].dfid ? (
-                                                        <Box component="span" sx={visuallyHidden}>
-                                                            {order === "desc"
-                                                                ? "sorted descending"
-                                                                : "sorted ascending"}
-                                                        </Box>
-                                                    ) : null}
-                                                </TableSortLabel>
-                                            )}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
+                                                                <Box sx={headBoxSx}>
+                                                                    {columns[col].groupBy ? (
+                                                                        <IconButton
+                                                                            onClick={onAggregate}
+                                                                            size="small"
+                                                                            title="aggregate"
+                                                                            data-dfid={columns[col].dfid}
+                                                                            disabled={!active}
+                                                                            sx={iconInRowSx}
+                                                                        >
+                                                                            {aggregates.includes(columns[col].dfid) ? (
+                                                                                <DataSaverOff fontSize="inherit" />
+                                                                            ) : (
+                                                                                <DataSaverOn fontSize="inherit" />
+                                                                            )}
+                                                                        </IconButton>
+                                                                    ) : null}
+                                                                    {columns[col].title === undefined
+                                                                        ? (headersInfo[idx] &&
+                                                                              headersInfo[idx].headers.length > i &&
+                                                                              headersInfo[idx].headers[i]) ||
+                                                                          columns[col].dfid
+                                                                        : columns[col].title}
+                                                                </Box>
+                                                                {orderBy === columns[col].dfid ? (
+                                                                    <Box component="span" sx={visuallyHidden}>
+                                                                        {order === "desc"
+                                                                            ? "sorted descending"
+                                                                            : "sorted ascending"}
+                                                                    </Box>
+                                                                ) : null}
+                                                            </TableSortLabel>
+                                                        )}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        );
+                                    }
+                                })}
                             </TableHead>
                         </MuiTable>
                         <Box sx={boxBodySx}>

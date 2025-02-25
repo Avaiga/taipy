@@ -14,14 +14,13 @@
 import { MouseEvent, ReactNode } from "react";
 import { SxProps } from "@mui/material";
 
-export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
-    defaultActive?: boolean;
-    active?: boolean;
-}
-
-export interface TaipyHoverProps {
-    hoverText?: string;
-    defaultHoverText?: string;
+export interface TaipyBaseProps {
+    id?: string;
+    libClassName?: string;
+    className?: string;
+    dynamicClassName?: string;
+    privateClassName?: string;
+    children?: ReactNode;
 }
 
 interface TaipyDynamicProps extends TaipyBaseProps {
@@ -30,13 +29,18 @@ interface TaipyDynamicProps extends TaipyBaseProps {
     updateVars?: string;
 }
 
-export interface TaipyBaseProps {
-    id?: string;
-    libClassName?: string;
-    className?: string;
-    dynamicClassName?: string;
-    privateClassName?: string;
-    children?: ReactNode;
+export interface TaipyHoverProps {
+    hoverText?: string;
+    defaultHoverText?: string;
+}
+
+export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
+    defaultActive?: boolean;
+    active?: boolean;
+}
+
+export interface TaipyLabelProps {
+    label?: string;
 }
 
 export interface TaipyMultiSelectProps {
@@ -66,10 +70,6 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, Tai
     multiline?: boolean;
     linesShown?: number;
     width?: string | number;
-}
-
-export interface TaipyLabelProps {
-    label?: string;
 }
 
 export interface DateProps {

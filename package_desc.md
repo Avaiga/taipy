@@ -21,7 +21,8 @@ built-in scheduling, and deployment tools.
 
 - Enables building production-ready web applications.
 - No need to learn new languages or full-stack frameworks.
-- Concentrate on Data and AI algorithms without development and deployment complexities.
+- Concentrate on Data and AI algorithms. Delegates development complexities.
+- Simplifies the production operations (hosting, deployment, upgrades, versioning, etc.).
 
 - Website: https://www.taipy.io
 - Documentation: https://docs.taipy.io/en/latest/
@@ -58,4 +59,5 @@ pip install taipy
 
 To install Taipy on a Conda Environment or from source code, please refer to the
 [Installation Guide](https://docs.taipy.io/en/latest/installation/).<br />
-To get started with Taipy, please refer to the [Getting Started Guide](https://docs.taipy.io/en/latest/getting_started/).
+To get started with Taipy, please refer to the
+[Getting Started Guide](https://docs.taipy.io/en/latest/getting_started/).

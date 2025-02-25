@@ -11,8 +11,8 @@
 
 import pytest
 
+from taipy import Scope
 from taipy.common.config import Config
-from taipy.common.config.common.scope import Scope
 from taipy.common.config.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode

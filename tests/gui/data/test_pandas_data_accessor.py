@@ -11,12 +11,13 @@
 
 import inspect
 import os
+import warnings
 from datetime import datetime
 from importlib import util
 from unittest.mock import Mock
 
+import numpy
 import pandas
-import pandas as pd
 import pytest
 from flask import g
 
@@ -26,7 +27,7 @@ from taipy.gui.data.decimator import ScatterDecimator
 from taipy.gui.data.pandas_data_accessor import _PandasDataAccessor
 
 
-# Define a mock to simulate _DataFormat behavior with a 'value' attribute
+# Define a mock to simulate _DataFormat behavior with a "value" attribute
 class MockDataFormat:
     LIST = Mock(value="list")
     CSV = Mock(value="csv")
@@ -42,9 +43,9 @@ def sample_df():
         "StringCol": ["Apple", "Banana", "Cherry", "apple"],
         "NumberCol": [10, 20, 30, 40],
         "BoolCol": [True, False, True, False],
-        "DateCol": pd.to_datetime(["2020-01-01", "2021-06-15", "2022-08-22", "2023-03-05"])
+        "DateCol": pandas.to_datetime(["2020-01-01", "2021-06-15", "2022-08-22", "2023-03-05"])
     }
-    return pd.DataFrame(data)
+    return pandas.DataFrame(data)
 
 def test_simple_data(gui: Gui, helpers, small_dataframe):
     accessor = _PandasDataAccessor(gui)
@@ -283,7 +284,7 @@ def test_contains_case_sensitive(pandas_accessor, sample_df):
         "filters": [{"col": "StringCol", "value": "Apple", "action": "contains", "matchCase": True}]
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pd.DataFrame(result['value']['data'])
+    filtered_data = pandas.DataFrame(result["value"]['data'])
 
     assert len(filtered_data) == 1
     assert filtered_data.iloc[0]['StringCol'] == 'Apple'
@@ -293,7 +294,7 @@ def test_contains_case_insensitive(pandas_accessor, sample_df):
         "filters": [{"col": "StringCol", "value": "apple", "action": "contains", "matchCase": False}]
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pd.DataFrame(result['value']['data'])
+    filtered_data = pandas.DataFrame(result["value"]['data'])
 
     assert len(filtered_data) == 2
     assert 'Apple' in filtered_data['StringCol'].values
@@ -304,7 +305,7 @@ def test_equals_case_sensitive(pandas_accessor, sample_df):
         "filters": [{"col": "StringCol", "value": "Apple", "action": "==", "matchCase": True}]
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pd.DataFrame(result['value']['data'])
+    filtered_data = pandas.DataFrame(result["value"]['data'])
 
     assert len(filtered_data) == 1
     assert filtered_data.iloc[0]['StringCol'] == 'Apple'
@@ -314,7 +315,7 @@ def test_equals_case_insensitive(pandas_accessor, sample_df):
         "filters": [{"col": "StringCol", "value": "apple", "action": "==", "matchCase": False}]
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pd.DataFrame(result['value']['data'])
+    filtered_data = pandas.DataFrame(result["value"]['data'])
 
     assert len(filtered_data) == 2
     assert 'Apple' in filtered_data['StringCol'].values
@@ -325,7 +326,7 @@ def test_not_equals_case_insensitive(pandas_accessor, sample_df):
         "filters": [{"col": "StringCol", "value": "apple", "action": "!=", "matchCase": False}]
     }
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pd.DataFrame(result['value']['data'])
+    filtered_data = pandas.DataFrame(result["value"]['data'])
 
     assert len(filtered_data) == 2
     assert 'Banana' in filtered_data['StringCol'].values
@@ -429,3 +430,27 @@ def test_csv(gui, small_dataframe):
     path = accessor.to_csv("", pd)
     assert path is not None
     assert os.path.getsize(path) > 0
+
+def test_multi_index(gui):
+    pandas_accessor = _PandasDataAccessor(gui)
+
+    iterables = [["bar", "baz", "foo", "qux"], ["one", "two"]]
+    index = pandas.MultiIndex.from_product(iterables, names=["first", "second"])
+    df = pandas.DataFrame({"col 1": numpy.random.randn(8), "col 2": numpy.random.randn(8)}, index=index)
+
+    with warnings.catch_warnings(record=True):
+        result = pandas_accessor.get_data("test_var", df, {}, MockDataFormat.LIST)
+        assert result.get("error") is None
+        assert result["value"] is not None
+
+def test_multi_index_columns(gui):
+    pandas_accessor = _PandasDataAccessor(gui)
+
+    iterables = [["bar", "baz", "foo", "qux"], ["one", "two"]]
+    index = pandas.MultiIndex.from_product(iterables, names=["first", "second"])
+    df = pandas.DataFrame(numpy.random.randn(3, 8), index=["A", "B", "C"], columns=index)
+
+    with warnings.catch_warnings(record=True):
+        result = pandas_accessor.get_data("test_var", df, {}, MockDataFormat.LIST)
+        assert result.get("error") is not None
+        assert result.get("value") is not None

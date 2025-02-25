@@ -17,6 +17,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 import networkx as nx
 
 from taipy.common.config.common._validate_id import _validate_id
+from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._entity._entity import _Entity
 from .._entity._labeled import _Labeled
@@ -105,6 +106,8 @@ class Scenario(_Entity, Submittable, _Labeled):
 
     id: ScenarioId
     """The unique identifier of this scenario."""
+
+    _logger = _TaipyLogger._get_logger()
 
     def __init__(
         self,
@@ -611,12 +614,32 @@ class Scenario(_Entity, Submittable, _Labeled):
         if dag.number_of_nodes() == 0:
             return True
         if not nx.is_directed_acyclic_graph(dag):
+            self._logger.error(f'The DAG of scenario "{self.id}" is not a directed acyclic graph')
             return False
         for left_node, right_node in dag.edges:
             if (isinstance(left_node, DataNode) and isinstance(right_node, Task)) or (
                 isinstance(left_node, Task) and isinstance(right_node, DataNode)
             ):
                 continue
+
+            left_node_desc = (
+                f'{left_node.__class__.__name__} "{left_node.get_label()}"'
+                if isinstance(left_node, _Labeled)
+                else left_node.__class__.__name__
+                if left_node
+                else "None"
+            )
+            right_node_desc = (
+                f'{right_node.__class__.__name__} "{right_node.get_label()}"'
+                if isinstance(right_node, _Labeled)
+                else right_node.__class__.__name__
+                if right_node
+                else "None"
+            )
+            self._logger.error(
+                f'Invalid edge detected in scenario "{self.id}": left node {left_node_desc} and right node '
+                f"{right_node_desc} must connect a Task and a DataNode"
+            )
             return False
         return True
 

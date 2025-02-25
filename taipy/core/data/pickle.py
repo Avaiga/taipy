@@ -13,10 +13,9 @@ import pickle
 from datetime import datetime, timedelta
 from typing import Any, List, Optional, Set
 
-from taipy.common.config.common.scope import Scope
-
 from .._entity._reload import _Reloader
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common.scope import Scope
 from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
@@ -31,6 +30,20 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
         data node.
     - *default_data*: The default data of the data node. It is used at the data node instantiation
         to write the data to the Pickle file.
+
+    ??? warning "To use with pickle-able data only"
+        PickleDataNode should be used only for "pickle-able" data.
+
+        Everything that's build up (recursively) from basic python types (dicts, lists,
+        primitives, objects, object references, even circular) can usually be pickled by default.
+
+        Things that are usually not pickle-able are, for example, sockets, file(handler)s,
+        database connections, custom data structure using in-memory references to Python IDs,
+        and so on.
+
+        Please refer to the
+        [pickle documentation](https://docs.python.org/3/library/pickle.html) for more information.
+
     """
 
     __STORAGE_TYPE = "pickle"

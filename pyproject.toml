@@ -51,6 +51,7 @@ exclude = [
     "build",
     "dist",
     "releases",
+    "tools",
     ".venv",
     ".mypy_cache",
     ".pytest_cache",

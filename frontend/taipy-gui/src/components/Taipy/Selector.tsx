@@ -178,6 +178,18 @@ const Selector = (props: SelectorProps) => {
         }),
         [width]
     );
+    const heightSx = useMemo(() => {
+        if (!height) {
+            return undefined;
+        }
+        return {
+            maxHeight: height,
+            display: 'flex',
+            flexFlow: 'column nowrap',
+            overflowY: "auto",
+        };
+    }, [height]);
+
     const paperSx = useMemo(() => {
         let sx = paperBaseSx;
         if (height !== undefined) {
@@ -371,6 +383,7 @@ const Selector = (props: SelectorProps) => {
                                 value={dropdownValue}
                                 onChange={handleChange}
                                 className={getSuffixedClassNames(className, "-radio-group")}
+                                sx={heightSx}
                             >
                                 {lovList.map((item) => (
                                     <FormControlLabel
@@ -390,7 +403,7 @@ const Selector = (props: SelectorProps) => {
                                 ))}
                             </RadioGroup>
                         ) : (
-                            <FormGroup className={getSuffixedClassNames(className, "-check-group")}>
+                            <FormGroup className={getSuffixedClassNames(className, "-check-group")} sx={heightSx}>
                                 {lovList.map((item) => (
                                     <FormControlLabel
                                         key={item.id}

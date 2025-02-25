@@ -75,7 +75,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Alert",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(var_type=PropertyType.dynamic_string)
         .set_attributes(
@@ -89,7 +89,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Button",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(with_update=False)
         .set_attributes(
@@ -103,7 +103,7 @@ class _Factory:
             ]
         ),
         "chat": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="Chat", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="Chat", prop_values=attrs, default_value=None
         )
         .set_value_and_default(with_update=True, with_default=False, var_type=PropertyType.data)
         .set_attributes(
@@ -123,7 +123,7 @@ class _Factory:
             ]
         ),
         "chart": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="Chart", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="Chart", prop_values=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.data)
         .set_attributes(
@@ -148,13 +148,13 @@ class _Factory:
         ._get_chart_config("scatter", "lines+markers")
         ._set_propagate(),
         "content": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="PageContent", attributes=attrs
+            gui=gui, control_type=control_type, element_name="PageContent", prop_values=attrs
         ),
         "date": lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,
             element_name="DateSelector",
-            attributes=attrs,
+            prop_values=attrs,
             default_value=datetime.fromtimestamp(0),
         )
         .set_value_and_default(var_type=PropertyType.date)
@@ -178,7 +178,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="DateRange",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(var_type=PropertyType.date_range)
         .set_attributes(
@@ -200,7 +200,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Dialog",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(var_type=PropertyType.dynamic_boolean)
         ._set_partial()  # partial should be set before page
@@ -221,7 +221,7 @@ class _Factory:
         )
         ._set_propagate(),
         "expandable": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="Expandable", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="Expandable", prop_values=attrs, default_value=None
         )
         .set_value_and_default()
         ._set_partial()  # partial should be set before page
@@ -237,7 +237,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="FileDownload",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(var_name="label", with_update=False)
         ._set_content("content", image=False)
@@ -257,7 +257,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="FileSelector",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(var_name="label", with_update=False)
         ._set_file_content()
@@ -278,7 +278,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Image",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(var_name="label", with_update=False)
         ._set_content("content")
@@ -295,7 +295,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Indicator",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(with_update=False, native_type=True)
         .set_attributes(
@@ -313,7 +313,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Input",
-            attributes=attrs,
+            prop_values=attrs,
         )
         ._set_input_type("text", True)
         .set_value_and_default()
@@ -334,7 +334,7 @@ class _Factory:
             ]
         ),
         "layout": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="Layout", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="Layout", prop_values=attrs, default_value=None
         )
         .set_value_and_default(with_default=False)
         .set_attributes(
@@ -344,7 +344,7 @@ class _Factory:
             ]
         ),
         "login": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="Login", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="Login", prop_values=attrs, default_value=None
         )
         .set_value_and_default(default_val="Log-in")
         .set_attributes(
@@ -358,7 +358,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="MenuCtl",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_attributes(
             [
@@ -378,7 +378,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Metric",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
         .set_attributes(
@@ -407,7 +407,7 @@ class _Factory:
             ]
         ),
         "navbar": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="NavBar", prop_values=attrs, default_value=None
         ).set_attributes(
             [
                 ("active", PropertyType.dynamic_boolean, True),
@@ -419,7 +419,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Input",
-            attributes=attrs,
+            prop_values=attrs,
             default_value=0,
         )
         ._set_input_type("number")
@@ -442,7 +442,7 @@ class _Factory:
             ]
         ),
         "pane": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="Pane", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="Pane", prop_values=attrs, default_value=None
         )
         .set_value_and_default(var_type=PropertyType.dynamic_boolean)
         ._set_partial()  # partial should be set before page
@@ -462,7 +462,7 @@ class _Factory:
         )
         ._set_propagate(),
         "part": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="Part", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="Part", prop_values=attrs, default_value=None
         )
         ._set_partial()  # partial should be set before page
         .set_attributes(
@@ -478,7 +478,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Progress",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(var_type=PropertyType.dynamic_number, native_type=True)
         .set_attributes(
@@ -492,7 +492,7 @@ class _Factory:
             ]
         ),
         "selector": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="Selector", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="Selector", prop_values=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.lov_value)
         .set_attributes(
@@ -518,7 +518,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Slider",
-            attributes=attrs,
+            prop_values=attrs,
             default_value=0,
         )
         .set_value_and_default(native_type=True, var_type=PropertyType.slider_value)
@@ -546,7 +546,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Status",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(with_update=False)
         .set_attributes(
@@ -560,7 +560,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Table",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.data)
         ._get_dataframe_attributes()
@@ -594,7 +594,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="Field",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(with_update=False)
         ._set_dataType()
@@ -611,7 +611,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="TimeSelector",
-            attributes=attrs,
+            prop_values=attrs,
             default_value=datetime.today().time(),
         )
         .set_value_and_default(var_type=PropertyType.time)
@@ -628,7 +628,7 @@ class _Factory:
         )
         ._set_propagate(),
         "toggle": lambda gui, control_type, attrs: _Builder(
-            gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=None
+            gui=gui, control_type=control_type, element_name="Toggle", prop_values=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.toggle_value)
         .set_attributes(
@@ -650,7 +650,7 @@ class _Factory:
             gui=gui,
             control_type=control_type,
             element_name="TreeView",
-            attributes=attrs,
+            prop_values=attrs,
         )
         .set_value_and_default(with_default=False, var_type=PropertyType.lov_value)
         .set_attributes(

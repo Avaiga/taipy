@@ -14,10 +14,10 @@ from typing import Dict, Iterable, List, Optional, Set, Union
 
 from taipy.common.config import Config
 from taipy.common.config._config import _Config
-from taipy.common.config.common.scope import Scope
 
 from .._manager._manager import _Manager
 from .._version._version_mixin import _VersionMixin
+from ..common.scope import Scope
 from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType

@@ -19,9 +19,9 @@ from taipy.common.config import Config
 from taipy.common.config._config import _Config
 from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.common.config.common._validate_id import _validate_id
-from taipy.common.config.common.frequency import Frequency
 from taipy.common.config.section import Section
 
+from ..common.frequency import Frequency
 from .data_node_config import DataNodeConfig
 from .task_config import TaskConfig
 
@@ -300,6 +300,10 @@ class ScenarioConfig(Section):
         self._properties.update(as_dict)
         if default_section:
             self._properties = {**default_section.properties, **self._properties}
+
+    @staticmethod
+    def _types_to_register() -> List[type]:
+        return [Frequency]
 
     @staticmethod
     def _configure(

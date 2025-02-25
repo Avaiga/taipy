@@ -44,11 +44,7 @@ class _Page(object):
             warnings.resetwarnings()
             module_name = self._renderer._get_module_name()
             with gui._set_locals_context(module_name):
-                render_return = self._renderer.render(gui)
-                if isinstance(render_return, tuple):
-                    self._rendered_jsx, module_name = render_return
-                else:
-                    self._rendered_jsx = render_return
+                self._rendered_jsx = self._renderer.render(gui)
             if silent:
                 s = ""
                 for wm in w:

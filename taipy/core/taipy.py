@@ -12,7 +12,6 @@
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union, overload
 
-from taipy.common.config import Scope
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ._entity._entity import _Entity
@@ -27,6 +26,7 @@ from .common._check_instance import (
     _is_task,
 )
 from .common._warnings import _warn_no_orchestrator_service
+from .common.scope import Scope
 from .config.data_node_config import DataNodeConfig
 from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory

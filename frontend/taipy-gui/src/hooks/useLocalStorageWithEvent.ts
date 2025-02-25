@@ -14,16 +14,18 @@
 import { Dispatch, useEffect } from "react";
 import { createLocalStorageAction, TaipyBaseAction } from "../context/taipyReducers";
 
-export const useLocalStorageWithEvent = (dispatch: Dispatch<TaipyBaseAction>) => {
+export const useLocalStorageWithEvent = (dispatch: Dispatch<TaipyBaseAction>, id: string) => {
     // send all localStorage data to backend on init
     useEffect(() => {
-        const localStorageData: Record<string, string> = {};
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key) {
-                localStorageData[key] = localStorage.getItem(key) || "";
+        if (localStorage && id) {
+            const localStorageData: Record<string, string> = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key) {
+                    localStorageData[key] = localStorage.getItem(key) || "";
+                }
             }
+            dispatch(createLocalStorageAction(localStorageData));
         }
-        dispatch(createLocalStorageAction(localStorageData));
-    }, [dispatch]); // Not necessary to add dispatch to the dependency array but comply with eslint warning anyway
+    }, [dispatch, id]); // Not necessary to add dispatch to the dependency array but comply with eslint warning anyway
 };

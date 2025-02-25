@@ -100,7 +100,7 @@ def test_expression_table_control(gui: Gui, test_client, helpers):
     md_string = "<|{pd.concat([series_1, series_2], axis=1)}|table|columns=Letters;Numbers|>"
     expected_list = [
         "<Table",
-        'defaultColumns="{&quot;Letters&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Letters&quot;&#x7D;, &quot;Numbers&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;int&quot;, &quot;dfid&quot;: &quot;Numbers&quot;&#x7D;}"',  # noqa: E501
+        'defaultColumns="{&quot;Letters&quot;: &#x7B;&quot;type&quot;: &quot;object&quot;, &quot;index&quot;: 0, &quot;dfid&quot;: &quot;Letters&quot;&#x7D;, &quot;Numbers&quot;: &#x7B;&quot;type&quot;: &quot;int&quot;, &quot;index&quot;: 1, &quot;dfid&quot;: &quot;Numbers&quot;&#x7D;}"',  # noqa: E501
         'updateVarName="_TpD_tp_TpExPr_pd_concat_series_1_series_2_axis_1_TPMDL_0_0"',
         "data={_TpD_tp_TpExPr_pd_concat_series_1_series_2_axis_1_TPMDL_0_0}",
     ]

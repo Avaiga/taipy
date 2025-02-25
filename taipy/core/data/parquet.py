@@ -16,10 +16,9 @@ from typing import Any, Dict, List, Optional, Set
 import numpy as np
 import pandas as pd
 
-from taipy.common.config.common.scope import Scope
-
 from .._entity._reload import _Reloader
 from .._version._version_manager_factory import _VersionManagerFactory
+from ..common.scope import Scope
 from ..exceptions.exceptions import UnknownCompressionAlgorithm, UnknownParquetEngine
 from ._file_datanode_mixin import _FileDataNodeMixin
 from ._tabular_datanode_mixin import _TabularDataNodeMixin

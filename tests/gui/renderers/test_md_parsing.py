@@ -14,7 +14,7 @@ from taipy.gui import Gui
 
 def test_invalid_control_name(gui: Gui, helpers):
     md_string = "<|invalid|invalid|>"
-    expected_list = ["INVALID SYNTAX - Control is 'invalid'"]
+    expected_list = ["UNKNOWN ELEMENT TYPE 'invalid'"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 

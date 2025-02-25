@@ -98,7 +98,7 @@ import DataNodeChart from "./DataNodeChart";
 import DataNodeTable from "./DataNodeTable";
 import { useTheme } from "@mui/material/styles";
 
-const JsonViewer = lazy(() => import("@textea/json-viewer").then(module => ({ default: module.JsonViewer })));
+const JsonViewer = lazy(() => import("@textea/json-viewer").then((module) => ({ default: module.JsonViewer })));
 
 const editTimestampFormat = "yyyy/MM/dd HH:mm";
 
@@ -389,7 +389,16 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 );
             }
             if (!dn || isNewDn) {
-                (showData || showProperties || showHistory) && setTabValue(showData ? TabValues.Data : showProperties ? TabValues.Properties: showHistory ? TabValues.History: undefined);
+                (showData || showProperties || showHistory) &&
+                    setTabValue(
+                        showData
+                            ? TabValues.Data
+                            : showProperties
+                            ? TabValues.Properties
+                            : showHistory
+                            ? TabValues.History
+                            : undefined
+                    );
             }
             if (!dn) {
                 return invalidDatanode;
@@ -440,7 +449,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             return dn;
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.dataNode, props.defaultDataNode, showData, showProperties, showHistory, id, dispatch, module, props.onLock]);
+    }, [
+        props.dataNode,
+        props.defaultDataNode,
+        showData,
+        showProperties,
+        showHistory,
+        id,
+        dispatch,
+        module,
+        props.onLock,
+    ]);
 
     // clean lock on unmount
     useEffect(
@@ -523,7 +542,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
 
     // scenarios
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-    const scenarioUpdateVars = useMemo(() => getUpdateVarNames(updateVars, "scenario", "scenarios"), [updateVars]);
+    const scenarioUpdateVars = useMemo(
+        () => ["scenario", "scenarios"].map((vn) => getUpdateVar(updateVars, vn)),
+        [updateVars]
+    );
     const showScenarios = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
@@ -533,7 +555,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                     createRequestUpdateAction(
                         id,
                         module,
-                        scenarioUpdateVars,
+                        scenarioUpdateVars.filter((v) => v) as string[],
                         true,
                         ownerIdVar ? { [ownerIdVar]: dnOwnerId } : undefined
                     )

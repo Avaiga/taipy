@@ -64,49 +64,48 @@ No more compromises on performance, customization, and scalability.
 
   ## Table of Contents
 
-- [What's Taipy?](#%EF%B8%8F-whats-taipy)
-- [Key Features](#-key-features)
-- [Quickstart](#️-quickstart)
-- [Scenario and Data Management](#-scenario--data-management)
-- [Taipy Studio](#taipy-studio)
-- [User Interface Generation and Scenario & Data Management](#user-interface-generation-and-scenario--data-management)
-- [Contributing](#%EF%B8%8F-contributing)
+- [Taipy? What for?](#-what-for)
+- [Taipy and its ecosystem](#-taipy-and-taipy-ecosystem)
+- [Quickstart](#-quickstart)
+- [Documentation and resources](#-documentation-and-resources)
+- [Contributing](#-contributing)
 - [Code of Conduct](#-code-of-conduct)
 - [License](#-license)
 
-&nbsp;
+## ⭐ What for?
 
-## ⭐️ What's Taipy?
+Taipy is designed for data scientists and machine learning engineers to create
+data & AI driven web applications.
 
-Taipy is designed for data scientists and machine learning engineers to build data & AI web applications.
-&nbsp;
+⭐️ Enables building production-ready web applications.<br/>
+⭐️ No need to learn new languages; only Python is needed.<br/>
+⭐️ Focus on data and AI algorithms. Delegates development complexities to Taipy.<br/>
+⭐️ Simplifies production operations (hosting, deployments, maintenance, etc.).<br/>
 
-⭐️ Enables building production-ready web applications. <br />
-⭐️ No need to learn new languages; only Python is needed.<br />
-⭐️ Concentrate on data and AI algorithms without the complexities of development and deployment.<br />
+## ✨ Taipy and Taipy Ecosystem
 
-&nbsp;
+Taipy includes the Taipy Python library enabling developers to easily empower their end-users with:
+- User interface generation
+- Data Integration
+- Pipeline orchestration
+- What-if analysis and scenario management
+- Authentication, roles and user management
+- Cron jobs and scheduling
 
-<h4 align="left">
-Taipy is a Two-in-One Tool for UI Generation and Scenario & Data Management
-</h4>
+Besides the Taipy Library, the Taipy Ecosystem includes:
+- Taipy Designer
+- Taipy Studio
+- Predefined templates
+- Data platform integration
 
-<br />
+Taipy comes with a set of materials to facilitate production operations and maintenance.
+- Command line interface.
+- Deployment scripts.
+- Version Management.
+- Data migration.
+- Telemetry and monitoring.
 
-| User Interface Generation                                                                       | Scenario & Data Management                                                                        |
-| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| <img src="readme_img/taipy_github_GUI_video.gif" alt="Interface Animation"  width="100%" /> | <img src="readme_img/taipy_github_scenarios_video.gif" alt="Back-End Animation"  width="100%"/> |
-
-&nbsp;
-
-## ✨ Key Features
-
-<img src="readme_img/taipy_github_scenario.png" alt="Scenario Banner"  width="49%" />  <img src="readme_img/taipy-github-optimized.png" alt="Front-End Animation"  width="49%"/>
-<img src="readme_img/taipy_github_data_support.png" alt="Back-End Animation"  width="49%" />
-
-&nbsp;
-
-## ⚙️ Quickstart
+## ⏩ Quickstart
 
 To install the stable release of Taipy, run:
 
@@ -114,143 +113,20 @@ To install the stable release of Taipy, run:
 pip install taipy
 ```
 
-### Ready to Install Taipy? 🚀
+For alternative installation methods, an
+[Installation Guide](https://docs.taipy.io/en/latest/tutorials/getting_started/installation/)
+provides step-by-step instructions.<br>
 
-Get everything set up in no time! Whether you're using a Conda environment or installing from
-source, follow our [Installation Guide](https://docs.taipy.io/en/latest/tutorials/getting_started/installation/) for
-step-by-step instructions.<br>
+## 💡 Documentation and resources
 
-### Excited to Dive In? 💡
+A comprehensive documentation set is available at
+[Taipy Documentation](https://docs.taipy.io/en/latest/) to help you with Taipy tools.
 
-Start building with Taipy today! Our
-[Getting Started Guide](https://docs.taipy.io/en/develop/tutorials/getting_started/)
-is the perfect place to begin your journey and unlock the full potential of Taipy.
-
-&nbsp;
-
-## 🔌 Scenario & Data Management
-
-Let's create a simple scenario in Taipy that allows you to filter movie data based on your chosen genre.<br />
-This scenario is designed as a straightforward pipeline.<br />
-Every time you change your genre selection, the scenario runs to process your request.<br />
-It then displays the top seven most popular movies in that genre.
-
-<br />
-
-> ⚠️ Keep in mind that in this example, we're using a very basic pipeline that consists of just one task. However,<br />
-> Taipy is capable of handling much more complex pipelines 🚀
-
-<br />
-
-Below is our filter function. This is a typical Python function, and it's the only task used in this scenario.
-
-```python
-def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
-    filtered_dataset = initial_dataset[initial_dataset['genres'].str.contains(selected_genre)]
-    filtered_data = filtered_dataset.nlargest(7, 'Popularity %')
-    return filtered_data
-```
-
-This is the execution graph of the scenario we are implementing:
-
-<p align="center">
-<img src="https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_exec_graph.png" width="600" align="center" />
-</p>
-
-### Taipy Studio
-
-You can use the Taipy Studio extension in Visual Studio Code to configure your scenario with no code.<br />
-Your configuration is automatically saved as a TOML file.<br />
-Check out the Taipy Studio [Documentation](https://docs.taipy.io/en/latest/userman/ecosystem/studio/).
-
-For more advanced use cases or if you prefer coding your configurations instead of using Taipy Studio,<br />
-check out the movie genre demo scenario creation with this [Demo](https://docs.taipy.io/en/latest/gallery/articles/movie_genre_selector/).
-
-<p align="center">
-<img src="https://github.com/Avaiga/taipy/raw/develop/readme_img/readme_demo_studio.gif" alt="Back-End Animation"  width="80%" align="center" />
-</p>
-
-&nbsp;
-
-## User Interface Generation and Scenario & Data Management
-
-This simple Taipy application demonstrates how to create a basic film recommendation system using Taipy.<br />
-The application filters a dataset of films based on the user's selected genre and displays the top seven films in that genre by popularity.
-Here is the full code for both the front end and back end of the application.
-
-<p align="center" width=80% >
-
-```python
-import taipy as tp
-import pandas as pd
-from taipy import Config, Scope, Gui
-
-# Defining the helper functions
-
-# Callback definition - submits scenario with genre selection
-def on_genre_selected(state):
-    scenario.selected_genre_node.write(state.selected_genre)
-    tp.submit(scenario)
-    state.df = scenario.filtered_data.read()
-
-## Set initial value to Action
-def on_init(state):
-    on_genre_selected(state)
-
-# Filtering function - task
-def filter_genre(initial_dataset: pd.DataFrame, selected_genre):
-    filtered_dataset = initial_dataset[initial_dataset["genres"].str.contains(selected_genre)]
-    filtered_data = filtered_dataset.nlargest(7, "Popularity %")
-    return filtered_data
-
-# The main script
-if __name__ == "__main__":
-    # Taipy Scenario & Data Management
-
-    # Load the configuration made with Taipy Studio
-    Config.load("config.toml")
-    scenario_cfg = Config.scenarios["scenario"]
-
-    # Start Taipy Orchestrator
-    tp.Orchestrator().run()
-
-    # Create a scenario
-    scenario = tp.create_scenario(scenario_cfg)
-
-    # Taipy User Interface
-    # Let's add a GUI to our Scenario Management for a full application
-
-    # Get the list of genres
-    genres = [
-        "Action", "Adventure", "Animation", "Children", "Comedy", "Fantasy", "IMAX",
-        "Romance", "Sci-Fi", "Western", "Crime", "Mystery", "Drama", "Horror", "Thriller", "Film-Noir", "War", "Musical", "Documentary"
-    ]
-
-    # Initialization of variables
-    df = pd.DataFrame(columns=["Title", "Popularity %"])
-    selected_genre = "Action"
-
-    # User interface definition
-    my_page = """
-# Film Recommendation
-
-## Choose Your Favorite Genre
-<|{selected_genre}|selector|lov={genres}|on_change=on_genre_selected|dropdown|>
-
-## Here are the Top Seven Picks by Popularity
-<|{df}|chart|x=Title|y=Popularity %|type=bar|title=Film Popularity|>
-    """
-
-    Gui(page=my_page).run()
-```
-</p>
-
-And the final result:
-<p align="center">
-<img src="readme_img/readme_app.gif"  width="70%" align="center" />
-</p>
-
-&nbsp;
+It includes
+[Tutorials](https://docs.taipy.io/en/latest/tutorials/),
+[user manuals](https://docs.taipy.io/en/latest/userman/),
+[API references](https://docs.taipy.io/en/latest/refmans/), and
+[Galleries](https://docs.taipy.io/en/latest/gallery/).
 
 ## ⚒️ Contributing
 

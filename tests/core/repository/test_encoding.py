@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import taipy.core.taipy as tp
-from taipy.core.config import Config
+from taipy.common.config import Config
 
 
 def test_no_special_characters():

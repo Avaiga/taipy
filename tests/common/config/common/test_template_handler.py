@@ -16,8 +16,6 @@ from unittest import mock
 import pytest
 
 from taipy.common.config.common._template_handler import _TemplateHandler
-from taipy.common.config.common.frequency import Frequency
-from taipy.common.config.common.scope import Scope
 from taipy.common.config.exceptions.exceptions import InconsistentEnvVariableError
 
 
@@ -169,31 +167,3 @@ def test_to_float():
     assert 0.0 == _TemplateHandler._to_float("0")
     assert -2.1 == _TemplateHandler._to_float("-2.1")
     assert 156165.3 == _TemplateHandler._to_float("156165.3")
-
-
-def test_to_scope():
-    with pytest.raises(InconsistentEnvVariableError):
-        _TemplateHandler._to_scope("okhds")
-    with pytest.raises(InconsistentEnvVariableError):
-        _TemplateHandler._to_scope("plop")
-
-    assert Scope.GLOBAL == _TemplateHandler._to_scope("global")
-    assert Scope.GLOBAL == _TemplateHandler._to_scope("GLOBAL")
-    assert Scope.SCENARIO == _TemplateHandler._to_scope("SCENARIO")
-    assert Scope.CYCLE == _TemplateHandler._to_scope("cycle")
-
-
-def test_to_frequency():
-    with pytest.raises(InconsistentEnvVariableError):
-        _TemplateHandler._to_frequency("okhds")
-    with pytest.raises(InconsistentEnvVariableError):
-        _TemplateHandler._to_frequency("plop")
-
-    assert Frequency.DAILY == _TemplateHandler._to_frequency("DAILY")
-    assert Frequency.DAILY == _TemplateHandler._to_frequency("Daily")
-    assert Frequency.WEEKLY == _TemplateHandler._to_frequency("weekly")
-    assert Frequency.WEEKLY == _TemplateHandler._to_frequency("WEEKLY")
-    assert Frequency.MONTHLY == _TemplateHandler._to_frequency("Monthly")
-    assert Frequency.MONTHLY == _TemplateHandler._to_frequency("MONThLY")
-    assert Frequency.QUARTERLY == _TemplateHandler._to_frequency("QuaRtERlY")
-    assert Frequency.YEARLY == _TemplateHandler._to_frequency("Yearly")

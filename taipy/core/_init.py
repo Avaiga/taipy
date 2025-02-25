@@ -11,6 +11,8 @@
 
 from ._core import Core
 from ._entity.submittable import Submittable
+from .common.frequency import Frequency
+from .common.scope import Scope
 from .cycle.cycle import Cycle
 from .cycle.cycle_id import CycleId
 from .data.data_node import DataNode

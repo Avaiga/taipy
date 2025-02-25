@@ -45,10 +45,6 @@ import { dateToString, getDateTime, getDateTimeString, getNumberString, getTimeZ
 import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "./utils";
 
 /**
- * A column description as received by the backend.
- */
-
-/**
  * Generates a  CSS class name for a table header.
  * @param columnName - The name of the column.
  * @returns for CSS class name.
@@ -56,12 +52,16 @@ import { TaipyActiveProps, TaipyMultiSelectProps, getSuffixedClassNames } from "
 
 export const generateHeaderClassName = (columnName: string | undefined): string => {
     // logic for the css header classname
-    if (!columnName){
+    if (!columnName) {
         // return an empty string if columname is undefined or empty
         return "";
     }
-    return '-' + columnName.replace(/\W+/g, '-').replace(/-+/g, '-').toLowerCase();
+    return "-" + columnName.replace(/\W+/g, "-").replace(/-+/g, "-").toLowerCase();
 };
+
+/**
+ * A column description as received by the backend.
+ */
 
 export interface ColumnDesc {
     /** The unique column identifier. */
@@ -104,6 +104,10 @@ export interface ColumnDesc {
     freeLov?: boolean;
     /** If false, the column cannot be sorted */
     sortable?: boolean;
+    /** The column headers if more than one. */
+    headers?: string[];
+    /** The index of the multi index if exists. */
+    multi?: number;
 }
 
 export const DEFAULT_SIZE = "small";
@@ -183,8 +187,8 @@ export const tableSx = { minWidth: 250 };
 export const headBoxSx = { display: "flex", alignItems: "flex-start" };
 export const iconInRowSx = { fontSize: "body2.fontSize" };
 export const iconsWrapperSx = { gridColumnStart: 2, display: "flex", alignItems: "center" } as CSSProperties;
-const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
-const tableFontSx = { fontSize: "body2.fontSize" };
+const CellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
+const TableFontSx = { fontSize: "body2.fontSize" };
 const ButtonSx = { minHeight: "unset", mb: "unset", padding: "unset", lineHeight: "unset" };
 export interface OnCellValidation {
     (value: RowValue, rowIndex: number, colName: string, userValue: string, tz?: string): void;
@@ -218,6 +222,7 @@ interface EditableCellProps {
     comp?: RowValue;
     useCheckbox?: boolean;
     formattedVal?: string;
+    rowSpan?: number;
 }
 
 export interface FilterDesc {
@@ -232,7 +237,13 @@ export interface FilterDesc {
 export const defaultColumns = {} as Record<string, ColumnDesc>;
 
 export const getSortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) =>
-    cols[key1].index < cols[key2].index ? -1 : cols[key1].index > cols[key2].index ? 1 : 0;
+    cols[key1].multi !== undefined
+        ? cols[key2].multi !== undefined
+            ? cols[key1].multi - cols[key2].multi
+            : -1
+        : cols[key2].multi !== undefined
+        ? 1
+        : cols[key1].index - cols[key2].index;
 
 const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string): string => {
     if (val === undefined) {
@@ -352,6 +363,11 @@ export const getPageKey = (
         .filter((v) => v)
         .join("-");
 
+export const getColumnHeader = (columns: Record<string, ColumnDesc>, columnKey: string, headerLevel: number) =>
+    columns[columnKey].headers && columns[columnKey].headers?.length > headerLevel
+        ? columns[columnKey].headers[headerLevel]
+        : undefined;
+
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
 const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps<Date>;
@@ -381,6 +397,7 @@ export const EditableCell = (props: EditableCellProps) => {
         comp,
         useCheckbox = false,
         formattedVal: formattedValue,
+        rowSpan = 1,
     } = props;
     const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
@@ -551,7 +568,7 @@ export const EditableCell = (props: EditableCellProps) => {
         !onValidation && setEdit(false);
     }, [onValidation]);
 
-    return (
+    return rowSpan == 0 ? null : (
         <TableCell
             {...getCellProps(colDesc, tableCellProps)}
             className={
@@ -564,31 +581,33 @@ export const EditableCell = (props: EditableCellProps) => {
                       }`
                     : undefined
             }
+            component={colDesc.multi !== undefined ? "th" : undefined}
+            rowSpan={rowSpan}
         >
             <Badge color="primary" variant="dot" invisible={comp === undefined || comp === null}>
                 {edit ? (
                     colDesc.type?.startsWith("bool") ? (
-                        <Box sx={cellBoxSx}>
+                        <Box sx={CellBoxSx}>
                             {useCheckbox ? (
-                            <input
-                                type="checkbox"
-                                checked={val as boolean}
-                                title={boolTitle}
-                                style={iconInRowSx}
-                                className={getSuffixedClassNames(tableClassName, "-bool")}
-                                ref={setInputFocus}
-                                onChange={onBoolChange}
-                            />
+                                <input
+                                    type="checkbox"
+                                    checked={val as boolean}
+                                    title={boolTitle}
+                                    style={iconInRowSx}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                    ref={setInputFocus}
+                                    onChange={onBoolChange}
+                                />
                             ) : (
-                            <Switch
-                                checked={val as boolean}
-                                size="small"
-                                title={boolTitle}
-                                sx={iconInRowSx}
-                                onChange={onBoolChange}
-                                inputRef={setInputFocus}
-                                className={getSuffixedClassNames(tableClassName, "-bool")}
-                            />
+                                <Switch
+                                    checked={val as boolean}
+                                    size="small"
+                                    title={boolTitle}
+                                    sx={iconInRowSx}
+                                    onChange={onBoolChange}
+                                    inputRef={setInputFocus}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
                             )}
                             <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
@@ -600,14 +619,14 @@ export const EditableCell = (props: EditableCellProps) => {
                             </Box>
                         </Box>
                     ) : colDesc.type?.startsWith("date") ? (
-                        <Box sx={cellBoxSx}>
+                        <Box sx={CellBoxSx}>
                             {withTime ? (
                                 <DateTimePicker
                                     value={val as Date}
                                     onChange={onDateChange}
                                     slotProps={textFieldProps}
                                     inputRef={setInputFocus}
-                                    sx={tableFontSx}
+                                    sx={TableFontSx}
                                     className={getSuffixedClassNames(tableClassName, "-date")}
                                 />
                             ) : (
@@ -616,7 +635,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     onChange={onDateChange}
                                     slotProps={textFieldProps}
                                     inputRef={setInputFocus}
-                                    sx={tableFontSx}
+                                    sx={TableFontSx}
                                     className={getSuffixedClassNames(tableClassName, "-date")}
                                 />
                             )}
@@ -630,7 +649,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             </Box>
                         </Box>
                     ) : colDesc.lov ? (
-                        <Box sx={cellBoxSx}>
+                        <Box sx={CellBoxSx}>
                             <Autocomplete
                                 autoComplete={true}
                                 fullWidth
@@ -653,7 +672,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                         onChange={colDesc.freeLov ? onChange : undefined}
                                         margin="dense"
                                         variant="standard"
-                                        sx={tableFontSx}
+                                        sx={TableFontSx}
                                         className={getSuffixedClassNames(tableClassName, "-input")}
                                     />
                                 )}
@@ -675,7 +694,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             onKeyDown={onKeyDown}
                             inputRef={setInputFocus}
                             margin="dense"
-                            sx={tableFontSx}
+                            sx={TableFontSx}
                             className={getSuffixedClassNames(tableClassName, "-input")}
                             endAdornment={
                                 <Box sx={iconsWrapperSx}>
@@ -695,7 +714,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             value="Confirm"
                             onKeyDown={onDeleteKeyDown}
                             inputRef={setInputFocus}
-                            sx={tableFontSx}
+                            sx={TableFontSx}
                             className={getSuffixedClassNames(tableClassName, "-delete")}
                             endAdornment={
                                 <Box sx={iconsWrapperSx}>
@@ -716,7 +735,7 @@ export const EditableCell = (props: EditableCellProps) => {
                         </Box>
                     ) : null
                 ) : (
-                    <Box sx={cellBoxSx} onClick={onSelect}>
+                    <Box sx={CellBoxSx} onClick={onSelect}>
                         {buttonImg ? (
                             buttonImg.img ? (
                                 <img
@@ -767,7 +786,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                 )}
                             </span>
                         )}
-                        {onValidation && !buttonImg ? (
+                        {onValidation && !buttonImg && colDesc.multi === undefined ? (
                             <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
                                     <EditIcon fontSize="inherit" />

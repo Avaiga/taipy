@@ -23,6 +23,8 @@ class _EventManager:
     def __exit__(self, exc_type, exc_value, traceback):
         if self.__thread_stack:
             self.__thread_stack.pop().start()
+        if exc_value:
+            raise exc_value
         return self
 
     def _add_thread(self, thread: Thread):

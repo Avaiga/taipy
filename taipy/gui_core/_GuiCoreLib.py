@@ -15,6 +15,7 @@ from datetime import datetime
 from taipy.core import Cycle, DataNode, Job, Scenario, Sequence, Task
 from taipy.gui import Gui, State
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
+from taipy.gui.extension.library import _ElementWithInnerProps
 
 from ..version import _get_version
 from ._adapters import (
@@ -65,8 +66,8 @@ class _GuiCore(ElementLibrary):
     __DATANODE_SELECTOR_SORT_VAR = "__tpgc_dn_sort"
     __DATANODE_SELECTOR_ERROR_VAR = "__tpgc_dn_error"
 
-    __elements = {
-        "scenario_selector": Element(
+    __elements: dict[str, Element] = {
+        "scenario_selector": _ElementWithInnerProps(
             "value",
             {
                 "id": ElementProperty(PropertyType.string),
@@ -113,7 +114,7 @@ class _GuiCore(ElementLibrary):
                 ),
             },
         ),
-        "scenario": Element(
+        "scenario": _ElementWithInnerProps(
             "scenario",
             {
                 "id": ElementProperty(PropertyType.string),
@@ -144,7 +145,7 @@ class _GuiCore(ElementLibrary):
                 ),
             },
         ),
-        "scenario_dag": Element(
+        "scenario_dag": _ElementWithInnerProps(
             "scenario",
             {
                 "id": ElementProperty(PropertyType.string),
@@ -161,7 +162,7 @@ class _GuiCore(ElementLibrary):
                 "on_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.on_dag_select}}"),
             },
         ),
-        "data_node_selector": Element(
+        "data_node_selector": _ElementWithInnerProps(
             "value",
             {
                 "id": ElementProperty(PropertyType.string),
@@ -198,7 +199,7 @@ class _GuiCore(ElementLibrary):
                 ),
             },
         ),
-        "data_node": Element(
+        "data_node": _ElementWithInnerProps(
             __DATANODE_VIZ_DATA_NODE_PROP,
             {
                 "id": ElementProperty(PropertyType.string),
@@ -274,7 +275,7 @@ class _GuiCore(ElementLibrary):
                 ),
             },
         ),
-        "job_selector": Element(
+        "job_selector": _ElementWithInnerProps(
             "value",
             {
                 "id": ElementProperty(PropertyType.string),

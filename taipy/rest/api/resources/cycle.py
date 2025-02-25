@@ -14,8 +14,8 @@ from datetime import datetime
 from flask import request
 from flask_restful import Resource
 
-from taipy.common.config.common.frequency import Frequency
 from taipy.core import Cycle
+from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.exceptions.exceptions import NonExistingCycle
 

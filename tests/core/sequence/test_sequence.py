@@ -13,8 +13,8 @@ from unittest import mock
 
 import pytest
 
+from taipy import Scope
 from taipy.common.config import Config
-from taipy.common.config.common.scope import Scope
 from taipy.core.common._utils import _Subscriber
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
@@ -28,6 +28,10 @@ from taipy.core.sequence.sequence import Sequence
 from taipy.core.sequence.sequence_id import SequenceId
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task, TaskId
+
+
+class FakeDataNode:
+    config_id = "config_id_of_a_fake_dn"
 
 
 def test_sequence_equals():
@@ -143,7 +147,7 @@ def test_get_set_attribute():
         sequence.bar = "KeyAlreadyUsed"
 
 
-def test_check_consistency():
+def test_check_consistency(caplog):
     sequence_1 = Sequence({}, [], "name_1")
     assert sequence_1._is_consistent()
 
@@ -157,6 +161,7 @@ def test_check_consistency():
     task_3 = Task("tfoo", {}, print, [data_node_3], [data_node_3], TaskId("task_id_3"))
     sequence_3 = Sequence({}, [task_3], "name_3")
     assert not sequence_3._is_consistent()  # Not a dag
+    assert 'The DAG of sequence "name_3" is not a directed acyclic graph' in caplog.text
 
     input_4 = InMemoryDataNode("foo", Scope.SCENARIO)
     output_4 = InMemoryDataNode("bar", Scope.SCENARIO)
@@ -164,9 +169,7 @@ def test_check_consistency():
     task_4_2 = Task("tbar", {}, print, [output_4], [input_4], TaskId("task_id_4_2"))
     sequence_4 = Sequence({}, [task_4_1, task_4_2], "name_4")
     assert not sequence_4._is_consistent()  # Not a Dag
-
-    class FakeDataNode:
-        config_id = "config_id_of_a_fake_dn"
+    assert 'The DAG of sequence "name_4" is not a directed acyclic graph' in caplog.text
 
     input_6 = DataNode("foo", Scope.SCENARIO, "input_id_5")
     output_6 = DataNode("bar", Scope.SCENARIO, "output_id_5")
@@ -174,6 +177,10 @@ def test_check_consistency():
     task_6_2 = Task("tbar", {}, print, [output_6], [FakeDataNode()], TaskId("task_id_5_2"))
     sequence_6 = Sequence({}, [task_6_1, task_6_2], "name_5")
     assert not sequence_6._is_consistent()  # Not a DataNode
+    assert (
+        'Invalid edge detected in sequence "name_5": left node Task "tbar" and right node FakeDataNode '
+        "must connect a Task and a DataNode" in caplog.text
+    )
 
     intermediate_7 = DataNode("foo", Scope.SCENARIO, "intermediate_id_7")
     output_7 = DataNode("bar", Scope.SCENARIO, "output_id_7")
@@ -197,6 +204,7 @@ def test_check_consistency():
     task_9_2 = Task("tbar", {}, print, [input_9_2], [output_9_2], TaskId("task_id_9_2"))
     sequence_9 = Sequence({}, [task_9_1, task_9_2], "name_9")
     assert not sequence_9._is_consistent()  # Not connected
+    assert 'The DAG of sequence "name_9" is not weakly connected' in caplog.text
 
     input_10_1 = DataNode("foo", Scope.SCENARIO, "output_id_10_1")
     intermediate_10_1 = DataNode("bar", Scope.SCENARIO, "intermediate_id_10_1")

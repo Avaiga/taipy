@@ -200,7 +200,7 @@ class CoreSection(UniqueSection):
         operating mode, Taipy will behave differently when a version of the
         application runs. Three modes are available: "development", "experiment",
         and "production". Please refer to the
-        [Versioning management](../../../../../../userman/advanced_features/versioning/index.md)
+        [Versioning management](../../../../../../userman/operations/versioning/index.md)
         documentation page for more details.
 
         By default, Taipy runs in "development" mode.
@@ -217,7 +217,7 @@ class CoreSection(UniqueSection):
         """The identifier of the user application version.
 
         Please refer to the
-        [Versioning management](../../../../../../userman/advanced_features/versioning/index.md)
+        [Versioning management](../../../../../../userman/operations/versioning/index.md)
         documentation page for more details.
         """
         return _tpl._replace_templates(self._version_number)
@@ -408,7 +408,7 @@ class CoreSection(UniqueSection):
             mode (Optional[str]): Indicates the mode of the version management system.
                 Possible values are *"development"* or *"experiment"*. On Enterprise edition of Taipy,
                 *production* mode is also available. Please refer to the
-                [Versioning management](../../../../../../userman/advanced_features/versioning/index.md)
+                [Versioning management](../../../../../../userman/operations/versioning/index.md)
                 documentation page for more details.
             version_number (Optional[str]): The string identifier of the version.
                  In development mode, the version number is ignored.

@@ -20,9 +20,12 @@ jobs:
   coverage:
     timeout-minutes: 50
     runs-on: ubuntu-latest
+
     if: github.event_name == 'pull_request' && github.event.pull_request.base.repo.full_name == github.event.pull_request.head.repo.full_name
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history to enable proper diff
 
       - uses: actions/setup-python@v5
         with:
@@ -38,13 +41,22 @@ jobs:
 
       - name: Pytest
         run: |
-          pipenv run pytest --cov=taipy --cov-report="xml:overall-coverage.xml" tests
+          python -m pip install xmltodict
+          pipenv run pytest --cov=taipy --cov-report=xml:${{ github.workspace }}/coverage.xml --cov-config=.coveragerc
 
-      - name: Coverage
-        uses: orgoro/coverage@v3.1
-        with:
-          coverageFile: overall-coverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}
+
+
+      - name: Check total project coverage
+        run: |
+          python tools/coverage_check.py check-total --coverage-file ${{ github.workspace }}/coverage.xml --threshold 80
+
+      - name: Check pull request coverage
+        run: |
+          python tools/coverage_check.py check-changed --coverage-file ${{ github.workspace }}/coverage.xml --threshold 80 --base-branch ${{ github.event.pull_request.base.ref }}
 
   overall-tests:
     needs: [partial-tests]

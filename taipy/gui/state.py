@@ -84,7 +84,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         Returns:
             Gui: The Gui instance for this state object.
         """
-        raise NotImplementedError
+        ...
 
     def assign(self, name: str, value: t.Any) -> t.Any:
         """Assign a value to a state variable.
@@ -125,7 +125,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
             name (str): The variable name to update.
             value (Any): The new variable value.
         """
-        raise NotImplementedError
+        ...
 
     def __enter__(self):
         self._gui.__enter__()
@@ -148,6 +148,10 @@ class State(SimpleNamespace, metaclass=ABCMeta):
                 This can be expressed as a path name or a URL (relative or not).
         """
         self._gui.set_favicon(favicon_path, self)
+
+    @abstractmethod
+    def __getitem__(self, key: str) -> "State":
+        ...
 
 
 class _GuiState(State):

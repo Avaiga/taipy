@@ -16,6 +16,7 @@ import pytest
 
 from taipy.gui import Gui
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
+from taipy.gui.extension.library import _ElementWithInnerProps
 
 
 def render_xhtml_4_my_library(properties: t.Dict[str, t.Any]) -> str:
@@ -53,7 +54,7 @@ class MyLibrary(ElementLibrary):
             "h1",
             render_xhtml=render_xhtml_4_my_library_fail,
         ),
-        "inner": Element(
+        "inner": _ElementWithInnerProps(
             "value",
             {"value": ElementProperty(PropertyType.string, "")},
             inner_properties={

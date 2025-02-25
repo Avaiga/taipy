@@ -700,8 +700,15 @@ class Gui:
         try:
             client_id = None
             if msg_type == _WsType.CLIENT_ID.value:
-                res = self._bindings()._get_or_create_scope(message.get("payload", ""))
+                payload = message.get("payload", {})
+                res = self._bindings()._get_or_create_scope(
+                    payload.get("id", "") if isinstance(payload, dict) else str(payload)
+                )
                 client_id = res[0] if res[1] else None
+                if self._config.config.get("app_id", False):
+                    front_app_id = payload.get("app_id", None) if isinstance(payload, dict) else None
+                    if front_app_id is not None:
+                        self.__handle_ws_app_id({"name": message.get("name"), "payload": front_app_id})
             expected_client_id = client_id or message.get(Gui.__ARG_CLIENT_ID)
             self.__set_client_id_in_context(expected_client_id)
             g.ws_client_id = expected_client_id
@@ -977,7 +984,7 @@ class Gui:
         return ("", 404)
 
     def __get_version(self) -> str:
-        return f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}'
+        return f"{self.__version.get('major', 0)}.{self.__version.get('minor', 0)}.{self.__version.get('patch', 0)}"
 
     def __append_libraries_to_status(self, status: t.Dict[str, t.Any]):
         libraries: t.Dict[str, t.Any] = {}
@@ -1009,7 +1016,7 @@ class Gui:
                 {
                     "flask_version": str(metadata.version("flask") or ""),
                     "backend_version": self.__get_version(),
-                    "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
+                    "host": f"{self._get_config('host', 'localhost')}:{self._get_config('port', 'default')}",
                     "python_version": sys.version,
                 }
             )
@@ -1909,9 +1916,8 @@ class Gui:
                     data_hash = hashes.get("data", "")
                     data = kwargs.get(data_hash)
                     col_dict = _get_columns_dict(
-                        data,
                         attributes.get("columns", {}),
-                        self._get_accessor().get_col_types(data_hash, _TaipyData(data, data_hash)),
+                        self._get_accessor().get_cols_description(data_hash, _TaipyData(data, data_hash)),
                         attributes.get("date_format"),
                         attributes.get("number_format"),
                     )
@@ -1939,7 +1945,9 @@ class Gui:
                         self,
                         attributes,
                         [
-                            self._get_accessor().get_col_types(data_hash, _TaipyData(kwargs.get(data_hash), data_hash))
+                            self._get_accessor().get_cols_description(
+                                data_hash, _TaipyData(kwargs.get(data_hash), data_hash)
+                            )
                             for data_hash in data_hashes
                         ],
                     )
@@ -2115,7 +2123,7 @@ class Gui:
             page = Markdown(page, frame=None)
         elif not isinstance(page, Page):  # pragma: no cover
             raise Exception(
-                f'Parameter "page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}.'
+                f'Parameter "page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}".'
             )
         # Init a new page
         new_page = _Page()
@@ -2132,16 +2140,23 @@ class Gui:
         # Validate Page
         _Hooks().validate_page(self, page)
         # Update locals context
-        self.__locals_context.add(page._get_module_name(), page._get_locals())
-        # Update variable directory
-        if not page._is_class_module():
-            self.__var_dir.add_frame(page._frame)
+        self._add_page_context(page)
         # Special case needed for page to access gui to trigger reload in notebook
         if _is_in_notebook():
             page._notebook_gui = self
             page._notebook_page = new_page
         # add page to hook
         _Hooks().add_page(self, page)
+
+    def _add_page_context(self, page: Page) -> t.Optional[str]:
+        # Update locals context
+        module_name = page._get_module_name()
+        if not self.__locals_context.has_context(module_name):
+            self.__locals_context.add(module_name, page._get_locals())
+        # Update variable directory
+        if not page._is_class_module():
+            self.__var_dir.add_frame(page._frame)
+        return module_name
 
     def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
         """Add several pages to the Graphical User Interface.
@@ -2269,9 +2284,7 @@ class Gui:
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(str(new_partial._route))
         # Update locals context
-        self.__locals_context.add(page._get_module_name(), page._get_locals())
-        # Update variable directory
-        self.__var_dir.add_frame(page._frame)
+        self._add_page_context(page)
         return new_partial
 
     def _update_partial(self, partial: Partial):
@@ -2512,6 +2525,17 @@ class Gui:
                         self._bind_custom_page_variables(page._renderer, self._get_client_id())
                     else:
                         page.render(self, silent=True)
+        if additional_pages := _Hooks()._get_additional_pages():
+            for page in additional_pages:
+                if isinstance(page, Page):
+                    with contextlib.suppress(Exception):
+                        if isinstance(page, CustomPage):
+                            self._bind_custom_page_variables(page, self._get_client_id())
+                        else:
+                            new_page = _Page()
+                            new_page._renderer = page
+                            new_page.render(self, silent=True)
+
         scope_metadata[_DataScopes._META_PRE_RENDER] = True
 
     def _get_navigated_page(self, page_name: str) -> t.Any:
@@ -2521,7 +2545,12 @@ class Gui:
                 params = request.args.to_dict() if hasattr(request, "args") else {}
                 params.pop("client_id", None)
                 params.pop("v", None)
-                nav_page = self._call_function_with_state(t.cast(t.Callable, self.on_navigate), [page_name, params])
+                nav_page = self._call_function_with_state(
+                    t.cast(t.Callable, self.on_navigate),
+                    ["/" if page_name == Gui.__root_page_name else page_name, params],
+                )
+                if nav_page == "/":
+                    nav_page = Gui.__root_page_name
                 if nav_page != page_name:
                     if isinstance(nav_page, str):
                         if self._navigate(nav_page):
@@ -2702,7 +2731,7 @@ class Gui:
         css_vars = []
         if stylekit := self._get_config("stylekit", _default_stylekit):
             for k, v in stylekit.items():
-                css_vars.append(f'--{k.replace("_", "-")}:{_get_css_var_value(v)};')
+                css_vars.append(f"--{k.replace('_', '-')}:{_get_css_var_value(v)};")
         return " ".join(css_vars)
 
     def __init_server(self):
@@ -2750,6 +2779,11 @@ class Gui:
 
     def __bind_default_function(self):
         with self.get_flask_app().app_context():
+            if additional_pages := _Hooks()._get_additional_pages():
+                # add page context for additional pages so that they can be managed by the variable directory
+                for page in additional_pages:
+                    if isinstance(page, Page) and not isinstance(page, CustomPage):
+                        self._add_page_context(page)
             self.__var_dir.process_imported_var()
             # bind on_* function if available
             self.__bind_local_func("on_init")
@@ -2947,6 +2981,8 @@ class Gui:
 
         self.__var_dir.set_default(self.__frame)
 
+        self.__bind_default_function()
+
         if self.__state is None or is_reloading:
             self.__state = _GuiState(
                 self, self.__locals_context.get_all_keys(), self.__locals_context.get_all_context()
@@ -2960,8 +2996,6 @@ class Gui:
             The unique instance of State that you can use to change bound variables directly,
             potentially impacting the user interface in real-time.
             """
-
-        self.__bind_default_function()
 
         # Base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}

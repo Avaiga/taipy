@@ -10,9 +10,9 @@
 # specific language governing permissions and limitations under the License.
 from typing import List
 
-from taipy.common.config.common.scope import Scope
 from taipy.core import DataNode, Sequence, SequenceId, Task, TaskId
 from taipy.core._entity._dag import _DAG
+from taipy.core.common.scope import Scope
 
 
 def assert_x(x: int, *nodes):

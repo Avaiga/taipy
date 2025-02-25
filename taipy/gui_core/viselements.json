@@ -461,7 +461,7 @@
                         "doc": "If False, the data node expiration date is not visible."
                     },
                     {
-                        "name": "chart_config",
+                        "name": "chart_configs",
                         "type": "dict",
                         "doc": "Chart configs by data node configuration id."
                     },
