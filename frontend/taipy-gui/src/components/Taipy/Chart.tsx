@@ -50,6 +50,7 @@ import {
     createRequestChartUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
+    createRequestDataUpdateAction,
 } from "../../context/taipyReducers";
 import { lightenPayload } from "../../context/wsUtils";
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
@@ -83,8 +84,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     defaultConfig: string;
     config?: string;
     data?: Record<string, TraceValueType>;
-    animationData?: string;
-    defaultAnimationData: string;
+    animationData?: Record<string, TraceValueType>;
     //data${number}?: Record<string, TraceValueType>;
     defaultLayout?: string;
     layout?: string;
@@ -388,7 +388,6 @@ const Chart = (props: ChartProp) => {
     const lastDataPl = useRef<ExtendedPlotData[]>([]);
     const theme = useTheme();
     const module = useModule();
-
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
@@ -561,6 +560,32 @@ const Chart = (props: ChartProp) => {
         props.figure,
     ]);
 
+    const updateDateVarsName = useMemo(() => {
+        return updateVars
+            ? updateVars.split(";").reduce((acc, item) => {
+                const [key, value] = item.split("=");
+                if (key && value) {
+                    acc[key.trim()] = value.trim();
+                }
+                return acc;
+            }, {} as Record<string, string>)
+            : {};
+    }, [updateVars]);
+
+    useEffect(() => {
+        if (animationData?.__taipy_refresh) {
+            dispatch(createRequestDataUpdateAction(
+                updateDateVarsName.animationData,
+                id,
+                module,
+                [],
+                "",
+                {},
+                true,
+            ));
+        }
+    }, [animationData, animationData?.__taipy_refresh, dispatch, id, module, updateDateVarsName.animationData]);
+
     const runAnimation = useCallback(async () => {
         if (plotRef.current && plotlyRef.current && frames?.to?.data && frames.to.traces.length > 0) {
             await plotlyRef.current.animate(
@@ -583,8 +608,6 @@ const Chart = (props: ChartProp) => {
         [width, height],
     );
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
-
-    const animationDataValues = useDynamicJsonProperty(animationData, props.defaultAnimationData, "");
 
     const dataPl = useMemo(() => {
         if (props.figure) {
@@ -663,8 +686,8 @@ const Chart = (props: ChartProp) => {
                     ret.z = baseZ;
                 }
             }
-                // Hack for treemap charts: create a fallback 'parents' column if needed
-                // This works ONLY because 'parents' is the third named axis
+            // Hack for treemap charts: create a fallback 'parents' column if needed
+            // This works ONLY because 'parents' is the third named axis
             // (see __CHART_AXIS in gui/utils/chart_config_builder.py)
             else if (config.types[idx] === "treemap" && Array.isArray(ret.labels)) {
                 ret.parents = Array(ret.labels.length).fill("");
@@ -820,10 +843,10 @@ const Chart = (props: ChartProp) => {
         plotRef.current = graphDiv as HTMLDivElement;
         plotlyRef.current = window.Plotly as unknown as PlotlyObject;
 
-        if (animationDataValues) {
+        if (animationData) {
             runAnimation().catch(console.error);
         }
-    }, [onClick, clickHandler, animationDataValues, runAnimation]);
+    }, [onClick, clickHandler, animationData, runAnimation]);
 
     const getRealIndex = useCallback(
         (dataIdx: number, index?: number) => {
@@ -889,17 +912,17 @@ const Chart = (props: ChartProp) => {
     );
 
     useEffect(() => {
-        if (!dataPl.length || !animationDataValues) return;
+        if (!dataPl.length || !animationData) return;
 
         const toFramesData = dataPl.map((trace) => {
-            const isYaxisAnimated = Object.hasOwn(animationDataValues, (trace as ScatterData).name);
+            const isYaxisAnimated = Object.hasOwn(animationData, (trace as ScatterData).name);
             const isXaxisAnimated = (trace as ExtendedPlotData).meta?.xAxisName &&
-                Object.hasOwn(animationDataValues, (trace as ExtendedPlotData).meta?.xAxisName as PropertyKey);
+                Object.hasOwn(animationData, (trace as ExtendedPlotData).meta?.xAxisName as PropertyKey);
 
             return {
                 name: (trace as ScatterData).name,
-                x: isXaxisAnimated ? animationDataValues[(trace as ExtendedPlotData).meta?.xAxisName as keyof typeof animationDataValues] ?? [] : (trace as ScatterData).x,
-                y: isYaxisAnimated ? animationDataValues[(trace as ScatterData).name as keyof typeof animationDataValues] ?? [] : (trace as ScatterData).y,
+                x: isXaxisAnimated ? animationData[(trace as ExtendedPlotData).meta?.xAxisName as keyof typeof animationData] ?? [] : (trace as ScatterData).x,
+                y: isYaxisAnimated ? animationData[(trace as ScatterData).name as keyof typeof animationData] ?? [] : (trace as ScatterData).y,
             };
         });
 
@@ -916,10 +939,7 @@ const Chart = (props: ChartProp) => {
                 baseframe: "from",
             },
         }));
-    }, [dataPl, animationDataValues]);
-
-    const initFrames = [frames.from, frames.to];
-    const updatedFrames = [{ ...frames.from, name: "from" }, frames.to];
+    }, [dataPl, animationData]);
 
     useEffect(() => {
         if (!plotRef.current || !frames.to || !frames.to.data?.length) {
