@@ -2298,6 +2298,8 @@ class Gui:
         partial = partials.get(route)
         if partial is None:
             partial = next((p for p in self._config.partials if p._route == route), None)
+            partials[route] = partial
+            _setscopeattr(self, Partial._PARTIALS, partials)
         return partial
 
     # Main binding method (bind in markdown declaration)
