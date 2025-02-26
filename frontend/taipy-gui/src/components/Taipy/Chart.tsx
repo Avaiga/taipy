@@ -42,9 +42,9 @@ import {
     PlotSelectionEvent, ScatterData,
     ScatterLine,
     AnimationOpts,
+    Root,
 } from "plotly.js";
 import { Figure } from "react-plotly.js";
-import Plotly from "plotly.js/lib/core";
 
 import {
     createRequestChartUpdateAction,
@@ -67,18 +67,13 @@ import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from 
 
 const Plot = lazy(() => import("react-plotly.js"));
 
-interface PlotMarker extends OriginalPlotMarker {
-    animateOn?: string[];
-    animateTo?: never[];
+interface PlotlyObject {
+    animate: (
+        root: Root,
+        frameOrGroupNameOrFrameList?: string | string[] | Partial<Frame> | Array<Partial<Frame>>,
+        opts?: Partial<AnimationOpts>,
+    ) => Promise<void>;
 }
-
-type ExtendedPlotData = {
-    [K in keyof Data]: Data[K];
-} & {
-    animateOn?: string[];
-    animateTo?: never[];
-    x?: Datum[];
-};
 
 interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     title?: string;
@@ -370,6 +365,7 @@ const Chart = (props: ChartProp) => {
     const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
     const plotRef = useRef<HTMLDivElement | null>(null);
+    const plotlyRef = useRef<PlotlyObject | null>(null);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
     const [frames, setFrames] = useState<{ from: Frame; to: Frame }>({
         from: {
@@ -566,8 +562,8 @@ const Chart = (props: ChartProp) => {
     ]);
 
     const runAnimation = useCallback(async () => {
-        if (plotRef.current && frames?.to?.data && frames.to.traces.length > 0) {
-            await Plotly.animate(
+        if (plotRef.current && plotlyRef.current && frames?.to?.data && frames.to.traces.length > 0) {
+            await plotlyRef.current.animate(
                 plotRef.current as unknown as PlotlyHTMLElement,
                 {
                     data: frames.to.data,
@@ -667,8 +663,8 @@ const Chart = (props: ChartProp) => {
                     ret.z = baseZ;
                 }
             }
-            // Hack for treemap charts: create a fallback 'parents' column if needed
-            // This works ONLY because 'parents' is the third named axis
+                // Hack for treemap charts: create a fallback 'parents' column if needed
+                // This works ONLY because 'parents' is the third named axis
             // (see __CHART_AXIS in gui/utils/chart_config_builder.py)
             else if (config.types[idx] === "treemap" && Array.isArray(ret.labels)) {
                 ret.parents = Array(ret.labels.length).fill("");
@@ -822,6 +818,7 @@ const Chart = (props: ChartProp) => {
     const onInitialized = useCallback((figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
         onClick && graphDiv.addEventListener("click", clickHandler);
         plotRef.current = graphDiv as HTMLDivElement;
+        plotlyRef.current = window.Plotly as unknown as PlotlyObject;
 
         if (animationDataValues) {
             runAnimation().catch(console.error);
