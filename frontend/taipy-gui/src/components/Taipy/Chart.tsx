@@ -35,11 +35,13 @@ import {
     Layout,
     ModeBarButtonAny,
     PlotDatum,
+    PlotData,
     PlotlyHTMLElement,
     PlotMarker,
     PlotRelayoutEvent,
     PlotSelectionEvent, ScatterData,
     ScatterLine,
+    AnimationOpts,
 } from "plotly.js";
 import { Figure } from "react-plotly.js";
 import Plotly from "plotly.js/lib/core";
@@ -221,6 +223,17 @@ const selectedPropRe = /selected(\d+)/;
 
 const MARKER_TO_COL = ["color", "size", "symbol", "opacity", "colors"];
 
+const DEFAULT_ANIMATION_SETTINGS: Partial<AnimationOpts> = {
+    transition: {
+        duration: 500,
+        easing: "cubic-in-out",
+    },
+    frame: {
+        duration: 500,
+    },
+    mode: "immediate" as "next" | "immediate" | "afterall",
+};
+
 const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t === "pie") : false);
 
 interface Axis {
@@ -242,7 +255,7 @@ interface PlotlyDiv extends HTMLDivElement {
     };
 }
 
-interface ExtendedPlotData extends Plotly.PlotData {
+interface ExtendedPlotData extends PlotData {
     meta?: {
         xAxisName?: string;
         yAxisName?: string;
@@ -552,6 +565,20 @@ const Chart = (props: ChartProp) => {
         props.figure,
     ]);
 
+    const runAnimation = useCallback(async () => {
+        if (plotRef.current && frames?.to?.data && frames.to.traces.length > 0) {
+            await Plotly.animate(
+                plotRef.current as unknown as PlotlyHTMLElement,
+                {
+                    data: frames.to.data,
+                    traces: frames.to.traces,
+                    layout: layout,
+                },
+                DEFAULT_ANIMATION_SETTINGS,
+            );
+        }
+    }, [frames, layout]);
+
     const style = useMemo(
         () =>
             height === undefined
@@ -640,8 +667,8 @@ const Chart = (props: ChartProp) => {
                     ret.z = baseZ;
                 }
             }
-                // Hack for treemap charts: create a fallback 'parents' column if needed
-                // This works ONLY because 'parents' is the third named axis
+            // Hack for treemap charts: create a fallback 'parents' column if needed
+            // This works ONLY because 'parents' is the third named axis
             // (see __CHART_AXIS in gui/utils/chart_config_builder.py)
             else if (config.types[idx] === "treemap" && Array.isArray(ret.labels)) {
                 ret.parents = Array(ret.labels.length).fill("");
@@ -797,32 +824,9 @@ const Chart = (props: ChartProp) => {
         plotRef.current = graphDiv as HTMLDivElement;
 
         if (animationDataValues) {
-            const runAnimation = async () => {
-                if (plotRef.current && frames?.to?.data && frames.to.traces.length > 0) {
-                    await Plotly.animate(
-                        plotRef.current,
-                        {
-                            data: frames.to.data,
-                            traces: frames.to.traces,
-                            layout: layout,
-                        },
-                        {
-                            transition: {
-                                duration: 500,
-                                easing: "cubic-in-out",
-                            },
-                            frame: {
-                                duration: 500,
-                            },
-                            mode: "immediate",
-                        },
-                    );
-                }
-            };
-
             runAnimation().catch(console.error);
         }
-    }, [onClick, clickHandler, animationDataValues, frames?.to?.data, frames?.to?.traces, layout]);
+    }, [onClick, clickHandler, animationDataValues, runAnimation]);
 
     const getRealIndex = useCallback(
         (dataIdx: number, index?: number) => {
@@ -891,9 +895,9 @@ const Chart = (props: ChartProp) => {
         if (!dataPl.length || !animationDataValues) return;
 
         const toFramesData = dataPl.map((trace) => {
-            const isYaxisAnimated = Object.prototype.hasOwnProperty.call(animationDataValues, (trace as ScatterData).name);
+            const isYaxisAnimated = Object.hasOwn(animationDataValues, (trace as ScatterData).name);
             const isXaxisAnimated = (trace as ExtendedPlotData).meta?.xAxisName &&
-                Object.prototype.hasOwnProperty.call(animationDataValues, (trace as ExtendedPlotData).meta?.xAxisName as PropertyKey);
+                Object.hasOwn(animationDataValues, (trace as ExtendedPlotData).meta?.xAxisName as PropertyKey);
 
             return {
                 name: (trace as ScatterData).name,
@@ -921,54 +925,37 @@ const Chart = (props: ChartProp) => {
     const updatedFrames = [{ ...frames.from, name: "from" }, frames.to];
 
     useEffect(() => {
-        if (!plotRef.current || !frames.to || !frames.to.data?.length) return;
+        if (!plotRef.current || !frames.to || !frames.to.data?.length) {
+            setFrames((prevFrames) => {
+                if (prevFrames.to.data.length > 0) {
+                    return {
+                        from: { name: "from", data: [], traces: [], layout: {}, group: "", baseframe: "" },
+                        to: { name: "to", data: [], traces: [], layout: {}, group: "", baseframe: "" },
+                    };
+                }
+                return prevFrames;
+            });
+            return;
+        }
 
         const plotElement = plotRef.current as unknown as PlotlyHTMLElement;
         if (!plotElement || !plotElement.data) return;
 
         let animationTimeout: NodeJS.Timeout | null = null;
 
-        const addFramesAsync = async () => {
-            try {
-                await Plotly.react(plotElement, frames.from.data, layout, {});
-                if (plotRef.current && frames?.to?.data && frames.to.traces.length > 0) {
-                    await Plotly.animate(
-                        plotElement,
-                        {
-                            data: frames.to.data,
-                            traces: frames.to.traces,
-                            layout: {},
-                        },
-                        {
-                            transition: {
-                                duration: 500,
-                                easing: "cubic-in-out",
-                            },
-                            frame: {
-                                duration: 500,
-                            },
-                            mode: "immediate",
-                        },
-                    );
-                }
-            } catch (error) {
-                console.error("Error adding frames:", error);
-            }
-        };
-
         // Debounce or delay to prevent overlapping calls
         animationTimeout = setTimeout(() => {
             if (plotRef.current) {
-                addFramesAsync().catch(console.error);
+                runAnimation().catch(console.error);
             }
-        }, 300);
+        }, 100);
 
         return () => {
             if (animationTimeout) {
                 clearTimeout(animationTimeout);
             }
         };
-    }, [layout, frames.to, frames.from]);
+    }, [layout, frames.to, frames.from, runAnimation]);
 
     return render ? (
         <Tooltip title={hover || ""}>

@@ -511,7 +511,7 @@
                     {
                         "name": "animation_data",
                         "type": "dynamic(dict[str, Any])",
-                        "doc": "Column name and its associated data for the animation."
+                        "doc": "A dictionary representing updated values for the dataset defined in <i>data</i>.<br/>Each key in <i>animation_data</i> must exist in <i>data</i>. Changing this property triggers an animation of the chart, showing the changes between the original (<i>data</i>) and updated (<i>animation_data</i>) values.<br/> This animation functionality currently works only with <i>Scatter</i> traces. If you’re using other trace types, the animation may not behave as expected."
                     },
                     {
                         "name": "mode",
