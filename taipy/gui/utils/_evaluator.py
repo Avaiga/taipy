@@ -35,6 +35,7 @@ from . import (
     _TaipyBase,
     _variable_decode,
     _variable_encode,
+    is_debugging,
 )
 
 
@@ -374,7 +375,8 @@ class _Evaluator:
                         expr_evaluated = eval(expr_string, ctx)
                         _setscopeattr(gui, hash_expr, expr_evaluated)
                     except Exception as e:
-                        _warn(f"Exception raised evaluating {_Evaluator._clean_exception_expr(expr_string)}", e)
+                        if is_debugging():
+                            _warn(f"Exception raised evaluating {_Evaluator._clean_exception_expr(expr_string)}", e)
                         hash_expr = ""
             # refresh holders if any
             for h in self.__expr_to_holders.get(expr, []):
