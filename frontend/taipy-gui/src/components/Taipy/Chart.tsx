@@ -51,7 +51,6 @@ import {
     createRequestChartUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
-    createRequestDataUpdateAction,
 } from "../../context/taipyReducers";
 import { lightenPayload } from "../../context/wsUtils";
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
@@ -66,6 +65,8 @@ import {
 import { ColumnDesc } from "./tableUtils";
 import { getComponentClassName } from "./TaipyStyle";
 import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
+
+import { isEqual } from "lodash";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -350,6 +351,14 @@ const getData = (
     idx: number,
 ) => (idx === 0 ? data : idx <= additionalDatas.length ? additionalDatas[idx - 1] : undefined);
 
+const useDeepCompareMemoize = (value: Data[] | number[] | Frame) => {
+    const ref = useRef(value);
+    if (!isEqual(value, ref.current)) {
+        ref.current = value;
+    }
+    return ref.current;
+};
+
 const Chart = (props: ChartProp) => {
     const {
         width = "100%",
@@ -368,23 +377,22 @@ const Chart = (props: ChartProp) => {
     const plotRef = useRef<HTMLDivElement | null>(null);
     const plotlyRef = useRef<PlotlyObject | null>(null);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
-    const [frames, setFrames] = useState<{ from: Frame; to: Frame }>({
-        from: {
-            name: "from",
-            data: [],
-            traces: [],
-            layout: {},
-            group: "",
-            baseframe: "",
-        },
-        to: {
-            name: "to",
-            data: [],
-            traces: [],
-            layout: {},
-            group: "",
-            baseframe: "",
-        },
+    const [fromFrame, setFromFrame] = useState<Frame>({
+        name: "from",
+        data: [],
+        traces: [],
+        layout: {},
+        group: "",
+        baseframe: "",
+    });
+
+    const [toFrame, setToFrame] = useState<Frame>({
+        name: "to",
+        data: [],
+        traces: [],
+        layout: {},
+        group: "",
+        baseframe: "",
     });
     const lastDataPl = useRef<ExtendedPlotData[]>([]);
     const theme = useTheme();
@@ -569,31 +577,34 @@ const Chart = (props: ChartProp) => {
 
     useEffect(() => {
         if (animationData?.__taipy_refresh) {
-            dispatch(createRequestDataUpdateAction(
+            dispatch(createRequestChartUpdateAction(
                 animationDataVarName,
                 id,
                 module,
                 [],
                 "",
-                {},
-                true,
+                undefined,
             ));
         }
     }, [animationData, animationData?.__taipy_refresh, dispatch, id, module, animationDataVarName]);
 
+    const memoizedToFrameData = useDeepCompareMemoize(toFrame.data);
+    const memoizedToFrameTraces = useDeepCompareMemoize(toFrame.traces);
+    const memoizedToFrame = useDeepCompareMemoize(toFrame);
+
     const runAnimation = useCallback(async () => {
-        if (plotRef.current && plotlyRef.current && frames?.to?.data && frames.to.traces.length > 0) {
+        if (plotRef.current && plotlyRef.current && memoizedToFrameData && (memoizedToFrameTraces as number[]).length > 0) {
             await plotlyRef.current.animate(
                 plotRef.current as unknown as PlotlyHTMLElement,
                 {
-                    data: frames.to.data,
-                    traces: frames.to.traces,
+                    data: memoizedToFrameData as Data[],
+                    traces: memoizedToFrameTraces as number[],
                     layout: layout,
                 },
                 DEFAULT_ANIMATION_SETTINGS,
             );
         }
-    }, [frames, layout]);
+    }, [layout, memoizedToFrameData, memoizedToFrameTraces]);
 
     const style = useMemo(
         () =>
@@ -921,31 +932,36 @@ const Chart = (props: ChartProp) => {
             };
         });
 
-        setFrames((prevFrames) => ({
-            from: prevFrames.to
-                ? { ...prevFrames.to, name: "from" }
-                : { name: "from", data: [], traces: [], layout: {}, group: "", baseframe: "" },
-            to: {
+        if (memoizedToFrameData !== toFramesData) {
+            setFromFrame({ ...memoizedToFrame as Frame, name: "from" });
+            setToFrame({
                 name: "to",
                 data: toFramesData,
                 traces: dataPl.map((_, idx) => idx),
                 layout: {},
                 group: "",
                 baseframe: "from",
-            },
-        }));
-    }, [dataPl, animationData]);
+            });
+        }
+    }, [dataPl, animationData, memoizedToFrameData, memoizedToFrame]);
 
     useEffect(() => {
-        if (!plotRef.current || !frames.to || !frames.to.data?.length) {
-            setFrames((prevFrames) => {
-                if (prevFrames.to.data.length > 0) {
-                    return {
-                        from: { name: "from", data: [], traces: [], layout: {}, group: "", baseframe: "" },
-                        to: { name: "to", data: [], traces: [], layout: {}, group: "", baseframe: "" },
-                    };
-                }
-                return prevFrames;
+        if (!plotRef.current || !toFrame.data?.length) {
+            setFromFrame({
+                name: "from",
+                data: [],
+                traces: [],
+                layout: {},
+                group: "",
+                baseframe: "",
+            });
+            setToFrame({
+                name: "to",
+                data: [],
+                traces: [],
+                layout: {},
+                group: "",
+                baseframe: "",
             });
             return;
         }
@@ -953,21 +969,18 @@ const Chart = (props: ChartProp) => {
         const plotElement = plotRef.current as unknown as PlotlyHTMLElement;
         if (!plotElement || !plotElement.data) return;
 
-        let animationTimeout: NodeJS.Timeout | null = null;
-
-        // Debounce or delay to prevent overlapping calls
-        animationTimeout = setTimeout(() => {
+        const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
             if (plotRef.current) {
                 runAnimation().catch(console.error);
             }
         }, 100);
 
         return () => {
-            if (animationTimeout) {
-                clearTimeout(animationTimeout);
+            if (timer) {
+                clearTimeout(timer);
             }
         };
-    }, [layout, frames.to, frames.from, runAnimation]);
+    }, [runAnimation, toFrame.data?.length]);
 
     return render ? (
         <Tooltip title={hover || ""}>
@@ -991,7 +1004,7 @@ const Chart = (props: ChartProp) => {
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}
-                            frames={[frames.from, frames.to]}
+                            frames={[fromFrame, toFrame]}
                             onSelected={isOnClick(config.types) ? undefined : onSelect}
                             onDeselect={isOnClick(config.types) ? undefined : onSelect}
                             onClick={isOnClick(config.types) ? onSelect : undefined}
