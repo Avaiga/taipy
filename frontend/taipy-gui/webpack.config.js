@@ -96,12 +96,6 @@ module.exports = (env, options) => {
                             fullySpecified: false,
                         },
                     },
-                    {
-                        test: /\.css$/,
-                        use: [
-                            "css-loader",
-                        ],
-                    },
                 ],
             },
             plugins: [

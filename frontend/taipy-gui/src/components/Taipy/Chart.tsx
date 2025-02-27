@@ -29,6 +29,7 @@ import Tooltip from "@mui/material/Tooltip";
 import merge from "lodash/merge";
 import { nanoid } from "nanoid";
 import {
+    AnimationOpts,
     Config,
     Data,
     Datum, Frame,
@@ -39,10 +40,10 @@ import {
     PlotlyHTMLElement,
     PlotMarker,
     PlotRelayoutEvent,
-    PlotSelectionEvent, ScatterData,
-    ScatterLine,
-    AnimationOpts,
+    PlotSelectionEvent,
     Root,
+    ScatterData,
+    ScatterLine,
 } from "plotly.js";
 import { Figure } from "react-plotly.js";
 
@@ -226,7 +227,7 @@ const DEFAULT_ANIMATION_SETTINGS: Partial<AnimationOpts> = {
     frame: {
         duration: 500,
     },
-    mode: "immediate" as "next" | "immediate" | "afterall",
+    mode: "immediate" as "next" | "immediate" | "afterall", // codespell:ignore
 };
 
 const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t === "pie") : false);
@@ -560,22 +561,16 @@ const Chart = (props: ChartProp) => {
         props.figure,
     ]);
 
-    const updateDateVarsName = useMemo(() => {
-        return updateVars
-            ? updateVars.split(";").reduce((acc, item) => {
-                const [key, value] = item.split("=");
-                if (key && value) {
-                    acc[key.trim()] = value.trim();
-                }
-                return acc;
-            }, {} as Record<string, string>)
-            : {};
+    const animationDataVarName = useMemo(() => {
+        if (updateVars) {
+            return getUpdateVar(updateVars, "animationData");
+        }
     }, [updateVars]);
 
     useEffect(() => {
         if (animationData?.__taipy_refresh) {
             dispatch(createRequestDataUpdateAction(
-                updateDateVarsName.animationData,
+                animationDataVarName,
                 id,
                 module,
                 [],
@@ -584,7 +579,7 @@ const Chart = (props: ChartProp) => {
                 true,
             ));
         }
-    }, [animationData, animationData?.__taipy_refresh, dispatch, id, module, updateDateVarsName.animationData]);
+    }, [animationData, animationData?.__taipy_refresh, dispatch, id, module, animationDataVarName]);
 
     const runAnimation = useCallback(async () => {
         if (plotRef.current && plotlyRef.current && frames?.to?.data && frames.to.traces.length > 0) {
