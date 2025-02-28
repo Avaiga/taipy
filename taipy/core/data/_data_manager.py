@@ -16,6 +16,7 @@ from taipy.common.config import Config
 from taipy.common.config._config import _Config
 
 from .._manager._manager import _Manager
+from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
 from ..common.scope import Scope
 from ..config.data_node_config import DataNodeConfig
@@ -25,7 +26,6 @@ from ..notification import Event, EventEntityType, EventOperation, Notifier, _ma
 from ..reason import EntityDoesNotExist, NotGlobalScope, ReasonCollection, WrongConfigType
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
-from ._data_fs_repository import _DataFSRepository
 from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId
@@ -35,7 +35,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     _DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
     _ENTITY_NAME = DataNode.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.DATA_NODE
-    _repository: _DataFSRepository
+    _repository: _AbstractRepository
 
     @classmethod
     def _get_owner_id(
@@ -58,14 +58,11 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         data_node_configs = [Config.data_nodes[dnc.id] for dnc in data_node_configs]
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
-            scope = dn_config.scope
-            owner_id = cls._get_owner_id(scope, cycle_id, scenario_id)
+            owner_id = cls._get_owner_id(dn_config.scope, cycle_id, scenario_id)
             dn_configs_and_owner_id.append((dn_config, owner_id))
-
         data_nodes = cls._repository._get_by_configs_and_owner_ids(
             dn_configs_and_owner_id, cls._build_filters_with_version(None)
         )
-
         return {
             dn_config: data_nodes.get((dn_config, owner_id)) or cls._create_and_set(dn_config, owner_id, None)
             for dn_config, owner_id in dn_configs_and_owner_id
@@ -171,7 +168,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     @classmethod
     def _get_by_config_id(cls, config_id: str, version_number: Optional[str] = None) -> List[DataNode]:
         """
-        Get all datanodes by its config id.
+        Get all data nodes by its config id.
         """
         filters = cls._build_filters_with_version(version_number)
         if not filters:
@@ -181,37 +178,12 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _duplicate(
-        cls, dn: DataNode, cycle_id: Optional[CycleId] = None, scenario_id: Optional[ScenarioId] = None
-    ) -> DataNode:
-        data_nodes = cls._repository._get_by_configs_and_owner_ids(
-            [(dn.config_id, cls._get_owner_id(dn.scope, cycle_id, scenario_id))], cls._build_filters_with_version(None)
-        )
-
-        if existing_dn := data_nodes.get((dn.config_id, dn.owner_id)):
-            return existing_dn
-        else:
-            duplicated_dn = cls._get(dn)
-
-            duplicated_dn.id = duplicated_dn._new_id(duplicated_dn._config_id)
-            duplicated_dn._owner_id = cls._get_owner_id(duplicated_dn._scope, cycle_id, scenario_id)
-            duplicated_dn._parent_ids = set()
-
-            duplicated_dn._duplicate_data()
-
-            cls._set(duplicated_dn)
-            return duplicated_dn
-
-    @classmethod
-    def _can_duplicate(cls, dn: DataNode) -> ReasonCollection:
-        reason_collector = ReasonCollection()
-
+    def _can_duplicate(cls, dn: Union[str, DataNode]) -> ReasonCollection:
         if isinstance(dn, DataNode):
             dn_id = dn.id
         else:
             dn_id = dn
-
+        reason_collector = ReasonCollection()
         if not cls._repository._exists(dn_id):
             reason_collector._add_reason(dn_id, EntityDoesNotExist(dn_id))
-
         return reason_collector
