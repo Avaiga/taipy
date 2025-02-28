@@ -1072,17 +1072,20 @@ def get_entities_by_config_id(
     return entities
 
 
-def can_duplicate(entity: Optional[Scenario] = None) -> ReasonCollection:
+def can_duplicate(entity: Union[str, Scenario]) -> ReasonCollection:
     """Indicate if a scenario can be duplicated.
 
+    Arguments:
+        entity (Union[str, Scenario]): The scenario or its id to check if it can be duplicated.
+
     Returns:
-        True if the given scenario can be created. False otherwise.
+        True if the given scenario can be duplicated. False otherwise.
     """
     return _ScenarioManagerFactory._build_manager()._can_duplicate(entity)
 
 
 def duplicate_scenario(
-    scenario: Scenario, creation_date: Optional[datetime] = None, name: Optional[str] = None
+    scenario: Scenario, new_creation_date: Optional[datetime] = None, new_name: Optional[str] = None
 ) -> Scenario:
     """Duplicate an existing scenario and return a new scenario.
 
@@ -1093,12 +1096,12 @@ def duplicate_scenario(
 
     Arguments:
         scenario (Scenario): The scenario to duplicate.
-        creation_date (Optional[datetime.datetime]): The creation date of the new scenario.
+        new_creation_date (Optional[datetime.datetime]): The creation date of the new scenario.
             If None, the current date and time is used.
-        name (Optional[str]): The displayable name of the new scenario.
+        new_name (Optional[str]): The displayable name of the new scenario.
 
     Returns:
         Scenario: The newly duplicated scenario.
     """
 
-    return _ScenarioManagerFactory._build_manager()._duplicate(scenario, creation_date, name)
+    return _ScenarioManagerFactory._build_manager()._duplicate(scenario, new_creation_date, new_name)

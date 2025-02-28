@@ -233,50 +233,12 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _duplicate(
-        cls, task: Task, cycle_id: Optional[CycleId] = None, scenario_id: Optional[ScenarioId] = None
-    ) -> Task:
-        data_manager = _DataManagerFactory._build_manager()
-
-        duplicated_task = cls._get(task)
-
-        inputs = [data_manager._duplicate(i, cycle_id, scenario_id) for i in duplicated_task.input.values()]
-        outputs = [data_manager._duplicate(o, cycle_id, scenario_id) for o in duplicated_task.output.values()]
-
-        scope = min(dn.scope for dn in (inputs + outputs)) if (len(inputs) + len(outputs)) != 0 else Scope.GLOBAL
-        owner_id = cls._get_owner_id(scope, cycle_id, scenario_id)
-
-        tasks_by_config = cls._repository._get_by_configs_and_owner_ids(  # type: ignore
-            [(task.config_id, owner_id)], cls._build_filters_with_version(None)
-        )
-
-        if existing_task := tasks_by_config.get((task.config_id, owner_id)):
-            return existing_task
-
-        duplicated_task.id = duplicated_task._new_id(duplicated_task.config_id)
-        duplicated_task._parent_ids = set()
-        duplicated_task._owner_id = owner_id
-
-        duplicated_task._input = {i.config_id: i for i in inputs}
-        duplicated_task._output = {o.config_id: o for o in outputs}
-
-        for dn in set(inputs + outputs):
-            dn._parent_ids.update([duplicated_task.id])
-            data_manager._set(dn)
-
-        cls._set(duplicated_task)
-        return duplicated_task
-
-    @classmethod
-    def _can_duplicate(cls, task: Task) -> ReasonCollection:
+    def _can_duplicate(cls, task: Union[Task, str]) -> ReasonCollection:
         reason_collector = ReasonCollection()
-
         if isinstance(task, Task):
             task_id = task.id
         else:
             task_id = task
-
         if not cls._repository._exists(task_id):
             reason_collector._add_reason(task_id, EntityDoesNotExist(task_id))
-
         return reason_collector
