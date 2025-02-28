@@ -191,7 +191,7 @@ const Metric = (props: MetricProps) => {
             layout.template = template;
         }
 
-        if (typeof props.title !== "object") {
+        if (props.title) {
             layout.title = {
                 text: props.title
             }
