@@ -1060,9 +1060,6 @@ def get_entities_by_config_id(
     Returns:
         The list of all entities by the config id.
     """
-
-    entities: List = []
-
     if entities := _ScenarioManagerFactory._build_manager()._get_by_config_id(config_id):
         return entities
     if entities := _TaskManagerFactory._build_manager()._get_by_config_id(config_id):
