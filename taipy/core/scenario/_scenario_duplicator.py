@@ -151,7 +151,7 @@ class _ScenarioDuplicator:
             new_scenario_tasks = []
             for t in seq.tasks:
                 new_scenario_tasks.append(self.new_tasks[t.config_id])
-            self.new_scenario._set_sequence(seq_name, new_scenario_tasks, properties=seq.properties)
+            self.new_scenario._set_sequence(seq_name, new_scenario_tasks, properties=seq._properties)
 
     def __init_new_scenario(self, new_creation_date: Optional[datetime], new_name: Optional[str]) -> None:
         self.new_scenario = self.__scenario_manager._get(self.scenario)
@@ -164,9 +164,9 @@ class _ScenarioDuplicator:
             self.new_cycle_id = cycle.id
         else:
             self.new_scenario._primary_scenario = False
+        if hasattr(self.new_scenario._properties, "_entity_owner"):
+            self.new_scenario._properties._entity_owner = self.new_scenario
         if new_name:
-            if hasattr(self.new_scenario._properties, "_entity_owner"):
-                del self.new_scenario._properties._entity_owner
             self.new_scenario._properties["name"] = new_name
         self.new_scenario._subscribers = []
 
@@ -179,6 +179,8 @@ class _ScenarioDuplicator:
         new_task.id = new_task._new_id(task.config_id)
         new_task._owner_id = self.__task_manager._get_owner_id(task.scope, self.new_cycle_id, self.new_scenario.id)
         new_task._parent_ids = set(self.new_scenario.id)
+        if hasattr(new_task._properties, "_entity_owner"):
+            new_task._properties._entity_owner = new_task
         new_task._input = {}  # To be potentially updated later
         new_task._output = {}  # To be potentially updated later
         return new_task
@@ -188,6 +190,8 @@ class _ScenarioDuplicator:
         new_dn.id = new_dn._new_id(dn._config_id)
         new_dn._owner_id = self.new_scenario.id if dn.scope == Scope.SCENARIO else self.new_cycle_id
         new_dn._parent_ids = set(task.id) if task else set(self.new_scenario.id)
+        if hasattr(new_dn._properties, "_entity_owner"):
+            new_dn._properties._entity_owner = new_dn
         new_dn._last_edit_date = None  # To be potentially updated later
         new_dn._edits = []  # To be potentially updated later
         return new_dn
