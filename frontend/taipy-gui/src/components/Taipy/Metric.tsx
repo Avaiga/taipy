@@ -82,8 +82,6 @@ const Metric = (props: MetricProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const theme = useTheme();
 
-    console.log(props.title);
-
     const colorMap = useMemo(() => {
         try {
             const obj = props.colorMap ? JSON.parse(props.colorMap) : null;
