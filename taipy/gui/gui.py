@@ -2406,9 +2406,6 @@ class Gui:
         duration: t.Optional[int] = None,
         notification_id: t.Optional[str] = None,
     ):
-        if not notification_id:
-            notification_id = str(uuid.uuid4())
-
         self.__send_ws_notification(
             notification_type,
             message,

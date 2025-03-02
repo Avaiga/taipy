@@ -61,7 +61,7 @@ const TaipyNotification = ({ notifications: notificationProps }: NotificationPro
                     variant: notification.nType as VariantType,
                     action: notificationAction,
                     key: notification.snackBarId,
-                    autoHideDuration: (notification.duration > 0 && notification.notificationId) ? notification.duration : null
+                    autoHideDuration: (notification.duration == 0 && notification.notificationId) ? null : notification.duration
                 });
                 notification.system &&
                     new Notification(document.title || "Taipy", { body: notification.message, icon: faviconUrl });
