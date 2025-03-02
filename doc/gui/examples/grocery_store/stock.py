@@ -14,20 +14,21 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Markdown
 
-# Local variable to store the computed stock value
-stock_value = 0
+# Whether stock details are displayed or not
+show_details = False
 
-# Compute the total stock value based on purchase price and stock quantity
-def compute_stock_value(data: dict[str, list[float]]):
-    global stock_value
-    stock_value = sum([v * n for v, n in zip(data["Purchase"], data["Stock"])])
+# Compute and return the total stock value based on purchase price and stock quantity
+def compute_stock_value(data: dict[str, list[float]]) -> float:
+    return sum([v * n for v, n in zip(data["Purchase"], data["Stock"])])
 
 # Define the Stock page as a Markdown page
 page = Markdown("""# Stock
 
-<|{data}|table|columns=Items;Stock|>
+Stock value: $<|{compute_stock_value(data)}|>
 
-Stock value: $<|{stock_value}|>
+<|Stock details|expandable|expanded={show_details}|
+<|{data}|table|columns=Items;Stock|>
+|>
 
 [Goto Sales](sales)
 """)

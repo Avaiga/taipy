@@ -1452,12 +1452,12 @@ class Gui:
             send_back_only=True,
         )
 
-    def __send_ws_alert(
+    def __send_ws_notification(
         self, type: str, message: str, system_notification: bool, duration: int, notification_id: t.Optional[str] = None
     ) -> None:
         payload = {
             "type": _WsType.ALERT.value,
-            "atype": type,
+            "nType": type,
             "message": message,
             "system": system_notification,
             "duration": duration,
@@ -2407,7 +2407,7 @@ class Gui:
         if not notification_id:
             notification_id = str(uuid.uuid4())
 
-        self.__send_ws_alert(
+        self.__send_ws_notification(
             notification_type,
             message,
             self._get_config("system_notification", False) if system_notification is None else system_notification,
@@ -2421,8 +2421,8 @@ class Gui:
         notification_id: str,
     ):
         if notification_id:
-            self.__send_ws_alert(
-                type="",  # Since you're closing, set type to an empty string or a predefined "close" type
+            self.__send_ws_notification(
+                type="",  # Empty string indicates closing
                 message="",  # No need for a message when closing
                 system_notification=False,  # System notification not needed for closing
                 duration=0,  # No duration since it's an immediate close

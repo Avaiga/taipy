@@ -21,15 +21,15 @@ import { NotificationMessage } from "../../context/taipyReducers";
 import userEvent from "@testing-library/user-event";
 
 const defaultMessage = "message";
-const defaultNotifications: NotificationMessage[] = [{ atype: "success", message: defaultMessage, system: true, duration: 3000 }];
-const getNotificationsWithType = (aType: string) => [{ ...defaultNotifications[0], atype: aType }];
+const defaultNotifications: NotificationMessage[] = [{ nType: "success", message: defaultMessage, system: true, duration: 3000, snackBarId: "nId" }];
+const getNotificationsWithType = (nType: string) => [{ ...defaultNotifications[0], nType }];
 
 class myNotification {
     static requestPermission = jest.fn(() => Promise.resolve("granted"));
     static permission = "granted";
 }
 
-describe("Alert Component", () => {
+describe("Notifications", () => {
     beforeAll(() => {
         globalThis.Notification = myNotification as unknown as jest.Mocked<typeof Notification>;
     });
@@ -45,7 +45,7 @@ describe("Alert Component", () => {
         const elt = getByText(defaultMessage);
         expect(elt.tagName).toBe("DIV");
     });
-    it("displays a success alert", async () => {
+    it("displays a success notification", async () => {
         const { getByText } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={defaultNotifications} />
@@ -54,7 +54,7 @@ describe("Alert Component", () => {
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-success")).toBeInTheDocument();
     });
-    it("displays an error alert", async () => {
+    it("displays an error notification", async () => {
         const { getByText } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={getNotificationsWithType("error")} />
@@ -63,7 +63,7 @@ describe("Alert Component", () => {
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-error")).toBeInTheDocument();
     });
-    it("displays a warning alert", async () => {
+    it("displays a warning notification", async () => {
         const { getByText } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={getNotificationsWithType("warning")} />
@@ -72,7 +72,7 @@ describe("Alert Component", () => {
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-warning")).toBeInTheDocument();
     });
-    it("displays an info alert", async () => {
+    it("displays an info notification", async () => {
         const { getByText } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={getNotificationsWithType("info")} />
@@ -86,12 +86,12 @@ describe("Alert Component", () => {
         link.rel = "icon";
         link.href = "/test-icon.png";
         document.head.appendChild(link);
-        const alerts: NotificationMessage[] = [
-            { atype: "success", message: "This is a system alert", system: true, duration: 3000 },
+        const notifications: NotificationMessage[] = [
+            { nType: "success", message: "This is a system notification", system: true, duration: 3000, snackBarId: "nId" },
         ];
         render(
             <SnackbarProvider>
-                <TaipyNotification notifications={alerts} />
+                <TaipyNotification notifications={notifications} />
             </SnackbarProvider>,
         );
         const linkElement = document.querySelector("link[rel='icon']");
@@ -103,42 +103,44 @@ describe("Alert Component", () => {
         document.head.removeChild(link);
     });
 
-    it("closes alert on close button click", async () => {
-        const alerts = [{ atype: "success", message: "Test Alert", duration: 3000, system: false }];
+    it("closes notification on close button click", async () => {
+        const notifications = [{ nType: "success", message: "Test Notification", duration: 3000, system: false, snackBarId: "nId" }];
         render(
             <SnackbarProvider>
-                <TaipyNotification notifications={alerts} />
+                <TaipyNotification notifications={notifications} />
             </SnackbarProvider>,
         );
         const closeButton = await screen.findByRole("button", { name: /close/i });
         await userEvent.click(closeButton);
         await waitFor(() => {
-            const alertMessage = screen.queryByText("Test Alert");
-            expect(alertMessage).not.toBeInTheDocument();
+            const notificationMessage = screen.queryByText("Test Notification");
+            expect(notificationMessage).not.toBeInTheDocument();
         });
     });
 
-    it("Alert disappears when alert type is empty", async () => {
-        const alerts = [{ atype: "success", message: "Test Alert", duration: 3000, system: false, notificationId: "aNotificationId" }];
+    it("Notification disappears when notification type is empty", async () => {
+        const notifications = [
+            { nType: "success", message: "Test Notification", duration: 3000, system: false, snackBarId: "nId" }];
         const { rerender } = render(
             <SnackbarProvider>
-                <TaipyNotification notifications={alerts} />
+                <TaipyNotification notifications={notifications} />
             </SnackbarProvider>,
         );
         await screen.findByRole("button", { name: /close/i });
-        const newAlerts = [{ atype: "", message: "Test Alert", duration: 3000, system: false, notificationId: "aNotificationId" }];
+        const newNotifications = [
+            { nType: "", message: "Test Notification", duration: 3000, system: false, snackBarId: "nId" }];
         rerender(
             <SnackbarProvider>
-                <TaipyNotification notifications={newAlerts} />
+                <TaipyNotification notifications={newNotifications} />
             </SnackbarProvider>,
         );
         await waitFor(() => {
-            const alertMessage = screen.queryByText("Test Alert");
-            expect(alertMessage).not.toBeInTheDocument();
+            const notificationMessage = screen.queryByText("Test Notification");
+            expect(notificationMessage).not.toBeInTheDocument();
         });
     });
 
-    it("does nothing when alert is undefined", async () => {
+    it("does nothing when notification is undefined", async () => {
         render(
             <SnackbarProvider>
                 <TaipyNotification notifications={[]} />
@@ -152,12 +154,12 @@ describe("Alert Component", () => {
         link.rel = "icon";
         link.href = "/test-icon.png";
         document.head.appendChild(link);
-        const alerts: NotificationMessage[] = [
-            { atype: "success", message: "This is a system alert", system: true, duration: 3000 },
+        const notifications: NotificationMessage[] = [
+            { nType: "success", message: "This is a system notification", system: true, duration: 3000, snackBarId: "nId" },
         ];
         render(
             <SnackbarProvider>
-                <TaipyNotification notifications={alerts} />
+                <TaipyNotification notifications={notifications} />
             </SnackbarProvider>,
         );
         const linkElement = document.querySelector("link[rel='icon']");
@@ -169,12 +171,12 @@ describe("Alert Component", () => {
         const link = document.createElement("link");
         link.rel = "icon";
         document.head.appendChild(link);
-        const alerts: NotificationMessage[] = [
-            { atype: "success", message: "This is a system alert", system: true, duration: 3000 },
+        const notifications: NotificationMessage[] = [
+            { nType: "success", message: "This is a system notification", system: true, duration: 3000, snackBarId: "nId" },
         ];
         render(
             <SnackbarProvider>
-                <TaipyNotification notifications={alerts} />
+                <TaipyNotification notifications={notifications} />
             </SnackbarProvider>,
         );
         const linkElement = document.querySelector("link[rel='icon']");
@@ -187,12 +189,12 @@ describe("Alert Component", () => {
         link.rel = "shortcut icon";
         link.href = "/test-shortcut-icon.png";
         document.head.appendChild(link);
-        const alerts: NotificationMessage[] = [
-            { atype: "success", message: "This is a system alert", system: true, duration: 3000 },
+        const notifications: NotificationMessage[] = [
+            { nType: "success", message: "This is a system notification", system: true, duration: 3000, snackBarId: "nId" },
         ];
         render(
             <SnackbarProvider>
-                <TaipyNotification notifications={alerts} />
+                <TaipyNotification notifications={notifications} />
             </SnackbarProvider>,
         );
         const linkElement = document.querySelector("link[rel='shortcut icon']");

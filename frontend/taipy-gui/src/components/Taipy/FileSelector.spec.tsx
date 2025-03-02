@@ -186,11 +186,11 @@ describe("FileSelector Component", () => {
         // Wait for the upload to complete
         await waitFor(() => expect(mockDispatch).toHaveBeenCalled());
 
-        // Check if the alert action has been dispatched
+        // Check if the notification action has been dispatched
         expect(mockDispatch).toHaveBeenCalledWith(
             expect.objectContaining({
                 type: "SET_NOTIFICATION",
-                atype: "success",
+                nType: "success",
                 duration: 3000,
                 message: "mocked response",
                 system: false,
@@ -222,11 +222,11 @@ describe("FileSelector Component", () => {
         // Wait for the upload to complete
         await waitFor(() => expect(mockDispatch).toHaveBeenCalled());
 
-        // Check if the alert action has been dispatched
+        // Check if the notification action has been dispatched
         expect(mockDispatch).toHaveBeenCalledWith(
             expect.objectContaining({
                 type: "SET_NOTIFICATION",
-                atype: "error",
+                nType: "error",
                 duration: 3000,
                 message: "Upload failed",
                 system: false,

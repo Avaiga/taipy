@@ -68,8 +68,8 @@ def notify(
     message: str = "",
     system_notification: t.Optional[bool] = None,
     duration: t.Optional[int] = None,
-    notification_id: str = "",
-):
+    id: str = "",
+) -> None:
     """Send a notification to the user interface.
 
     Arguments:
@@ -83,10 +83,15 @@ def notify(
             *configuration[system_notification]*.
         duration: The time, in milliseconds, during which the notification is shown.
             If not specified or set to None, this parameter will use the value of
-            *configuration[notification_duration]*.
+            *configuration[notification_duration]*.<br/>
+            If *duration* is 0 and *id* is set to a non-empty string, the notification remains
+            visible until `close_notification()^` is called or the user closes the notification
+            manually.
+        id: An optional identifier for this notification, so the application can close it explicitly
+            using `close_notification()^`.
 
     Note that you can also call this function with *notification_type* set to the first letter
-    or the alert type (i.e. setting *notification_type* to "i" is equivalent to setting it to
+    or the notification type (i.e. setting *notification_type* to "i" is equivalent to setting it to
     "info").
 
     If *system_notification* is set to True, then the browser requests the system
@@ -98,16 +103,24 @@ def notify(
     feature.
     """
     if state and isinstance(state._gui, Gui):
-        return state._gui._notify(notification_type, message, system_notification, duration, notification_id)
+        return state._gui._notify(notification_type, message, system_notification, duration, id)
     else:
         _warn("'notify()' must be called in the context of a callback.")
 
 
-def close_notification(state: State, notification_id: str):
-    """Close a specific notification by ID."""
+def close_notification(state: State, id: str) -> None:
+    """Close a specific notification.
+
+    You can force a lasting notification to close by calling this function with the same
+    notification identifier that the one that was used when calling `notify()^`.
+
+    Arguments:
+        id The identifier of the notification that must be closed.<br/>
+          Nothing happens if no opened notification with this identifier can be found.
+    """
     if state and isinstance(state._gui, Gui):
         # Send the close command with the notification_id
-        state._gui._close_notification(notification_id)
+        state._gui._close_notification(id)
     else:
         _warn("'close_notification()' must be called in the context of a callback.")
 

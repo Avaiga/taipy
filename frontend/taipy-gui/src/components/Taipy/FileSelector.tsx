@@ -128,10 +128,11 @@ const FileSelector = (props: FileSelectorProps) => {
                         notify &&
                             dispatch(
                                 createNotificationAction({
-                                    atype: "success",
+                                    nType: "success",
                                     message: value,
                                     system: false,
                                     duration: 3000,
+                                    snackBarId: "FileSelector action"
                                 })
                             );
                         const fileInput = document.getElementById(inputId) as HTMLInputElement;
@@ -142,10 +143,11 @@ const FileSelector = (props: FileSelectorProps) => {
                         notify &&
                             dispatch(
                                 createNotificationAction({
-                                    atype: "error",
+                                    nType: "error",
                                     message: reason,
                                     system: false,
                                     duration: 3000,
+                                    snackBarId: "FileSelector failure"
                                 })
                             );
                         const fileInput = document.getElementById(inputId) as HTMLInputElement;
