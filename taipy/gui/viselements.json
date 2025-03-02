@@ -1679,7 +1679,7 @@
                         "default_property": true,
                         "type": "dynamic(str)",
                         "default_value": "\"\"",
-                        "doc": "The message displayed in the notification. Can be a dynamic string."
+                        "doc": "The message displayed in the notification."
                     },
                     {
                         "name": "severity",
