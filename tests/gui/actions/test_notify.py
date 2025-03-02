@@ -36,4 +36,4 @@ def test_notify(gui: Gui, helpers):
         notify(gui._Gui__state, "Info", "Message")  # type: ignore[attr-defined]
 
     received_messages = ws_client.get_received()
-    helpers.assert_outward_ws_simple_message(received_messages[0], "AL", {"atype": "Info", "message": "Message"})
+    helpers.assert_outward_ws_simple_message(received_messages[0], "AL", {"nType": "Info", "message": "Message"})
