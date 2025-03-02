@@ -24,7 +24,7 @@ describe("Expandable Component", () => {
     it("renders", async () => {
         const { getByText } = render(<Expandable title="foo">bar</Expandable>);
         const elt = getByText("foo");
-        expect(elt.tagName).toBe("DIV");
+        expect(elt.tagName).toBe("SPAN");
     });
     it("displays the right info for string", async () => {
         const { getByText } = render(

@@ -694,7 +694,7 @@ describe("taipyReducer function", () => {
                 },
             ],
         };
-        const action = { type: Types.DeleteNotification, notificationId: notificationId1 };
+        const action = { type: Types.DeleteNotification, snackBarId: notificationId1 };
         const newState = taipyReducer(initialState, action);
         expect(newState.notifications).toEqual([
             {
@@ -703,6 +703,7 @@ describe("taipyReducer function", () => {
                 system: false,
                 duration: 3000,
                 notificationId: notificationId2,
+                snackBarId: notificationId2
             },
         ]);
     });
@@ -1141,7 +1142,7 @@ describe("initializeWebSocket function", () => {
                 mockSocket,
                 "ID",
                 "TaipyClientId",
-                "mockId",
+                { "id": "mockId" },
                 "mockId",
                 undefined,
                 false,
