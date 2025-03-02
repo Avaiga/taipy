@@ -128,3 +128,12 @@ class _TemplateHandler:
             return locate(val)
         except Exception:
             raise InconsistentEnvVariableError(f"{val} is not a valid class.") from None
+
+    @staticmethod
+    def _to_enum(val: str):
+        enum_class, enum_value = val.rsplit(".", 1)
+        try:
+            enum = locate(enum_class)
+            return enum[enum_value]  # type: ignore[index]
+        except Exception:
+            raise InconsistentEnvVariableError(f"{val} is not a valid enum.") from None
