@@ -52,3 +52,9 @@ def test_md_link(gui: Gui, helpers):
     md_string = "[content](link)"
     expected_list = ["<a", 'href="link"', "content</a>"]
     helpers.test_control_md(gui, md_string, expected_list)
+
+
+def test_html_in_md(gui: Gui, helpers):
+    md_string = "<center> <|Hello|text|> </center>"
+    expected_list = ["<center>", "<div", "Hello", "</div>", "</center>"]
+    helpers.test_control_md(gui, md_string, expected_list)
