@@ -12,8 +12,8 @@ from datetime import datetime
 from typing import Dict, Optional, Set, Union
 
 from taipy.common.config import Config
-from ..common._listattributes import _ListAttributes
 
+from ..common._listattributes import _ListAttributes
 from ..common.scope import Scope
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..data._data_duplicator import _DataDuplicator
