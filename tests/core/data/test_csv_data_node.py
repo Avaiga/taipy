@@ -350,8 +350,8 @@ class TestCSVDataNode:
         reasons = dn._upload(not_exists_csv_path, upload_checker=check_data_column)
         assert bool(reasons) is False
         assert (
-            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.csv can not be read,"
-            f' therefore is not a valid data file for data node "{dn.id}"'
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file 'not_exists.csv' can not be read,"
+            f" therefore is not a valid data file for data node '{dn.id}'"
         )
 
         not_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_csv").strpath
@@ -361,7 +361,7 @@ class TestCSVDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.not_csv has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.not_csv' has invalid data for data node '{dn.id}'"
         )
 
         wrong_format_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.csv").strpath
@@ -371,7 +371,7 @@ class TestCSVDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.csv has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.csv' has invalid data for data node '{dn.id}'"
         )
 
         assert_frame_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails
@@ -400,8 +400,8 @@ class TestCSVDataNode:
         reasons = dn._upload(not_exists_csv_path, upload_checker=check_data_is_positive)
         assert bool(reasons) is False
         assert (
-            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.csv can not be read"
-            f', therefore is not a valid data file for data node "{dn.id}"'
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file 'not_exists.csv' can not be read"
+            f", therefore is not a valid data file for data node '{dn.id}'"
         )
 
         not_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_csv").strpath
@@ -411,7 +411,7 @@ class TestCSVDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.not_csv has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.not_csv' has invalid data for data node '{dn.id}'"
         )
 
         wrong_format_csv_path = tmpdir_factory.mktemp("data").join("wrong_format_df.csv").strpath
@@ -421,7 +421,7 @@ class TestCSVDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.csv has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.csv' has invalid data for data node '{dn.id}'"
         )
 
         np.array_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails

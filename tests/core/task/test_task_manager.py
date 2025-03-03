@@ -311,7 +311,7 @@ def test_is_submittable():
 
     rc = _TaskManager._is_submittable("some_task")
     assert not rc
-    assert "Entity some_task does not exist in the repository" in rc.reasons
+    assert "Entity 'some_task' does not exist in the repository" in rc.reasons
 
     assert len(_TaskManager._get_all()) == 1
     assert _TaskManager._is_submittable(task)
@@ -485,59 +485,14 @@ def test_get_scenarios_by_config_id_in_multiple_versions_environment():
 def _create_task_from_config(task_config, *args, **kwargs):
     return _TaskManager._bulk_get_or_create([task_config], *args, **kwargs)[0]
 
-
-def test_duplicate_task_wit_different_owner_id():
-    dn_input_config_1 = Config.configure_pickle_data_node("my_input_1", scope=Scope.SCENARIO, default_data="testing")
-    dn_output_config_1 = Config.configure_pickle_data_node("my_output_1", scope=Scope.SCENARIO)
-    task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
-    task = _create_task_from_config(task_config_1)
-
-    task_id = task.id
-
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-
-    new_task = _TaskManager._duplicate(task, scenario_id="scenario_id")
-
-    assert task.id != new_task.id
-    assert len(_TaskManager._get_all()) == 2
-    assert len(_DataManager._get_all()) == 4
-
-    assert all(task_id in dn.parent_ids for dn in task.data_nodes.values())
-    assert all(dn.owner_id is None for dn in task.data_nodes.values())
-
-    assert all(new_task.id in dn.parent_ids for dn in new_task.data_nodes.values())
-    assert all(dn.owner_id == "scenario_id" for dn in new_task.data_nodes.values())
-
-
-def test_duplicate_task_wit_same_owner_id():
-    dn_input_config_1 = Config.configure_pickle_data_node("my_input_1", scope=Scope.SCENARIO, default_data="testing")
-    dn_output_config_1 = Config.configure_pickle_data_node("my_output_1", scope=Scope.SCENARIO)
-    task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
-    task = _create_task_from_config(task_config_1)
-
-    task_id = task.id
-
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-
-    new_task = _TaskManager._duplicate(task)
-
-    assert task.id == new_task.id
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-
-    assert all(task_id in dn.parent_ids for dn in task.data_nodes.values())
-    assert all(dn.owner_id is None for dn in task.data_nodes.values())
-
-    assert all(new_task.id in dn.parent_ids for dn in new_task.data_nodes.values())
-    assert all(dn.owner_id is None for dn in new_task.data_nodes.values())
-
-
-def test_duplicate_task():
+def test_can_duplicate():
     dn_config = Config.configure_pickle_data_node("dn", scope=Scope.SCENARIO)
     task_config = Config.configure_task("task_1", print, [dn_config])
     task = _TaskManager._bulk_get_or_create([task_config])[0]
+
+    reasons = _TaskManager._can_duplicate(task.id)
+    assert bool(reasons)
+    assert reasons._reasons == {}
 
     reasons = _TaskManager._can_duplicate(task)
     assert bool(reasons)
@@ -545,7 +500,5 @@ def test_duplicate_task():
 
     reasons = _TaskManager._can_duplicate("1")
     assert not bool(reasons)
-    assert reasons._reasons["1"] == {EntityDoesNotExist(1)}
-    assert str(list(reasons._reasons["1"])[0]) == "Entity 1 does not exist in the repository"
-    with pytest.raises(AttributeError):
-        _TaskManager._duplicate("1")
+    assert reasons._reasons["1"] == {EntityDoesNotExist("1")}
+    assert str(list(reasons._reasons["1"])[0]) == "Entity '1' does not exist in the repository"

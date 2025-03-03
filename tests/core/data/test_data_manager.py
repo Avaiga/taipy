@@ -65,13 +65,13 @@ class TestDataManager:
         assert reasons._reasons[dn_config.id] == {NotGlobalScope(dn_config.id)}
         assert (
             str(list(reasons._reasons[dn_config.id])[0])
-            == f'Data node config "{dn_config.id}" does not have GLOBAL scope'
+            == f"Data node config '{dn_config.id}' does not have GLOBAL scope"
         )
 
         reasons = _DataManager._can_create(1)
         assert bool(reasons) is False
         assert reasons._reasons["1"] == {WrongConfigType("1", DataNodeConfig.__name__)}
-        assert str(list(reasons._reasons["1"])[0]) == 'Object "1" must be a valid DataNodeConfig'
+        assert str(list(reasons._reasons["1"])[0]) == "Object '1' must be a valid DataNodeConfig"
 
     def test_create_data_node_with_name_provided(self):
         dn_config = Config.configure_data_node(id="dn", foo="bar", name="acb")
@@ -732,47 +732,19 @@ class TestDataManager:
         assert len(_DataManager._get_by_config_id(dn_config_1.id)) == 3
         assert len(_DataManager._get_by_config_id(dn_config_2.id)) == 2
 
-    def test_duplicate_data_node_with_differnt_owner_id(self):
-        csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        dn_config = Config.configure_csv_data_node("dn_csv_in_1", default_path=csv_path_inp)
+    def test_can_duplicate(self):
+        dn_config = Config.configure_data_node("dn_1")
         dn = _DataManager._create_and_set(dn_config, None, None)
 
-        assert len(_DataManager._get_all()) == 1
+        reasons = _DataManager._can_duplicate(dn.id)
+        assert bool(reasons)
+        assert reasons._reasons == {}
 
-        new_dn = _DataManager._duplicate(dn, scenario_id="new_scenario_owner_id")
-
-        assert dn.id != new_dn.id
-        assert len(_DataManager._get_all()) == 2
-        assert dn.properties["path"] != new_dn.properties["path"]
-        assert os.path.exists(str(new_dn.properties["path"]))
-        os.remove(str(new_dn.properties["path"]))
-
-    def test_duplicate_data_node_with_same_owner_id(self):
-        csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        dn_config = Config.configure_csv_data_node("dn_csv_in_1", default_path=csv_path_inp)
-        dn = _DataManager._create_and_set(dn_config, None, None)
-
-        old_dn_id = dn.id
-
-        assert len(_DataManager._get_all()) == 1
-
-        new_dn = _DataManager._duplicate(dn)
-        old_dn = _DataManager._get(old_dn_id)
-
-        assert old_dn.id == new_dn.id
-        assert len(_DataManager._get_all()) == 1
-
-    def test_duplicate_data_node(self):
-        dn_config = Config.configure_pickle_data_node("dn", scope=Scope.SCENARIO)
-        data = _DataManager._create_and_set(dn_config, None, None)
-
-        reasons = _DataManager._can_duplicate(data)
+        reasons = _DataManager._can_duplicate(dn)
         assert bool(reasons)
         assert reasons._reasons == {}
 
         reasons = _DataManager._can_duplicate("1")
         assert not bool(reasons)
-        assert reasons._reasons["1"] == {EntityDoesNotExist(1)}
-        assert str(list(reasons._reasons["1"])[0]) == "Entity 1 does not exist in the repository"
-        with pytest.raises(AttributeError):
-            _DataManager._duplicate("1")
+        assert reasons._reasons["1"] == {EntityDoesNotExist("1")}
+        assert str(list(reasons._reasons["1"])[0]) == "Entity '1' does not exist in the repository"

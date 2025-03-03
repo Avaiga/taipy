@@ -8,46 +8,37 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
 from datetime import datetime
 from typing import Dict, Optional, Set, Union
 
 from taipy.common.config import Config
-
+from .scenario import Scenario
 from ..common.scope import Scope
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
 from ..notification import EventOperation, Notifier, _make_event
+from ..sequence.sequence import Sequence
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
-from .scenario import Scenario
 
 
 class _ScenarioDuplicator:
     """A service to duplicate a scenario and related entities."""
 
-    scenario: Scenario
-    """The scenario to duplicate."""
-    data_to_duplicate: Set[str]
-    """The set of data node configuration to duplicate data."""
-    new_scenario: Scenario
-    """The newly created scenario."""
-    new_cycle_id: Optional[str] = None
-    """The id of the new cycle."""
-    new_tasks: Dict[str, Task] = {}
-    """The newly created tasks indexed by config id."""
-    new_data_nodes: Dict[str, DataNode] = {}
-    """The newly created data nodes indexed by config id."""
-
     def __init__(self, scenario: Scenario, data_to_duplicate: Union[bool, Set[str]]=True):
-        self.scenario = scenario
+        self.scenario: Scenario = scenario
         if data_to_duplicate is True:
-            self.data_to_duplicate = set(self.scenario.data_nodes.keys())
+            self.data_to_duplicate: Set[str] = set(self.scenario.data_nodes.keys())
         elif isinstance(data_to_duplicate, set):
-            self.data_to_duplicate = data_to_duplicate
+            self.data_to_duplicate: Set[str] = data_to_duplicate
         else:
-            self.data_to_duplicate = set()
+            self.data_to_duplicate: Set[str] = set()
+
+        self.new_scenario: Optional[Scenario] = None
+        self.new_cycle_id: str = None
+        self.new_tasks: Dict[str, Task] = {}
+        self.new_data_nodes: Dict[str, DataNode] = {}
 
         from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
         self.__scenario_manager = _ScenarioManagerFactory._build_manager()
@@ -73,10 +64,11 @@ class _ScenarioDuplicator:
             The newly created scenario.
         """
         self.__init_new_scenario(new_creation_date or datetime.now(), new_name)
-        for task in self.scenario.tasks.values():
-            self.new_scenario._tasks.add(self._duplicate_task(task).id)
         for dn in self.scenario.additional_data_nodes.values():
             self.new_scenario._additional_data_nodes.add(self._duplicate_datanode(dn).id)
+        for task in self.scenario.tasks.values():
+            self.new_scenario._tasks.add(self._duplicate_task(task).id)
+
         self._duplicate_sequences()
 
         self.__scenario_manager._set(self.new_scenario)
@@ -88,11 +80,15 @@ class _ScenarioDuplicator:
             # Task and children data nodes already exist. No need to duplicate.
             self.new_tasks[task.config_id] = task
             task._parent_ids.update([self.new_scenario.id])
+            self.__task_manager._repository._save(task) # Through the repository so we don't set data nodes
+            Notifier.publish(_make_event(task, EventOperation.UPDATE, "parent_ids", task._parent_ids))
             return task
         if task.scope == Scope.CYCLE and self.scenario.cycle.id == self.new_cycle_id:
             # Task and children data nodes already exist. No need to duplicate.
             self.new_tasks[task.config_id] = task
             task._parent_ids.update([self.new_scenario.id])
+            self.__task_manager._repository._save(task) # Through the repository so we don't set data nodes
+            Notifier.publish(_make_event(task, EventOperation.UPDATE, "parent_ids", task._parent_ids))
             return task
         if task.scope == Scope.CYCLE:
             existing_tasks = self.__task_manager._repository._get_by_configs_and_owner_ids(  # type: ignore
@@ -100,64 +96,83 @@ class _ScenarioDuplicator:
                 self.__task_manager._build_filters_with_version(None))
             if existing_tasks:
                 # Task and children data nodes already exist. No need to duplicate.
-                self.new_tasks[task.config_id] = task
-                task._parent_ids.update([self.new_scenario.id])
-                return task
+                existing_task = existing_tasks[(task.config_id,self.new_cycle_id)]
+                self.new_tasks[task.config_id] = existing_task
+                existing_task._parent_ids.update([self.new_scenario.id])
+                self.__task_manager._repository._save(existing_task)  # Through the repository so we don't set data nodes
+                Notifier.publish(_make_event(existing_task, EventOperation.UPDATE, "parent_ids", existing_task._parent_ids))
+                return existing_task
 
         new_task = self.__init_new_task(task)
-        for input in task.data_nodes.values():
+        for input in task.input.values():
             new_task._input[input.config_id] = self._duplicate_datanode(input, new_task)
         for output in task.output.values():
             new_task._output[output.config_id] = self._duplicate_datanode(output, new_task)
-        self.new_tasks[task.config_id] = task
+        self.new_tasks[task.config_id] = new_task
 
         self.__task_manager._set(new_task)
         Notifier.publish(_make_event(new_task, EventOperation.CREATION))
         return new_task
 
     def _duplicate_datanode(self, dn: DataNode, task: Optional[Task]=None) -> DataNode:
+        if dn.config_id in self.new_data_nodes:
+            # Data node already created from another task. No need to duplicate.
+            new_dn = self.new_data_nodes[dn.config_id]
+            new_dn._parent_ids.update([task.id]) if task else new_dn._parent_ids.update([self.new_scenario.id])
+            self.__data_manager._set(new_dn)
+            Notifier.publish(_make_event(new_dn, EventOperation.UPDATE, "parent_ids", new_dn._parent_ids))
+            return new_dn
         if dn.scope == Scope.GLOBAL:
             # Data node already exists. No need to duplicate.
             dn._parent_ids.update([task.id]) if task else dn._parent_ids.update([self.new_scenario.id])
+            self.__data_manager._set(dn)
+            Notifier.publish(_make_event(dn, EventOperation.UPDATE, "parent_ids", dn._parent_ids))
             return dn
         if dn.scope == Scope.CYCLE and self.scenario.cycle.id == self.new_cycle_id:
             # Data node already exists. No need to duplicate.
             dn._parent_ids.update([task.id]) if task else dn._parent_ids.update([self.new_scenario.id])
+            self.__data_manager._set(dn)
+            Notifier.publish(_make_event(dn, EventOperation.UPDATE, "parent_ids", dn._parent_ids))
             return dn
         if dn.scope == Scope.CYCLE:
             existing_dns = self.__data_manager._repository._get_by_configs_and_owner_ids(  # type: ignore
                 [(dn.config_id, self.new_cycle_id)],
                 self.__data_manager._build_filters_with_version(None))
             if existing_dns.get((dn.config_id, self.new_cycle_id)):
+                existing_dn = existing_dns[(dn.config_id, self.new_cycle_id)]
                 # A cycle data node with same config and same cycle owner already exist. No need to duplicate it.
-                dn._parent_ids.update([task.id]) if task else dn._parent_ids.update([self.new_scenario.id])
-                return dn
-        if dn.scope == Scope.SCENARIO and dn.config_id in self.new_data_nodes:
-            # Data node already created from another task. No need to duplicate.
-            dn._parent_ids.update([task.id]) if task else dn._parent_ids.update([self.new_scenario.id])
-            return dn
+                existing_dn._parent_ids.update([task.id]) if task else existing_dn._parent_ids.update([self.new_scenario.id])
+                self.__data_manager._set(existing_dn)
+                Notifier.publish(_make_event(existing_dn, EventOperation.UPDATE, "parent_ids", existing_dn._parent_ids))
+                return existing_dn
 
         new_dn = self.__init_new_datanode(dn, task)
         for new_dn._config_id in self.data_to_duplicate:
             new_dn._duplicate_data()
         self.new_data_nodes[dn.config_id] = new_dn
-
         self.__data_manager._set(new_dn)
         Notifier.publish(_make_event(new_dn, EventOperation.CREATION))
         return new_dn
 
     def _duplicate_sequences(self):
-        for seq_name, seq in self.scenario.sequences:
-            new_scenario_tasks = []
-            for t in seq.tasks:
-                new_scenario_tasks.append(self.new_tasks[t.config_id])
-            self.new_scenario._set_sequence(seq_name, new_scenario_tasks, properties=seq._properties)
+        new_sequences = {}
+        for seq_name, seq_data in self.scenario._sequences.items():
+            new_sequence_id = Sequence._new_id(seq_name, self.new_scenario.id)
+            new_sequence = {Scenario._SEQUENCE_PROPERTIES_KEY: seq_data[Scenario._SEQUENCE_PROPERTIES_KEY],
+                            Scenario._SEQUENCE_TASKS_KEY: []}  # We do not want to duplicate the subscribers
+            for task in seq_data[Scenario._SEQUENCE_TASKS_KEY]:
+                new_task = self.new_tasks[task.config_id]
+                new_task._parent_ids.update([new_sequence_id])
+                self.__task_manager._set(new_task)
+                new_sequence[Scenario._SEQUENCE_TASKS_KEY].append(self.new_tasks[task.config_id])
+            new_sequences[seq_name] = new_sequence
+        self.new_scenario._sequences = new_sequences
 
     def __init_new_scenario(self, new_creation_date: Optional[datetime], new_name: Optional[str]) -> None:
         self.new_scenario = self.__scenario_manager._get(self.scenario)
         self.new_scenario.id = self.new_scenario._new_id(self.scenario.config_id)
         self.new_scenario._creation_date = new_creation_date
-        if frequency:= Config.scenarios[self.scenario.id].frequency:
+        if frequency:= Config.scenarios[self.scenario.config_id].frequency:
             cycle = self.__cycle_manager._get_or_create(frequency, new_creation_date)
             self.new_scenario._cycle = cycle
             self.new_scenario._primary_scenario = len(self.__scenario_manager._get_all_by_cycle(cycle)) == 0
@@ -178,7 +193,7 @@ class _ScenarioDuplicator:
         new_task = self.__task_manager._get(task)
         new_task.id = new_task._new_id(task.config_id)
         new_task._owner_id = self.__task_manager._get_owner_id(task.scope, self.new_cycle_id, self.new_scenario.id)
-        new_task._parent_ids = set(self.new_scenario.id)
+        new_task._parent_ids = {self.new_scenario.id}
         if hasattr(new_task._properties, "_entity_owner"):
             new_task._properties._entity_owner = new_task
         new_task._input = {}  # To be potentially updated later
@@ -187,9 +202,9 @@ class _ScenarioDuplicator:
 
     def __init_new_datanode(self, dn: DataNode, task: Optional[Task]=None) -> DataNode:
         new_dn = self.__data_manager._get(dn)
-        new_dn.id = new_dn._new_id(dn._config_id)
+        new_dn.id = DataNode._new_id(dn._config_id)
         new_dn._owner_id = self.new_scenario.id if dn.scope == Scope.SCENARIO else self.new_cycle_id
-        new_dn._parent_ids = set(task.id) if task else set(self.new_scenario.id)
+        new_dn._parent_ids = {task.id} if task else {self.new_scenario.id}
         if hasattr(new_dn._properties, "_entity_owner"):
             new_dn._properties._entity_owner = new_dn
         new_dn._last_edit_date = None  # To be potentially updated later

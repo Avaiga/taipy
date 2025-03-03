@@ -208,7 +208,7 @@ def test_is_submittable():
 
     rc = _SequenceManager._is_submittable("some_sequence")
     assert not rc
-    assert "Entity some_sequence does not exist in the repository." in rc.reasons
+    assert "Entity 'some_sequence' does not exist in the repository." in rc.reasons
 
     scenario.add_sequences({"sequence": [task]})
     sequence = scenario.sequences["sequence"]

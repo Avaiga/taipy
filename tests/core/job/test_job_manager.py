@@ -414,7 +414,7 @@ def test_is_deletable():
 
     rc = _JobManager._is_deletable("some_job")
     assert not rc
-    assert "Entity some_job does not exist in the repository." in rc.reasons
+    assert "Entity 'some_job' does not exist in the repository." in rc.reasons
 
     assert job.is_completed()
     assert _JobManager._is_deletable(job)

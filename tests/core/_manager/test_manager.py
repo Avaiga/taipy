@@ -168,7 +168,7 @@ class TestManager:
 
         rc = MockManager._is_editable("some_entity")
         assert not rc
-        assert "Entity some_entity does not exist in the repository." in rc.reasons
+        assert "Entity 'some_entity' does not exist in the repository." in rc.reasons
 
     def test_is_readable(self):
         m = MockEntity("uuid", "Foo")
@@ -177,4 +177,4 @@ class TestManager:
 
         rc = MockManager._is_editable("some_entity")
         assert not rc
-        assert "Entity some_entity does not exist in the repository." in rc.reasons
+        assert "Entity 'some_entity' does not exist in the repository." in rc.reasons
