@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import Dict, Optional, Set, Union
 
 from taipy.common.config import Config
+from ..common._listattributes import _ListAttributes
 
 from ..common.scope import Scope
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
@@ -186,7 +187,7 @@ class _ScenarioDuplicator:
             self.new_scenario._properties._entity_owner = self.new_scenario
         if new_name:
             self.new_scenario._properties["name"] = new_name
-        self.new_scenario._subscribers = []
+        self.new_scenario._subscribers = _ListAttributes(self.new_scenario, [])
 
         self.new_scenario._tasks = set()  # To be potentially updated later
         self.new_scenario._sequences = {}  # To be potentially updated later
