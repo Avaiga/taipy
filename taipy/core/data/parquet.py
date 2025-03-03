@@ -248,6 +248,3 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     def _write(self, data: Any):
         self._write_with_kwargs(data)
-
-    def _duplicate_data(self):
-        return self._duplicate_file(self.id)

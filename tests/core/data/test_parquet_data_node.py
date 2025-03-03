@@ -333,7 +333,7 @@ class TestParquetDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f"The uploaded file wrong_format_df.not_parquet has invalid data for data node '{dn.id}'"
+            == f"The uploaded file 'wrong_format_df.not_parquet' has invalid data for data node '{dn.id}'"
         )
 
         wrong_format_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.parquet").strpath
@@ -345,7 +345,7 @@ class TestParquetDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f"The uploaded file wrong_format_df.parquet has invalid data for data node '{dn.id}'"
+            == f"The uploaded file 'wrong_format_df.parquet' has invalid data for data node '{dn.id}'"
         )
 
         assert_frame_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails
@@ -404,29 +404,3 @@ class TestParquetDataNode:
 
         # The upload should succeed when check_data_is_positive() return True
         assert dn._upload(new_parquet_path, upload_checker=check_data_is_positive)
-
-    def test_duplicate_data_file(self):
-        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/parquet_example")
-        dn = ParquetDataNode("foo", Scope.SCENARIO, properties={"path": path})
-        _DataManager._set(dn)
-
-        read_data = dn.read()
-        assert read_data is not None
-
-        old_path = dn.path
-        new_file_path = str(dn._duplicate_data())
-        assert filecmp.dircmp(path, new_file_path)
-
-        old_dn_id = dn.id
-        old_dn = _DataManager._get(old_dn_id)
-        assert old_dn.path == old_path
-
-        dn.id = dn._new_id("foo")
-        dn.path = new_file_path
-        new_file_path_2 = str(dn._duplicate_data())
-        assert len(new_file_path_2.split("TAIPY_DUPLICATED")) == 2
-        shutil.rmtree(new_file_path)
-        shutil.rmtree(new_file_path_2)
-
-        old_dn = _DataManager._get(old_dn_id)
-        assert old_dn.path == old_path

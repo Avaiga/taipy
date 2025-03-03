@@ -338,6 +338,3 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             self._write_excel_with_single_sheet(
                 data.to_excel, self._path, index=False, header=properties[self._HAS_HEADER_PROPERTY] or None
             )
-
-    def _duplicate_data(self):
-        return self._duplicate_file(self.id)

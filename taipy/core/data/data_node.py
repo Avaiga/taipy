@@ -685,9 +685,6 @@ class DataNode(_Entity, _Labeled):
 
         return last_modified_datetime
 
-    def _duplicate_data(self):
-        raise NotImplementedError
-
     @staticmethod
     def _class_map():
         def all_subclasses(cls):

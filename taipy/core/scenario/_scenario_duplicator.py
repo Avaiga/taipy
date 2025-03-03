@@ -15,6 +15,7 @@ from taipy.common.config import Config
 from .scenario import Scenario
 from ..common.scope import Scope
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
+from ..data._data_duplicator import _DataDuplicator
 from ..data._data_manager_factory import _DataManagerFactory
 from ..data.data_node import DataNode
 from ..notification import EventOperation, Notifier, _make_event
@@ -147,8 +148,11 @@ class _ScenarioDuplicator:
                 return existing_dn
 
         new_dn = self.__init_new_datanode(dn, task)
-        for new_dn._config_id in self.data_to_duplicate:
-            new_dn._duplicate_data()
+        if new_dn._config_id in self.data_to_duplicate:
+            duplicator = _DataDuplicator(dn)
+            if duplicator.can_duplicate():
+                duplicator.duplicate_data(new_dn)
+
         self.new_data_nodes[dn.config_id] = new_dn
         self.__data_manager._set(new_dn)
         Notifier.publish(_make_event(new_dn, EventOperation.CREATION))

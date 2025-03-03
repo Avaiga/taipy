@@ -493,29 +493,3 @@ class TestJSONDataNode:
 
         # The upload should succeed when check_data_keys() return True
         assert dn._upload(json_file, upload_checker=check_data_keys)
-
-    def test_duplicate_data_file(self):
-        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_dict.json")
-        dn = JSONDataNode("foo", Scope.SCENARIO, properties={"path": path})
-        _DataManager._set(dn)
-
-        read_data = dn.read()
-        assert read_data is not None
-        old_path = dn.path
-
-        new_file_path = str(dn._duplicate_data())
-        assert filecmp.cmp(path, new_file_path)
-
-        old_dn_id = dn.id
-        old_dn = _DataManager._get(old_dn_id)
-        assert old_dn.path == old_path
-
-        dn.id = dn._new_id("foo")
-        dn.path = new_file_path
-        new_file_path_2 = str(dn._duplicate_data())
-        assert len(new_file_path_2.split("TAIPY_DUPLICATED")) == 2
-        os.unlink(new_file_path)
-        os.unlink(new_file_path_2)
-
-        old_dn = _DataManager._get(old_dn_id)
-        assert old_dn.path == old_path

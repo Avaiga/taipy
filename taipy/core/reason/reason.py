@@ -56,6 +56,18 @@ class _DataNodeReasonMixin:
         return _DataManagerFactory._build_manager()._get(self.datanode_id)
 
 
+class DataIsNotDuplicable(Reason, _DataNodeReasonMixin):
+    """
+    The data node can be duplicated but not its data
+
+    Attributes:
+        datanode_id (str): The identifier of the `DataNode^`.
+    """
+
+    def __init__(self, datanode_id: str):
+        Reason.__init__(self, f"Data of data node '{datanode_id}' is not duplicable")
+        _DataNodeReasonMixin.__init__(self, datanode_id)
+
 class DataNodeEditInProgress(Reason, _DataNodeReasonMixin):
     """
     A `DataNode^` is being edited, which prevents specific actions from being performed.

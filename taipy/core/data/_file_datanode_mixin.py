@@ -42,7 +42,7 @@ class _FileDataNodeMixin:
     _PATH_KEY = "path"
     _DEFAULT_PATH_KEY = "default_path"
     _IS_GENERATED_KEY = "is_generated"
-    __TAIPY_DUPLICATED_PREFIX = "TAIPY_DUPLICATED"
+    __TAIPY_DUPLICATE = "DUPLICATE_OF"
 
     __logger = _TaipyLogger._get_logger()
 
@@ -221,16 +221,14 @@ class _FileDataNodeMixin:
             shutil.move(old_path, new_path)
         return new_path
 
-    def _duplicate_file(self, id: str) -> Optional[str]:
-        if os.path.exists(self.path):
-            folder_path, base_name = os.path.split(self.path)
-            if base_name.startswith(self.__TAIPY_DUPLICATED_PREFIX):
-                base_name = "".join(base_name.split("_")[5:])
-            new_base_path = os.path.join(folder_path, f"{self.__TAIPY_DUPLICATED_PREFIX}_{id}_{base_name}")
-            if os.path.isdir(self.path):
-                shutil.copytree(self.path, new_base_path)
+    def _duplicate_file(self, dest: DataNode):
+        if os.path.exists(self._path):
+            folder_path, base_name = os.path.split(self._path)
+            new_path = os.path.join(folder_path, f"{dest.id}_{self.__TAIPY_DUPLICATE}_{base_name}")
+            if os.path.isdir(self._path):
+                shutil.copytree(self._path, new_path)
             else:
-                shutil.copy(self.path, new_base_path)
-            self._properties[self._PATH_KEY] = new_base_path  # type: ignore[attr-defined]
-            return new_base_path
-        return ""
+                shutil.copy(self._path, new_path)
+            normalize_path = _normalize_path(new_path)
+            dest._path = normalize_path
+            dest._properties[self._PATH_KEY] = normalize_path

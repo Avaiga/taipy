@@ -14,6 +14,7 @@ from typing import Dict, Iterable, List, Optional, Set, Union
 
 from taipy.common.config import Config
 from taipy.common.config._config import _Config
+from ._data_duplicator import _DataDuplicator
 
 from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
@@ -24,6 +25,7 @@ from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..reason import EntityDoesNotExist, NotGlobalScope, ReasonCollection, WrongConfigType
+from ..reason.reason import DataIsNotDuplicable
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
 from ._file_datanode_mixin import _FileDataNodeMixin
@@ -186,4 +188,9 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         reason_collector = ReasonCollection()
         if not cls._repository._exists(dn_id):
             reason_collector._add_reason(dn_id, EntityDoesNotExist(dn_id))
+            return reason_collector
+        if not isinstance(dn, DataNode):
+            dn = cls._get(dn)
+        if not _DataDuplicator(dn).can_duplicate():
+            reason_collector._add_reason(dn_id, DataIsNotDuplicable(dn_id))
         return reason_collector
