@@ -1060,13 +1060,13 @@ def get_entities_by_config_id(
     Returns:
         The list of all entities by the config id.
     """
-    if entities := _ScenarioManagerFactory._build_manager()._get_by_config_id(config_id):
-        return entities
-    if entities := _TaskManagerFactory._build_manager()._get_by_config_id(config_id):
-        return entities
-    if entities := _DataManagerFactory._build_manager()._get_by_config_id(config_id):
-        return entities
-    return entities
+    if scenarios := _ScenarioManagerFactory._build_manager()._get_by_config_id(config_id):
+        return scenarios
+    if tasks := _TaskManagerFactory._build_manager()._get_by_config_id(config_id):
+        return tasks
+    if data_nodes := _DataManagerFactory._build_manager()._get_by_config_id(config_id):
+        return data_nodes
+    return scenarios
 
 
 def can_duplicate(entity: Union[str, Scenario]) -> ReasonCollection:
