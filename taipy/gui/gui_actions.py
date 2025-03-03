@@ -84,7 +84,7 @@ def notify(
         duration: The time, in milliseconds, during which the notification is shown.
             If not specified or set to None, this parameter will use the value of
             *configuration[notification_duration]*.<br/>
-            If *duration* is 0, the notification remains visible for ever. If *id* is set to 
+            If *duration* is 0, the notification remains visible for ever. If *id* is set to
             until `close_notification()^` is called or the user closes the notification
             manually.
         id: An optional identifier for this notification, so the application can close it explicitly
