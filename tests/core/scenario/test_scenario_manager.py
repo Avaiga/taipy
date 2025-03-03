@@ -42,7 +42,7 @@ from taipy.core.exceptions.exceptions import (
     UnauthorizedTagError,
 )
 from taipy.core.job._job_manager import _JobManager
-from taipy.core.reason import EntityDoesNotExist, WrongConfigType, ReasonCollection
+from taipy.core.reason import EntityDoesNotExist, ReasonCollection, WrongConfigType
 from taipy.core.scenario._scenario_duplicator import _ScenarioDuplicator
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory

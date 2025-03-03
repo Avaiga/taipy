@@ -14,7 +14,6 @@ from typing import Dict, Iterable, List, Optional, Set, Union
 
 from taipy.common.config import Config
 from taipy.common.config._config import _Config
-from ._data_duplicator import _DataDuplicator
 
 from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
@@ -28,6 +27,7 @@ from ..reason import EntityDoesNotExist, NotGlobalScope, ReasonCollection, Wrong
 from ..reason.reason import DataIsNotDuplicable
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
+from ._data_duplicator import _DataDuplicator
 from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId

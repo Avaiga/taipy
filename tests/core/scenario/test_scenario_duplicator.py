@@ -11,7 +11,7 @@
 
 from datetime import datetime, timedelta
 
-from taipy import Config, Scope, Sequence, Frequency
+from taipy import Config, Frequency, Scope, Sequence
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.job._job_manager import _JobManager
@@ -102,7 +102,7 @@ def test_duplicate_scenario_scoped_dns_no_cycle_one_sequence():
     assert new_task._parent_ids == {new_scenario.id, Sequence._new_id("sequence_1", new_scenario.id)}
 
     assert task._function == new_task._function
-    assert task._skippable == new_task._skippable == True
+    assert task._skippable == new_task._skippable is True
     assert task._properties == new_task._properties == {"k": "v"}
 
     # Check data node attributes
@@ -204,7 +204,7 @@ def test_duplicate_same_cycle():
     assert task_1._owner_id == new_task_1._owner_id == scenario.cycle.id
     assert task_1._parent_ids == new_task_1._parent_ids == {scenario.id, new_scenario.id}
     assert task_1._function == new_task_1._function
-    assert task_1._skippable == new_task_1._skippable == False
+    assert task_1._skippable == new_task_1._skippable is False
     assert task_1._properties == new_task_1._properties == {}
 
     task_2 = scenario.tasks["task_2"]
@@ -216,7 +216,7 @@ def test_duplicate_same_cycle():
     assert task_2._parent_ids == {scenario.id}
     assert new_task_2._parent_ids == {new_scenario.id}
     assert task_2._function == new_task_2._function
-    assert task_2._skippable == new_task_2._skippable == False
+    assert task_2._skippable == new_task_2._skippable is False
     assert task_2._properties == new_task_2._properties == {}
 
     task_3 = scenario.tasks["task_3"]
@@ -228,7 +228,7 @@ def test_duplicate_same_cycle():
     assert task_3._parent_ids == {scenario.id}
     assert new_task_3._parent_ids == {new_scenario.id}
     assert task_3._function == new_task_3._function
-    assert task_3._skippable == new_task_3._skippable == False
+    assert task_3._skippable == new_task_3._skippable is False
     assert task_3._properties == new_task_3._properties == {}
 
     # Check data node attributes
@@ -339,7 +339,7 @@ def test_duplicate_to_new_cycle():
     assert task_1._parent_ids == {scenario.id}
     assert new_task_1._parent_ids == {new_scenario.id}
     assert task_1._function == new_task_1._function
-    assert task_1._skippable == new_task_1._skippable == False
+    assert task_1._skippable == new_task_1._skippable is False
     assert task_1._properties == new_task_1._properties == {}
 
     task_2 = scenario.tasks["task_2"]
@@ -351,7 +351,7 @@ def test_duplicate_to_new_cycle():
     assert task_2._parent_ids == {scenario.id}
     assert new_task_2._parent_ids == {new_scenario.id}
     assert task_2._function == new_task_2._function
-    assert task_2._skippable == new_task_2._skippable == False
+    assert task_2._skippable == new_task_2._skippable is False
     assert task_2._properties == new_task_2._properties == {}
 
     task_3 = scenario.tasks["task_3"]
@@ -363,7 +363,7 @@ def test_duplicate_to_new_cycle():
     assert task_3._parent_ids == {scenario.id}
     assert new_task_3._parent_ids == {new_scenario.id}
     assert task_3._function == new_task_3._function
-    assert task_3._skippable == new_task_3._skippable == False
+    assert task_3._skippable == new_task_3._skippable is False
     assert task_3._properties == new_task_3._properties == {}
 
     # Check data node attributes
@@ -478,7 +478,7 @@ def test_duplicate_to_new_cycle_with_existing_scenario():
     assert task_1._parent_ids == {scenario.id}
     assert existing_task_1._parent_ids == new_task_1._parent_ids == {existing_scenario.id, new_scenario.id}
     assert task_1._function == existing_task_1._function == new_task_1._function
-    assert task_1._skippable == existing_task_1._skippable == new_task_1._skippable == False
+    assert task_1._skippable == existing_task_1._skippable == new_task_1._skippable is False
     assert task_1._properties == existing_task_1._properties == new_task_1._properties == {}
 
     task_2 = scenario.tasks["task_2"]
@@ -491,7 +491,7 @@ def test_duplicate_to_new_cycle_with_existing_scenario():
     assert task_2._parent_ids == {scenario.id}
     assert new_task_2._parent_ids == {new_scenario.id}
     assert task_2._function == new_task_2._function
-    assert task_2._skippable == new_task_2._skippable == False
+    assert task_2._skippable == new_task_2._skippable is False
     assert task_2._properties == new_task_2._properties == {}
 
     task_3 = scenario.tasks["task_3"]
@@ -503,7 +503,7 @@ def test_duplicate_to_new_cycle_with_existing_scenario():
     assert task_3._parent_ids == {scenario.id}
     assert new_task_3._parent_ids == {new_scenario.id}
     assert task_3._function == new_task_3._function
-    assert task_3._skippable == new_task_3._skippable == False
+    assert task_3._skippable == new_task_3._skippable is False
     assert task_3._properties == new_task_3._properties == {}
 
     # Check data node attributes
@@ -607,7 +607,7 @@ def test_duplicate_with_all_global_dn():
     assert task_1._owner_id == new_task_1._owner_id is None
     assert task_1._parent_ids == new_task_1._parent_ids == {scenario.id, new_scenario.id}
     assert task_1._function == new_task_1._function
-    assert task_1._skippable == new_task_1._skippable == False
+    assert task_1._skippable == new_task_1._skippable is False
     assert task_1._properties == new_task_1._properties == {}
 
     # Check data node attributes

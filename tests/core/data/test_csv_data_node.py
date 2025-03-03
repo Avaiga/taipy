@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import dataclasses
-import filecmp
 import os
 import pathlib
 import re

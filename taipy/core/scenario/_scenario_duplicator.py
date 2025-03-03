@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Dict, Optional, Set, Union
 
 from taipy.common.config import Config
-from .scenario import Scenario
+
 from ..common.scope import Scope
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..data._data_duplicator import _DataDuplicator
@@ -22,6 +22,7 @@ from ..notification import EventOperation, Notifier, _make_event
 from ..sequence.sequence import Sequence
 from ..task._task_manager_factory import _TaskManagerFactory
 from ..task.task import Task
+from .scenario import Scenario
 
 
 class _ScenarioDuplicator:
@@ -97,12 +98,12 @@ class _ScenarioDuplicator:
                 self.__task_manager._build_filters_with_version(None))
             if existing_tasks:
                 # Task and children data nodes already exist. No need to duplicate.
-                existing_task = existing_tasks[(task.config_id,self.new_cycle_id)]
-                self.new_tasks[task.config_id] = existing_task
-                existing_task._parent_ids.update([self.new_scenario.id])
-                self.__task_manager._repository._save(existing_task)  # Through the repository so we don't set data nodes
-                Notifier.publish(_make_event(existing_task, EventOperation.UPDATE, "parent_ids", existing_task._parent_ids))
-                return existing_task
+                existing_t = existing_tasks[(task.config_id,self.new_cycle_id)]
+                self.new_tasks[task.config_id] = existing_t
+                existing_t._parent_ids.update([self.new_scenario.id])
+                self.__task_manager._repository._save(existing_t)  # Don't set data nodes
+                Notifier.publish(_make_event(existing_t, EventOperation.UPDATE, "parent_ids", existing_t._parent_ids))
+                return existing_t
 
         new_task = self.__init_new_task(task)
         for input in task.input.values():
@@ -140,12 +141,12 @@ class _ScenarioDuplicator:
                 [(dn.config_id, self.new_cycle_id)],
                 self.__data_manager._build_filters_with_version(None))
             if existing_dns.get((dn.config_id, self.new_cycle_id)):
-                existing_dn = existing_dns[(dn.config_id, self.new_cycle_id)]
+                ex_dn = existing_dns[(dn.config_id, self.new_cycle_id)]
                 # A cycle data node with same config and same cycle owner already exist. No need to duplicate it.
-                existing_dn._parent_ids.update([task.id]) if task else existing_dn._parent_ids.update([self.new_scenario.id])
-                self.__data_manager._set(existing_dn)
-                Notifier.publish(_make_event(existing_dn, EventOperation.UPDATE, "parent_ids", existing_dn._parent_ids))
-                return existing_dn
+                ex_dn._parent_ids.update([task.id]) if task else ex_dn._parent_ids.update([self.new_scenario.id])
+                self.__data_manager._set(ex_dn)
+                Notifier.publish(_make_event(ex_dn, EventOperation.UPDATE, "parent_ids", ex_dn._parent_ids))
+                return ex_dn
 
         new_dn = self.__init_new_datanode(dn, task)
         if new_dn._config_id in self.data_to_duplicate:

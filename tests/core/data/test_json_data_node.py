@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import datetime
-import filecmp
 import json
 import os
 import pathlib
