@@ -37,7 +37,7 @@ class _ScenarioDuplicator:
         else:
             self.data_to_duplicate = set()
 
-        self.new_scenario = None
+        self.new_scenario: Scenario = None  # type: ignore
         self.new_cycle_id: Optional[str] = None
         self.new_tasks: Dict[str, Task] = {}
         self.new_data_nodes: Dict[str, DataNode] = {}
