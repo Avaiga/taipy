@@ -594,7 +594,7 @@ describe("taipyReducer function", () => {
             system: action.system,
             duration: action.duration,
             notificationId: action.notificationId,
-            snackBarId: action.notificationId,
+            snackbarId: action.notificationId,
         });
     });
     it("should handle DELETE_NOTIFICATION action", () => {
@@ -609,7 +609,7 @@ describe("taipyReducer function", () => {
                     system: true,
                     duration: 5000,
                     notificationId: notificationId1,
-                    snackBarId: notificationId1
+                    snackbarId: notificationId1
                 },
                 {
                     nType: "warning",
@@ -617,11 +617,11 @@ describe("taipyReducer function", () => {
                     system: false,
                     duration: 3000,
                     notificationId: notificationId2,
-                    snackBarId: notificationId2
+                    snackbarId: notificationId2
                 },
             ],
         };
-        const action = { type: Types.DeleteNotification, snackBarId: notificationId1 };
+        const action = { type: Types.DeleteNotification, snackbarId: notificationId1 };
         const newState = taipyReducer(initialState, action);
         expect(newState.notifications).toEqual([
             {
@@ -630,7 +630,7 @@ describe("taipyReducer function", () => {
                 system: false,
                 duration: 3000,
                 notificationId: notificationId2,
-                snackBarId: notificationId2
+                snackbarId: notificationId2
             },
         ]);
     });
@@ -647,7 +647,7 @@ describe("taipyReducer function", () => {
                     system: true,
                     duration: 5000,
                     notificationId: notificationId1,
-                    snackBarId: notificationId1
+                    snackbarId: notificationId1
                 },
                 {
                     nType: "warning",
@@ -655,7 +655,7 @@ describe("taipyReducer function", () => {
                     system: false,
                     duration: 3000,
                     notificationId: notificationId2,
-                    snackBarId: notificationId2
+                    snackbarId: notificationId2
                 },
             ],
         };
@@ -682,7 +682,7 @@ describe("taipyReducer function", () => {
                     system: true,
                     duration: 5000,
                     notificationId: notificationId1,
-                    snackBarId: notificationId1
+                    snackbarId: notificationId1
                 },
                 {
                     message: "Notification2",
@@ -690,11 +690,11 @@ describe("taipyReducer function", () => {
                     system: false,
                     duration: 3000,
                     notificationId: notificationId2,
-                    snackBarId: notificationId2
+                    snackbarId: notificationId2
                 },
             ],
         };
-        const action = { type: Types.DeleteNotification, snackBarId: notificationId1 };
+        const action = { type: Types.DeleteNotification, snackbarId: notificationId1 };
         const newState = taipyReducer(initialState, action);
         expect(newState.notifications).toEqual([
             {
@@ -703,7 +703,7 @@ describe("taipyReducer function", () => {
                 system: false,
                 duration: 3000,
                 notificationId: notificationId2,
-                snackBarId: notificationId2
+                snackbarId: notificationId2
             },
         ]);
     });

@@ -21,7 +21,9 @@ import { NotificationMessage } from "../../context/taipyReducers";
 import userEvent from "@testing-library/user-event";
 
 const defaultMessage = "message";
-const defaultNotifications: NotificationMessage[] = [{ nType: "success", message: defaultMessage, system: true, duration: 3000, snackBarId: "nId" }];
+const defaultNotifications: NotificationMessage[] = [
+    { nType: "success", message: defaultMessage, system: true, duration: 3000, snackbarId: "nId" },
+];
 const getNotificationsWithType = (nType: string) => [{ ...defaultNotifications[0], nType }];
 
 class myNotification {
@@ -87,7 +89,13 @@ describe("Notifications", () => {
         link.href = "/test-icon.png";
         document.head.appendChild(link);
         const notifications: NotificationMessage[] = [
-            { nType: "success", message: "This is a system notification", system: true, duration: 3000, snackBarId: "nId" },
+            {
+                nType: "success",
+                message: "This is a system notification",
+                system: true,
+                duration: 3000,
+                snackbarId: "nId",
+            },
         ];
         render(
             <SnackbarProvider>
@@ -104,7 +112,9 @@ describe("Notifications", () => {
     });
 
     it("closes notification on close button click", async () => {
-        const notifications = [{ nType: "success", message: "Test Notification", duration: 3000, system: false, snackBarId: "nId" }];
+        const notifications = [
+            { nType: "success", message: "Test Notification", duration: 3000, system: false, snackbarId: "nId" },
+        ];
         render(
             <SnackbarProvider>
                 <TaipyNotification notifications={notifications} />
@@ -120,7 +130,8 @@ describe("Notifications", () => {
 
     it("Notification disappears when notification type is empty", async () => {
         const notifications = [
-            { nType: "success", message: "Test Notification", duration: 3000, system: false, snackBarId: "nId" }];
+            { nType: "success", message: "Test Notification", duration: 3000, system: false, snackbarId: "nId" },
+        ];
         const { rerender } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={notifications} />
@@ -128,7 +139,8 @@ describe("Notifications", () => {
         );
         await screen.findByRole("button", { name: /close/i });
         const newNotifications = [
-            { nType: "", message: "Test Notification", duration: 3000, system: false, snackBarId: "nId" }];
+            { nType: "", message: "Test Notification", duration: 3000, system: false, snackbarId: "nId" },
+        ];
         rerender(
             <SnackbarProvider>
                 <TaipyNotification notifications={newNotifications} />
@@ -155,7 +167,13 @@ describe("Notifications", () => {
         link.href = "/test-icon.png";
         document.head.appendChild(link);
         const notifications: NotificationMessage[] = [
-            { nType: "success", message: "This is a system notification", system: true, duration: 3000, snackBarId: "nId" },
+            {
+                nType: "success",
+                message: "This is a system notification",
+                system: true,
+                duration: 3000,
+                snackbarId: "nId",
+            },
         ];
         render(
             <SnackbarProvider>
@@ -172,7 +190,13 @@ describe("Notifications", () => {
         link.rel = "icon";
         document.head.appendChild(link);
         const notifications: NotificationMessage[] = [
-            { nType: "success", message: "This is a system notification", system: true, duration: 3000, snackBarId: "nId" },
+            {
+                nType: "success",
+                message: "This is a system notification",
+                system: true,
+                duration: 3000,
+                snackbarId: "nId",
+            },
         ];
         render(
             <SnackbarProvider>
@@ -190,7 +214,13 @@ describe("Notifications", () => {
         link.href = "/test-shortcut-icon.png";
         document.head.appendChild(link);
         const notifications: NotificationMessage[] = [
-            { nType: "success", message: "This is a system notification", system: true, duration: 3000, snackBarId: "nId" },
+            {
+                nType: "success",
+                message: "This is a system notification",
+                system: true,
+                duration: 3000,
+                snackbarId: "nId",
+            },
         ];
         render(
             <SnackbarProvider>

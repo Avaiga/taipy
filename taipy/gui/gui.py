@@ -21,7 +21,6 @@ import sys
 import tempfile
 import time
 import typing as t
-import uuid
 import warnings
 from importlib import metadata, util
 from importlib.util import find_spec

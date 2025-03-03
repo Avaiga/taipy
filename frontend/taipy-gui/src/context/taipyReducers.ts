@@ -94,7 +94,7 @@ export interface NotificationMessage {
     system: boolean;
     duration: number;
     notificationId?: string;
-    snackBarId: string;
+    snackbarId: string;
 }
 
 interface TaipyAction extends NamePayload, TaipyBaseAction {
@@ -113,7 +113,7 @@ interface TaipyMultipleMessageAction extends TaipyBaseAction {
 interface TaipyNotificationAction extends TaipyBaseAction, NotificationMessage {}
 
 interface TaipyDeleteNotificationAction extends TaipyBaseAction {
-    snackBarId: string;
+    snackbarId: string;
 }
 
 export const BLOCK_CLOSE = { action: "", message: "", close: true, noCancel: false } as BlockMessage;
@@ -413,7 +413,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                         system: notificationAction.system,
                         duration: notificationAction.duration,
                         notificationId: notificationAction.notificationId,
-                        snackBarId: notificationAction.notificationId || nanoid()
+                        snackbarId: notificationAction.nType ? nanoid() : notificationAction.nType
                     },
                 ],
             };
@@ -422,7 +422,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             return {
                 ...state,
                 notifications: state.notifications.filter(
-                    (notification) => notification.snackBarId !== deleteNotificationAction.snackBarId
+                    (notification) => notification.snackbarId !== deleteNotificationAction.snackbarId
                 ),
             };
         case Types.SetBlock:
@@ -860,13 +860,13 @@ export const createNotificationAction = (notification: NotificationMessage): Tai
     system: notification.system,
     duration: notification.duration,
     notificationId: notification.notificationId,
-    snackBarId: notification.snackBarId
+    snackbarId: notification.snackbarId
 });
 
-export const createDeleteNotificationAction = (snackBarId: string): TaipyDeleteNotificationAction => {
+export const createDeleteNotificationAction = (snackbarId: string): TaipyDeleteNotificationAction => {
     return {
         type: Types.DeleteNotification,
-        snackBarId: snackBarId,
+        snackbarId,
     }
 }
 

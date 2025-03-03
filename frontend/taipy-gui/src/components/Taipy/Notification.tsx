@@ -11,8 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useEffect, useMemo } from "react";
-import { SnackbarKey, useSnackbar, VariantType } from "notistack";
+import React, { useCallback, useEffect, useMemo, useRef, SyntheticEvent } from "react";
+import { SnackbarKey, useSnackbar, VariantType, CloseReason } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -26,18 +26,37 @@ interface NotificationProps {
 const TaipyNotification = ({ notifications: notificationProps }: NotificationProps) => {
     const notification = notificationProps.length ? notificationProps[0] : undefined;
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const snackbarIds = useRef<Record<string, string>>({});
     const dispatch = useDispatch();
 
-    const closeNotification = useCallback((key: SnackbarKey) => () => closeSnackbar(key), [closeSnackbar]);
+    const closeNotifications = useCallback(
+        (ids: string | string[]) => {
+            if (Array.isArray(ids)) {
+                ids.forEach((id) => closeSnackbar(id));
+            } else {
+                closeSnackbar(ids);
+            }
+        },
+        [closeSnackbar]
+    );
 
     const notificationAction = useCallback(
         (key: SnackbarKey) => (
-            <IconButton size="small" aria-label="close" color="inherit" onClick={closeNotification(key)}>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={() => closeNotifications(key as string)}
+            >
                 <CloseIcon fontSize="small" />
             </IconButton>
         ),
-        [closeNotification]
+        [closeNotifications]
     );
+
+    const notificationClosed = (event: SyntheticEvent | null, reason: CloseReason, key?: SnackbarKey) => {
+        snackbarIds.current = Object.fromEntries(Object.entries(snackbarIds.current).filter(([id]) => id !== key));
+    };
 
     const faviconUrl = useMemo(() => {
         const nodeList = document.getElementsByTagName("link");
@@ -51,22 +70,37 @@ const TaipyNotification = ({ notifications: notificationProps }: NotificationPro
 
     useEffect(() => {
         if (notification) {
+            const notificationId = notification.notificationId;
             if (notification.nType === "") {
-                closeSnackbar(notification.snackBarId);
+                if (notificationId) {
+                    closeNotifications(
+                        Object.entries(snackbarIds.current)
+                            .filter(([, id]) => notificationId === id)
+                            .map(([snackbarId]) => snackbarId)
+                    );
+                } else {
+                    closeNotifications(notification.snackbarId);
+                }
             } else {
+                if (notificationId) {
+                    snackbarIds.current = {
+                        ...snackbarIds.current,
+                        [notification.snackbarId]: notificationId,
+                    };
+                }
                 enqueueSnackbar(notification.message, {
                     variant: notification.nType as VariantType,
                     action: notificationAction,
-                    key: notification.snackBarId,
-                    autoHideDuration:
-                        notification.duration == 0 && notification.notificationId ? null : notification.duration,
+                    onClose: notificationClosed,
+                    key: notification.snackbarId,
+                    autoHideDuration: notification.duration || null,
                 });
                 notification.system &&
                     new Notification(document.title || "Taipy", { body: notification.message, icon: faviconUrl });
             }
-            dispatch(createDeleteNotificationAction(notification.snackBarId));
+            dispatch(createDeleteNotificationAction(notification.snackbarId));
         }
-    }, [notification, enqueueSnackbar, closeSnackbar, notificationAction, faviconUrl, dispatch]);
+    }, [notification, enqueueSnackbar, closeNotifications, notificationAction, faviconUrl, dispatch]);
 
     useEffect(() => {
         notification?.system && window.Notification && Notification.requestPermission();

@@ -132,7 +132,7 @@ const FileSelector = (props: FileSelectorProps) => {
                                     message: value,
                                     system: false,
                                     duration: 3000,
-                                    snackBarId: "FileSelector action"
+                                    snackbarId: "FileSelector action"
                                 })
                             );
                         const fileInput = document.getElementById(inputId) as HTMLInputElement;
@@ -147,7 +147,7 @@ const FileSelector = (props: FileSelectorProps) => {
                                     message: reason,
                                     system: false,
                                     duration: 3000,
-                                    snackBarId: "FileSelector failure"
+                                    snackbarId: "FileSelector failure"
                                 })
                             );
                         const fileInput = document.getElementById(inputId) as HTMLInputElement;

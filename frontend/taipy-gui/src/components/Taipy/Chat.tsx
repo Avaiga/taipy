@@ -344,7 +344,7 @@ const Chat = (props: ChatProps) => {
                                 : "Only image file are authorized",
                         system: false,
                         duration: 3000,
-                        snackBarId: "Chat warning"
+                        snackbarId: "Chat warning"
                     })
                 );
                 setSelectedFile(null);
