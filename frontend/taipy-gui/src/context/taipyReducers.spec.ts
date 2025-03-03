@@ -90,7 +90,7 @@ describe("reducer", () => {
         expect(
             taipyReducer({ ...INITIAL_STATE }, {
                 type: "SET_NOTIFICATION",
-                atype: "i",
+                nType: "i",
                 message: "message",
                 system: "system",
             } as TaipyBaseAction).notifications
@@ -203,19 +203,19 @@ describe("reducer", () => {
         ).toBeUndefined();
     });
     it("creates a notification action", () => {
-        expect(createNotificationAction({ atype: "I", message: "message" } as NotificationMessage).type).toBe(
+        expect(createNotificationAction({ nType: "I", message: "message" } as NotificationMessage).type).toBe(
             "SET_NOTIFICATION"
         );
-        expect(createNotificationAction({ atype: "err", message: "message" } as NotificationMessage).atype).toBe(
+        expect(createNotificationAction({ nType: "err", message: "message" } as NotificationMessage).nType).toBe(
             "error"
         );
-        expect(createNotificationAction({ atype: "Wa", message: "message" } as NotificationMessage).atype).toBe(
+        expect(createNotificationAction({ nType: "Wa", message: "message" } as NotificationMessage).nType).toBe(
             "warning"
         );
-        expect(createNotificationAction({ atype: "sUc", message: "message" } as NotificationMessage).atype).toBe(
+        expect(createNotificationAction({ nType: "sUc", message: "message" } as NotificationMessage).nType).toBe(
             "success"
         );
-        expect(createNotificationAction({ atype: "  ", message: "message" } as NotificationMessage).atype).toBe("");
+        expect(createNotificationAction({ nType: "  ", message: "message" } as NotificationMessage).nType).toBe("");
     });
 });
 
@@ -581,7 +581,7 @@ describe("taipyReducer function", () => {
     it("should handle SET_NOTIFICATION action", () => {
         const action = {
             type: Types.SetNotification,
-            atype: "error",
+            nType: "error",
             message: "some error message",
             system: true,
             duration: 3000,
@@ -589,11 +589,12 @@ describe("taipyReducer function", () => {
         };
         const newState = taipyReducer({ ...INITIAL_STATE }, action);
         expect(newState.notifications).toContainEqual({
-            atype: action.atype,
+            nType: action.nType,
             message: action.message,
             system: action.system,
             duration: action.duration,
             notificationId: action.notificationId,
+            snackbarId: action.notificationId,
         });
     });
     it("should handle DELETE_NOTIFICATION action", () => {
@@ -603,30 +604,33 @@ describe("taipyReducer function", () => {
             ...INITIAL_STATE,
             notifications: [
                 {
-                    atype: "error",
+                    nType: "error",
                     message: "First Notification",
                     system: true,
                     duration: 5000,
                     notificationId: notificationId1,
+                    snackbarId: notificationId1
                 },
                 {
-                    atype: "warning",
+                    nType: "warning",
                     message: "Second Notification",
                     system: false,
                     duration: 3000,
                     notificationId: notificationId2,
+                    snackbarId: notificationId2
                 },
             ],
         };
-        const action = { type: Types.DeleteNotification, notificationId: notificationId1 };
+        const action = { type: Types.DeleteNotification, snackbarId: notificationId1 };
         const newState = taipyReducer(initialState, action);
         expect(newState.notifications).toEqual([
             {
-                atype: "warning",
+                nType: "warning",
                 message: "Second Notification",
                 system: false,
                 duration: 3000,
                 notificationId: notificationId2,
+                snackbarId: notificationId2
             },
         ]);
     });
@@ -638,18 +642,20 @@ describe("taipyReducer function", () => {
             ...INITIAL_STATE,
             notifications: [
                 {
-                    atype: "error",
+                    nType: "error",
                     message: "First Notification",
                     system: true,
                     duration: 5000,
                     notificationId: notificationId1,
+                    snackbarId: notificationId1
                 },
                 {
-                    atype: "warning",
+                    nType: "warning",
                     message: "Second Notification",
                     system: false,
                     duration: 3000,
                     notificationId: notificationId2,
+                    snackbarId: notificationId2
                 },
             ],
         };
@@ -672,29 +678,32 @@ describe("taipyReducer function", () => {
             notifications: [
                 {
                     message: "Notification1",
-                    atype: "type1",
+                    nType: "type1",
                     system: true,
                     duration: 5000,
                     notificationId: notificationId1,
+                    snackbarId: notificationId1
                 },
                 {
                     message: "Notification2",
-                    atype: "type2",
+                    nType: "type2",
                     system: false,
                     duration: 3000,
                     notificationId: notificationId2,
+                    snackbarId: notificationId2
                 },
             ],
         };
-        const action = { type: Types.DeleteNotification, notificationId: notificationId1 };
+        const action = { type: Types.DeleteNotification, snackbarId: notificationId1 };
         const newState = taipyReducer(initialState, action);
         expect(newState.notifications).toEqual([
             {
                 message: "Notification2",
-                atype: "type2",
+                nType: "type2",
                 system: false,
                 duration: 3000,
                 notificationId: notificationId2,
+                snackbarId: notificationId2
             },
         ]);
     });
@@ -847,7 +856,7 @@ describe("addRows function", () => {
     });
 });
 
-describe("retreiveBlockUi function", () => {
+describe("retrieveBlockUi function", () => {
     it("should retrieve block message from localStorage", () => {
         const mockBlockMessage = { action: "testAction", noCancel: false, close: false, message: "testMessage" };
         Storage.prototype.getItem = jest.fn(() => JSON.stringify(mockBlockMessage));
@@ -928,10 +937,10 @@ describe("messageToAction function", () => {
         };
         expect(result).toEqual(expected);
     });
-    it('should call createAlertAction if message type is "AL"', () => {
+    it('should call createNotificationAction if message type is "AL"', () => {
         const message: WsMessage & Partial<NotificationMessage> = {
             type: "AL",
-            atype: "I",
+            nType: "I",
             name: "someName",
             payload: {},
             propagate: true,
@@ -1133,7 +1142,7 @@ describe("initializeWebSocket function", () => {
                 mockSocket,
                 "ID",
                 "TaipyClientId",
-                "mockId",
+                { "id": "mockId" },
                 "mockId",
                 undefined,
                 false,

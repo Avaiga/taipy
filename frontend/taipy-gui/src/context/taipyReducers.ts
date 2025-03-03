@@ -89,11 +89,12 @@ export interface NamePayload {
 }
 
 export interface NotificationMessage {
-    atype: string;
+    nType: string;
     message: string;
     system: boolean;
     duration: number;
     notificationId?: string;
+    snackbarId: string;
 }
 
 interface TaipyAction extends NamePayload, TaipyBaseAction {
@@ -111,8 +112,8 @@ interface TaipyMultipleMessageAction extends TaipyBaseAction {
 
 interface TaipyNotificationAction extends TaipyBaseAction, NotificationMessage {}
 
-interface TaipyDeleteAlertAction extends TaipyBaseAction {
-    notificationId: string;
+interface TaipyDeleteNotificationAction extends TaipyBaseAction {
+    snackbarId: string;
 }
 
 export const BLOCK_CLOSE = { action: "", message: "", close: true, noCancel: false } as BlockMessage;
@@ -317,7 +318,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         });
         // try to reconnect on connect_error
         socket.on("connect_error", (error) => {
-            if ((error as unknown as Record<string, unknown>).type === "TransportError") {
+            if (error && (error as unknown as Record<string, unknown>).type === "TransportError") {
                 lastReasonServer = true;
             }
             setTimeout(() => socket.connect(), 500);
@@ -407,11 +408,12 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 notifications: [
                     ...state.notifications,
                     {
-                        atype: notificationAction.atype,
+                        nType: notificationAction.nType,
                         message: notificationAction.message,
                         system: notificationAction.system,
                         duration: notificationAction.duration,
-                        notificationId: notificationAction.notificationId || nanoid(),
+                        notificationId: notificationAction.notificationId,
+                        snackbarId: notificationAction.nType ? nanoid() : notificationAction.nType
                     },
                 ],
             };
@@ -420,7 +422,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             return {
                 ...state,
                 notifications: state.notifications.filter(
-                    (notification) => notification.notificationId !== deleteNotificationAction.notificationId
+                    (notification) => notification.snackbarId !== deleteNotificationAction.snackbarId
                 ),
             };
         case Types.SetBlock:
@@ -833,11 +835,11 @@ export const createTimeZoneAction = (timeZone: string, fromBackend = false): Tai
     payload: { timeZone: timeZone, fromBackend: fromBackend },
 });
 
-const getNotificationType = (aType: string) => {
-    aType = aType.trim();
-    if (aType) {
-        aType = aType.charAt(0).toLowerCase();
-        switch (aType) {
+const getNotificationType = (nType: string) => {
+    nType = nType.trim();
+    if (nType) {
+        nType = nType.charAt(0).toLowerCase();
+        switch (nType) {
             case "e":
                 return "error";
             case "w":
@@ -848,22 +850,25 @@ const getNotificationType = (aType: string) => {
                 return "info";
         }
     }
-    return aType;
+    return nType;
 };
 
 export const createNotificationAction = (notification: NotificationMessage): TaipyNotificationAction => ({
     type: Types.SetNotification,
-    atype: getNotificationType(notification.atype),
+    nType: getNotificationType(notification.nType),
     message: notification.message,
     system: notification.system,
     duration: notification.duration,
     notificationId: notification.notificationId,
+    snackbarId: notification.snackbarId
 });
 
-export const createDeleteAlertAction = (notificationId: string): TaipyDeleteAlertAction => ({
-    type: Types.DeleteNotification,
-    notificationId,
-});
+export const createDeleteNotificationAction = (snackbarId: string): TaipyDeleteNotificationAction => {
+    return {
+        type: Types.DeleteNotification,
+        snackbarId,
+    }
+}
 
 export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({
     type: Types.SetBlock,

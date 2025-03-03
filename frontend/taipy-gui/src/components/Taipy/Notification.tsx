@@ -11,38 +11,48 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useEffect, useMemo } from "react";
-import { SnackbarKey, useSnackbar, VariantType } from "notistack";
+import React, { useCallback, useEffect, useMemo, useRef, SyntheticEvent } from "react";
+import { SnackbarKey, useSnackbar, VariantType, CloseReason } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { NotificationMessage, createDeleteAlertAction } from "../../context/taipyReducers";
+import { NotificationMessage, createDeleteNotificationAction } from "../../context/taipyReducers";
 import { useDispatch } from "../../utils/hooks";
 
 interface NotificationProps {
     notifications: NotificationMessage[];
 }
 
-const TaipyNotification = ({ notifications }: NotificationProps) => {
-    const notification = notifications.length ? notifications[0] : undefined;
+const TaipyNotification = ({ notifications: notificationProps }: NotificationProps) => {
+    const notification = notificationProps.length ? notificationProps[0] : undefined;
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const snackbarIds = useRef<Record<string, string>>({});
     const dispatch = useDispatch();
 
-    const resetNotification = useCallback(
-        (key: SnackbarKey) => () => {
-            closeSnackbar(key);
+    const closeNotifications = useCallback(
+        (ids: string[]) => {
+            ids.forEach((id) => closeSnackbar(id));
         },
         [closeSnackbar]
     );
 
     const notificationAction = useCallback(
         (key: SnackbarKey) => (
-            <IconButton size="small" aria-label="close" color="inherit" onClick={resetNotification(key)}>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={() => closeNotifications([key as string])}
+            >
                 <CloseIcon fontSize="small" />
             </IconButton>
         ),
-        [resetNotification]
+        [closeNotifications]
     );
+
+    const notificationClosed = (event: SyntheticEvent | null, reason: CloseReason, key?: SnackbarKey) => {
+        snackbarIds.current = Object.fromEntries(Object.entries(snackbarIds.current).filter(([id]) => id !== key));
+    };
 
     const faviconUrl = useMemo(() => {
         const nodeList = document.getElementsByTagName("link");
@@ -56,22 +66,35 @@ const TaipyNotification = ({ notifications }: NotificationProps) => {
 
     useEffect(() => {
         if (notification) {
-            const notificationId = notification.notificationId || "";
-            if (notification.atype === "") {
-                closeSnackbar(notificationId);
+            const notificationId = notification.notificationId;
+            if (notification.nType === "") {
+                if (notificationId) {
+                    closeNotifications(
+                        Object.entries(snackbarIds.current)
+                            .filter(([, id]) => notificationId === id)
+                            .map(([snackbarId]) => snackbarId)
+                    );
+                }
             } else {
+                if (notificationId) {
+                    snackbarIds.current = {
+                        ...snackbarIds.current,
+                        [notification.snackbarId]: notificationId,
+                    };
+                }
                 enqueueSnackbar(notification.message, {
-                    variant: notification.atype as VariantType,
+                    variant: notification.nType as VariantType,
                     action: notificationAction,
-                    autoHideDuration: notification.duration,
-                    key: notificationId,
+                    onClose: notificationClosed,
+                    key: notification.snackbarId,
+                    autoHideDuration: notification.duration || null,
                 });
                 notification.system &&
                     new Notification(document.title || "Taipy", { body: notification.message, icon: faviconUrl });
             }
-            dispatch(createDeleteAlertAction(notificationId));
+            dispatch(createDeleteNotificationAction(notification.snackbarId));
         }
-    }, [notification, enqueueSnackbar, closeSnackbar, notificationAction, faviconUrl, dispatch]);
+    }, [notification, enqueueSnackbar, closeNotifications, notificationAction, faviconUrl, dispatch]);
 
     useEffect(() => {
         notification?.system && window.Notification && Notification.requestPermission();

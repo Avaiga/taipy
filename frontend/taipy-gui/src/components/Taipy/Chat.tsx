@@ -337,13 +337,14 @@ const Chat = (props: ChatProps) => {
             } else {
                 dispatch(
                     createNotificationAction({
-                        atype: "info",
+                        nType: "info",
                         message:
                             file.size > maxFileSize
                                 ? `Image size is limited to ${maxFileSize / 1024} KB`
                                 : "Only image file are authorized",
                         system: false,
                         duration: 3000,
+                        snackbarId: "Chat warning"
                     })
                 );
                 setSelectedFile(null);

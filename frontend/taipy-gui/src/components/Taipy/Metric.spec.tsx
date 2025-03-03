@@ -178,7 +178,7 @@ describe("Metric Component", () => {
         const title = "Test Title";
         const { container } = render(<Metric title={title} />);
         await waitFor(() => {
-            const titleElement = container.querySelector(".gtitle");
+            const titleElement = container.querySelector(".g-gtitle");
             if (!titleElement) {
                 throw new Error("Title element not found");
             }
