@@ -42,7 +42,7 @@ describe("Notifications", () => {
         const { getByText } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={defaultNotifications} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const elt = getByText(defaultMessage);
         expect(elt.tagName).toBe("DIV");
@@ -51,7 +51,7 @@ describe("Notifications", () => {
         const { getByText } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={defaultNotifications} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-success")).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe("Notifications", () => {
         const { getByText } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={getNotificationsWithType("error")} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-error")).toBeInTheDocument();
@@ -69,7 +69,7 @@ describe("Notifications", () => {
         const { getByText } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={getNotificationsWithType("warning")} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-warning")).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe("Notifications", () => {
         const { getByText } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={getNotificationsWithType("info")} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const elt = getByText(defaultMessage);
         expect(elt.closest(".notistack-MuiContent-info")).toBeInTheDocument();
@@ -100,7 +100,7 @@ describe("Notifications", () => {
         render(
             <SnackbarProvider>
                 <TaipyNotification notifications={notifications} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const linkElement = document.querySelector("link[rel='icon']");
         if (linkElement) {
@@ -118,7 +118,7 @@ describe("Notifications", () => {
         render(
             <SnackbarProvider>
                 <TaipyNotification notifications={notifications} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const closeButton = await screen.findByRole("button", { name: /close/i });
         await userEvent.click(closeButton);
@@ -129,22 +129,26 @@ describe("Notifications", () => {
     });
 
     it("Notification disappears when notification type is empty", async () => {
-        const notifications = [
-            { nType: "success", message: "Test Notification", duration: 3000, system: false, snackbarId: "nId" },
-        ];
+        const baseNotification = {
+            nType: "success",
+            message: "Test Notification",
+            duration: 3000,
+            system: false,
+            notificationId: "nId",
+            snackbarId: "nId",
+        };
+        const notifications = [ baseNotification ];
         const { rerender } = render(
             <SnackbarProvider>
                 <TaipyNotification notifications={notifications} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         await screen.findByRole("button", { name: /close/i });
-        const newNotifications = [
-            { nType: "", message: "Test Notification", duration: 3000, system: false, snackbarId: "nId" },
-        ];
+        const newNotifications = [ { ...baseNotification, nType: "" }];
         rerender(
             <SnackbarProvider>
                 <TaipyNotification notifications={newNotifications} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         await waitFor(() => {
             const notificationMessage = screen.queryByText("Test Notification");
@@ -156,7 +160,7 @@ describe("Notifications", () => {
         render(
             <SnackbarProvider>
                 <TaipyNotification notifications={[]} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         expect(Notification.requestPermission).not.toHaveBeenCalled();
     });
@@ -178,7 +182,7 @@ describe("Notifications", () => {
         render(
             <SnackbarProvider>
                 <TaipyNotification notifications={notifications} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const linkElement = document.querySelector("link[rel='icon']");
         expect(linkElement?.getAttribute("href")).toBe("/test-icon.png");
@@ -201,7 +205,7 @@ describe("Notifications", () => {
         render(
             <SnackbarProvider>
                 <TaipyNotification notifications={notifications} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const linkElement = document.querySelector("link[rel='icon']");
         expect(linkElement?.getAttribute("href") || "/favicon.png").toBe("/favicon.png");
@@ -225,7 +229,7 @@ describe("Notifications", () => {
         render(
             <SnackbarProvider>
                 <TaipyNotification notifications={notifications} />
-            </SnackbarProvider>,
+            </SnackbarProvider>
         );
         const linkElement = document.querySelector("link[rel='shortcut icon']");
         expect(linkElement?.getAttribute("href")).toBe("/test-shortcut-icon.png");
