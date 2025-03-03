@@ -64,7 +64,7 @@ def download(
 
 def notify(
     state: State,
-    notification_type: str = "I",
+    notification_type: str = "info",
     message: str = "",
     system_notification: t.Optional[bool] = None,
     duration: t.Optional[int] = None,
@@ -75,32 +75,31 @@ def notify(
     Arguments:
         state (State^): The current user state as received in any callback.
         notification_type: The notification type. This can be one of "success", "info",
-            "warning", or "error".<br/>
-            To remove the last notification, set this parameter to the empty string.
+            "warning", or "error".
         message: The text message to display.
         system_notification: If True, the system will also show the notification.<br/>
             If not specified or set to None, this parameter will use the value of
             *configuration[system_notification]*.
-        duration: The time, in milliseconds, during which the notification is shown.
+        duration: The time, in milliseconds, that the notification is displayed.<br/>
             If not specified or set to None, this parameter will use the value of
             *configuration[notification_duration]*.<br/>
-            If *duration* is 0, the notification remains visible for ever. If *id* is set to
-            until `close_notification()^` is called or the user closes the notification
-            manually.
+            If *duration* is 0, the notification remains visible indefinitely until closed. If *id*
+            is set to a non-empty string, the application can call `close_notification(id)^` to
+            close the notification. The user can always manually close the notification.
         id: An optional identifier for this notification, so the application can close it explicitly
-            using `close_notification()^`.
+            using `close_notification()^` before the *duration* delay has passed.
 
     Note that you can also call this function with *notification_type* set to the first letter
     or the notification type (i.e. setting *notification_type* to "i" is equivalent to setting it to
     "info").
 
-    If *system_notification* is set to True, then the browser requests the system
-    to display a notification as well. They usually appear in small windows that
-    fly out of the system tray.<br/>
-    The first time your browser is requested to show such a system notification for
-    Taipy applications, you may be prompted to authorize the browser to do so. Please
-    refer to your browser documentation for details on how to allow or prevent this
-    feature.
+    If *system_notification* is set to True, then the browser requests the system to display a
+    notification as well. They usually appear in small windows that fly out of the system tray.<br/>
+    When a Taipy application requests a system notification for the first time, the browser may
+    prompt the user for permission. The  browser documentation will describe how to allow or prevent
+    this feature.<br/>
+    If the user denies system notification permissions, the system notifications will not be
+    displayed, but the in-app notification will still function.
     """
     if state and isinstance(state._gui, Gui):
         return state._gui._notify(notification_type, message, system_notification, duration, id)
@@ -111,14 +110,16 @@ def notify(
 def close_notification(state: State, id: str) -> None:
     """Close a specific notification.
 
-    You can force a lasting notification to close by calling this function with the same
-    notification identifier that the one that was used when calling `notify()^`.<br/>
-    Note that if several notifications had been created with the same identifier, all these
-    notifications are closed.
+    This function closes a persistent notification by using the same identifier that was provided to
+    `notify()^`.<br/>
+    If multiple notifications were created with the same identifier, they will all be closed
+    simultaneously.
+
+    If no notification with this identifier exists, no action is taken.
 
     Arguments:
-        id The identifier of the notification(s) that must be closed.<br/>
-          Nothing happens if no opened notification with this identifier can be found.
+        state (State^): The current user state as received in any callback.
+        id: The identifier of the notification(s) that must be closed.
     """
     if state and isinstance(state._gui, Gui):
         # Send the close command with the notification_id
