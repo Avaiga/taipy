@@ -318,7 +318,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         });
         // try to reconnect on connect_error
         socket.on("connect_error", (error) => {
-            if ((error as unknown as Record<string, unknown>).type === "TransportError") {
+            if (error && (error as unknown as Record<string, unknown>).type === "TransportError") {
                 lastReasonServer = true;
             }
             setTimeout(() => socket.connect(), 500);
