@@ -30,12 +30,8 @@ const TaipyNotification = ({ notifications: notificationProps }: NotificationPro
     const dispatch = useDispatch();
 
     const closeNotifications = useCallback(
-        (ids: string | string[]) => {
-            if (Array.isArray(ids)) {
-                ids.forEach((id) => closeSnackbar(id));
-            } else {
-                closeSnackbar(ids);
-            }
+        (ids: string[]) => {
+            ids.forEach((id) => closeSnackbar(id));
         },
         [closeSnackbar]
     );
@@ -46,7 +42,7 @@ const TaipyNotification = ({ notifications: notificationProps }: NotificationPro
                 size="small"
                 aria-label="close"
                 color="inherit"
-                onClick={() => closeNotifications(key as string)}
+                onClick={() => closeNotifications([key as string])}
             >
                 <CloseIcon fontSize="small" />
             </IconButton>
@@ -78,8 +74,6 @@ const TaipyNotification = ({ notifications: notificationProps }: NotificationPro
                             .filter(([, id]) => notificationId === id)
                             .map(([snackbarId]) => snackbarId)
                     );
-                } else {
-                    closeNotifications(notification.snackbarId);
                 }
             } else {
                 if (notificationId) {
