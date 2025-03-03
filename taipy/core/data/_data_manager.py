@@ -180,7 +180,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _can_duplicate(cls, dn: Union[str, DataNode]) -> ReasonCollection:
+    def _can_duplicate(cls, dn: Union[DataNodeId, DataNode]) -> ReasonCollection:
         if isinstance(dn, DataNode):
             dn_id = dn.id
         else:

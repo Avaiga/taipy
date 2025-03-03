@@ -33,12 +33,12 @@ class _ScenarioDuplicator:
         if data_to_duplicate is True:
             self.data_to_duplicate: Set[str] = set(self.scenario.data_nodes.keys())
         elif isinstance(data_to_duplicate, set):
-            self.data_to_duplicate: Set[str] = data_to_duplicate
+            self.data_to_duplicate = data_to_duplicate
         else:
-            self.data_to_duplicate: Set[str] = set()
+            self.data_to_duplicate = set()
 
-        self.new_scenario: Optional[Scenario] = None
-        self.new_cycle_id: str = None
+        self.new_scenario = None
+        self.new_cycle_id: Optional[str] = None
         self.new_tasks: Dict[str, Task] = {}
         self.new_data_nodes: Dict[str, DataNode] = {}
 
@@ -65,14 +65,12 @@ class _ScenarioDuplicator:
         Returns:
             The newly created scenario.
         """
-        self.__init_new_scenario(new_creation_date or datetime.now(), new_name)
+        self.new_scenario = self.__init_new_scenario(new_creation_date or datetime.now(), new_name)
         for dn in self.scenario.additional_data_nodes.values():
-            self.new_scenario._additional_data_nodes.add(self._duplicate_datanode(dn).id)
+            self.new_scenario._additional_data_nodes.add(self._duplicate_datanode(dn).id)  # type: ignore
         for task in self.scenario.tasks.values():
-            self.new_scenario._tasks.add(self._duplicate_task(task).id)
-
+            self.new_scenario._tasks.add(self._duplicate_task(task).id)  # type: ignore
         self._duplicate_sequences()
-
         self.__scenario_manager._set(self.new_scenario)
         Notifier.publish(_make_event(self.new_scenario, EventOperation.CREATION))
         return self.new_scenario
@@ -173,7 +171,7 @@ class _ScenarioDuplicator:
             new_sequences[seq_name] = new_sequence
         self.new_scenario._sequences = new_sequences
 
-    def __init_new_scenario(self, new_creation_date: Optional[datetime], new_name: Optional[str]) -> None:
+    def __init_new_scenario(self, new_creation_date: datetime, new_name: Optional[str]) -> Scenario:
         self.new_scenario = self.__scenario_manager._get(self.scenario)
         self.new_scenario.id = self.new_scenario._new_id(self.scenario.config_id)
         self.new_scenario._creation_date = new_creation_date
@@ -193,6 +191,7 @@ class _ScenarioDuplicator:
         self.new_scenario._tasks = set()  # To be potentially updated later
         self.new_scenario._sequences = {}  # To be potentially updated later
         self.new_scenario._additional_data_nodes = set()  # To be potentially updated later
+        return self.new_scenario
 
     def __init_new_task(self, task: Task) -> Task:
         new_task = self.__task_manager._get(task)

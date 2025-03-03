@@ -233,7 +233,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return cls._repository._load_all(filters)
 
     @classmethod
-    def _can_duplicate(cls, task: Union[Task, str]) -> ReasonCollection:
+    def _can_duplicate(cls, task: Union[Task, TaskId]) -> ReasonCollection:
         reason_collector = ReasonCollection()
         if isinstance(task, Task):
             task_id = task.id
