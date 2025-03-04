@@ -33,7 +33,7 @@ const GuiDownload = ({ download }: GuiDownloadProps) => {
         }
     }, [content, name, dispatch, onAction, module]);
 
-    return <></>;
+    return null;
 };
 
 export default GuiDownload;

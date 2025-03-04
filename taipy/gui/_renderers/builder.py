@@ -792,15 +792,14 @@ class _Builder:
                 list_val = list(list_val.split(";"))
             if isinstance(list_val, list):
                 # TODO catch the cast exception
-                if list_type.value == PropertyType.number.value:
+                if list_type is PropertyType.number:
                     list_val = [int(v) for v in list_val]
                 else:
-                    list_val = [int(v) for v in list_val]
-            else:
-                if list_val is not None:
+                    list_val = [str(v) for v in list_val]
+                if list_val:
+                    self.__set_react_attribute(_to_camel_case(name), list_val)
+            elif list_val is not None:
                     _warn(f"{self.__element_name}: {name} should be a list.")
-                list_val = []
-            self.__set_react_attribute(_to_camel_case(name), list_val)
         else:
             self.__set_react_attribute(_to_camel_case(name), hash_name)
             self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
