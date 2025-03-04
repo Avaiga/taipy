@@ -732,7 +732,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     else:
                         base_list = []
         else:
-            base_list = datanodes
+            base_list = t.cast(list, datanodes)
         adapted_list = self.get_sorted_datanode_list(t.cast(list, base_list), sorts)
         return self.get_filtered_datanode_list(t.cast(list, adapted_list), filters)
 
