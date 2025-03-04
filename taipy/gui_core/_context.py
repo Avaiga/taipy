@@ -711,9 +711,17 @@ class _GuiCoreContext(CoreEventConsumerBase):
             self.__do_datanodes_tree()
         if datanodes is None:
             if scenarios is None:
-                base_list = (self.data_nodes_by_owner or {}).get(None, []) + (
-                    self.get_scenarios(None, None, None) or []
-                )
+                tree: t.List[t.Union[Cycle, Scenario]] = []
+                with self.lock:
+                    # always needed to get scenarios for a cycle in cycle_adapter
+                    if self.scenario_by_cycle is None:
+                        self.scenario_by_cycle = get_cycles_scenarios()
+                    for cycle, c_scenarios in self.scenario_by_cycle.items():
+                        if cycle is None:
+                            tree.extend(c_scenarios)
+                        else:
+                            tree.append(cycle)
+                base_list = (self.data_nodes_by_owner or {}).get(None, []) + tree
             else:
                 if isinstance(scenarios, (list, tuple)) and len(scenarios) > 1:
                     base_list = list(scenarios)
