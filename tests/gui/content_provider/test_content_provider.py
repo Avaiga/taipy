@@ -70,4 +70,4 @@ def test_process_content_provider(gui: Gui, helpers):
     result = flask_client.get(
         f"/taipy-user-content/test?client_id={cid}&__taipy_html_content=true&variable_name=an_instance"
     )
-    assert "test_content_provider.AType" in result.data.decode()
+    assert "test_content_provider._AType" in result.data.decode()
