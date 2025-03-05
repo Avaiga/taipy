@@ -18,17 +18,13 @@ from taipy.gui import Gui, Markdown, get_module_context, get_module_name_from_st
 
 
 def test_get_module_context(gui: Gui, helpers):
-    name = "World!"  # noqa: F841
-    btn_id = "button1"  # noqa: F841
-
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
+    gui.add_page("test", Markdown("<|Hello|button|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
-    # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().app_context():
         g.client_id = cid
@@ -42,17 +38,13 @@ def test_bad_get_module_context(gui: Gui, helpers):
         assert len(records) == 0
 
 def test_get_module_name_from_state(gui: Gui, helpers):
-    name = "World!"  # noqa: F841
-    btn_id = "button1"  # noqa: F841
-
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
+    gui.add_page("test", Markdown("<|Hello|button|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
-    # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().app_context():
         g.client_id = cid
