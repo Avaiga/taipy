@@ -37,5 +37,5 @@ def test_get_state_id(gui: Gui, helpers):
 
 def test_bad_get_state_id(gui: Gui, helpers):
     with warnings.catch_warnings(record=True) as records:
-        get_state_id(None) # type: ignore[arg-type]
-        assert len(records) == 1
+        assert get_state_id(None) is None # type: ignore[arg-type]
+        assert len(records) == 0
