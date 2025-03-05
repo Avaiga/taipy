@@ -49,8 +49,8 @@ def test_process_content_provider(gui: Gui, helpers):
     def content_provider(x):
         return str(x)
 
-    v_name = "variable"
-    an_instance = AType()
+    v_name = "variable"  # noqa: F841
+    an_instance = AType()  # noqa: F841
 
     gui.register_content_provider(AType, content_provider)
 
