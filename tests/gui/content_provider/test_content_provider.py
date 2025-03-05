@@ -1,0 +1,75 @@
+# Copyright 2021-2025 Avaiga Private Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
+import inspect
+import warnings
+
+from flask import g
+
+from taipy.gui import Gui, Markdown, close_notification, notify
+
+
+class AType:
+    pass
+
+
+def test_register_content_provider(gui: Gui, helpers):
+    def content_provider(x):
+        return x
+
+    gui.register_content_provider(AType, content_provider)
+    assert gui._Gui__content_providers[AType] is content_provider  # type: ignore[attr-defined]
+
+
+def test_bad_register_content_provider(gui: Gui, helpers):
+    with warnings.catch_warnings(record=True) as records:
+        gui.register_content_provider(AType, "content_provider")  # type: ignore[arg-type]
+        assert len(records) == 1
+
+
+def test_bad_again_register_content_provider(gui: Gui, helpers):
+    def content_provider(x):
+        return x
+
+    with warnings.catch_warnings(record=True) as records:
+        gui.register_content_provider(AType, content_provider)
+        gui.register_content_provider(AType, content_provider)
+        assert len(records) == 1
+
+
+def test_process_content_provider(gui: Gui, helpers):
+    def content_provider(x):
+        return str(x)
+
+    v_name = "variable"
+    an_instance = AType()
+
+    gui.register_content_provider(AType, content_provider)
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
+    gui.add_page("test", Markdown("<|Hello {v_name} {str(an_instance)}|button|>"))
+    gui.run(run_server=False)
+    flask_client = gui._server.test_client()
+    cid = helpers.create_scope_and_get_sid(gui)
+    # Get the jsx once so that the page will be evaluated -> variable will be registered
+    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
+    # no content provider
+    result = flask_client.get(
+        f"/taipy-user-content/test?client_id={cid}&__taipy_html_content=true&variable_name=v_name"
+    )
+    assert "No valid provider" in result.data.decode()
+    # my content provider
+    result = flask_client.get(
+        f"/taipy-user-content/test?client_id={cid}&__taipy_html_content=true&variable_name=an_instance"
+    )
+    assert "test_content_provider.AType" in result.data.decode()
