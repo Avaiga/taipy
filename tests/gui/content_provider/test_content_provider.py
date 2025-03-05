@@ -12,12 +12,10 @@
 import inspect
 import warnings
 
-from flask import g
-
-from taipy.gui import Gui, Markdown, close_notification, notify
+from taipy.gui import Gui, Markdown
 
 
-class AType:
+class _AType:
     pass
 
 
@@ -25,13 +23,13 @@ def test_register_content_provider(gui: Gui, helpers):
     def content_provider(x):
         return x
 
-    gui.register_content_provider(AType, content_provider)
-    assert gui._Gui__content_providers[AType] is content_provider  # type: ignore[attr-defined]
+    gui.register_content_provider(_AType, content_provider)
+    assert gui._Gui__content_providers[_AType] is content_provider  # type: ignore[attr-defined]
 
 
 def test_bad_register_content_provider(gui: Gui, helpers):
     with warnings.catch_warnings(record=True) as records:
-        gui.register_content_provider(AType, "content_provider")  # type: ignore[arg-type]
+        gui.register_content_provider(_AType, "content_provider")  # type: ignore[arg-type]
         assert len(records) == 1
 
 
@@ -40,8 +38,8 @@ def test_bad_again_register_content_provider(gui: Gui, helpers):
         return x
 
     with warnings.catch_warnings(record=True) as records:
-        gui.register_content_provider(AType, content_provider)
-        gui.register_content_provider(AType, content_provider)
+        gui.register_content_provider(_AType, content_provider)
+        gui.register_content_provider(_AType, content_provider)
         assert len(records) == 1
 
 
@@ -50,9 +48,9 @@ def test_process_content_provider(gui: Gui, helpers):
         return str(x)
 
     v_name = "variable"  # noqa: F841
-    an_instance = AType()  # noqa: F841
+    an_instance = _AType()  # noqa: F841
 
-    gui.register_content_provider(AType, content_provider)
+    gui.register_content_provider(_AType, content_provider)
 
     # set gui frame
     gui._set_frame(inspect.currentframe())
