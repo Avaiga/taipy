@@ -42,6 +42,7 @@ class _FileDataNodeMixin:
     _PATH_KEY = "path"
     _DEFAULT_PATH_KEY = "default_path"
     _IS_GENERATED_KEY = "is_generated"
+    __TAIPY_DUPLICATE = "DUPLICATE_OF"
 
     __logger = _TaipyLogger._get_logger()
 
@@ -109,12 +110,14 @@ class _FileDataNodeMixin:
 
         return ""
 
-    def _upload(self,
-                path: str,
-                upload_checker: Optional[Callable[[str, Any], bool]] = None,
-                editor_id: Optional[str] = None,
-                comment: Optional[str] = None,
-                **kwargs: Any) -> ReasonCollection:
+    def _upload(
+        self,
+        path: str,
+        upload_checker: Optional[Callable[[str, Any], bool]] = None,
+        editor_id: Optional[str] = None,
+        comment: Optional[str] = None,
+        **kwargs: Any,
+    ) -> ReasonCollection:
         """Upload a file data to the data node.
 
         Arguments:
@@ -136,11 +139,15 @@ class _FileDataNodeMixin:
         from ._data_manager_factory import _DataManagerFactory
 
         reasons = ReasonCollection()
-        if (editor_id
-            and self.edit_in_progress # type: ignore[attr-defined]
-            and self.editor_id != editor_id # type: ignore[attr-defined]
-            and (not self.editor_expiration_date # type: ignore[attr-defined]
-                 or self.editor_expiration_date > datetime.now())):  # type: ignore[attr-defined]
+        if (
+            editor_id
+            and self.edit_in_progress  # type: ignore[attr-defined]
+            and self.editor_id != editor_id  # type: ignore[attr-defined]
+            and (
+                not self.editor_expiration_date  # type: ignore[attr-defined]
+                or self.editor_expiration_date > datetime.now()  # type: ignore[attr-defined]
+            )
+        ):
             reasons._add_reason(self.id, DataNodeEditInProgress(self.id))  # type: ignore[attr-defined]
             return reasons
 
@@ -161,7 +168,8 @@ class _FileDataNodeMixin:
                 self.__logger.error(
                     f"Error with the upload checker `{upload_checker.__name__}` "
                     f"while checking `{up_path.name}` file for upload to the data "
-                    f"node `{self.id}`:") # type: ignore[attr-defined]
+                    f"node `{self.id}`:"  # type: ignore[attr-defined]
+                )
                 self.__logger.error(f"Error: {err}")
                 can_upload = False
 
@@ -212,3 +220,15 @@ class _FileDataNodeMixin:
         if os.path.exists(old_path):
             shutil.move(old_path, new_path)
         return new_path
+
+    def _duplicate_file(self, dest: DataNode):
+        if os.path.exists(self._path):
+            folder_path, base_name = os.path.split(self._path)
+            new_path = os.path.join(folder_path, f"{dest.id}_{self.__TAIPY_DUPLICATE}_{base_name}")
+            if os.path.isdir(self._path):
+                shutil.copytree(self._path, new_path)
+            else:
+                shutil.copy(self._path, new_path)
+            normalize_path = _normalize_path(new_path)
+            dest._path = normalize_path
+            dest._properties[self._PATH_KEY] = normalize_path

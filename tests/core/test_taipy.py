@@ -869,3 +869,29 @@ class TestTaipy:
         assert len(tp.get_scenarios()) == 5
         assert len(tp.get_entities_by_config_id(scenario_config_1.id)) == 3
         assert len(tp.get_entities_by_config_id(scenario_config_2.id)) == 2
+
+    def test_can_duplicate(self):
+        dn_config = Config.configure_in_memory_data_node("dn", 10)
+        task_config = Config.configure_task("task", print, [dn_config])
+        scenario_config = Config.configure_scenario("sc", {task_config}, [], Frequency.DAILY)
+
+        scenario = tp.create_scenario(scenario_config)
+        assert tp.can_duplicate(scenario)
+        assert not tp.can_duplicate("1")
+
+    def test_duplicate_scenario(self):
+        dn_config = Config.configure_in_memory_data_node("dn", 10)
+        task_config = Config.configure_task("task", print, [dn_config])
+        scenario_config = Config.configure_scenario("sc", {task_config}, [], Frequency.DAILY)
+
+        scenario = tp.create_scenario(scenario_config)
+
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._duplicate") as mck:
+            tp.duplicate_scenario(scenario)
+            mck.assert_called_once_with(scenario, None, None)
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._duplicate") as mck:
+            tp.duplicate_scenario(scenario, datetime.datetime(2022, 2, 5))
+            mck.assert_called_once_with(scenario, datetime.datetime(2022, 2, 5), None)
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._duplicate") as mck:
+            tp.duplicate_scenario(scenario, datetime.datetime(2022, 2, 5), "displayable_name")
+            mck.assert_called_once_with(scenario, datetime.datetime(2022, 2, 5), "displayable_name")

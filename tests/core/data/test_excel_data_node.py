@@ -573,8 +573,8 @@ class TestExcelDataNode:
         reasons = dn._upload(not_exists_xlsx_path, upload_checker=check_data_column)
         assert bool(reasons) is False
         assert (
-            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.xlsx can not be read,"
-            f' therefore is not a valid data file for data node "{dn.id}"'
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file 'not_exists.xlsx' can not be read,"
+            f" therefore is not a valid data file for data node '{dn.id}'"
         )
 
         not_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsm").strpath
@@ -584,7 +584,7 @@ class TestExcelDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.xlsm has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.xlsm' has invalid data for data node '{dn.id}'"
         )
 
         wrong_format_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsx").strpath
@@ -594,7 +594,7 @@ class TestExcelDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.xlsx has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.xlsx' has invalid data for data node '{dn.id}'"
         )
 
         assert_frame_equal(dn.read()["Sheet1"], old_data)  # The content of the dn should not change when upload fails
@@ -623,18 +623,18 @@ class TestExcelDataNode:
         reasons = dn._upload(not_exists_xlsx_path, upload_checker=check_data_is_positive)
         assert bool(reasons) is False
         assert (
-            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.xlsx can not be read,"
-            f' therefore is not a valid data file for data node "{dn.id}"'
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file 'not_exists.xlsx' can not be read,"
+            f" therefore is not a valid data file for data node '{dn.id}'"
         )
 
         wrong_format_not_excel_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsm").strpath
         pd.DataFrame(old_data).to_excel(wrong_format_not_excel_path, index=False)
-        # The upload should fail when the file is not a excel
+        # The upload should fail when the file is not an Excel
         reasons = dn._upload(wrong_format_not_excel_path, upload_checker=check_data_is_positive)
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.xlsm has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.xlsm' has invalid data for data node '{dn.id}'"
         )
 
         not_xlsx_path = tmpdir_factory.mktemp("data").join("wrong_format_df.xlsx").strpath
@@ -643,7 +643,7 @@ class TestExcelDataNode:
         reasons = dn._upload(not_xlsx_path, upload_checker=check_data_is_positive)
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.xlsx has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.xlsx' has invalid data for data node '{dn.id}'"
         )
 
         np.array_equal(dn.read()["Sheet1"], old_data)  # The content of the dn should not change when upload fails

@@ -16,16 +16,18 @@ from taipy.common.config import Config
 from taipy.common.config._config import _Config
 
 from .._manager._manager import _Manager
+from .._repository._abstract_repository import _AbstractRepository
 from .._version._version_mixin import _VersionMixin
 from ..common.scope import Scope
 from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
 from ..exceptions.exceptions import InvalidDataNodeType
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
-from ..reason import NotGlobalScope, ReasonCollection, WrongConfigType
+from ..reason import EntityDoesNotExist, NotGlobalScope, ReasonCollection, WrongConfigType
+from ..reason.reason import DataIsNotDuplicable
 from ..scenario.scenario_id import ScenarioId
 from ..sequence.sequence_id import SequenceId
-from ._data_fs_repository import _DataFSRepository
+from ._data_duplicator import _DataDuplicator
 from ._file_datanode_mixin import _FileDataNodeMixin
 from .data_node import DataNode
 from .data_node_id import DataNodeId
@@ -35,7 +37,18 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     _DATA_NODE_CLASS_MAP = DataNode._class_map()  # type: ignore
     _ENTITY_NAME = DataNode.__name__
     _EVENT_ENTITY_TYPE = EventEntityType.DATA_NODE
-    _repository: _DataFSRepository
+    _repository: _AbstractRepository
+
+    @classmethod
+    def _get_owner_id(
+        cls, scope, cycle_id, scenario_id
+    ) -> Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]:
+        if scope == Scope.SCENARIO:
+            return scenario_id
+        elif scope == Scope.CYCLE:
+            return cycle_id
+        else:
+            return None
 
     @classmethod
     def _bulk_get_or_create(
@@ -47,20 +60,11 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         data_node_configs = [Config.data_nodes[dnc.id] for dnc in data_node_configs]
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
-            scope = dn_config.scope
-            owner_id: Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]
-            if scope == Scope.SCENARIO:
-                owner_id = scenario_id
-            elif scope == Scope.CYCLE:
-                owner_id = cycle_id
-            else:
-                owner_id = None
+            owner_id = cls._get_owner_id(dn_config.scope, cycle_id, scenario_id)
             dn_configs_and_owner_id.append((dn_config, owner_id))
-
         data_nodes = cls._repository._get_by_configs_and_owner_ids(
             dn_configs_and_owner_id, cls._build_filters_with_version(None)
         )
-
         return {
             dn_config: data_nodes.get((dn_config, owner_id)) or cls._create_and_set(dn_config, owner_id, None)
             for dn_config, owner_id in dn_configs_and_owner_id
@@ -166,7 +170,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
     @classmethod
     def _get_by_config_id(cls, config_id: str, version_number: Optional[str] = None) -> List[DataNode]:
         """
-        Get all datanodes by its config id.
+        Get all data nodes by its config id.
         """
         filters = cls._build_filters_with_version(version_number)
         if not filters:
@@ -174,3 +178,19 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         for fil in filters:
             fil.update({"config_id": config_id})
         return cls._repository._load_all(filters)
+
+    @classmethod
+    def _can_duplicate(cls, dn: Union[DataNodeId, DataNode]) -> ReasonCollection:
+        if isinstance(dn, DataNode):
+            dn_id = dn.id
+        else:
+            dn_id = dn
+        reason_collector = ReasonCollection()
+        if not cls._repository._exists(dn_id):
+            reason_collector._add_reason(dn_id, EntityDoesNotExist(dn_id))
+            return reason_collector
+        if not isinstance(dn, DataNode):
+            dn = cls._get(dn)
+        if not _DataDuplicator(dn).can_duplicate():
+            reason_collector._add_reason(dn_id, DataIsNotDuplicable(dn_id))
+        return reason_collector

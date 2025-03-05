@@ -433,22 +433,27 @@ class DataNode(_Entity, _Labeled):
                 corresponding to this write.
         """
         from ._data_manager_factory import _DataManagerFactory
-        if (editor_id
+
+        if (
+            editor_id
             and self.edit_in_progress
             and self.editor_id != editor_id
-            and (not self.editor_expiration_date or self.editor_expiration_date > datetime.now())):
+            and (not self.editor_expiration_date or self.editor_expiration_date > datetime.now())
+        ):
             raise DataNodeIsBeingEdited(self.id, self.editor_id)
         self._append(data)
         self.track_edit(editor_id=editor_id, comment=comment, **kwargs)
         self.unlock_edit()
         _DataManagerFactory._build_manager()._set(self)
 
-    def write(self,
-              data,
-              job_id: Optional[JobId] = None,
-              editor_id: Optional[str] = None,
-              comment: Optional[str] = None,
-              **kwargs: Any):
+    def write(
+        self,
+        data,
+        job_id: Optional[JobId] = None,
+        editor_id: Optional[str] = None,
+        comment: Optional[str] = None,
+        **kwargs: Any,
+    ):
         """Write some data to this data node.
 
         once the data is written, the data node is unlocked and the edit is tracked.
@@ -461,10 +466,12 @@ class DataNode(_Entity, _Labeled):
             **kwargs (Any): Extra information to attach to the edit document
                 corresponding to this write.
         """
-        if (editor_id
+        if (
+            editor_id
             and self.edit_in_progress
             and self.editor_id != editor_id
-            and (not self.editor_expiration_date or self.editor_expiration_date > datetime.now())):
+            and (not self.editor_expiration_date or self.editor_expiration_date > datetime.now())
+        ):
             raise DataNodeIsBeingEdited(self.id, self.editor_id)
         self._write(data)
         self.track_edit(job_id=job_id, editor_id=editor_id, comment=comment, **kwargs)
@@ -473,12 +480,14 @@ class DataNode(_Entity, _Labeled):
 
         _DataManagerFactory._build_manager()._set(self)
 
-    def track_edit(self,
-                   job_id: Optional[str] = None,
-                   editor_id: Optional[str] = None,
-                   timestamp: Optional[datetime] = None,
-                   comment: Optional[str] = None,
-                   **options: Any):
+    def track_edit(
+        self,
+        job_id: Optional[str] = None,
+        editor_id: Optional[str] = None,
+        timestamp: Optional[datetime] = None,
+        comment: Optional[str] = None,
+        **options: Any,
+    ):
         """Creates and adds a new entry in the edits attribute without writing the data.
 
         Arguments:
@@ -627,15 +636,15 @@ class DataNode(_Entity, _Labeled):
             If the data node config is not part of the scenario config, 0xfffc is returned as an infinite rank.
         """
         if not scenario_config_id:
-            return 0xfffb
+            return 0xFFFB
         dn_config = Config.data_nodes.get(self._config_id, None)
         if not dn_config:
             self._logger.error(f"Data node config `{self.config_id}` for data node `{self.id}` is not found.")
-            return 0xfffd
+            return 0xFFFD
         if not dn_config._ranks:
             self._logger.error(f"Data node config `{self.config_id}` for data node `{self.id}` has no rank.")
-            return 0xfffe
-        return dn_config._ranks.get(scenario_config_id, 0xfffc)
+            return 0xFFFE
+        return dn_config._ranks.get(scenario_config_id, 0xFFFC)
 
     @abstractmethod
     def _read(self):

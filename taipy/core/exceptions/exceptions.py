@@ -43,6 +43,10 @@ class MissingRequiredProperty(Exception):
     """Raised if a required property is missing when creating a Data Node."""
 
 
+class WrongDataNodeType(Exception):
+    """Raised if a data node storage type is incorrect."""
+
+
 class InvalidDataNodeType(Exception):
     """Raised if a data node storage type does not exist."""
 

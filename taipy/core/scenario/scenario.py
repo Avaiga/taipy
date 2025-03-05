@@ -414,6 +414,44 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout, **properties)
 
+    def can_duplicate(self) -> ReasonCollection:
+        """Indicate if a scenario can be duplicated.
+
+        Arguments:
+            entity (Union[str, Scenario]): The scenario or its id to check if it can be duplicated.
+
+        Returns:
+            True if the given scenario can be duplicated. False otherwise.
+        """
+        from ._scenario_manager_factory import _ScenarioManagerFactory
+
+        return _ScenarioManagerFactory._build_manager()._can_duplicate(self)
+
+    def duplicate(
+        self,
+        new_creation_date: Optional[datetime] = None,
+        new_name: Optional[str] = None,
+    ) -> "Scenario":
+        """Duplicate the scenario and return the new one.
+
+        This method duplicates the scenario, optionally setting a new creation date and name.
+        The nested tasks and data nodes are duplicated as well. If the scenario belongs to a
+        cycle, the cycle (corresponding to the creation_date and the configuration frequency
+        attribute) is created if it does not exist yet.
+
+        Arguments:
+            new_creation_date (Optional[datetime.datetime]): The creation date of the new scenario.
+                If None, the current date and time is used.
+            new_name (Optional[str]): The displayable name of the new scenario.
+                If None, the name of the current scenario is used.
+
+        Returns:
+            Scenario: The newly duplicated scenario.
+        """
+        from ._scenario_manager_factory import _ScenarioManagerFactory
+
+        return _ScenarioManagerFactory._build_manager()._duplicate(self, new_creation_date, new_name)
+
     def set_primary(self) -> None:
         """Promote the scenario as the primary scenario of its cycle.
 

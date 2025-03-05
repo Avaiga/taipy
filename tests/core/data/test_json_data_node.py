@@ -460,8 +460,8 @@ class TestJSONDataNode:
         reasons = dn._upload(not_exists_json_path, upload_checker=check_data_keys)
         assert bool(reasons) is False
         assert (
-            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.json can not be read,"
-            f' therefore is not a valid data file for data node "{dn.id}"'
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file 'not_exists.json' can not be read,"
+            f" therefore is not a valid data file for data node '{dn.id}'"
         )
 
         not_json_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_json").strpath
@@ -472,7 +472,7 @@ class TestJSONDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.not_json has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.not_json' has invalid data for data node '{dn.id}'"
         )
 
         wrong_format_json_path = tmpdir_factory.mktemp("data").join("wrong_format_df.json").strpath
@@ -483,7 +483,7 @@ class TestJSONDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.json has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.json' has invalid data for data node '{dn.id}'"
         )
 
         assert dn.read() == old_data  # The content of the dn should not change when upload fails

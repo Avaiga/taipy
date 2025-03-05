@@ -320,8 +320,8 @@ class TestParquetDataNode:
         reasons = dn._upload(not_exists_parquet_path, upload_checker=check_data_column)
         assert bool(reasons) is False
         assert (
-            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.parquet can not be read,"
-            f' therefore is not a valid data file for data node "{dn.id}"'
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file 'not_exists.parquet' can not be read,"
+            f" therefore is not a valid data file for data node '{dn.id}'"
         )
 
         not_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_parquet").strpath
@@ -331,7 +331,7 @@ class TestParquetDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.not_parquet has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.not_parquet' has invalid data for data node '{dn.id}'"
         )
 
         wrong_format_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.parquet").strpath
@@ -343,7 +343,7 @@ class TestParquetDataNode:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.parquet has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.parquet' has invalid data for data node '{dn.id}'"
         )
 
         assert_frame_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails
@@ -372,8 +372,8 @@ class TestParquetDataNode:
         reasons = dn._upload(not_exists_parquet_path, upload_checker=check_data_is_positive)
         assert bool(reasons) is False
         assert (
-            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.parquet can not be read,"
-            f' therefore is not a valid data file for data node "{dn.id}"'
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file 'not_exists.parquet' can not be read,"
+            f" therefore is not a valid data file for data node '{dn.id}'"
         )
 
         not_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_parquet").strpath
@@ -382,7 +382,7 @@ class TestParquetDataNode:
         reasons = dn._upload(not_parquet_path, upload_checker=check_data_is_positive)
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.not_parquet has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.not_parquet' has invalid data for data node '{dn.id}'"
         )
 
         wrong_format_parquet_path = tmpdir_factory.mktemp("data").join("wrong_format_df.parquet").strpath
@@ -393,7 +393,7 @@ class TestParquetDataNode:
         reasons = dn._upload(wrong_format_parquet_path, upload_checker=check_data_is_positive)
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.parquet has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.parquet' has invalid data for data node '{dn.id}'"
         )
 
         np.array_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails

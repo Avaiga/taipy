@@ -76,22 +76,6 @@ class Task(_Entity, _Labeled):
             # Retrieve the list of all tasks
             all_tasks = tp.get_tasks()
         ```
-
-    Attributes:
-        config_id (str): The identifier of the `TaskConfig^`.
-        properties (dict[str, Any]): A dictionary of additional properties.
-        function (callable): The python function to execute. The _function_ must take as parameter the
-            data referenced by inputs data nodes, and must return the data referenced by outputs data nodes.
-        input (Union[DataNode^, List[DataNode^]]): The list of inputs.
-        output (Union[DataNode^, List[DataNode^]]): The list of outputs.
-        id (str): The unique identifier of the task.
-        owner_id (str):  The identifier of the owner (sequence_id, scenario_id, cycle_id) or None.
-        parent_ids (Optional[Set[str]]): The set of identifiers of the parent sequences.
-        version (str): The string indicates the application version of the task to instantiate. If not provided, the
-            latest version is used.
-        skippable (bool): If True, indicates that the task can be skipped if no change has been made on inputs. The
-            default value is _False_.
-
     """
 
     _ID_PREFIX = "TASK"
@@ -116,7 +100,7 @@ class Task(_Entity, _Labeled):
         skippable: bool = False,
     ) -> None:
         self._config_id = _validate_id(config_id)
-        self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
+        self.id = id or self._new_id(config_id)
         self._owner_id = owner_id
         self._parent_ids = parent_ids or set()
         self._input = {dn.config_id: dn for dn in input or []}
@@ -126,6 +110,11 @@ class Task(_Entity, _Labeled):
         self._skippable = skippable
         self._properties = _Properties(self, **properties)
         self._init_done = True
+
+    @staticmethod
+    def _new_id(config_id: str) -> TaskId:
+        """Generate a unique task identifier."""
+        return TaskId(Task.__ID_SEPARATOR.join([Task._ID_PREFIX, config_id, str(uuid.uuid4())]))
 
     def __hash__(self) -> int:
         return hash(self.id)
@@ -198,7 +187,11 @@ class Task(_Entity, _Labeled):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def function(self) -> Callable:
-        """The python function to execute."""
+        """The python function to execute.
+
+        The _function_ must take as parameter the data referenced by inputs data nodes,
+        and must return the data referenced by outputs data nodes.
+        """
         return self._function
 
     @function.setter  # type: ignore

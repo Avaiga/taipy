@@ -51,6 +51,7 @@ from ..reason import (
 from ..submission._submission_manager_factory import _SubmissionManagerFactory
 from ..submission.submission import Submission
 from ..task._task_manager_factory import _TaskManagerFactory
+from ._scenario_duplicator import _ScenarioDuplicator
 from .scenario import Scenario
 from .scenario_id import ScenarioId
 
@@ -521,3 +522,38 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for fil in filters:
             fil.update({"config_id": config_id})
         return cls._repository._load_all(filters)
+
+    @classmethod
+    def _duplicate(
+        cls, scenario: Scenario, new_creation_date: Optional[datetime] = None, new_name: Optional[str] = None
+    ) -> Scenario:
+        """Create a duplicated scenario with its related entities.
+
+        Duplicate a scenario, publish a creation event and return the newly created
+        scenario.
+
+        Arguments:
+            scenario (Scenario): The scenario to duplicate.
+            new_creation_date (Optional[datetime]): The creation date of the new scenario.
+                If not provided, the current date and time is used.
+            new_name (Optional[str]): The name of the new scenario. If not provided, the
+                name of the original scenario is used.
+
+        Returns:
+            The newly created scenario.
+        """
+        reasons = cls._can_duplicate(scenario)
+        if not reasons:
+            raise Exception(reasons.reasons)
+        return _ScenarioDuplicator(scenario).duplicate(new_creation_date, new_name)
+
+    @classmethod
+    def _can_duplicate(cls, scenario: Union[str, Scenario]) -> ReasonCollection:
+        reason_collector = ReasonCollection()
+        if isinstance(scenario, Scenario):
+            scenario_id = scenario.id
+        else:
+            scenario_id = str(scenario)  # type: ignore
+        if not cls._repository._exists(scenario_id):
+            reason_collector._add_reason(scenario_id, EntityDoesNotExist(scenario_id))
+        return reason_collector

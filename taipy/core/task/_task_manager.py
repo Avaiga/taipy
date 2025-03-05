@@ -58,6 +58,17 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         super()._set(task)
 
     @classmethod
+    def _get_owner_id(
+        cls, scope, cycle_id, scenario_id
+    ) -> Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]:
+        if scope == Scope.SCENARIO:
+            return scenario_id
+        elif scope == Scope.CYCLE:
+            return cycle_id
+        else:
+            return None
+
+    @classmethod
     def _bulk_get_or_create(
         cls,
         task_configs: List[TaskConfig],
@@ -79,13 +90,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
             ]
             task_config_data_nodes = [data_nodes[dn_config] for dn_config in task_dn_configs]
             scope = min(dn.scope for dn in task_config_data_nodes) if len(task_config_data_nodes) != 0 else Scope.GLOBAL
-            owner_id: Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]
-            if scope == Scope.SCENARIO:
-                owner_id = scenario_id
-            elif scope == Scope.CYCLE:
-                owner_id = cycle_id
-            else:
-                owner_id = None
+            owner_id = cls._get_owner_id(scope, cycle_id, scenario_id)
 
             tasks_configs_and_owner_id.append((task_config, owner_id))
 
@@ -226,3 +231,14 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         for fil in filters:
             fil.update({"config_id": config_id})
         return cls._repository._load_all(filters)
+
+    @classmethod
+    def _can_duplicate(cls, task: Union[Task, TaskId]) -> ReasonCollection:
+        reason_collector = ReasonCollection()
+        if isinstance(task, Task):
+            task_id = task.id
+        else:
+            task_id = task
+        if not cls._repository._exists(task_id):
+            reason_collector._add_reason(task_id, EntityDoesNotExist(task_id))
+        return reason_collector

@@ -1060,13 +1060,45 @@ def get_entities_by_config_id(
     Returns:
         The list of all entities by the config id.
     """
+    if scenarios := _ScenarioManagerFactory._build_manager()._get_by_config_id(config_id):
+        return scenarios
+    if tasks := _TaskManagerFactory._build_manager()._get_by_config_id(config_id):
+        return tasks
+    if data_nodes := _DataManagerFactory._build_manager()._get_by_config_id(config_id):
+        return data_nodes
+    return scenarios
 
-    entities: List = []
 
-    if entities := _ScenarioManagerFactory._build_manager()._get_by_config_id(config_id):
-        return entities
-    if entities := _TaskManagerFactory._build_manager()._get_by_config_id(config_id):
-        return entities
-    if entities := _DataManagerFactory._build_manager()._get_by_config_id(config_id):
-        return entities
-    return entities
+def can_duplicate(entity: Union[str, Scenario]) -> ReasonCollection:
+    """Indicate if a scenario can be duplicated.
+
+    Arguments:
+        entity (Union[str, Scenario]): The scenario or its id to check if it can be duplicated.
+
+    Returns:
+        True if the given scenario can be duplicated. False otherwise.
+    """
+    return _ScenarioManagerFactory._build_manager()._can_duplicate(entity)
+
+
+def duplicate_scenario(
+    scenario: Scenario, new_creation_date: Optional[datetime] = None, new_name: Optional[str] = None
+) -> Scenario:
+    """Duplicate an existing scenario and return a new scenario.
+
+    This function duplicates the provided scenario, optionally setting a new creation date and name.
+
+    If the scenario belongs to a cycle, the cycle (corresponding to the creation_date and the configuration
+    frequency attribute) is created if it does not exist yet.
+
+    Arguments:
+        scenario (Scenario): The scenario to duplicate.
+        new_creation_date (Optional[datetime.datetime]): The creation date of the new scenario.
+            If None, the current date and time is used.
+        new_name (Optional[str]): The displayable name of the new scenario.
+
+    Returns:
+        Scenario: The newly duplicated scenario.
+    """
+
+    return _ScenarioManagerFactory._build_manager()._duplicate(scenario, new_creation_date, new_name)
