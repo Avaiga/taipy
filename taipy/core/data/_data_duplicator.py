@@ -8,8 +8,9 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-from ..data.data_node import DataNode
 from ._file_datanode_mixin import _FileDataNodeMixin
+from ..data.data_node import DataNode
+from ..exceptions import WrongDataNodeType
 
 
 class _DataDuplicator:
@@ -34,11 +35,11 @@ class _DataDuplicator:
 
         Raises:
             NotImplementedError: If the data node type is not supported yet.
-            NotImplementedError: If the source and destination data nodes have different storage types.
+            WrongDataNodeType: If the source and destination data nodes have different storage types.
         """
-        if self.can_duplicate():
+        if isinstance(self.src, _FileDataNodeMixin):
             if self.src.storage_type() != dest.storage_type():
-                raise NotImplementedError("Source and destination data nodes must have the same storage type.")
+                raise WrongDataNodeType("Source and destination data nodes must have the same storage type.")
             self.src._duplicate_file(dest)
         else:
-            raise NotImplementedError(f"Data node type '{self.src.storage_type()}' is not supported for duplication yet.")
+            raise NotImplementedError(f"Data node type '{self.src.storage_type()}' not supported for duplication yet.")
