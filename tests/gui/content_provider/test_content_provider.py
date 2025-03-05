@@ -47,7 +47,6 @@ def test_process_content_provider(gui: Gui, helpers):
     def content_provider(x):
         return str(x)
 
-    v_name = "variable"  # noqa: F841
     an_instance = _AType()  # noqa: F841
 
     gui.register_content_provider(_AType, content_provider)
@@ -55,7 +54,25 @@ def test_process_content_provider(gui: Gui, helpers):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.add_page("test", Markdown("<|Hello {v_name} {str(an_instance)}|button|>"))
+    gui.add_page("test", Markdown("<|Hello {str(an_instance)}|button|>"))
+    gui.run(run_server=False)
+    flask_client = gui._server.test_client()
+    cid = helpers.create_scope_and_get_sid(gui)
+    # Get the jsx once so that the page will be evaluated -> variable will be registered
+    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
+    # my content provider
+    result = flask_client.get(
+        f"/taipy-user-content/test?client_id={cid}&__taipy_html_content=true&variable_name=an_instance"
+    )
+    assert "test_content_provider._AType" in result.data.decode()
+
+def test_process_content_provider_invalid(gui: Gui, helpers):
+    v_name = "variable"  # noqa: F841
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
+    gui.add_page("test", Markdown("<|Hello {v_name}|button|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
@@ -66,8 +83,3 @@ def test_process_content_provider(gui: Gui, helpers):
         f"/taipy-user-content/test?client_id={cid}&__taipy_html_content=true&variable_name=v_name"
     )
     assert "No valid provider" in result.data.decode()
-    # my content provider
-    result = flask_client.get(
-        f"/taipy-user-content/test?client_id={cid}&__taipy_html_content=true&variable_name=an_instance"
-    )
-    assert "test_content_provider._AType" in result.data.decode()
