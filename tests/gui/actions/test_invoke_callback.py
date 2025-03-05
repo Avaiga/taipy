@@ -26,9 +26,6 @@ def get_state(gui: Gui, state_id: str):
 
 
 def test_invoke_callback(gui: Gui, helpers):
-    name = "World!"  # noqa: F841
-    btn_id = "button1"  # noqa: F841
-
     val = 1  # noqa: F841
 
     def user_callback(state: State):
@@ -37,7 +34,7 @@ def test_invoke_callback(gui: Gui, helpers):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>\n<|{val}|>"))
+    gui.add_page("test", Markdown("<|Hello|button|>\n<|{val}|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # client id
@@ -51,9 +48,6 @@ def test_invoke_callback(gui: Gui, helpers):
 
 
 def test_invoke_callback_sid(gui: Gui, helpers):
-    name = "World!"  # noqa: F841
-    btn_id = "button1"  # noqa: F841
-
     val = 1  # noqa: F841
 
     def user_callback(state: State):
@@ -62,7 +56,7 @@ def test_invoke_callback_sid(gui: Gui, helpers):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>\n<|{val}|>"))
+    gui.add_page("test", Markdown("<|Hello|button|>\n<|{val}|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # client id

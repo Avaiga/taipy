@@ -34,8 +34,9 @@ def test_get_module_context(gui: Gui, helpers):
 
 def test_bad_get_module_context(gui: Gui, helpers):
     with warnings.catch_warnings(record=True) as records:
-        assert get_module_context(None) is None # type: ignore[arg-type]
+        assert get_module_context(None) is None  # type: ignore[arg-type]
         assert len(records) == 0
+
 
 def test_get_module_name_from_state(gui: Gui, helpers):
     # set gui frame
@@ -54,5 +55,5 @@ def test_get_module_name_from_state(gui: Gui, helpers):
 
 def test_bad_get_module_name_from_state(gui: Gui, helpers):
     with warnings.catch_warnings(record=True) as records:
-        assert get_module_name_from_state(None) is None # type: ignore[arg-type]
+        assert get_module_name_from_state(None) is None  # type: ignore[arg-type]
         assert len(records) == 0

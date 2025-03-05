@@ -35,5 +35,5 @@ def test_get_content_url(gui: Gui, helpers):
 
 def test_bad_resume_control(gui: Gui, helpers):
     with warnings.catch_warnings(record=True) as records:
-        get_user_content_url(None) # type: ignore[arg-type]
+        get_user_content_url(None)  # type: ignore[arg-type]
         assert len(records) == 1
