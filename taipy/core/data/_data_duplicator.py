@@ -36,9 +36,9 @@ class _DataDuplicator:
             NotImplementedError: If the data node type is not supported yet.
             NotImplementedError: If the source and destination data nodes have different storage types.
         """
-        if isinstance(self.src, _FileDataNodeMixin):
+        if self.can_duplicate():
             if self.src.storage_type() != dest.storage_type():
                 raise NotImplementedError("Source and destination data nodes must have the same storage type.")
             self.src._duplicate_file(dest)
         else:
-            raise NotImplementedError("Data node type not supported yet.")
+            raise NotImplementedError(f"Data node type '{self.src.storage_type()}' is not supported for duplication yet.")
