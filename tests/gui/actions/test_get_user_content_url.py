@@ -14,10 +14,10 @@ import warnings
 
 from flask import g
 
-from taipy.gui import Gui, Markdown, get_state_id
+from taipy.gui import Gui, Markdown, get_user_content_url
 
 
-def test_get_state_id(gui: Gui, helpers):
+def test_get_content_url(gui: Gui, helpers):
     name = "World!"  # noqa: F841
     btn_id = "button1"  # noqa: F841
 
@@ -27,15 +27,17 @@ def test_get_state_id(gui: Gui, helpers):
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
+    # WS client and emit
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui.get_flask_app().app_context():
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         g.client_id = cid
-        assert cid == get_state_id(gui._Gui__state)  # type: ignore[attr-defined]
+        url = get_user_content_url(gui._Gui__state, "path")  # type: ignore[attr-defined]
+        assert url == "/taipy-user-content/path?client_id=test"
 
 
-def test_bad_get_state_id(gui: Gui, helpers):
+def test_bad_resume_control(gui: Gui, helpers):
     with warnings.catch_warnings(record=True) as records:
-        get_state_id(None) # type: ignore[arg-type]
+        get_user_content_url(None) # type: ignore[arg-type]
         assert len(records) == 1

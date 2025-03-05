@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+import warnings
 
 from flask import g
 
@@ -41,8 +42,10 @@ def test_notify(gui: Gui, helpers):
     )
 
 def test_bad_notify(gui: Gui, helpers):
-    id = notify(None, "Info", "Message", id="id")  # type: ignore[arg-type]
-    assert id is None
+    with warnings.catch_warnings(record=True) as records:
+        id = notify(None, "Info", "Message", id="id")  # type: ignore[arg-type]
+        assert id is None
+        assert len(records) == 1
 
 
 def test_close_notification(gui: Gui, helpers):
@@ -69,3 +72,11 @@ def test_close_notification(gui: Gui, helpers):
         received_messages[0], "AL", {"nType": "Info", "message": "Message", "notificationId": "id"}
     )
     helpers.assert_outward_ws_simple_message(received_messages[1], "AL", {"nType": "", "notificationId": "id"})
+
+
+def test_bad_close_notification(gui: Gui, helpers):
+    with warnings.catch_warnings(record=True) as records:
+        close_notification(None, "id")  # type: ignore[arg-type]
+        assert len(records) == 1
+
+

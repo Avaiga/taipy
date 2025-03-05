@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+import warnings
 
 from flask import g
 
@@ -27,7 +28,7 @@ def test_hold_control(gui: Gui, helpers):
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
-    ws_client = gui._server._ws.test_client(gui._server.get_flask()) # type: ignore[arg-type]
+    ws_client = gui._server._ws.test_client(gui._server.get_flask())  # type: ignore[arg-type]
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
@@ -39,3 +40,9 @@ def test_hold_control(gui: Gui, helpers):
     helpers.assert_outward_ws_simple_message(
         received_messages[0], "BL", {"action": "_taipy_on_cancel_block_ui", "message": "Work in Progress..."}
     )
+
+
+def test_bad_hold_control(gui: Gui, helpers):
+    with warnings.catch_warnings(record=True) as records:
+        hold_control(None)  # type: ignore[arg-type]
+        assert len(records) == 1

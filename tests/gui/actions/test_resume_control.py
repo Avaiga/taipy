@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+import warnings
 
 from flask import g
 
@@ -37,3 +38,8 @@ def test_resume_control(gui: Gui, helpers):
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_simple_message(received_messages[0], "BL", {"message": None})
+
+def test_bad_resume_control(gui: Gui, helpers):
+    with warnings.catch_warnings(record=True) as records:
+        resume_control(None) # type: ignore[arg-type]
+        assert len(records) == 1

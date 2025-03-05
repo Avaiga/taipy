@@ -11,6 +11,7 @@
 
 import inspect
 import typing as t
+import warnings
 
 from flask import Flask, g
 
@@ -43,3 +44,8 @@ def test_download(gui: Gui, helpers):
     helpers.assert_outward_ws_simple_message(
         received_messages[0], "DF", {"name": "filename.txt", "onAction": "on_download_action"}
     )
+
+def test_bad_download(gui: Gui, helpers):
+    with warnings.catch_warnings(record=True) as records:
+        download(None, "some text", "filename.txt", "on_download_action") # type: ignore[arg-type]
+        assert len(records) == 1
