@@ -40,6 +40,10 @@ def test_notify(gui: Gui, helpers):
         received_messages[0], "AL", {"nType": "Info", "message": "Message", "notificationId": "id"}
     )
 
+def test_bad_notify(gui: Gui, helpers):
+    id = notify(None, "Info", "Message", id="id")  # type: ignore[arg-type]
+    assert id is None
+
 
 def test_close_notification(gui: Gui, helpers):
     name = "World!"  # noqa: F841

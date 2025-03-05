@@ -27,7 +27,7 @@ def test_resume_control(gui: Gui, helpers):
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
-    ws_client = gui._server._ws.test_client(gui._server.get_flask())
+    ws_client = gui._server._ws.test_client(gui._server.get_flask()) # type: ignore[arg-type]
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
