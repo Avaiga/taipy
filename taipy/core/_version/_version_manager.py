@@ -72,7 +72,7 @@ class _VersionManager(_Manager[_Version]):
         return version
 
     @classmethod
-    def _get_all(cls, version_number: Optional[Union[str, List]] = "all") -> List[_Version]:
+    def _get_all(cls, version_number: Union[str, List, None] = "all") -> List[_Version]:
         """
         Returns all entities.
         """

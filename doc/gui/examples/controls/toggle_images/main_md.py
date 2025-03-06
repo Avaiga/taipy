@@ -14,20 +14,19 @@
 #     python <script>
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui, Icon
-from taipy.gui import builder as tgb
 
 lov = [
-    ("id1", "Label 1"),
-    ("id2", Icon("https://docs.taipy.io/en/latest/assets/images/favicon.png", "Taipy Logo"), "Label 2"),
-    ("id3", "Label 3"),
+    "Label 1",
+    Icon("https://docs.taipy.io/en/latest/assets/images/favicon.png", "Taipy Logo"),
+    "Label 3",
 ]
 value = lov[0]
 
-with tgb.Page() as page:
-    tgb.toggle("{value}", lov="{lov}")  # type: ignore[attr-defined]
-    tgb.html(None, "Value: ")
-    tgb.text("{value[1].text if isinstance(value[1], Icon) else value[1]}", inline=True)  # type: ignore[attr-defined]
+page = """<|{value}|toggle|lov={lov}|>
+
+Value: <|{value.text if isinstance(value, Icon) else value}|>
+"""
 
 
 if __name__ == "__main__":
-    Gui(page).run(title="Toggle - List tuples")
+    Gui(page).run(title="Toggle - Images")

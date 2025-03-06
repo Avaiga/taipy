@@ -15,11 +15,13 @@
 # -----------------------------------------------------------------------------------------
 from taipy.gui import Gui
 
+# Initial selected value
 value = "Item 2"
 
 page = """
 <|{value}|toggle|lov=Item 1;Item 2;Item 3|>
-Value: <|{value}|>
+
+Selected value: <|{value}|>
 """
 
 if __name__ == "__main__":

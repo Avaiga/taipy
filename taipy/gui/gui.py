@@ -60,7 +60,7 @@ from ._renderers.factory import _Factory
 from ._renderers.json import _TaipyJsonEncoder
 from ._renderers.utils import _get_columns_dict
 from ._warnings import TaipyGuiWarning, _warn
-from .builder import _ElementApiGenerator
+from .builder._api_generator import _ElementApiGenerator
 from .config import Config, ConfigParameter, _Config
 from .custom import Page as CustomPage
 from .custom.utils import get_current_resource_handler, is_in_custom_page_context
@@ -179,19 +179,19 @@ class Gui:
 
     def __init__(
         self,
-        page: t.Optional[t.Union[str, Page]] = None,
+        page: t.Union[str, Page, None] = None,
         pages: t.Optional[dict] = None,
         css_file: t.Optional[str] = None,
         path_mapping: t.Optional[dict] = None,
         env_filename: t.Optional[str] = None,
         libraries: t.Optional[t.List[ElementLibrary]] = None,
         flask: t.Optional[Flask] = None,
-        script_paths: t.Optional[t.Union[str, Path, t.List[t.Union[str, Path]]]] = None,
+        script_paths: t.Union[str, Path, t.List[t.Union[str, Path]], None] = None,
     ):
         """Initialize a new Gui instance.
 
         Arguments:
-            page (Optional[Union[str, Page^]]): An optional `Page^` instance that is used
+            page (Union[str, Page^]): An optional `Page^` instance that is used
                 when there is a single page in this interface, referenced as the *root*
                 page (located at `/`).<br/>
                 If *page* is a raw string and if it holds a path to a readable file then
@@ -231,7 +231,7 @@ class Gui:
                 If this argument is set, this `Gui` instance will use the value of this argument
                 as the underlying server. If omitted or set to None, this `Gui` will create its
                 own Flask application instance and use it to serve the pages.
-            script_paths (Optional[Union[str, Path, List[Union[str, Path]]]]):
+            script_paths (Union[str, Path, List[Union[str, Path]], None]):
                 Specifies the path(s) to the JavaScript files or external resources used by the application.
                 It can be a single URL or path, or a list containing multiple URLs and/or paths.
         """
@@ -261,7 +261,7 @@ class Gui:
         self.__evaluator: _Evaluator = None  # type: ignore[assignment]
         self.__adapter = _Adapter()
         self.__directory_name_of_pages: t.List[str] = []
-        self.__favicon: t.Optional[t.Union[str, Path]] = None
+        self.__favicon: t.Union[str, Path, None] = None
 
         # default actions
         self.on_action: t.Optional[t.Callable] = None
@@ -418,7 +418,7 @@ class Gui:
             for library in libraries:
                 Gui.add_library(library)
 
-    def __load_scripts(self, script_paths: t.Optional[t.Union[str, Path, t.List[t.Union[str, Path]]]]):
+    def __load_scripts(self, script_paths: t.Union[str, Path, t.List[t.Union[str, Path]], None]):
         if script_paths is None:
             return
         else:
@@ -921,7 +921,7 @@ class Gui:
         q_args: t.Dict[str, str] = {}
         q_args.update(request.args)
         q_args.pop(Gui.__ARG_CLIENT_ID, None)
-        cb_function: t.Optional[t.Union[t.Callable, str]] = None
+        cb_function: t.Union[t.Callable, str, None] = None
         cb_function_name = None
         if q_args.get(Gui._HTML_CONTENT_KEY):
             cb_function = self.__process_content_provider
@@ -1387,7 +1387,7 @@ class Gui:
             if value is not None and scope_meta_ls.get(key) != value:
                 scope_meta_ls[key] = value
 
-    def _query_local_storage(self, *keys: str) -> t.Optional[t.Union[str, t.Dict[str, str]]]:
+    def _query_local_storage(self, *keys: str) -> t.Union[str, t.Dict[str, str], None]:
         if not keys:
             return None
         if len(keys) == 1:
@@ -1986,7 +1986,7 @@ class Gui:
             gui_app = a_state.get_gui()
             if _hasscopeattr(gui_app, Gui.__UI_BLOCK_NAME):
                 _setscopeattr(gui_app, Gui.__UI_BLOCK_NAME, False)
-            gui_app.__on_action(id, {"action": callback})
+            gui_app.__on_action(id, {"action": callback})  # type: ignore
 
         return _taipy_on_cancel_block_ui
 
@@ -2157,7 +2157,7 @@ class Gui:
             self.__var_dir.add_frame(page._frame)
         return module_name
 
-    def add_pages(self, pages: t.Optional[t.Union[t.Mapping[str, t.Union[str, Page]], str]] = None) -> None:
+    def add_pages(self, pages: t.Union[t.Mapping[str, t.Union[str, Page]], str, None] = None) -> None:
         """Add several pages to the Graphical User Interface.
 
         Arguments:
@@ -2380,9 +2380,7 @@ class Gui:
         except RuntimeError:
             return False
 
-    def _download(
-        self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[t.Union[str, t.Callable]] = ""
-    ):
+    def _download(self, content: t.Any, name: t.Optional[str] = "", on_action: t.Union[str, t.Callable, None] = ""):
         if _is_function(on_action):
             on_action_name = (
                 _get_lambda_id(t.cast(LambdaType, on_action))
@@ -2429,7 +2427,7 @@ class Gui:
 
     def _hold_actions(
         self,
-        callback: t.Optional[t.Union[str, t.Callable]] = None,
+        callback: t.Union[str, t.Callable, None] = None,
         message: t.Optional[str] = "Work in Progress...",
     ):  # pragma: no cover
         if _is_unnamed_function(callback):
@@ -2837,7 +2835,7 @@ class Gui:
             for lib in libs
             for s in (lib._do_get_relative_paths(lib.get_styles()))
         ]
-        if self._get_config("stylekit", True):
+        if self._get_config("stylekit", True):  # noqa: codespell
             styles.append("stylekit/stylekit.css")
         else:
             styles.append(Gui.__ROBOTO_FONT)
@@ -2932,7 +2930,7 @@ class Gui:
         """
         # --------------------------------------------------------------------------------
         # The ssl_context argument was removed just after 1.1. It was defined as:
-        # t.Optional[t.Union[ssl.SSLContext, t.Tuple[str, t.Optional[str]], t.Literal["adhoc"]]] = None
+        # t.Union[ssl.SSLContext, t.Tuple[str, t.Optional[str]], t.Literal["adhoc"], None] = None
         #
         # With the doc:
         #     ssl_context (Optional[Union[ssl.SSLContext, Tuple[str, Optional[str]], t.Literal['adhoc']]]):

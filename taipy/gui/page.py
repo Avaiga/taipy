@@ -45,7 +45,13 @@ class Page:
         self._class_module_name = ""
         self._class_locals: t.Dict[str, t.Any] = {}
         self._frame: t.Optional[FrameType] = None
-        self._renderer: t.Optional[Page] = self.create_page()
+        page = self.create_page()
+        if isinstance(page, str):
+            from ._renderers import Markdown
+
+            page = Markdown(page)
+        self._renderer: t.Optional[Page] = page
+
         if "frame" in kwargs:
             self._frame = kwargs.get("frame")
         elif self._renderer:
@@ -63,11 +69,7 @@ class Page:
             # Extract the page module's attributes and methods
             cls = type(self)
             cls_locals = dict(vars(self))
-            functions = [
-                i[0]
-                for i in inspect.getmembers(cls)
-                if not i[0].startswith("_") and inspect.isroutine(i[1])
-            ]
+            functions = [i[0] for i in inspect.getmembers(cls) if not i[0].startswith("_") and inspect.isroutine(i[1])]
             for f in functions:
                 func = getattr(self, f)
                 if hasattr(func, "__func__") and func.__func__ is not None:
@@ -80,7 +82,7 @@ class Page:
         self.set_style(kwargs.get("style", None))
         self._script_paths(kwargs.get("script_paths", None))
 
-    def create_page(self) -> t.Optional[Page]:
+    def create_page(self) -> t.Union[Page, str, None]:
         """Create the page content for page modules.
 
         If this page is a page module, this method must be overloaded and return the page content.
@@ -91,7 +93,8 @@ class Page:
         a page module.
 
         Returns:
-            The page content for this Page subclass, making it a page module.
+            The page content for this Page subclass, making it a page module.<br/>
+            This can be a string, then Taipy will interpret it as Markdown content.
         """
         return None
 
@@ -185,7 +188,7 @@ class Page:
     def _get_style(self):
         return self.__style
 
-    def _script_paths(self, script_paths: t.Optional[t.Union[str, Path, t.List[t.Union[str, Path]]]]) -> Page:
+    def _script_paths(self, script_paths: t.Union[str, Path, t.List[t.Union[str, Path]], None]) -> Page:
         """
         Load a script or a list of scripts to be used in the page.
 
@@ -205,8 +208,12 @@ class Page:
                         continue
                     script_path = Path(script_path)
 
-                if isinstance(script_path,
-                              Path) and script_path.exists() and script_path.is_file() and script_path.suffix == ".js":
+                if (
+                    isinstance(script_path, Path)
+                    and script_path.exists()
+                    and script_path.is_file()
+                    and script_path.suffix == ".js"
+                ):
                     continue
                 else:
                     _warn(f"Script path '{script_path}' does not exist, is not a file, or is not a JavaScript file.")

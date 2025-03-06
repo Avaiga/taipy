@@ -161,7 +161,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     def _read_sheet_with_exposed_type(
         self, path: str, sheet_exposed_type: str, sheet_name: str
-    ) -> Optional[Union[np.ndarray, pd.DataFrame]]:
+    ) -> Union[np.ndarray, pd.DataFrame, None]:
         if sheet_exposed_type in [self._EXPOSED_TYPE_NUMPY, self._EXPOSED_TYPE_NUMPY_NDARRAY]:
             return self._read_as_numpy(path, sheet_name)
         elif sheet_exposed_type in [self._EXPOSED_TYPE_PANDAS, self._EXPOSED_TYPE_PANDAS_DATAFRAME]:

@@ -112,9 +112,9 @@ class Scenario(_Entity, Submittable, _Labeled):
     def __init__(
         self,
         config_id: str,
-        tasks: Optional[Union[Set[TaskId], Set[Task]]],
+        tasks: Union[Set[TaskId], Set[Task], None],
         properties: Dict[str, Any],
-        additional_data_nodes: Optional[Union[Set[DataNodeId], Set[DataNode]]] = None,
+        additional_data_nodes: Union[Set[DataNodeId], Set[DataNode], None] = None,
         scenario_id: Optional[ScenarioId] = None,
         creation_date: Optional[datetime] = None,
         is_primary: bool = False,
@@ -389,7 +389,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         callbacks: Optional[List[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[Union[float, int]] = None,
+        timeout: Union[float, int, None] = None,
         **properties,
     ) -> Submission:
         """Submit this scenario for execution.

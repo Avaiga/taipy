@@ -13,14 +13,17 @@ import json
 import os
 import re
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union, get_args, get_origin
 
 from markdownify import markdownify
 
 __RE_INDEXED_PROPERTY = re.compile(r"^([\w_]+)\[(<\w+>)?([\w]+)(</\w+>)?\]$")
 
-# Make sure we can import the mandatory packages
+# Script should be located in <taipy_root>/tools
 script_dir = os.path.dirname(os.path.realpath(__file__))
+# Move to <taipy_root>
+os.chdir(os.path.dirname(os.path.dirname(script_dir)))
+# Make sure we can import the mandatory packages
 if not os.path.isdir(os.path.abspath(os.path.join(script_dir, "taipy"))):
     sys.path.append(os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir)))
 
@@ -44,7 +47,7 @@ gui_config = "".join(
 )
 
 replaced_content = ""
-with open(gui_pyi_file, "r") as file:
+with open(gui_pyi_file, "r", encoding="utf-8") as file:
     for line in file:
         if "def run(" in line:
             replace_str = line[line.index(", run_server") : (line.index("**kwargs") + len("**kwargs"))]
@@ -52,15 +55,20 @@ with open(gui_pyi_file, "r") as file:
             line = line.replace(replace_str, gui_config)
         replaced_content += line
 
-with open(gui_pyi_file, "w") as write_file:
+with open(gui_pyi_file, "w", encoding="utf-8") as write_file:
     write_file.write(replaced_content)
 
 # ##################################################################################################
 # Generate Page Builder pyi file (gui/builder/__init__.pyi)
 # ##################################################################################################
+# Types that appear in viselements.json
+from taipy.gui import Icon  # noqa: E402
+from taipy.core import Cycle, DataNode, Job, Scenario  # noqa: E402
+from datetime import datetime
+
 # Read the version
 current_version = "latest"
-with open("./taipy/gui/version.json", "r") as vfile:
+with open("./taipy/gui/version.json", "r", encoding="utf-8") as vfile:
     version = json.load(vfile)
     if "dev" in version.get("ext", ""):
         current_version = "develop"
@@ -74,12 +82,12 @@ builder_pyi_file = f"{builder_py_file}i"
 controls: Dict[str, List] = {}
 blocks: Dict[str, List] = {}
 undocumented: Dict[str, List] = {}
-with open("./taipy/gui/viselements.json", "r") as file:
+with open("./taipy/gui/viselements.json", "r", encoding="utf-8") as file:
     viselements: Dict[str, List] = json.load(file)
     controls[""] = viselements.get("controls", [])
     blocks[""] = viselements.get("blocks", [])
     undocumented[""] = viselements.get("undocumented", [])
-with open("./taipy/gui_core/viselements.json", "r") as file:
+with open("./taipy/gui_core/viselements.json", "r", encoding="utf-8") as file:
     core_viselements: Dict[str, List] = json.load(file)
     controls['if find_spec("taipy.core"):'] = core_viselements.get("controls", [])
     blocks['if find_spec("taipy.core"):'] = core_viselements.get("blocks", [])
@@ -87,7 +95,7 @@ with open("./taipy/gui_core/viselements.json", "r") as file:
 
 os.system(f"pipenv run stubgen {builder_py_file} --no-import --parse-only --export-less -o ./")
 
-with open(builder_pyi_file, "a") as file:
+with open(builder_pyi_file, "a", encoding="utf-8") as file:
     file.write("from datetime import datetime\n")
     file.write("from importlib.util import find_spec\n")
     file.write("from typing import Any, Callable, Optional, Union\n")
@@ -132,7 +140,7 @@ def resolve_inherit(
     return properties
 
 
-def format_as_parameter(property: Dict[str, str]):
+def format_as_parameter(property: Dict[str, str], element_name: str):
     name = property["name"]
     if match := __RE_INDEXED_PROPERTY.match(name):
         name = f"{match.group(1)}__{match.group(3)}"
@@ -147,14 +155,27 @@ def format_as_parameter(property: Dict[str, str]):
         property["dynamic"] = " (dynamic)"
     else:
         property["dynamic"] = ""
-    if type == "Callback" or type == "Function":
-        type = "Callable"
-    else:
-        type = re.sub(r"((plotly|taipy)\.[\w\.]*)", r'"\1"', type)
     default_value = property.get("default_value", None)
+    type, _ = re.subn(r"\bCallable|Callback|Function\b", "callable", type)
+    type = re.sub(r"((plotly|taipy)\.[\w\.]*)", r'"\1"', type)
+    try:
+        type_desc = eval(type)
+        if get_origin(type_desc) is Union:
+            types = get_args(type_desc)
+            if not any(t.__name__ in ["str", "Any"] for t in types):
+                type = type.rpartition("]")
+                type = type[0] + ", str]"
+        elif hasattr(type_desc, "__name__") and type_desc.__name__ not in ["str", "Any"]:
+            type = f"Union[{type}, str]"
+    except NameError:
+        print(f"WARNING - Couldn't parse type '{type}' in {element_name}.{name}")
+    
     if default_value is None or default_value == "None":
         default_value = " = None"
-        if type:
+        if type.startswith("Union["):
+            type = type.rpartition("]")
+            type = ": " + type[0] + ", None]"
+        else:
             type = f": Optional[{type}]"
     else:
         try:
@@ -164,7 +185,10 @@ def format_as_parameter(property: Dict[str, str]):
                 type = f": {type}"
         except Exception:
             default_value = " = None"
-            if type:
+            if type.startswith("Union["):
+                type = type.rpartition("]")
+                type = ": " + type[0] + ", None]"
+            else:
                 type = f": Optional[{type}]"
     return f"{name}{type}{default_value}"
 
@@ -209,7 +233,7 @@ def generate_elements(elements_by_prefix: Dict[str, List], base_class: str):
         indent = ""
         if prefix:
             indent = "    "
-            with open(builder_pyi_file, "a") as file:
+            with open(builder_pyi_file, "a", encoding="utf-8") as file:
                 file.write(prefix + "\n")
         for element in elements:
             name = element[0]
@@ -228,7 +252,10 @@ def generate_elements(elements_by_prefix: Dict[str, List], base_class: str):
             # Remove hidden properties
             properties = [p for p in properties if not p.get("hide", False)]
             # Generate function parameters
-            properties_decl = [format_as_parameter(p) for p in properties]
+            properties_decl = [format_as_parameter(p, name) for p in properties]
+            # Manually add the 'inline' property for the text control
+            if name == "text":
+                properties_decl.append("inline: bool = False")
             # Generate properties doc
             for property in properties:
                 if "default_property" in property and property["default_property"] is True:
@@ -241,10 +268,13 @@ def generate_elements(elements_by_prefix: Dict[str, List], base_class: str):
             for property in property_list:
                 property_doc = build_doc(name, property)
                 properties_doc += property_doc
+            if name == "text":
+                properties_doc += ("inline\n  If True, the text is created next to "
+                                 + "the previous element and not on a new line.\n\n")
             if len(properties_decl) > 1:
                 properties_decl.insert(1, "*")
             # Append element to __init__.pyi
-            with open(builder_pyi_file, "a") as file:
+            with open(builder_pyi_file, "a", encoding="utf-8") as file:
                 file.write(
                     element_template(
                         name,

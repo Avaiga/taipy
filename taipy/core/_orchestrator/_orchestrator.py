@@ -52,7 +52,7 @@ class _Orchestrator(_AbstractOrchestrator):
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[Union[float, int]] = None,
+        timeout: Union[float, int, None] = None,
         **properties,
     ) -> Submission:
         """Submit the given `Scenario^` or `Sequence^` for an execution.
@@ -109,7 +109,7 @@ class _Orchestrator(_AbstractOrchestrator):
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[Union[float, int]] = None,
+        timeout: Union[float, int, None] = None,
         **properties,
     ) -> Submission:
         """Submit the given `Task^` for an execution.
@@ -203,7 +203,7 @@ class _Orchestrator(_AbstractOrchestrator):
             cls.jobs_to_run.put(job)
 
     @classmethod
-    def _wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None) -> None:
+    def _wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Union[float, int, None] = None) -> None:
         #  Note: this method should be prefixed by two underscores, but it has only one, so it can be mocked in tests.
         def __check_if_timeout(st, to):
             if to is None:

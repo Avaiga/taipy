@@ -18,12 +18,14 @@ from dataclasses import dataclass
 from taipy.gui import Gui
 
 
+# Define a User class with attributes for ID, name, and birth year
 @dataclass
 class User:
     id: int
     name: str
     birth_year: int
 
+# Create a list of users to be managed
 users = [
     User(231, "Johanna", 1987),
     User(125, "John", 1979),
@@ -31,7 +33,9 @@ users = [
     User(31,  "Mary", 1974)
     ]
 
+# Initialize the selected user to the third user in the list (Peter)
 user_sel = users[2]
+
 page ="""
 <|{user_sel}|toggle|lov={users}|type=User|adapter={lambda u: (u.id, u.name)}|>
 

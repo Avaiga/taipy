@@ -17,12 +17,9 @@ from taipy.gui import Markdown, Page
 
 # SalesPage inherits from taipy.gui.Page
 class SalesPage(Page):
-    # Available quarters for sales data selection
-    quarters: list[str] = ["Q1", "Q2", "Q3"]
-
     def __init__(self) -> None:
-        self.quarter = "Q1"  # Default selected quarter
-        self.currency = "$"  # Default currency
+        self.quarter = "Q1"  # Initial selected quarter
+        self.currency = "$"  # Initial currency
         super().__init__()
 
     @staticmethod

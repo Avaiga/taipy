@@ -57,8 +57,8 @@ class TaskConfig(Section):
         self,
         id: str,
         function: Optional[Callable],
-        inputs: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        outputs: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        inputs: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
+        outputs: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
         skippable: bool = False,
         **properties,
     ) -> None:
@@ -168,8 +168,8 @@ class TaskConfig(Section):
     def _configure(
         id: str,
         function: Optional[Callable],
-        input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        input: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
+        output: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
         skippable: bool = False,
         **properties,
     ) -> "TaskConfig":
@@ -178,10 +178,10 @@ class TaskConfig(Section):
         Arguments:
             id (str): The unique identifier of this task configuration.
             function (Callable): The python function called by Taipy to run the task.
-            input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+            input (Union[DataNodeConfig^, List[DataNodeConfig^], None]): The list of the
                 function input data node configurations. This can be a unique data node
                 configuration if there is a single input data node, or None if there are none.
-            output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+            output (Union[DataNodeConfig^, List[DataNodeConfig^], None]): The list of the
                 function output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
             skippable (bool): If True, indicates that the task can be skipped if no change has
@@ -199,8 +199,8 @@ class TaskConfig(Section):
     @staticmethod
     def _set_default_configuration(
         function: Optional[Callable],
-        input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        input: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
+        output: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
         skippable: bool = False,
         **properties,
     ) -> "TaskConfig":
@@ -212,10 +212,10 @@ class TaskConfig(Section):
 
         Arguments:
             function (Callable): The python function called by Taipy to run the task.
-            input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+            input (Union[DataNodeConfig^, List[DataNodeConfig^], None]): The list of the
                 input data node configurations. This can be a unique data node
                 configuration if there is a single input data node, or None if there are none.
-            output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+            output (Union[DataNodeConfig^, List[DataNodeConfig^], None]): The list of the
                 output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
             skippable (bool): If True, indicates that the task can be skipped if no change has

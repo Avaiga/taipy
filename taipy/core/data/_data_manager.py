@@ -48,13 +48,11 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         dn_configs_and_owner_id = []
         for dn_config in data_node_configs:
             scope = dn_config.scope
-            owner_id: Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]
+            owner_id: Union[SequenceId, ScenarioId, CycleId, None] = None
             if scope == Scope.SCENARIO:
                 owner_id = scenario_id
             elif scope == Scope.CYCLE:
                 owner_id = cycle_id
-            else:
-                owner_id = None
             dn_configs_and_owner_id.append((dn_config, owner_id))
 
         data_nodes = cls._repository._get_by_configs_and_owner_ids(

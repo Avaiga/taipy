@@ -151,11 +151,11 @@ def _migrate_mongo_entities(
     """Migrate entities from mongodb to the current version.
 
     Args:
-        hostname (str, optional): The hostname of the mongodb. Defaults to "localhost".
-        port (int, optional): The port of the mongodb. Defaults to 27017.
-        user (str, optional): The username of the mongodb. Defaults to "".
-        password (str, optional): The password of the mongodb. Defaults to "".
-        backup (bool, optional): Whether to backup the entities before migrating. Defaults to True.
+        hostname (Optional[str]): The hostname of the mongodb. Defaults to "localhost".
+        port (Optional[int]): The port of the mongodb. Defaults to 27017.
+        user (Optional[str]): The username of the mongodb. Defaults to "".
+        password (Optional[str]): The password of the mongodb. Defaults to "".
+        backup (Optional[bool]): Whether to backup the entities before migrating. Defaults to True.
 
     Returns:
         bool: True if the migration was successful, False otherwise.

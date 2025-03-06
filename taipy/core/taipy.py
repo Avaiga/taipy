@@ -221,7 +221,7 @@ def submit(
     entity: Union[Scenario, Sequence, Task],
     force: bool = False,
     wait: bool = False,
-    timeout: Optional[Union[float, int]] = None,
+    timeout: Union[float, int, None] = None,
     **properties,
 ) -> Submission:
     """Submit a scenario, sequence or task entity for execution.
@@ -864,7 +864,7 @@ def get_cycles() -> List[Cycle]:
     return _CycleManagerFactory._build_manager()._get_all()
 
 
-def can_create(config: Optional[Union[ScenarioConfig, DataNodeConfig]] = None) -> ReasonCollection:
+def can_create(config: Union[ScenarioConfig, DataNodeConfig, None] = None) -> ReasonCollection:
     """Indicate if a config section can be used to instantiate a scenario or a data node.
 
     If no config is provided, the function indicates if any scenario or data node config can be created.

@@ -117,12 +117,12 @@ class _Builder:
             (prop_dict, prop_hash) = _Builder.__parse_attribute_value(gui, self.__prop_values["properties"])
             if prop_hash is None:
                 prop_hash = prop_dict
-                prop_hash = self.__gui._bind_var(prop_hash)
-                if hasattr(self.__gui._bindings(), prop_hash):
+                prop_hash = self.__gui._bind_var(prop_hash)  # type: ignore
+                if hasattr(self.__gui._bindings(), prop_hash):  # type: ignore
                     prop_dict = _getscopeattr(self.__gui, prop_hash)
             if isinstance(prop_dict, (dict, _MapDict)):
                 # Iterate through prop_dict and append to self.attributes
-                var_name, _ = gui._get_real_var_name(prop_hash)
+                var_name, _ = gui._get_real_var_name(prop_hash)  # type: ignore
                 for k, v in prop_dict.items():
                     (val, key_hash) = _Builder.__parse_attribute_value(gui, v)
                     self.__prop_values[k] = (
@@ -141,10 +141,10 @@ class _Builder:
 
     @staticmethod
     def __parse_attribute_value(gui: "Gui", value) -> t.Tuple:
-        if isinstance(value, str) and gui._is_expression(value):
-            hash_value = gui._evaluate_expr(value)
+        if isinstance(value, str) and gui._is_expression(value):  # type: ignore
+            hash_value = gui._evaluate_expr(value)  # type: ignore
             try:
-                func = gui._get_user_function(hash_value)
+                func = gui._get_user_function(hash_value)  # type: ignore
                 if _is_function(func):
                     return (func, hash_value)
                 return (_getscopeattr_drill(gui, hash_value), hash_value)
@@ -330,9 +330,7 @@ class _Builder:
     ):
         value = self.__prop_values.get(name, default_value)
         if value is not None:
-            self.set_attribute(
-                _to_camel_case(f"default_{name}" if dynamic_property_name is None else name), str(value)
-            )
+            self.set_attribute(_to_camel_case(f"default_{name}" if dynamic_property_name is None else name), str(value))
         if hash := self.__hashes.get(name):
             prop_name = _to_camel_case(name if dynamic_property_name is None else dynamic_property_name)
             if with_update:
@@ -460,7 +458,7 @@ class _Builder:
             return self.__set_react_attribute(_to_camel_case(name), False)
         elif value:
             value = str(value)
-            func = self.__gui._get_user_function(value)
+            func = self.__gui._get_user_function(value)  # type: ignore
             if func == value:
                 _warn(f"{self.__control_type}.{name}: {value} is not a function.")
         return self.set_attribute(_to_camel_case(name), value) if value else self
@@ -477,7 +475,7 @@ class _Builder:
     ):
         property_name = var_name if property_name is None else property_name
         lov_name = self.__hashes.get(var_name)
-        real_var_name = self.__gui._get_real_var_name(lov_name)[0] if lov_name else None
+        real_var_name = self.__gui._get_real_var_name(lov_name)[0] if lov_name else None  # type: ignore
         lov = self.__prop_values.get(var_name)
         adapter: t.Any = None
         var_type: t.Optional[str] = None
@@ -498,7 +496,7 @@ class _Builder:
 
         adapter = self.__prop_values.get("adapter", adapter)
         if adapter and isinstance(adapter, str):
-            adapter = self.__gui._get_user_function(adapter)
+            adapter = self.__gui._get_user_function(adapter)  # type: ignore
         if adapter and not _is_function(adapter):
             _warn(f"{self.__element_name}: adapter property value is invalid.")
             adapter = None
@@ -518,31 +516,31 @@ class _Builder:
                             elt = value[0]
                     else:
                         elt = value
-                var_type = self.__gui._get_unique_type_adapter(type(elt).__name__)
+                var_type = self.__gui._get_unique_type_adapter(type(elt).__name__)  # type: ignore
             if adapter is None:
-                adapter = self.__gui._get_adapter_for_type(var_type)
+                adapter = self.__gui._get_adapter_for_type(var_type)  # type: ignore
             elif var_type == str.__name__ and _is_function(adapter):
                 var_type += (
-                    _get_lambda_id(t.cast(LambdaType, adapter))
+                    _get_lambda_id(t.cast(LambdaType, adapter))  # type: ignore
                     if _is_unnamed_function(adapter)
                     else _get_expr_var_name(adapter.__name__)
                 )
             if lov_name:
                 if adapter is None:
-                    adapter = self.__gui._get_adapter_for_type(lov_name)
+                    adapter = self.__gui._get_adapter_for_type(lov_name)  # type: ignore
                 else:
-                    self.__gui._add_type_for_var(lov_name, t.cast(str, var_type))
+                    self.__gui._add_type_for_var(lov_name, t.cast(str, var_type))  # type: ignore
             if value_name := self.__hashes.get("value"):
                 if adapter is None:
-                    adapter = self.__gui._get_adapter_for_type(value_name)
+                    adapter = self.__gui._get_adapter_for_type(value_name)  # type: ignore
                 else:
-                    self.__gui._add_type_for_var(value_name, t.cast(str, var_type))
+                    self.__gui._add_type_for_var(value_name, t.cast(str, var_type))  # type: ignore
             if adapter is not None:
                 self.__gui._add_adapter_for_type(var_type, adapter)  # type: ignore[arg-type]
 
             if default_lov is not None and lov:
                 for elt in lov:
-                    ret = self.__gui._run_adapter(
+                    ret = self.__gui._run_adapter(  # type: ignore
                         t.cast(t.Callable, adapter),
                         elt,
                         adapter.__name__ if hasattr(adapter, "__name__") else "adapter",
@@ -554,7 +552,7 @@ class _Builder:
             value = self.__prop_values.get("value")
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
-                ret = self.__gui._run_adapter(
+                ret = self.__gui._run_adapter(  # type: ignore
                     t.cast(t.Callable, adapter),
                     val,
                     adapter.__name__ if hasattr(adapter, "__name__") else "adapter",
@@ -577,8 +575,8 @@ class _Builder:
         # LoV expression binding
         if lov_name and real_var_name:
             typed_lov_hash = (
-                self.__gui._evaluate_expr(
-                    f"{{{self.__gui._get_call_method_name('_get_adapted_lov')}({real_var_name},'{var_type}')}}"
+                self.__gui._evaluate_expr(  # type: ignore
+                    f"{{{self.__gui._get_call_method_name('_get_adapted_lov')}({real_var_name},'{var_type}')}}"  # type: ignore
                 )
                 if var_type
                 else lov_name
@@ -614,16 +612,16 @@ class _Builder:
         rebuild_hash = self.__hashes.get("rebuild")
         if rebuild_hash or _is_true(rebuild):
             attributes, hashes = self.__filter_attributes_hashes(self.__filter_attribute_names(attribute_names))
-            rebuild_name = f"bool({self.__gui._get_real_var_name(rebuild_hash)[0]})" if rebuild_hash else "None"
+            rebuild_name = f"bool({self.__gui._get_real_var_name(rebuild_hash)[0]})" if rebuild_hash else "None"  # type: ignore
             try:
-                self.__gui._set_building(True)
-                return self.__gui._evaluate_expr(
+                self.__gui._set_building(True)  # type: ignore
+                return self.__gui._evaluate_expr(  # type: ignore
                     "{"
-                    + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{k}={v2}" for k, v2 in {v: self.__gui._get_real_var_name(t.cast(str, v))[0] for v in hashes.values()}.items()])})'  # noqa: E501
+                    + f'{fn_name}({rebuild}, {rebuild_name}, "{quote(json.dumps(attributes))}", "{quote(json.dumps(hashes))}", {", ".join([f"{k}={v2}" for k, v2 in {v: self.__gui._get_real_var_name(t.cast(str, v))[0] for v in hashes.values()}.items()])})'  # noqa: E501 # type: ignore
                     + "}"
                 )
             finally:
-                self.__gui._set_building(False)
+                self.__gui._set_building(False)  # type: ignore
         return None
 
     def _get_dataframe_attributes(self) -> "_Builder":
@@ -637,17 +635,17 @@ class _Builder:
             cmp_datas_hash = []
             while cmp_data := self.__hashes.get(f"data[{cmp_idx}]"):
                 cmp_idx += 1
-                cmp_datas.append(self.__gui._get_real_var_name(cmp_data)[0])
+                cmp_datas.append(self.__gui._get_real_var_name(cmp_data)[0])  # type: ignore
                 cmp_datas_hash.append(cmp_data)
             if cmp_datas:
-                cmp_hash = self.__gui._evaluate_expr(
+                cmp_hash = self.__gui._evaluate_expr(  # type: ignore
                     "{"
-                    + f"{self.__gui._get_call_method_name('_compare_data')}"
-                    + f"({self.__gui._get_real_var_name(data_hash)[0]},{','.join(cmp_datas)})"
+                    + f"{self.__gui._get_call_method_name('_compare_data')}"  # type: ignore
+                    + f"({self.__gui._get_real_var_name(data_hash)[0]},{','.join(cmp_datas)})"  # type: ignore
                     + "}"
                 )
                 self.__update_vars.append(f"comparedatas={','.join(cmp_datas_hash)}")
-        cols_description = self.__gui._get_accessor().get_cols_description(data_hash, _TaipyData(data, data_hash))
+        cols_description = self.__gui._get_accessor().get_cols_description(data_hash, _TaipyData(data, data_hash))  # type: ignore
         col_dict = _get_columns_dict(
             self.__prop_values.get("columns", {}),
             cols_description,
@@ -656,7 +654,8 @@ class _Builder:
         )
 
         rebuild_fn_hash = self.__build_rebuild_fn(
-            self.__gui._get_call_method_name("_tbl_cols"), _Builder.__TABLE_COLUMNS_DEPS
+            self.__gui._get_call_method_name("_tbl_cols"),  # type: ignore
+            _Builder.__TABLE_COLUMNS_DEPS,  # type: ignore
         )
         if rebuild_fn_hash:
             self.__set_react_attribute("columns", rebuild_fn_hash)
@@ -703,7 +702,7 @@ class _Builder:
         self.__prop_values["_default_type"] = default_type
         self.__prop_values["_default_mode"] = default_mode
         rebuild_fn_hash = self.__build_rebuild_fn(
-            self.__gui._get_call_method_name("_chart_conf"),
+            self.__gui._get_call_method_name("_chart_conf"),  # type: ignore
             _CHART_NAMES + ("_default_type", "_default_mode", "data"),
         )
         if rebuild_fn_hash:
@@ -712,7 +711,7 @@ class _Builder:
         # read column definitions
         data = self.__prop_values.get("data")
         data_hash = self.__hashes.get("data", "")
-        cols_description = [self.__gui._get_accessor().get_cols_description(data_hash, _TaipyData(data, data_hash))]
+        cols_description = [self.__gui._get_accessor().get_cols_description(data_hash, _TaipyData(data, data_hash))]  # type: ignore
 
         if data_hash:
             data_updates: t.List[str] = []
@@ -726,7 +725,7 @@ class _Builder:
                 data_idx += 1
                 name_idx = f"data[{data_idx}]"
                 cols_description.append(
-                    self.__gui._get_accessor().get_cols_description(add_data_hash, _TaipyData(add_data, add_data_hash))
+                    self.__gui._get_accessor().get_cols_description(add_data_hash, _TaipyData(add_data, add_data_hash))  # type: ignore
                 )
             self.set_attribute("dataVarNames", ";".join(data_updates))
 
@@ -835,7 +834,7 @@ class _Builder:
         hash_name = self.__hashes.get(var_name)
         if content is None and hash_name is None:
             return self
-        value = self.__gui._get_content(hash_name or var_name, content, image)
+        value = self.__gui._get_content(hash_name or var_name, content, image)  # type: ignore
         if hash_name:
             hash_name = self.__get_typed_hash_name(hash_name, PropertyType.image if image else PropertyType.content)
         if hash_name:
@@ -850,7 +849,7 @@ class _Builder:
         var_name: str,
         value: t.Optional[t.Any] = None,
         native_type: bool = False,
-        var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]] = None,
+        var_type: t.Union[PropertyType, t.Type[_TaipyBase], None] = None,
     ):
         if value is None:
             value = self.__prop_values.get(var_name)
@@ -880,7 +879,7 @@ class _Builder:
         with_update=True,
         with_default=True,
         native_type=False,
-        var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]] = None,
+        var_type: t.Union[PropertyType, t.Type[_TaipyBase], None] = None,
         default_val: t.Any = None,
     ):
         """
@@ -968,7 +967,7 @@ class _Builder:
         return self
 
     def _set_propagate(self):
-        val = self.__get_boolean_attribute("propagate", t.cast(bool, self.__gui._config.config.get("propagate")))
+        val = self.__get_boolean_attribute("propagate", t.cast(bool, self.__gui._config.config.get("propagate")))  # type: ignore
         return self if val else self.__set_boolean_attribute("propagate", False)
 
     def __set_refresh_on_update(self):
@@ -1001,12 +1000,10 @@ class _Builder:
             self.set_attribute("mode", "theme")
         return self
 
-    def __get_typed_hash_name(
-        self, hash_name: str, var_type: t.Optional[t.Union[PropertyType, t.Type[_TaipyBase]]]
-    ) -> str:
+    def __get_typed_hash_name(self, hash_name: str, var_type: t.Union[PropertyType, t.Type[_TaipyBase], None]) -> str:
         if taipy_type := _get_taipy_type(var_type):
-            expr = self.__gui._get_expr_from_hash(hash_name)
-            hash_name = self.__gui._evaluate_bind_holder(t.cast(t.Type[_TaipyBase], taipy_type), expr)
+            expr = self.__gui._get_expr_from_hash(hash_name)  # type: ignore
+            hash_name = self.__gui._evaluate_bind_holder(t.cast(t.Type[_TaipyBase], taipy_type), expr)  # type: ignore
         return hash_name
 
     def __set_dynamic_property_without_default(
@@ -1029,11 +1026,11 @@ class _Builder:
         front_var = self.__get_typed_hash_name(hash_name, property_type)
         self.set_attribute(
             _to_camel_case(f"default_{property_name}"),
-            self.__gui._get_user_content_url(
+            self.__gui._get_user_content_url(  # type: ignore
                 None,
                 {
                     "variable_name": front_var,
-                    self.__gui._HTML_CONTENT_KEY: str(_time.time()),
+                    self.__gui._HTML_CONTENT_KEY: str(_time.time()),  # type: ignore
                 },
             ),
         )
@@ -1164,8 +1161,8 @@ class _Builder:
             elif isclass(var_type) and issubclass(var_type, _TaipyBase):
                 prop_name = _to_camel_case(attr[0])
                 if hash_name := self.__hashes.get(attr[0]):
-                    expr = self.__gui._get_expr_from_hash(hash_name)
-                    hash_name = self.__gui._evaluate_bind_holder(var_type, expr)
+                    expr = self.__gui._get_expr_from_hash(hash_name)  # type: ignore
+                    hash_name = self.__gui._evaluate_bind_holder(var_type, expr)  # type: ignore
                     self.__update_vars.append(f"{prop_name}={hash_name}")
                     self.__set_react_attribute(prop_name, hash_name)
                 else:

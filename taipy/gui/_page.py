@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-# _Page for multipage support
+# _Page for multi-page support
 from __future__ import annotations
 
 import logging
@@ -32,10 +32,10 @@ class _Page(object):
     def __init__(self) -> None:
         self._rendered_jsx: t.Optional[str] = None
         self._renderer: t.Optional[Page] = None
-        self._style: t.Optional[t.Union[str, t.Dict[str, t.Any]]] = None
+        self._style: t.Union[str, t.Dict[str, t.Any], None] = None
         self._route: t.Optional[str] = None
         self._head: t.Optional[list] = None
-        self._script_paths: t.Optional[t.Union[str, Path, t.List[t.Union[str, Path]]]] = None
+        self._script_paths: t.Union[str, Path, t.List[t.Union[str, Path]], None] = None
 
     def render(self, gui: Gui, silent: t.Optional[bool] = False):
         if self._renderer is None:
@@ -43,7 +43,7 @@ class _Page(object):
         with warnings.catch_warnings(record=True) as w:
             warnings.resetwarnings()
             module_name = self._renderer._get_module_name()
-            with gui._set_locals_context(module_name):
+            with gui._set_locals_context(module_name):  # type: ignore
                 self._rendered_jsx = self._renderer.render(gui)
             if silent:
                 s = ""
@@ -69,7 +69,7 @@ class _Page(object):
                     s = "\033[1;31m\n"
                     s += (
                         message
-                        := f"--- {len(w)} warning(s) were found for page '{'/' if self._route == gui._get_root_page_name() else self._route}' {self._renderer._get_content_detail(gui)} ---\n"  # noqa: E501
+                        := f"--- {len(w)} warning(s) were found for page '{'/' if self._route == gui._get_root_page_name() else self._route}' {self._renderer._get_content_detail(gui)} ---\n"  # noqa: E501 # type: ignore
                     )
                     for i, wm in enumerate(w):
                         s += f" - Warning {i + 1}: {wm.message}\n"

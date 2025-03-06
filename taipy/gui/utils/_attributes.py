@@ -18,36 +18,36 @@ if t.TYPE_CHECKING:
 
 def _getscopeattr(gui: "Gui", name: str, *more) -> t.Any:
     if more:
-        return getattr(gui._get_data_scope(), name, more[0])
-    return getattr(gui._get_data_scope(), name)
+        return getattr(gui._get_data_scope(), name, more[0])  # type: ignore
+    return getattr(gui._get_data_scope(), name)  # type: ignore
 
 
 def _getscopeattr_drill(gui: "Gui", name: str) -> t.Any:
-    return attrgetter(name)(gui._get_data_scope())
+    return attrgetter(name)(gui._get_data_scope())  # type: ignore
 
 
 def _setscopeattr(gui: "Gui", name: str, value: t.Any):
-    if gui._is_broadcasting():
-        for scope in gui._get_all_data_scopes().values():
+    if gui._is_broadcasting():  # type: ignore
+        for scope in gui._get_all_data_scopes().values():  # type: ignore
             setattr(scope, name, value)
     else:
-        setattr(gui._get_data_scope(), name, value)
+        setattr(gui._get_data_scope(), name, value)  # type: ignore
 
 
 def _setscopeattr_drill(gui: "Gui", name: str, value: t.Any):
-    if gui._is_broadcasting():
-        for scope in gui._get_all_data_scopes().values():
+    if gui._is_broadcasting():  # type: ignore
+        for scope in gui._get_all_data_scopes().values():  # type: ignore
             _attrsetter(scope, name, value)
     else:
-        _attrsetter(gui._get_data_scope(), name, value)
+        _attrsetter(gui._get_data_scope(), name, value)  # type: ignore
 
 
 def _hasscopeattr(gui: "Gui", name: str) -> bool:
-    return hasattr(gui._get_data_scope(), name)
+    return hasattr(gui._get_data_scope(), name)  # type: ignore
 
 
 def _delscopeattr(gui: "Gui", name: str):
-    delattr(gui._get_data_scope(), name)
+    delattr(gui._get_data_scope(), name)  # type: ignore
 
 
 def _attrsetter(obj: object, attr_str: str, value: object) -> None:

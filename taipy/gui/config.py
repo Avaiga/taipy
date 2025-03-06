@@ -93,9 +93,9 @@ Stylekit = t.TypedDict(
 ServerConfig = t.TypedDict(
     "ServerConfig",
     {
-        "cors": t.Optional[t.Union[bool, t.Dict[str, t.Any]]],
+        "cors": t.Union[bool, t.Dict[str, t.Any], None],
         "socketio": t.Optional[t.Dict[str, t.Any]],
-        "ssl_context": t.Optional[t.Union[str, t.Tuple[str, str]]],
+        "ssl_context": t.Union[str, t.Tuple[str, str], None],
         "flask": t.Optional[t.Dict[str, t.Any]],
     },
     total=False,

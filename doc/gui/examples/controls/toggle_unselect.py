@@ -19,7 +19,8 @@ value = "Item 2"
 
 page = """
 <|{value}|toggle|lov=Item 1;Item 2;Item 3|unselected_value=No Value|allow_unselect|>
-Value: <|{value}|>
+
+Selected value: <|{value}|>
 """
 
 if __name__ == "__main__":

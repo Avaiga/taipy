@@ -44,7 +44,7 @@ class _AbstractOrchestrator:
         callbacks: Optional[Iterable[Callable]],
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[Union[float, int]] = None,
+        timeout: Union[float, int, None] = None,
         **properties,
     ) -> Submission:
         raise NotImplementedError
@@ -57,7 +57,7 @@ class _AbstractOrchestrator:
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[Union[float, int]] = None,
+        timeout: Union[float, int, None] = None,
         **properties,
     ) -> Submission:
         raise NotImplementedError

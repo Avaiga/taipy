@@ -79,14 +79,11 @@ class _TaskManager(_Manager[Task], _VersionMixin):
             ]
             task_config_data_nodes = [data_nodes[dn_config] for dn_config in task_dn_configs]
             scope = min(dn.scope for dn in task_config_data_nodes) if len(task_config_data_nodes) != 0 else Scope.GLOBAL
-            owner_id: Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]
+            owner_id: Union[SequenceId, ScenarioId, CycleId, None] = None
             if scope == Scope.SCENARIO:
                 owner_id = scenario_id
             elif scope == Scope.CYCLE:
                 owner_id = cycle_id
-            else:
-                owner_id = None
-
             tasks_configs_and_owner_id.append((task_config, owner_id))
 
         tasks_by_config = cls._repository._get_by_configs_and_owner_ids(  # type: ignore
@@ -199,7 +196,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         callbacks: Optional[List[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[Union[float, int]] = None,
+        timeout: Union[float, int, None] = None,
         check_inputs_are_ready: bool = True,
         **properties,
     ) -> Submission:

@@ -43,12 +43,12 @@ class _Bindings:
                 value._update_var = None  # type: ignore[assignment]
             elif isinstance(value, dict):
                 value = _MapDict(value, None)
-            ud.__gui._update_var(name, value)
+            ud.__gui._update_var(name, value)  # type: ignore
 
         def __getter(ud: _Bindings) -> t.Any:
             value = getattr(ud._get_data_scope(), name)
             if isinstance(value, _MapDict):
-                return _MapDict(value._dict, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))
+                return _MapDict(value._dict, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))  # type: ignore
             else:
                 return value
 
@@ -64,7 +64,7 @@ class _Bindings:
         create = not id
         if create:
             id = f"{datetime.now().strftime('%Y%m%d%H%M%S%f')}-{random()}"
-            self.__gui._send_ws_id(id)
+            self.__gui._send_ws_id(id)  # type: ignore
         self.__scopes.create_scope(id)
         return id, create
 
@@ -75,10 +75,10 @@ class _Bindings:
         self.__scopes = _DataScopes(self.__gui)
 
     def _get_data_scope(self):
-        return self.__scopes.get_scope(self.__gui._get_client_id())[0]
+        return self.__scopes.get_scope(self.__gui._get_client_id())[0]  # type: ignore
 
     def _get_data_scope_metadata(self):
-        return self.__scopes.get_scope(self.__gui._get_client_id())[1]
+        return self.__scopes.get_scope(self.__gui._get_client_id())[1]  # type: ignore
 
     def _get_all_scopes(self):
         return self.__scopes.get_all_scopes()

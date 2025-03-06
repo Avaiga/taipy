@@ -240,7 +240,7 @@ class Task(_Entity, _Labeled):
         callbacks: Optional[List[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[Union[float, int]] = None,
+        timeout: Union[float, int, None] = None,
         **properties,
     ) -> Submission:
         """Submit the task for execution.

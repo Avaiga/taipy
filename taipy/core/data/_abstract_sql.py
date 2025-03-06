@@ -139,7 +139,7 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
             self._engine = None
         return super().__setattr__(key, value)
 
-    def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+    def filter(self, operators: Union[List, Tuple, None] = None, join_operator=JoinOperator.AND):
         properties = self.properties
         if properties[self._EXPOSED_TYPE_PROPERTY] == self._EXPOSED_TYPE_PANDAS:
             return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator)
@@ -212,21 +212,19 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
             return self._read_as_numpy()
         return self._read_as()
 
-    def _read_as(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+    def _read_as(self, operators: Union[List, Tuple, None] = None, join_operator=JoinOperator.AND):
         custom_class = self.properties[self._EXPOSED_TYPE_PROPERTY]
         with self._get_engine().connect() as connection:
             query_result = connection.execute(text(self._get_read_query(operators, join_operator)))
         return [custom_class(**row) for row in query_result]
 
-    def _read_as_numpy(
-        self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND
-    ) -> np.ndarray:
+    def _read_as_numpy(self, operators: Union[List, Tuple, None] = None, join_operator=JoinOperator.AND) -> np.ndarray:
         return self._read_as_pandas_dataframe(operators=operators, join_operator=join_operator).to_numpy()
 
     def _read_as_pandas_dataframe(
         self,
         columns: Optional[List[str]] = None,
-        operators: Optional[Union[List, Tuple]] = None,
+        operators: Union[List, Tuple, None] = None,
         join_operator=JoinOperator.AND,
     ):
         with self._get_engine().connect() as conn:
@@ -240,7 +238,7 @@ class _AbstractSQLDataNode(DataNode, _TabularDataNodeMixin):
             return pd.DataFrame(result, columns=keys)
 
     @abstractmethod
-    def _get_read_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+    def _get_read_query(self, operators: Union[List, Tuple, None] = None, join_operator=JoinOperator.AND):
         query = self._get_base_read_query()
 
         if not operators:

@@ -157,7 +157,7 @@ class MongoCollectionDataNode(DataNode):
         """Return the storage type of the data node: "mongo_collection"."""
         return cls.__STORAGE_TYPE
 
-    def filter(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND) -> List:
+    def filter(self, operators: Union[List, Tuple, None] = None, join_operator=JoinOperator.AND) -> List:
         cursor = self._read_by_query(operators, join_operator)
         return [self._decoder(row) for row in cursor]
 
@@ -165,7 +165,7 @@ class MongoCollectionDataNode(DataNode):
         cursor = self._read_by_query()
         return [self._decoder(row) for row in cursor]
 
-    def _read_by_query(self, operators: Optional[Union[List, Tuple]] = None, join_operator=JoinOperator.AND):
+    def _read_by_query(self, operators: Union[List, Tuple, None] = None, join_operator=JoinOperator.AND):
         """Query from a Mongo collection, exclude the _id field"""
         if not operators:
             return self.collection.find()

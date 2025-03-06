@@ -772,7 +772,7 @@ class DataNodeConfig(Section):
         id: str,
         default_path: Optional[str] = None,
         has_header: Optional[bool] = None,
-        sheet_name: Optional[Union[List[str], str]] = None,
+        sheet_name: Union[List[str], str, None] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -784,7 +784,7 @@ class DataNodeConfig(Section):
             id (str): The unique identifier of the new Excel data node configuration.
             default_path (Optional[str]): The path of the Excel file.
             has_header (Optional[bool]): If True, indicates that the Excel file has a header.
-            sheet_name (Optional[Union[List[str], str]]): The list of sheet names to be used.
+            sheet_name (Union[List[str], str]): The list of sheet names to be used.
                 This can be a unique name.
             exposed_type (Optional[str]): The exposed type of the data read from Excel file.<br/>
                 The default value is `pandas`.

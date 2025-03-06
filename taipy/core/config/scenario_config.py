@@ -55,8 +55,8 @@ class ScenarioConfig(Section):
     def __init__(
         self,
         id: str,
-        tasks: Optional[Union[TaskConfig, List[TaskConfig]]] = None,
-        additional_data_nodes: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        tasks: Union[TaskConfig, List[TaskConfig], None] = None,
+        additional_data_nodes: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         sequences: Optional[Dict[str, List[TaskConfig]]] = None,

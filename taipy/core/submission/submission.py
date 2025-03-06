@@ -80,7 +80,7 @@ class Submission(_Entity, _Labeled):
         entity_type: str,
         entity_config_id: Optional[str] = None,
         id: Optional[SubmissionId] = None,
-        jobs: Optional[Union[List[Job], List[JobId]]] = None,
+        jobs: Union[List[Job], List[JobId], None] = None,
         properties: Optional[Dict[str, Any]] = None,
         creation_date: Optional[datetime] = None,
         submission_status: Optional[SubmissionStatus] = None,

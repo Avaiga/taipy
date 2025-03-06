@@ -84,4 +84,4 @@ discuss_page = """
 pages = {"register": register_page, "discuss": discuss_page}
 
 if __name__ == "__main__":
-    gui = Gui(pages=pages).run(title="Chat - Discuss")
+    Gui(pages=pages).run(title="Chat - Discuss")

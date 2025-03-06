@@ -17,22 +17,23 @@ from taipy.gui import Gui, Markdown
 
 value = "Item 2"
 
-page = Markdown("<|{value}|toggle|lov=Item 1;Item 2;Item 3|>", style={
+page = Markdown(
+    "<|{value}|toggle|lov=Item 1;Item 2;Item 3;Item 4;Item 5|>",
+    style={
         ".taipy-toggle": {
-            ".MuiList-root": {  # list
-                "height": "70vh",  # limit height
-                "overflow-y": "auto",  # show vertical scroll if necessary
-                ".MuiListItemButton-root:nth-child(even)": {  # change colors
+            ".MuiToggleButtonGroup-root": {  # Select the list
+                ".MuiToggleButton-root:nth-child(even)": {  # Even button colors
                     "background-color": "lightgrey",
-                    "color": "darkgrey",
+                    "color": "black",
                 },
-                ".MuiListItemButton-root:nth-child(odd)": {
+                ".MuiToggleButton-root:nth-child(odd)": {  # Odd button colors
                     "background-color": "darkgrey",
-                    "color": "lightgrey",
+                    "color": "white",
                 },
             },
         }
-    },)
+    },
+)
 
 if __name__ == "__main__":
     Gui(page).run(title="Toggle - Styling")

@@ -17,7 +17,6 @@
 # -----------------------------------------------------------------------------------------
 from grocery_store.sales import SalesPage
 from grocery_store.stock import page as StockPage
-
 from taipy.gui import Gui
 
 # Define sample data for grocery store sales and stock
@@ -29,8 +28,9 @@ data = {
     "Sales Q1": [120, 200, 90, 50, 75],
     "Sales Q2": [140, 180, 110, 60, 85],
     "Sales Q3": [100, 190, 95, 55, 80],
-    "Stock":  [500, 600, 400, 300, 250]
+    "Stock": [500, 600, 400, 300, 250],
 }
 
 # Initialize and run the GUI application with Sales and Stock pages
-Gui(pages={ "sales": SalesPage(), "stock": StockPage }).run(title="Grocery Store")
+if __name__ == "__main__":
+    Gui(pages={"sales": SalesPage(), "stock": StockPage}).run(title="Grocery Store")

@@ -732,12 +732,12 @@ class _Factory:
     @staticmethod
     def call_builder(
         gui: "Gui", name: str, all_properties: t.Optional[t.Dict[str, t.Any]] = None, is_html: t.Optional[bool] = False
-    ) -> t.Optional[t.Union[t.Any, t.Tuple[str, str]]]:
+    ) -> t.Union[t.Any, t.Tuple[str, str], None]:
         name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
         _Factory.__COUNTER += 1
-        with gui._get_authorization():
+        with gui._get_authorization():  # type: ignore
             if builder is None:
                 lib, element_name, element = _Factory.__get_library_element(name)
                 if lib:

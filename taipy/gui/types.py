@@ -186,13 +186,13 @@ def _get_taipy_type(a_type: PropertyType) -> t.Type[_TaipyBase]:  # noqa: F811
 
 @t.overload
 def _get_taipy_type(  # noqa: F811
-    a_type: t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]],
-) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]: ...
+    a_type: t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType, None],
+) -> t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType, None]: ...
 
 
 def _get_taipy_type(  # noqa: F811
-    a_type: t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]],
-) -> t.Optional[t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType]]:
+    a_type: t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType, None],
+) -> t.Union[t.Type[_TaipyBase], t.Type[Decimator], PropertyType, None]:
     if a_type is None:
         return None
     if isinstance(a_type, PropertyType) and not isinstance(a_type.value, str):
