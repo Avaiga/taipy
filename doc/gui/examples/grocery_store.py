@@ -17,6 +17,7 @@
 # -----------------------------------------------------------------------------------------
 from grocery_store.sales import SalesPage
 from grocery_store.stock import page as StockPage
+
 from taipy.gui import Gui
 
 # Define sample data for grocery store sales and stock
