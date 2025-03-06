@@ -18,6 +18,7 @@ from taipy.common.config.exceptions.exceptions import InconsistentEnvVariableErr
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from .._manager._manager import _Manager
+from .._repository._abstract_repository import _AbstractRepository
 from ..exceptions.exceptions import (
     ConfigCoreVersionMismatched,
     ConflictedConfigurationError,
@@ -27,7 +28,6 @@ from ..exceptions.exceptions import (
 )
 from ..reason import ReasonCollection
 from ._version import _Version
-from ._version_fs_repository import _VersionFSRepository
 
 
 class _VersionManager(_Manager[_Version]):
@@ -41,7 +41,7 @@ class _VersionManager(_Manager[_Version]):
 
     _DEFAULT_VERSION = _LATEST_VERSION
 
-    _repository: _VersionFSRepository
+    _repository: _AbstractRepository
 
     @classmethod
     def _get(cls, entity: Union[str, _Version], default=None) -> _Version:

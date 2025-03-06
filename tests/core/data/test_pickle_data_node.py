@@ -273,8 +273,8 @@ class TestPickleDataNodeEntity:
         reasons = dn._upload(not_exists_json_path, upload_checker=check_data_column)
         assert bool(reasons) is False
         assert (
-            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file not_exists.json can not be read,"
-            f' therefore is not a valid data file for data node "{dn.id}"'
+            str(list(reasons._reasons[dn.id])[0]) == "The uploaded file 'not_exists.json' can not be read,"
+            f" therefore is not a valid data file for data node '{dn.id}'"
         )
 
         not_pickle_path = tmpdir_factory.mktemp("data").join("wrong_format_df.not_pickle").strpath
@@ -285,7 +285,7 @@ class TestPickleDataNodeEntity:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.not_pickle has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.not_pickle' has invalid data for data node '{dn.id}'"
         )
 
         wrong_format_pickle_path = tmpdir_factory.mktemp("data").join("wrong_format_df.p").strpath
@@ -296,7 +296,7 @@ class TestPickleDataNodeEntity:
         assert bool(reasons) is False
         assert (
             str(list(reasons._reasons[dn.id])[0])
-            == f'The uploaded file wrong_format_df.p has invalid data for data node "{dn.id}"'
+            == f"The uploaded file 'wrong_format_df.p' has invalid data for data node '{dn.id}'"
         )
 
         assert_frame_equal(dn.read(), old_data)  # The content of the dn should not change when upload fails

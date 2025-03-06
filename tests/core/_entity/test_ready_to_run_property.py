@@ -91,22 +91,22 @@ def test_scenario_not_submittable_if_one_input_edit_in_progress():
     dn_config_1 = Config.configure_in_memory_data_node("dn_1", 10)
     task_config = Config.configure_task("task", print, [dn_config_1], [])
     scenario_config = Config.configure_scenario("sc", [task_config])
-    scenario = scenario_manager._create(scenario_config)
-    dn_1 = scenario.dn_1
+    s = scenario_manager._create(scenario_config)
+    dn_1 = s.dn_1
     dn_1.lock_edit()
 
     assert not dn_1.is_ready_for_reading
-    assert not scenario_manager._is_submittable(scenario)
-    assert isinstance(scenario_manager._is_submittable(scenario), ReasonCollection)
+    assert not scenario_manager._is_submittable(s)
+    assert isinstance(scenario_manager._is_submittable(s), ReasonCollection)
 
-    assert scenario.id in _ReadyToRunProperty._submittable_id_datanodes
-    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[scenario.id]._reasons
+    assert s.id in _ReadyToRunProperty._submittable_id_datanodes
+    assert dn_1.id in _ReadyToRunProperty._submittable_id_datanodes[s.id]._reasons
     assert dn_1.id in _ReadyToRunProperty._datanode_id_submittables
-    assert scenario.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id]._reasons[dn_1.id] == {
+    assert s.id in _ReadyToRunProperty._datanode_id_submittables[dn_1.id]
+    assert _ReadyToRunProperty._submittable_id_datanodes[s.id]._reasons[dn_1.id] == {
         DataNodeEditInProgress(dn_1.id)
     }
-    assert _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons == f"DataNode {dn_1.id} is being edited."
+    assert _ReadyToRunProperty._submittable_id_datanodes[s.id].reasons == f"DataNode '{dn_1.id}' is being edited."
 
 
 def test_scenario_not_submittable_for_multiple_reasons():
@@ -142,8 +142,8 @@ def test_scenario_not_submittable_for_multiple_reasons():
         DataNodeIsNotWritten(dn_2.id),
     }
     reason_str = _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons
-    assert f"DataNode {dn_2.id} is being edited" in reason_str
-    assert f"DataNode {dn_2.id} is not written" in reason_str
+    assert f"DataNode '{dn_2.id}' is being edited" in reason_str
+    assert f"DataNode '{dn_2.id}' is not written" in reason_str
 
 
 def test_writing_input_remove_reasons():
@@ -166,8 +166,8 @@ def test_writing_input_remove_reasons():
         DataNodeIsNotWritten(dn_1.id),
     }
     reason_str = _ReadyToRunProperty._submittable_id_datanodes[scenario.id].reasons
-    assert f"DataNode {dn_1.id} is being edited" in reason_str
-    assert f"DataNode {dn_1.id} is not written" in reason_str
+    assert f"DataNode '{dn_1.id}' is being edited" in reason_str
+    assert f"DataNode '{dn_1.id}' is not written" in reason_str
 
     dn_1.write(10)
     assert scenario_manager._is_submittable(scenario)
@@ -192,8 +192,8 @@ def __assert_not_submittable_becomes_submittable_when_dn_edited(entity, manager,
         DataNodeIsNotWritten(dn.id),
     }
     reason_str = _ReadyToRunProperty._submittable_id_datanodes[entity.id].reasons
-    assert f"DataNode {dn.id} is being edited" in reason_str
-    assert f"DataNode {dn.id} is not written" in reason_str
+    assert f"DataNode '{dn.id}' is being edited" in reason_str
+    assert f"DataNode '{dn.id}' is not written" in reason_str
 
     dn.write("ANY VALUE")
     assert manager._is_submittable(entity)

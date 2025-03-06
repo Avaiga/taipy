@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import { createDownloadAction, createSendActionNameAction, FileDownloadProps } from "../../context/taipyReducers";
 import { useDispatch, useModule } from "../../utils/hooks";
@@ -33,7 +33,7 @@ const GuiDownload = ({ download }: GuiDownloadProps) => {
         }
     }, [content, name, dispatch, onAction, module]);
 
-    return <></>;
+    return null;
 };
 
 export default GuiDownload;

@@ -414,6 +414,61 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         return _ScenarioManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout, **properties)
 
+    def can_duplicate(self) -> ReasonCollection:
+        """Indicate if a scenario can be duplicated.
+
+        Arguments:
+            entity (Union[str, Scenario]): The scenario or its id to check if it can be duplicated.
+
+        Returns:
+            True if the given scenario can be duplicated. False otherwise.
+        """
+        from ._scenario_manager_factory import _ScenarioManagerFactory
+
+        return _ScenarioManagerFactory._build_manager()._can_duplicate(self)
+
+    def duplicate(
+        self,
+        new_creation_date: Optional[datetime] = None,
+        new_name: Optional[str] = None,
+        data_to_duplicate: Union[Set[str], bool] = True
+    ) -> "Scenario":
+        """Duplicate the scenario and return the new one.
+
+        If the scenario belongs to a cycle, the cycle (corresponding to the creation_date
+        and the configuration frequency attribute) is created if it does not exist yet.
+
+        The nested entities are duplicated or not depending on the creation date of the new
+        scenario, its cycle, and the various data node scopes.
+
+        !!! warning "Data and data nodes duplication"
+
+            Note that for now, Taipy can only duplicate data for file-based data nodes. For
+            other types of data nodes (sql, mongo, etc.), the new data nodes are created
+            referencing the exact same data as the original data nodes. This can lead to
+            conflicts if the data is modified in one of the scenarios.
+
+            Users must ensure after a duplication that the data nodes' data are correctly
+            set for the new scenario.
+
+            For example, the table name of a SQL table data node must be manually updated to
+            avoid conflicts.
+
+        Arguments:
+            new_creation_date (Optional[datetime.datetime]): The creation date of the new scenario.
+                If None, the current date and time is used.
+            new_name (Optional[str]): The displayable name of the new scenario.
+                If None, the name of the current scenario is used.
+            data_to_duplicate (Union[Set[str], bool]): A set of data node configuration ids used
+                to duplicate only the data nodes' data with the specified configuration ids.
+                If True, all data nodes are duplicated. If False, no data nodes are duplicated.
+        Returns:
+            Scenario: The newly duplicated scenario.
+        """
+        from ._scenario_manager_factory import _ScenarioManagerFactory
+
+        return _ScenarioManagerFactory._build_manager()._duplicate(self, new_creation_date, new_name, data_to_duplicate)
+
     def set_primary(self) -> None:
         """Promote the scenario as the primary scenario of its cycle.
 

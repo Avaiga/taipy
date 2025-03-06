@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+import warnings
 
 from flask import g
 
@@ -17,19 +18,15 @@ from taipy.gui import Gui, Markdown, hold_control
 
 
 def test_hold_control(gui: Gui, helpers):
-    name = "World!"  # noqa: F841
-    btn_id = "button1"  # noqa: F841
-
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
+    gui.add_page("test", Markdown("<|Hello|button|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
-    ws_client = gui._server._ws.test_client(gui._server.get_flask())
+    ws_client = gui._server._ws.test_client(gui._server.get_flask())  # type: ignore[arg-type]
     cid = helpers.create_scope_and_get_sid(gui)
-    # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         g.client_id = cid
@@ -39,3 +36,9 @@ def test_hold_control(gui: Gui, helpers):
     helpers.assert_outward_ws_simple_message(
         received_messages[0], "BL", {"action": "_taipy_on_cancel_block_ui", "message": "Work in Progress..."}
     )
+
+
+def test_bad_hold_control(gui: Gui, helpers):
+    with warnings.catch_warnings(record=True) as records:
+        hold_control(None)  # type: ignore[arg-type]
+        assert len(records) == 1

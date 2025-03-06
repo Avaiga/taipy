@@ -277,11 +277,11 @@ const defaultCursorIcon = { ...iconInRowSx, "& .MuiSwitch-input": defaultCursor 
 const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Partial<TableCellProps> => {
     switch (col.type) {
         case "bool":
-            base.align = "center";
+            base = {...base, align: "center"};
             break;
     }
     if (col.width) {
-        base.width = col.width;
+        base = {...base, width: col.width};
     }
     return base;
 };

@@ -153,7 +153,7 @@ def test_is_deletable():
 
     rc = submission_manager._is_deletable("some_submission")
     assert not rc
-    assert "Entity some_submission does not exist in the repository." in rc.reasons
+    assert "Entity 'some_submission' does not exist in the repository." in rc.reasons
 
     assert submission._submission_status == SubmissionStatus.SUBMITTED
     assert not submission.is_deletable()

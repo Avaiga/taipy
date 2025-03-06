@@ -56,6 +56,18 @@ class _DataNodeReasonMixin:
         return _DataManagerFactory._build_manager()._get(self.datanode_id)
 
 
+class DataIsNotDuplicable(Reason, _DataNodeReasonMixin):
+    """
+    The data node can be duplicated but not its data
+
+    Attributes:
+        datanode_id (str): The identifier of the `DataNode^`.
+    """
+
+    def __init__(self, datanode_id: str):
+        Reason.__init__(self, f"Data of data node '{datanode_id}' is not duplicable")
+        _DataNodeReasonMixin.__init__(self, datanode_id)
+
 class DataNodeEditInProgress(Reason, _DataNodeReasonMixin):
     """
     A `DataNode^` is being edited, which prevents specific actions from being performed.
@@ -65,7 +77,7 @@ class DataNodeEditInProgress(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, datanode_id: str):
-        Reason.__init__(self, f"DataNode {datanode_id} is being edited")
+        Reason.__init__(self, f"DataNode '{datanode_id}' is being edited")
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
 
@@ -78,7 +90,7 @@ class DataNodeIsNotWritten(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, datanode_id: str):
-        Reason.__init__(self, f"DataNode {datanode_id} is not written")
+        Reason.__init__(self, f"DataNode '{datanode_id}' is not written")
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
 
@@ -91,7 +103,7 @@ class EntityIsNotSubmittableEntity(Reason):
     """
 
     def __init__(self, entity_id: str):
-        Reason.__init__(self, f"Entity {entity_id} is not a submittable entity")
+        Reason.__init__(self, f"Entity '{entity_id}' is not a submittable entity")
 
 
 class WrongConfigType(Reason):
@@ -105,9 +117,9 @@ class WrongConfigType(Reason):
 
     def __init__(self, config_id: str, config_type: Optional[str]):
         if config_type:
-            reason = f'Object "{config_id}" must be a valid {config_type}'
+            reason = f"Object '{config_id}' must be a valid {config_type}"
         else:
-            reason = f'Object "{config_id}" is not a valid config to be created'
+            reason = f"Object '{config_id}' is not a valid config to be created"
 
         Reason.__init__(self, reason)
 
@@ -121,7 +133,7 @@ class NotGlobalScope(Reason):
     """
 
     def __init__(self, config_id: str):
-        Reason.__init__(self, f'Data node config "{config_id}" does not have GLOBAL scope')
+        Reason.__init__(self, f"Data node config '{config_id}' does not have GLOBAL scope")
 
 
 class UploadFileCanNotBeRead(Reason, _DataNodeReasonMixin):
@@ -136,8 +148,8 @@ class UploadFileCanNotBeRead(Reason, _DataNodeReasonMixin):
     def __init__(self, file_name: str, datanode_id: str):
         Reason.__init__(
             self,
-            f"The uploaded file {file_name} can not be read, "
-            f'therefore is not a valid data file for data node "{datanode_id}"',
+            f"The uploaded file '{file_name}' can not be read, "
+            f"therefore is not a valid data file for data node '{datanode_id}'",
         )
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
@@ -152,7 +164,7 @@ class NoFileToDownload(Reason, _DataNodeReasonMixin):
 
     def __init__(self, file_path: str, datanode_id: str):
         Reason.__init__(
-            self, f"Path '{file_path}' from data node '{datanode_id}'" f" does not exist and cannot be downloaded"
+            self, f"Path '{file_path}' from data node '{datanode_id}' does not exist and cannot be downloaded"
         )
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
@@ -167,7 +179,7 @@ class NotAFile(Reason, _DataNodeReasonMixin):
 
     def __init__(self, file_path: str, datanode_id: str):
         Reason.__init__(
-            self, f"Path '{file_path}' from data node '{datanode_id}'" f" is not a file and can t be downloaded"
+            self, f"Path '{file_path}' from data node '{datanode_id}' is not a file and can t be downloaded"
         )
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
@@ -182,7 +194,7 @@ class InvalidUploadFile(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, file_name: str, datanode_id: str):
-        Reason.__init__(self, f'The uploaded file {file_name} has invalid data for data node "{datanode_id}"')
+        Reason.__init__(self, f"The uploaded file '{file_name}' has invalid data for data node '{datanode_id}'")
         _DataNodeReasonMixin.__init__(self, datanode_id)
 
 
@@ -195,7 +207,7 @@ class EntityDoesNotExist(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, entity_id: str):
-        Reason.__init__(self, f"Entity {entity_id} does not exist in the repository")
+        Reason.__init__(self, f"Entity '{entity_id}' does not exist in the repository")
 
 
 class JobIsNotFinished(Reason, _DataNodeReasonMixin):
@@ -207,7 +219,7 @@ class JobIsNotFinished(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, job_id: str):
-        Reason.__init__(self, f"The job {job_id} is not finished yet")
+        Reason.__init__(self, f"The job '{job_id}' is not finished yet")
 
 
 class EntityIsNotAScenario(Reason, _DataNodeReasonMixin):
@@ -219,7 +231,7 @@ class EntityIsNotAScenario(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, entity_id: str):
-        Reason.__init__(self, f"The entity {entity_id} is not a scenario")
+        Reason.__init__(self, f"The entity '{entity_id}' is not a scenario")
 
 
 class ScenarioIsThePrimaryScenario(Reason, _DataNodeReasonMixin):
@@ -232,7 +244,7 @@ class ScenarioIsThePrimaryScenario(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, scenario_id: str, cycle: str):
-        Reason.__init__(self, f"The scenario {scenario_id} is the primary scenario of cycle {cycle}")
+        Reason.__init__(self, f"The scenario '{scenario_id}' is the primary scenario of cycle '{cycle}'")
 
 
 class ScenarioDoesNotBelongToACycle(Reason, _DataNodeReasonMixin):
@@ -244,7 +256,7 @@ class ScenarioDoesNotBelongToACycle(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, scenario_id: str):
-        Reason.__init__(self, f"The scenario {scenario_id} does not belong to any cycle")
+        Reason.__init__(self, f"The scenario '{scenario_id}' does not belong to any cycle")
 
 
 class SubmissionIsNotFinished(Reason, _DataNodeReasonMixin):
@@ -256,7 +268,7 @@ class SubmissionIsNotFinished(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, submission_id: str):
-        Reason.__init__(self, f"The submission {submission_id} is not finished yet")
+        Reason.__init__(self, f"The submission '{submission_id}' is not finished yet")
 
 
 class SubmissionStatusIsUndefined(Reason, _DataNodeReasonMixin):
@@ -268,4 +280,4 @@ class SubmissionStatusIsUndefined(Reason, _DataNodeReasonMixin):
     """
 
     def __init__(self, submission_id: str):
-        Reason.__init__(self, f"The status of submission {submission_id} is undefined")
+        Reason.__init__(self, f"The status of submission '{submission_id}' is undefined")

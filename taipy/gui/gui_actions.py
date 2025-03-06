@@ -67,7 +67,7 @@ def notify(
     system_notification: t.Optional[bool] = None,
     duration: t.Optional[int] = None,
     id: str = "",
-) -> None:
+) -> t.Optional[str]:
     """Send a notification to the user interface.
 
     Arguments:
@@ -103,6 +103,7 @@ def notify(
         return state._gui._notify(notification_type, message, system_notification, duration, id)  # type: ignore
     else:
         _warn("'notify()' must be called in the context of a callback.")
+        return None
 
 
 def close_notification(state: State, id: str) -> None:

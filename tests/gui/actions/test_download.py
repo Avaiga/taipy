@@ -11,6 +11,7 @@
 
 import inspect
 import typing as t
+import warnings
 
 from flask import Flask, g
 
@@ -18,22 +19,18 @@ from taipy.gui import Gui, Markdown, State, download
 
 
 def test_download(gui: Gui, helpers):
-    name = "World!"  # noqa: F841
-    btn_id = "button1"  # noqa: F841
-
     def on_download_action(state: State):
         pass
 
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
+    gui.add_page("test", Markdown("<|Hello|button|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(t.cast(Flask, gui._server.get_flask()))
     cid = helpers.create_scope_and_get_sid(gui)
-    # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         g.client_id = cid
@@ -43,3 +40,9 @@ def test_download(gui: Gui, helpers):
     helpers.assert_outward_ws_simple_message(
         received_messages[0], "DF", {"name": "filename.txt", "onAction": "on_download_action"}
     )
+
+
+def test_bad_download(gui: Gui, helpers):
+    with warnings.catch_warnings(record=True) as records:
+        download(None, "some text", "filename.txt", "on_download_action")  # type: ignore[arg-type]
+        assert len(records) == 1

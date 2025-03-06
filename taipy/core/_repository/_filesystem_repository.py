@@ -191,10 +191,14 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         return None
 
     def __match_file_and_get_entity(self, filepath, config_and_owner_ids, filters):
-        if match := [(c, p) for c, p in config_and_owner_ids if c.id in filepath.name]:
+        if match := [(c, p) for c, p in config_and_owner_ids if (c if isinstance(c, str) else c.id) in filepath.name]:
             for config, owner_id in match:
                 for fil in filters:
-                    fil.update({"config_id": config.id, "owner_id": owner_id})
+                    if isinstance(config, str):
+                        config_id = config
+                    else:
+                        config_id = config.id
+                    fil.update({"config_id": config_id, "owner_id": owner_id})
 
                 if data := self.__filter_by(filepath, filters):
                     return config, owner_id, self.__file_content_to_entity(data)

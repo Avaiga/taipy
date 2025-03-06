@@ -11,6 +11,7 @@
 
 from datetime import datetime, timedelta
 from typing import Callable, Iterable, Optional
+from unittest import mock
 from unittest.mock import ANY, patch
 
 import freezegun
@@ -41,7 +42,8 @@ from taipy.core.exceptions.exceptions import (
     UnauthorizedTagError,
 )
 from taipy.core.job._job_manager import _JobManager
-from taipy.core.reason import WrongConfigType
+from taipy.core.reason import EntityDoesNotExist, ReasonCollection, WrongConfigType
+from taipy.core.scenario._scenario_duplicator import _ScenarioDuplicator
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
@@ -385,14 +387,14 @@ def test_can_create():
     reasons = _ScenarioManager._can_create(task_config)
     assert bool(reasons) is False
     assert reasons._reasons[task_config.id] == {WrongConfigType(task_config.id, ScenarioConfig.__name__)}
-    assert str(list(reasons._reasons[task_config.id])[0]) == 'Object "task" must be a valid ScenarioConfig'
+    assert str(list(reasons._reasons[task_config.id])[0]) == "Object 'task' must be a valid ScenarioConfig"
     with pytest.raises(AttributeError):
         _ScenarioManager._create(task_config)
 
     reasons = _ScenarioManager._can_create(1)
     assert bool(reasons) is False
     assert reasons._reasons["1"] == {WrongConfigType(1, ScenarioConfig.__name__)}
-    assert str(list(reasons._reasons["1"])[0]) == 'Object "1" must be a valid ScenarioConfig'
+    assert str(list(reasons._reasons["1"])[0]) == "Object '1' must be a valid ScenarioConfig"
     with pytest.raises(AttributeError):
         _ScenarioManager._create(1)
 
@@ -406,7 +408,7 @@ def test_is_deletable():
 
     rc = _ScenarioManager._is_deletable("some_scenario")
     assert not rc
-    assert "Entity some_scenario does not exist in the repository." in rc.reasons
+    assert "Entity 'some_scenario' does not exist in the repository." in rc.reasons
 
     assert len(_ScenarioManager._get_all()) == 2
     assert scenario_1_primary.is_primary
@@ -1049,7 +1051,7 @@ def test_is_submittable():
 
     rc = _ScenarioManager._is_submittable("some_scenario")
     assert not rc
-    assert "Entity some_scenario does not exist in the repository." in rc.reasons
+    assert "Entity 'some_scenario' does not exist in the repository." in rc.reasons
 
     assert len(_ScenarioManager._get_all()) == 1
     assert _ScenarioManager._is_submittable(scenario)
@@ -1553,3 +1555,40 @@ def test_filter_scenarios_by_creation_datetime():
     )
     assert len(filtered_scenarios) == 1
     assert [s_1_1] == filtered_scenarios
+
+
+def test_can_duplicate_scenario():
+    dn_config = Config.configure_pickle_data_node("dn")
+    task_config = Config.configure_task("task_1", print, [dn_config])
+    scenario_config = Config.configure_scenario("scenario_1", [task_config])
+    scenario = _ScenarioManager._create(scenario_config)
+
+    reasons = _ScenarioManager._can_duplicate(scenario)
+    assert bool(reasons)
+    assert reasons._reasons == {}
+
+    reasons = _ScenarioManager._can_duplicate(scenario.id)
+    assert bool(reasons)
+    assert reasons._reasons == {}
+
+    reasons = _ScenarioManager._can_duplicate("WRONG_ID")
+    assert not bool(reasons)
+    assert reasons._reasons["WRONG_ID"] == {EntityDoesNotExist("WRONG_ID")}
+    assert str(list(reasons._reasons["WRONG_ID"])[0]) == "Entity 'WRONG_ID' does not exist in the repository"
+
+
+def test_duplicate_scenario():
+    scenario = Scenario("config_id", set(), {}, set(), ScenarioId("scenario_id"))
+    with mock.patch.object(_ScenarioManager, "_can_duplicate", return_value= ReasonCollection()) as mock_can:
+        with mock.patch.object(_ScenarioDuplicator, "duplicate") as mock_duplicate:
+            _ScenarioManager._duplicate(scenario)
+            mock_can.assert_called_once_with(scenario)
+            mock_duplicate.assert_called_once_with(None, None)
+            mock_duplicate.reset_mock()
+            mock_can.reset_mock()
+
+            new_date = datetime.now()
+            new_name = "new_name"
+            _ScenarioManager._duplicate(scenario, new_date, new_name)
+            mock_can.assert_called_once_with(scenario)
+            mock_duplicate.assert_called_once_with(new_date, new_name)
