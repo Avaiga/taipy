@@ -140,6 +140,7 @@ export interface FileDownloadProps {
     content?: string;
     name?: string;
     onAction?: string;
+    context?: string;
 }
 
 interface TaipyIdAction extends TaipyBaseAction, IdMessage {}
@@ -499,7 +500,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 delete state.download;
                 return { ...state };
             }
-            return { ...state, download: { content: dAction.content, name: dAction.name, onAction: dAction.onAction } };
+            return { ...state, download: { content: dAction.content, name: dAction.name, onAction: dAction.onAction, context: dAction.context } };
         }
         case Types.Partial: {
             const pAction = baseAction as TaipyPartialAction;
@@ -906,6 +907,7 @@ export const createDownloadAction = (dMessage?: FileDownloadProps): TaipyDownloa
     content: dMessage?.content,
     name: dMessage?.name,
     onAction: dMessage?.onAction,
+    context: dMessage?.context,
 });
 
 export const createSetMenuAction = (menu: MenuProps): TaipySetMenuAction => ({
