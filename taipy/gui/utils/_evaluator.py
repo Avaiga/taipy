@@ -125,11 +125,11 @@ class _Evaluator:
                             if lazy_declare and var_name.startswith("__"):
                                 with warnings.catch_warnings(record=True) as warns:
                                     warnings.resetwarnings()
-                                    encoded_var_name = gui._bind_var(var_name)
+                                    encoded_var_name = gui._bind_var(var_name)  # type: ignore[attr-defined]
                                     if next((w for w in warns if w.category is TaipyGuiWarning), None):
-                                        gui._bind_var_val(var_name, None)
+                                        gui._bind_var_val(var_name, None)  # type: ignore[attr-defined]
                             else:
-                                encoded_var_name = gui._bind_var(var_name)
+                                encoded_var_name = gui._bind_var(var_name)  # type: ignore[attr-defined]
                             var_val[var_name] = _getscopeattr_drill(gui, encoded_var_name)
                             var_map[var_name] = encoded_var_name
                         except AttributeError as e:
@@ -147,7 +147,7 @@ class _Evaluator:
     ):
         if expr in self.__expr_to_hash:
             expr_hash = self.__expr_to_hash[expr]
-            gui._bind_var_val(expr_hash, expr_evaluated)
+            gui._bind_var_val(expr_hash, expr_evaluated)  # type: ignore[attr-defined]
             return expr_hash
         if expr_hash is None:
             expr_hash = _get_expr_var_name(expr)
@@ -156,7 +156,7 @@ class _Evaluator:
             # edge case, only a single variable
             expr_hash = f"tpec_{_get_client_var_name(expr)}"
         self.__expr_to_hash[expr] = expr_hash
-        gui._bind_var_val(expr_hash, expr_evaluated)
+        gui._bind_var_val(expr_hash, expr_evaluated)  # type: ignore[attr-defined]
         self.__hash_to_expr[expr_hash] = expr
         for var in var_map.values():
             if var not in self.__global_ctx.keys():
@@ -171,7 +171,7 @@ class _Evaluator:
         for encoded_var_name in var_map.values():
             var_name, module_name = _variable_decode(encoded_var_name)
             # only variables in the main module with be taken into account
-            if module_name is not None and module_name != gui._get_default_module_name():
+            if module_name is not None and module_name != gui._get_default_module_name():  # type: ignore[attr-defined]
                 continue
             if var_name in self.__shared_variable:
                 self.__shared_variable.append(expr_hash)
@@ -248,7 +248,7 @@ class _Evaluator:
             expr_hash = expr if _Evaluator.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
             is_edge_case = True
         # validate whether expression has already been evaluated
-        module_name = gui._get_locals_context()
+        module_name = gui._get_locals_context()  # type: ignore[attr-defined]
         not_encoded_expr = expr
         expr = f"TpExPr_{_variable_encode(expr, module_name)}"
         if expr in self.__expr_to_hash and _hasscopeattr(gui, self.__expr_to_hash[expr]):
@@ -258,10 +258,10 @@ class _Evaluator:
             ctx: t.Dict[str, t.Any] = {}
             ctx.update(self.__global_ctx)
             if lambda_expr:
-                ctx.update(gui._get_locals_bind())
+                ctx.update(gui._get_locals_bind())  # type: ignore[attr-defined]
             # entries in var_val are not always seen (NameError) when passed as locals
             ctx.update(var_val)
-            with gui._get_authorization():
+            with gui._get_authorization():  # type: ignore[attr-defined]
                 expr_evaluated = eval(not_encoded_expr if is_edge_case else expr_string, ctx)
         except Exception as e:
             exception_str = not_encoded_expr if is_edge_case else expr_string
@@ -272,7 +272,7 @@ class _Evaluator:
             )
             expr_evaluated = None
         if lambda_expr and callable(expr_evaluated):
-            expr_hash = _get_lambda_id(expr_evaluated, module=module_name)  # type: ignore[reportArgumentType]
+            expr_hash = _get_lambda_id(expr_evaluated, module=module_name)  # type: ignore[arg-type]
         # save the expression if it needs to be re-evaluated
         return self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_map, lambda_expr)
 
@@ -286,7 +286,7 @@ class _Evaluator:
 
         expr_decoded, _ = _variable_decode(expr)
         var_map = self.__expr_to_var_map.get(expr, {})
-        eval_dict = {k: _getscopeattr_drill(gui, gui._bind_var(v)) for k, v in var_map.items()}
+        eval_dict = {k: _getscopeattr_drill(gui, gui._bind_var(v)) for k, v in var_map.items()}  # type: ignore[attr-defined]
         if self._is_expression(expr_decoded):
             expr_string = 'f"' + _variable_decode(expr)[0].replace('"', '\\"') + '"'
         else:
@@ -363,7 +363,7 @@ class _Evaluator:
                 if expr_var_map is None:
                     _warn(f"Something is amiss with expression list for {expr}.")
                 else:
-                    eval_dict = {k: _getscopeattr_drill(gui, gui._bind_var(v)) for k, v in expr_var_map.items()}
+                    eval_dict = {k: _getscopeattr_drill(gui, gui._bind_var(v)) for k, v in expr_var_map.items()}  # type: ignore[attr-defined]
                     if self._is_expression(expr_decoded):
                         expr_string = 'f"' + _variable_decode(expr)[0].replace('"', '\\"') + '"'
                     else:

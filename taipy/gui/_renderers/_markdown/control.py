@@ -21,7 +21,7 @@ class _ControlPattern(InlineProcessor):
     def extend(md, gui, priority):
         instance = _ControlPattern(_ControlPattern.__PATTERN, md)
         md.inlinePatterns.register(instance, "taipy", priority)
-        instance._gui = gui  # type: ignore[reportAttributeAccessIssue]
+        instance._gui = gui  # type: ignore[attr-defined]
 
     def handleMatch(self, m, data):
-        return _MarkdownFactory.create_element(self._gui, m.group(1), m.group(2)), m.start(0), m.end(0)  # type: ignore[reportAttributeAccessIssue]
+        return _MarkdownFactory.create_element(self._gui, m.group(1), m.group(2)), m.start(0), m.end(0)  # type: ignore[attr-defined]

@@ -33,7 +33,7 @@ class _TaipyHTMLParser(HTMLParser):
         self._tag_stack = []
 
     # @override
-    def handle_starttag(self, tag, props) -> None:
+    def handle_starttag(self, tag, props) -> None: # type: ignore[misc]
         self._tag_stack.append((tag, self._line_count))
         if tag == "html":
             return
@@ -93,7 +93,7 @@ class _TaipyHTMLParser(HTMLParser):
     def parse_taipy_tag(self) -> None:
         tp_string, tp_element_name = self.taipy_tag.parse(self._gui)
         self.append_data(tp_string)
-        self.tag_mapping[f"{self.taipy_tag.namespace}:{self.taipy_tag.control_type}"] = tp_element_name
+        self.tag_mapping[f"{self.taipy_tag.namespace}:{self.taipy_tag.control_type}"] = tp_element_name  # type: ignore[misc]
         self.taipy_tag = None
 
     def get_jsx(self) -> str:
@@ -132,4 +132,4 @@ class _TaipyTag(object):
         # allow usage of 'class' property in html taipy tag
         if "class" in self.properties and "class_name" not in self.properties:
             self.properties["class_name"] = self.properties["class"]
-        return _HtmlFactory.create_element(gui, self.namespace, self.control_type, self.properties)
+        return _HtmlFactory.create_element(gui, self.namespace, self.control_type, self.properties)  # type: ignore[return-value]

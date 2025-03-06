@@ -33,7 +33,7 @@ class _PandasBasedDataAccessor(_DataAccessor):
     def _from_pandas(self, value: pd.DataFrame, data_type: t.Type) -> t.Any:
         pass
 
-    def get_cols_description(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, t.Dict[str, str]]]:  # type: ignore[reportIncompatibleMethodOverride ]
+    def get_cols_description(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, t.Dict[str, str]]]:  # type: ignore[override ]
         return self._get_pandas_accessor().get_cols_description(var_name, self.to_pandas(value))
 
     def get_data(

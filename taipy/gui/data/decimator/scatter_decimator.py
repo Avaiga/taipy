@@ -81,7 +81,7 @@ class ScatterDecimator(Decimator):
         grid_shape = (grid_x + 1, grid_y + 1)
         if len(data[0]) == 3:
             grid_z = grid_x
-            grid_shape = (grid_x + 1, grid_y + 1, grid_z + 1)
+            grid_shape = (grid_x + 1, grid_y + 1, grid_z + 1)  # type: ignore[assignment]
             z_col = data[:, 2]
             min_z: float = np.amin(z_col)
             max_z: float = np.amax(z_col)

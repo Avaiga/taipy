@@ -195,8 +195,8 @@ class _GuiState(State):
 
     def broadcast(self, name: str, value: t.Any):
         with self._set_context(self._gui):
-            encoded_name = self._gui._bind_var(name)
-            self._gui._broadcast_all_clients(encoded_name, value)
+            encoded_name = self._gui._bind_var(name)  # type: ignore[attr-defined]
+            self._gui._broadcast_all_clients(encoded_name, value)  # type: ignore[attr-defined]
 
     def __getattribute__(self, name: str) -> t.Any:
         if name == "__class__":
@@ -208,33 +208,33 @@ class _GuiState(State):
             return gui
         if name in _GuiState.__excluded_attrs:
             raise AttributeError(f"Variable '{name}' is protected and is not accessible.")
-        if gui._is_in_brdcst_callback() and (
-            name not in gui._get_shared_variables() and not gui._bindings()._is_single_client()
+        if gui._is_in_brdcst_callback() and (  # type: ignore[attr-defined]
+            name not in gui._get_shared_variables() and not gui._bindings()._is_single_client()  # type: ignore[attr-defined]
         ):
             raise AttributeError(f"Variable '{name}' is not available to be accessed in shared callback.")
         if not name.startswith("__") and name not in super().__getattribute__(_GuiState.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
         with self._notebook_context(gui), self._set_context(gui):
-            encoded_name = gui._bind_var(name)
-            return getattr(gui._bindings(), encoded_name)
+            encoded_name = gui._bind_var(name)  # type: ignore[attr-defined]
+            return getattr(gui._bindings(), encoded_name)  # type: ignore[attr-defined]
 
     def __setattr__(self, name: str, value: t.Any) -> None:
         gui: "Gui" = super().__getattribute__(_GuiState.__gui_attr)
-        if gui._is_in_brdcst_callback() and (
-            name not in gui._get_shared_variables() and not gui._bindings()._is_single_client()
+        if gui._is_in_brdcst_callback() and (  # type: ignore[attr-defined]
+            name not in gui._get_shared_variables() and not gui._bindings()._is_single_client()  # type: ignore[attr-defined]
         ):
             raise AttributeError(f"Variable '{name}' is not available to be accessed in shared callback.")
         if not name.startswith("__") and name not in super().__getattribute__(_GuiState.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not accessible.")
         with self._notebook_context(gui), self._set_context(gui):
-            encoded_name = gui._bind_var(name)
-            setattr(gui._bindings(), encoded_name, value)
+            encoded_name = gui._bind_var(name)  # type: ignore[attr-defined]
+            setattr(gui._bindings(), encoded_name, value)  # type: ignore[attr-defined]
 
     def __getitem__(self, key: str):
         context = key if key in super().__getattribute__(_GuiState.__attrs[2]) else None
         if context is None:
             gui: "Gui" = super().__getattribute__(_GuiState.__gui_attr)
-            page_ctx = gui._get_page_context(key)
+            page_ctx = gui._get_page_context(key)  # type: ignore[attr-defined]
             context = page_ctx if page_ctx is not None else None
         if context is None:
             raise RuntimeError(f"Can't resolve context '{key}' from state object")
@@ -244,14 +244,14 @@ class _GuiState(State):
     def _set_context(self, gui: "Gui") -> t.ContextManager[None]:
         if (pl_ctx := self._get_placeholder(_GuiState.__placeholder_attrs[1])) is not None:
             self._set_placeholder(_GuiState.__placeholder_attrs[1], None)
-            if pl_ctx != gui._get_locals_context():
-                return gui._set_locals_context(pl_ctx)
+            if pl_ctx != gui._get_locals_context():  # type: ignore[attr-defined]
+                return gui._set_locals_context(pl_ctx)  # type: ignore[attr-defined]
         if len(inspect.stack()) > 1:
             ctx = _get_module_name_from_frame(t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame)))
-            current_context = gui._get_locals_context()
+            current_context = gui._get_locals_context()  # type: ignore[attr-defined]
             # ignore context if the current one starts with the new one (to resolve for class modules)
             if ctx != current_context and not current_context.startswith(str(ctx)):
-                return gui._set_locals_context(ctx)
+                return gui._set_locals_context(ctx)  # type: ignore[attr-defined]
         return nullcontext()
 
     def _notebook_context(self, gui: "Gui"):
@@ -284,7 +284,7 @@ class _GuiState(State):
 class _AsyncState(_GuiState):
     def __init__(self, state: State) -> None:
         super().__init__(state.get_gui(), [], [])
-        self._set_placeholder("__state_id", state.get_gui()._get_client_id())
+        self._set_placeholder("__state_id", state.get_gui()._get_client_id())  # type: ignore[attr-defined]
 
     @staticmethod
     def __set_var_in_state(state: State, var_name: str, value: t.Any):

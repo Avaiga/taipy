@@ -737,7 +737,7 @@ class _Factory:
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None
         _Factory.__COUNTER += 1
-        with gui._get_authorization():  # type: ignore[reportAttributeAccessIssue]
+        with gui._get_authorization():  # type: ignore[attr-defined]
             if builder is None:
                 lib, element_name, element = _Factory.__get_library_element(name)
                 if lib:

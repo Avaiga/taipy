@@ -43,7 +43,7 @@ class _Page(object):
         with warnings.catch_warnings(record=True) as w:
             warnings.resetwarnings()
             module_name = self._renderer._get_module_name()
-            with gui._set_locals_context(module_name):  # type: ignore[reportAttributeAccessIssue]
+            with gui._set_locals_context(module_name):  # type: ignore[attr-defined]
                 self._rendered_jsx = self._renderer.render(gui)
             if silent:
                 s = ""
@@ -69,7 +69,7 @@ class _Page(object):
                     s = "\033[1;31m\n"
                     s += (
                         message
-                        := f"--- {len(w)} warning(s) were found for page '{'/' if self._route == gui._get_root_page_name() else self._route}' {self._renderer._get_content_detail(gui)} ---\n"  # noqa: E501 # type: ignore[reportAttributeAccessIssue]
+                        := f"--- {len(w)} warning(s) were found for page '{'/' if self._route == gui._get_root_page_name() else self._route}' {self._renderer._get_content_detail(gui)} ---\n"  # type: ignore[reportAttributeAccessIssue] # noqa: E501
                     )
                     for i, wm in enumerate(w):
                         s += f" - Warning {i + 1}: {wm.message}\n"
@@ -77,6 +77,6 @@ class _Page(object):
                     s += "\033[0m\n"
                     logging.warning(s)
         if hasattr(self._renderer, "head"):
-            self._head = list(self._renderer.head)  # type: ignore[reportAttributeAccessIssue]
+            self._head = list(self._renderer.head)  # type: ignore[attr-defined]
         # return renderer module_name from frame
         return module_name

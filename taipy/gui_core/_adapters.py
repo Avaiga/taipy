@@ -50,7 +50,7 @@ from .filters import DataNodeFilter, ParamType, ScenarioFilter, _Filter
 # prevent gui from trying to push scenario instances to the front-end
 class _GuiCoreDoNotUpdate(_DoNotUpdate):
     def __repr__(self):
-        return self.get_label() if hasattr(self, "get_label") else super().__repr__()  # type: ignore[reportAttributeAccessIssue]
+        return self.get_label() if hasattr(self, "get_label") else super().__repr__()  # type: ignore[attr-defined]
 
 
 class _EntityType(Enum):
@@ -416,7 +416,7 @@ class _GuiCoreProperties(ABC):
         return {}
 
     def get(self):
-        data = super().get()  # type: ignore[reportAttributeAccessIssue]
+        data = super().get()  # type: ignore[attr-defined]
         if _is_boolean(data):
             if _is_true(data):
                 data = self.get_default_list()

@@ -307,7 +307,7 @@ class ElementLibrary(ABC):
     def __get_class_folder(self):
         if not hasattr(self, "_class_folder"):
             module_obj = sys.modules.get(self.__class__.__module__)
-            base = (Path(".") if module_obj is None else Path(module_obj.__file__).parent).resolve()  # type: ignore[reportArgumentType]
+            base = (Path(".") if module_obj is None else Path(module_obj.__file__).parent).resolve()  # type: ignore[arg-type]
             self._class_folder = base if base.exists() else Path(".").resolve()
         return self._class_folder
 
@@ -372,7 +372,7 @@ class ElementLibrary(ABC):
         """TODO"""
         from ..gui import Gui
 
-        return f"/{Gui._EXTENSION_ROOT}/{self.get_name()}/{resource}{self.get_query(resource)}"  # type: ignore[reportAttributeAccessIssue]
+        return f"/{Gui._EXTENSION_ROOT}/{self.get_name()}/{resource}{self.get_query(resource)}"  # type: ignore[attr-defined]
 
     def get_data(self, library_name: str, payload: t.Dict, var_name: str, value: t.Any) -> t.Optional[t.Dict]:
         """
@@ -491,9 +491,9 @@ class _ElementWithInnerProps(Element):
                     # handling property replacement in inner properties <tp:prop:...>
                     while m := _ElementWithInnerProps.__RE_PROP_VAR.search(val):
                         var = attributes.get(m.group(1))
-                        hash_value = None if var is None else gui._evaluate_expr(var)  # type: ignore[reportAttributeAccessIssue]
+                        hash_value = None if var is None else gui._evaluate_expr(var)  # type: ignore[attr-defined]
                         if hash_value:
-                            names = gui._get_real_var_name(hash_value)  # type: ignore[reportAttributeAccessIssue]
+                            names = gui._get_real_var_name(hash_value)  # type: ignore[attr-defined]
                             hash_value = names[0] if isinstance(names, tuple) else names
                         else:
                             hash_value = "None"
@@ -507,7 +507,7 @@ class _ElementWithInnerProps(Element):
                             id = len(uniques) + 1
                             uniques[m.group(1)] = id
                         val = f"{val[: m.start()]}{counter}{id}{val[m.end() :]}"
-                    if has_uniq and gui._is_expression(val):  # type: ignore[reportAttributeAccessIssue]
-                        gui._evaluate_expr(val, True)  # type: ignore[reportAttributeAccessIssue]
+                    if has_uniq and gui._is_expression(val):  # type: ignore[attr-defined]
+                        gui._evaluate_expr(val, True)  # type: ignore[attr-defined]
 
                 attributes[prop] = val

@@ -164,7 +164,7 @@ class _Adapter:
         if label is None:
             return None
         children = self.__get_children(value)
-        return (id, label) if children is None else (id, label, children)  # type: ignore[reportReturnType]
+        return (id, label) if children is None else (id, label, children)  # type: ignore[return-value]
 
     def __get_id(self, value: t.Any, dig=True) -> str:
         if isinstance(value, str):

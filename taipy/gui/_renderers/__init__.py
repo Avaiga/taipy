@@ -107,10 +107,10 @@ class _Renderer(Page, ABC):
             raise RuntimeError("'set_content()' must be used in an IPython notebook context")
         self.__process_content(content)
         if self._notebook_gui is not None and self._notebook_page is not None:
-            if self._notebook_gui._config.root_page is self._notebook_page:  # type: ignore[reportAttributeAccessIssue]
-                self._notebook_gui._navigate("/", {"tp_reload_all": "true"})  # type: ignore[reportAttributeAccessIssue]
+            if self._notebook_gui._config.root_page is self._notebook_page:  # type: ignore[attr-defined]
+                self._notebook_gui._navigate("/", {"tp_reload_all": "true"})  # type: ignore[attr-defined]
                 return
-            self._notebook_gui._navigate(self._notebook_page._route, {"tp_reload_same_route_only": "true"})  # type: ignore[reportAttributeAccessIssue]
+            self._notebook_gui._navigate(self._notebook_page._route, {"tp_reload_same_route_only": "true"})  # type: ignore[attr-defined]
 
     def _get_content_detail(self, gui: "Gui") -> str:
         if self._filepath:
@@ -161,7 +161,7 @@ class Markdown(_Renderer):
 
     # Generate JSX from Markdown
     def render(self, gui: "Gui") -> str:
-        return gui._markdown.convert(self._content)  # type: ignore[reportAttributeAccessIssue]
+        return gui._markdown.convert(self._content)  # type: ignore[attr-defined]
 
 
 class Html(_Renderer):

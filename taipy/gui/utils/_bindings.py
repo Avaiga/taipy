@@ -43,12 +43,12 @@ class _Bindings:
                 value._update_var = None  # type: ignore[assignment]
             elif isinstance(value, dict):
                 value = _MapDict(value, None)
-            ud.__gui._update_var(name, value)  # type: ignore[reportAttributeAccessIssue]
+            ud.__gui._update_var(name, value)  # type: ignore[attr-defined]
 
         def __getter(ud: _Bindings) -> t.Any:
             value = getattr(ud._get_data_scope(), name)
             if isinstance(value, _MapDict):
-                return _MapDict(value._dict, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))  # type: ignore[reportAttributeAccessIssue]
+                return _MapDict(value._dict, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))  # type: ignore[attr-defined]
             else:
                 return value
 
@@ -64,7 +64,7 @@ class _Bindings:
         create = not id
         if create:
             id = f"{datetime.now().strftime('%Y%m%d%H%M%S%f')}-{random()}"
-            self.__gui._send_ws_id(id)  # type: ignore[reportAttributeAccessIssue]
+            self.__gui._send_ws_id(id)  # type: ignore[attr-defined]
         self.__scopes.create_scope(id)
         return id, create
 
@@ -75,10 +75,10 @@ class _Bindings:
         self.__scopes = _DataScopes(self.__gui)
 
     def _get_data_scope(self):
-        return self.__scopes.get_scope(self.__gui._get_client_id())[0]  # type: ignore[reportAttributeAccessIssue]
+        return self.__scopes.get_scope(self.__gui._get_client_id())[0]  # type: ignore[attr-defined]
 
     def _get_data_scope_metadata(self):
-        return self.__scopes.get_scope(self.__gui._get_client_id())[1]  # type: ignore[reportAttributeAccessIssue]
+        return self.__scopes.get_scope(self.__gui._get_client_id())[1]  # type: ignore[attr-defined]
 
     def _get_all_scopes(self):
         return self.__scopes.get_all_scopes()

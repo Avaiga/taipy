@@ -60,8 +60,8 @@ class Partial(_Page):
             state (State^): The current user state as received in any callback.
             content (str): The new content to use and display.
         """
-        if state and state._gui and callable(state._gui._update_partial):
-            state._gui._update_partial(self.__copy(content))
+        if state and state._gui and callable(state._gui._update_partial):  # type: ignore[attr-defined]
+            state._gui._update_partial(self.__copy(content))  # type: ignore[attr-defined]
         else:
             _warn("'Partial.update_content()' must be called in the context of a callback.")
 

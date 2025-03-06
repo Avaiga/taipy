@@ -214,7 +214,7 @@ def _build_chart_config(  # noqa: C901
     decimators: t.List[t.Optional[str]] = []
     for tr in traces:
         if tr[_Chart_iprops.decimator.value]:
-            cls = gui._get_user_instance(  # type: ignore[reportAttributeAccessIssue]
+            cls = gui._get_user_instance(  # type: ignore[attr-defined]
                 class_name=str(tr[_Chart_iprops.decimator.value]), class_type=PropertyType.decimator.value
             )
             if isinstance(cls, PropertyType.decimator.value):

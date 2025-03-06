@@ -107,5 +107,5 @@ def test_on_action_call(gui:Gui):
 
     gui.run(run_server=False)
     with gui.get_flask_app().app_context():
-        gui._Gui__on_action(an_id, a_non_action_payload) # type: ignore[reportAttributeAccessIssue]
-        gui._Gui__on_action(an_id, an_action_payload) # type: ignore[reportAttributeAccessIssue]
+        gui._Gui__on_action(an_id, a_non_action_payload) # type: ignore[attr-defined]
+        gui._Gui__on_action(an_id, an_action_payload) # type: ignore[attr-defined]

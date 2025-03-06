@@ -144,7 +144,7 @@ class _DataAccessors(object):
         access = self.__access_4_type.get(type(value))
         if access is None:
             if value is not None:
-                converted_value = type(self.__gui)._convert_unsupported_data(value)  # type: ignore[reportAttributeAccessIssue]
+                converted_value = type(self.__gui)._convert_unsupported_data(value)  # type: ignore[attr-defined]
                 if converted_value is not None:
                     access = self.__access_4_type.get(type(converted_value))
                     if access is not None:

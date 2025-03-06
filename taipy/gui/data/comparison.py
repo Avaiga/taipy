@@ -25,16 +25,16 @@ def _compare_function(
         names = datanames.split(",")
         if not names:
             return None
-        compare_fn = gui._get_user_function(compare_name) if compare_name else None
+        compare_fn = gui._get_user_function(compare_name) if compare_name else None  # type: ignore[attr-defined]
         if callable(compare_fn):
-            return gui._get_accessor().to_pandas(
-                gui._call_function_with_state(compare_fn, [name, [gui._get_real_var_name(n) for n in names]])
+            return gui._get_accessor().to_pandas(  # type: ignore[attr-defined]
+                gui._call_function_with_state(compare_fn, [name, [gui._get_real_var_name(n) for n in names]])  # type: ignore[attr-defined]
             )
         elif compare_fn is not None:
             _warn(f"{compare_name}(): compare function name is not valid.")
-        dfs = [gui._get_accessor().to_pandas(_getscopeattr(gui, n)) for n in names]
+        dfs = [gui._get_accessor().to_pandas(_getscopeattr(gui, n)) for n in names]  # type: ignore[attr-defined]
         return value.compare(dfs[0], keep_shape=True)
     except Exception as e:
-        if not gui._call_on_exception(compare_name or "Gui._compare_function", e):
+        if not gui._call_on_exception(compare_name or "Gui._compare_function", e):  # type: ignore[attr-defined]
             _warn(f"{compare_name or 'Gui._compare_function'}(): compare function raised an exception", e)
         return None

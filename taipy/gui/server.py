@@ -119,15 +119,15 @@ class _Server:
             if "status" in message:
                 _TaipyLogger._get_logger().info(message["status"])
             elif "type" in message:
-                gui._manage_message(message["type"], message)  # type: ignore[reportAttributeAccessIssue]
+                gui._manage_message(message["type"], message)  # type: ignore[attr-defined]
 
         @self._ws.on("connect")
         def handle_connect():
-            gui._handle_connect()  # type: ignore[reportAttributeAccessIssue]
+            gui._handle_connect()  # type: ignore[attr-defined]
 
         @self._ws.on("disconnect")
         def handle_disconnect():
-            gui._handle_disconnect()  # type: ignore[reportAttributeAccessIssue]
+            gui._handle_disconnect()  # type: ignore[attr-defined]
 
     def __is_ignored(self, file_path: str) -> bool:
         if not hasattr(self, "_ignore_matches"):
@@ -136,7 +136,7 @@ class _Server:
                 (pathlib.Path(__main__.__file__).parent / __IGNORE_FILE) if hasattr(__main__, "__file__") else None
             )
             if not ignore_file or not ignore_file.is_file():
-                ignore_file = pathlib.Path(self._gui._root_dir) / __IGNORE_FILE  # type: ignore[reportAttributeAccessIssue]
+                ignore_file = pathlib.Path(self._gui._root_dir) / __IGNORE_FILE  # type: ignore[attr-defined]
             self._ignore_matches = (
                 parse_gitignore(ignore_file) if ignore_file.is_file() and os.access(ignore_file, os.R_OK) else None
             )
@@ -201,7 +201,7 @@ class _Server:
                     ) from None
 
             if path == "taipy.status.json":
-                return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))  # type: ignore[reportAttributeAccessIssue]
+                return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))  # type: ignore[attr-defined]
             if (file_path := str(os.path.normpath((base_path := static_folder + os.path.sep) + path))).startswith(
                 base_path
             ) and os.path.isfile(file_path):
@@ -229,7 +229,7 @@ class _Server:
                 return send_from_directory(base_path, path)
             if (
                 (
-                    file_path := str(os.path.normpath((base_path := self._gui._root_dir + os.path.sep) + path))  # type: ignore[reportAttributeAccessIssue]
+                    file_path := str(os.path.normpath((base_path := self._gui._root_dir + os.path.sep) + path))  # type: ignore[attr-defined]
                 ).startswith(base_path)
                 and os.path.isfile(file_path)
                 and not self.__is_ignored(file_path)
@@ -251,7 +251,7 @@ class _Server:
                 "jsx": template_str,
                 "style": (style + os.linesep) if style else "",
                 "head": head or [],
-                "context": context or self._gui._get_default_module_name(),  # type: ignore[reportAttributeAccessIssue]
+                "context": context or self._gui._get_default_module_name(),  # type: ignore[attr-defined]
                 "scriptPaths": script_paths,
             }
         )
@@ -273,7 +273,7 @@ class _Server:
         self._ws.run(self._flask, host=self._host, port=self._port, debug=False, use_reloader=False)
 
     def _get_async_mode(self) -> str:
-        return self._ws.async_mode  # type: ignore[reportAttributeAccessIssue]
+        return self._ws.async_mode  # type: ignore[attr-defined]
 
     def _apply_patch(self):
         if self._get_async_mode() == "gevent" and util.find_spec("gevent"):
@@ -344,7 +344,7 @@ class _Server:
             if client_url is not None:
                 client_url = client_url.format(port=port)
                 _TaipyLogger._get_logger().info(f" * Application is accessible at {client_url}")
-        if not is_running_from_reloader() and self._gui._get_config("run_browser", False):  # type: ignore[reportAttributeAccessIssue]
+        if not is_running_from_reloader() and self._gui._get_config("run_browser", False):  # type: ignore[attr-defined]
             webbrowser.open(client_url or server_url, new=2)
         if _is_in_notebook() or run_in_thread:
             self._thread = KThread(target=self._run_notebook)
@@ -373,8 +373,8 @@ class _Server:
             self._is_running = False
             with contextlib.suppress(Exception):
                 if self._get_async_mode() == "gevent":
-                    if self._ws.wsgi_server is not None:  # type: ignore[reportAttributeAccessIssue]
-                        self._ws.wsgi_server.stop()  # type: ignore[reportAttributeAccessIssue]
+                    if self._ws.wsgi_server is not None:  # type: ignore[attr-defined]
+                        self._ws.wsgi_server.stop()  # type: ignore[attr-defined]
                     else:
                         self._thread.kill()
                 else:

@@ -103,8 +103,8 @@ class RDP(Decimator):
                 # Also include the start index to get absolute index
                 # And not relative
                 mid = np.argmax(dsq) + 1 + start
-                stack.append((start, mid))  # type: ignore[reportArgumentType]
-                stack.append((mid, end))  # type: ignore[reportArgumentType]
+                stack.append((start, mid))  # type: ignore[arg-type]
+                stack.append((mid, end))  # type: ignore[arg-type]
             else:
                 # Points in between are redundant
                 mask[start + 1 : end] = False
@@ -133,7 +133,7 @@ class RDP(Decimator):
             max_dist_index = np.argmax(dsq) + start + 1
             weights[max_dist_index] = np.amax(dsq)
             stack.append((start, max_dist_index))
-            stack.append((max_dist_index, end))  # type: ignore[reportArgumentType]
+            stack.append((max_dist_index, end))  # type: ignore[arg-type]
         maxTolerance = np.sort(weights)[M_len - n_out]
 
         return weights >= maxTolerance
