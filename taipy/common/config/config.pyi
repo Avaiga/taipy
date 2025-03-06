@@ -537,7 +537,7 @@ class Config:
         id: str,
         default_path: Optional[str] = None,
         has_header: Optional[bool] = None,
-        sheet_name: Optional[Union[List[str], str]] = None,
+        sheet_name: Union[List[str], str, None] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -549,7 +549,7 @@ class Config:
             id (str): The unique identifier of the new Excel data node configuration.
             default_path (Optional[str]): The path of the Excel file.
             has_header (Optional[bool]): If True, indicates that the Excel file has a header.
-            sheet_name (Optional[Union[List[str], str]]): The list of sheet names to be used.
+            sheet_name (Union[List[str], str]): The list of sheet names to be used.
                 This can be a unique name.
             exposed_type (Optional[str]): The exposed type of the data read from Excel file.<br/>
                 The default value is `pandas`.
@@ -904,8 +904,8 @@ class Config:
     def configure_task(
         id: str,
         function: Optional[Callable],
-        input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        input: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
+        output: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
         skippable: bool = False,
         **properties,
     ) -> "TaskConfig":
@@ -914,10 +914,10 @@ class Config:
         Arguments:
             id (str): The unique identifier of this task configuration.
             function (Callable): The python function called by Taipy to run the task.
-            input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+            input (Union[DataNodeConfig^, List[DataNodeConfig^], None]): The list of the
                 function input data node configurations. This can be a unique data node
                 configuration if there is a single input data node, or None if there are none.
-            output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+            output (Union[DataNodeConfig^, List[DataNodeConfig^], None]): The list of the
                 function output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
             skippable (bool): If True, indicates that the task can be skipped if no change has
@@ -932,8 +932,8 @@ class Config:
     @staticmethod
     def set_default_task_configuration(
         function: Optional[Callable],
-        input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
+        input: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
+        output: Union[DataNodeConfig, List[DataNodeConfig], None] = None,
         skippable: bool = False,
         **properties,
     ) -> "TaskConfig":
@@ -945,10 +945,10 @@ class Config:
 
         Arguments:
             function (Callable): The python function called by Taipy to run the task.
-            input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+            input (Union[DataNodeConfig^, List[DataNodeConfig^], None]): The list of the
                 input data node configurations. This can be a unique data node
                 configuration if there is a single input data node, or None if there are none.
-            output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+            output (Union[DataNodeConfig^, List[DataNodeConfig^], None]): The list of the
                 output data node configurations. This can be a unique data node
                 configuration if there is a single output data node, or None if there are none.
             skippable (bool): If True, indicates that the task can be skipped if no change has
@@ -963,14 +963,14 @@ class Config:
 
     @staticmethod
     def configure_job_executions(
-        mode: Optional[str] = None, max_nb_of_workers: Optional[Union[int, str]] = None, **properties
+        mode: Optional[str] = None, max_nb_of_workers: Union[int, str, None] = None, **properties
     ) -> "JobConfig":
         """Configure job execution.
 
         Arguments:
             mode (Optional[str]): The job execution mode.
                 Possible values are: *"standalone"* or *"development"*.
-            max_nb_of_workers (Optional[int, str]): Parameter used only in *"standalone"* mode.
+            max_nb_of_workers (Union[int, str]): Parameter used only in *"standalone"* mode.
                 This indicates the maximum number of jobs able to run in parallel.<br/>
                 The default value is 2.<br/>
                 A string can be provided to dynamically set the value using an environment
