@@ -42,6 +42,32 @@ def test_download(gui: Gui, helpers):
     )
 
 
+def test_download_fn(gui: Gui, helpers):
+    def on_download_action(state: State):
+        pass
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
+    gui.add_page("test", Markdown("<|Hello|button|>"))
+    gui.run(run_server=False)
+    flask_client = gui._server.test_client()
+    # WS client and emit
+    ws_client = gui._server._ws.test_client(t.cast(Flask, gui._server.get_flask()))
+    cid = helpers.create_scope_and_get_sid(gui)
+    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        g.client_id = cid
+        download(gui._Gui__state, "some text", "filename.txt", on_download_action)  # type: ignore[attr-defined]
+
+    received_messages = ws_client.get_received()
+    helpers.assert_outward_ws_simple_message(
+        received_messages[0],
+        "DF",
+        {"name": "filename.txt", "context": "test_download", "onAction": "tp_on_download_action_0"},
+    )
+
+
 def test_bad_download(gui: Gui, helpers):
     with warnings.catch_warnings(record=True) as records:
         download(None, "some text", "filename.txt", "on_download_action")  # type: ignore[arg-type]
