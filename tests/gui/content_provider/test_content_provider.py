@@ -45,7 +45,7 @@ def test_bad_again_register_content_provider(gui: Gui, helpers):
 
 def test_process_content_provider(gui: Gui, helpers):
     def content_provider(x):
-        return str(x)
+        return f"instance of {type(x)}"
 
     an_instance = _AType()  # noqa: F841
 
@@ -64,7 +64,7 @@ def test_process_content_provider(gui: Gui, helpers):
     result = flask_client.get(
         f"/taipy-user-content/test?client_id={cid}&__taipy_html_content=true&variable_name=an_instance"
     )
-    assert "test_content_provider._AType" in result.data.decode()
+    assert "instance of <class 'test_content_provider._AType'>" in result.data.decode()
 
 def test_process_content_provider_invalid(gui: Gui, helpers):
     v_name = "variable"  # noqa: F841
