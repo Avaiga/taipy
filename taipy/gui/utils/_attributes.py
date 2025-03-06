@@ -18,36 +18,36 @@ if t.TYPE_CHECKING:
 
 def _getscopeattr(gui: "Gui", name: str, *more) -> t.Any:
     if more:
-        return getattr(gui._get_data_scope(), name, more[0])  # type: ignore
-    return getattr(gui._get_data_scope(), name)  # type: ignore
+        return getattr(gui._get_data_scope(), name, more[0])  # type: ignore[reportAttributeAccessIssue]
+    return getattr(gui._get_data_scope(), name)  # type: ignore[reportAttributeAccessIssue]
 
 
 def _getscopeattr_drill(gui: "Gui", name: str) -> t.Any:
-    return attrgetter(name)(gui._get_data_scope())  # type: ignore
+    return attrgetter(name)(gui._get_data_scope())  # type: ignore[reportAttributeAccessIssue]
 
 
 def _setscopeattr(gui: "Gui", name: str, value: t.Any):
-    if gui._is_broadcasting():  # type: ignore
-        for scope in gui._get_all_data_scopes().values():  # type: ignore
+    if gui._is_broadcasting():  # type: ignore[reportAttributeAccessIssue]
+        for scope in gui._get_all_data_scopes().values():  # type: ignore[reportAttributeAccessIssue]
             setattr(scope, name, value)
     else:
-        setattr(gui._get_data_scope(), name, value)  # type: ignore
+        setattr(gui._get_data_scope(), name, value)  # type: ignore[reportAttributeAccessIssue]
 
 
 def _setscopeattr_drill(gui: "Gui", name: str, value: t.Any):
-    if gui._is_broadcasting():  # type: ignore
-        for scope in gui._get_all_data_scopes().values():  # type: ignore
+    if gui._is_broadcasting():  # type: ignore[reportAttributeAccessIssue]
+        for scope in gui._get_all_data_scopes().values():  # type: ignore[reportAttributeAccessIssue]
             _attrsetter(scope, name, value)
     else:
-        _attrsetter(gui._get_data_scope(), name, value)  # type: ignore
+        _attrsetter(gui._get_data_scope(), name, value)  # type: ignore[reportAttributeAccessIssue]
 
 
 def _hasscopeattr(gui: "Gui", name: str) -> bool:
-    return hasattr(gui._get_data_scope(), name)  # type: ignore
+    return hasattr(gui._get_data_scope(), name)  # type: ignore[reportAttributeAccessIssue]
 
 
 def _delscopeattr(gui: "Gui", name: str):
-    delattr(gui._get_data_scope(), name)  # type: ignore
+    delattr(gui._get_data_scope(), name)  # type: ignore[reportAttributeAccessIssue]
 
 
 def _attrsetter(obj: object, attr_str: str, value: object) -> None:

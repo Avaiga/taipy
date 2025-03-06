@@ -26,14 +26,14 @@ class _PandasBasedDataAccessor(_DataAccessor):
 
     def _get_pandas_accessor(self):
         if self.__accessor_instance is None:
-            self.__accessor_instance = self._gui._get_accessor()._get_instance(pd.DataFrame({}))  # type: ignore[arg-type, assignment]
+            self.__accessor_instance = self._gui._get_accessor()._get_instance(pd.DataFrame({}))  # type: ignore[reportAttributeAccessIssue ]
         return t.cast(_PandasDataAccessor, self.__accessor_instance)
 
     @abstractmethod
     def _from_pandas(self, value: pd.DataFrame, data_type: t.Type) -> t.Any:
         pass
 
-    def get_cols_description(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, t.Dict[str, str]]]:  # type: ignore
+    def get_cols_description(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, t.Dict[str, str]]]:  # type: ignore[reportIncompatibleMethodOverride ]
         return self._get_pandas_accessor().get_cols_description(var_name, self.to_pandas(value))
 
     def get_data(

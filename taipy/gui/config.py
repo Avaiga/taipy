@@ -270,7 +270,7 @@ class _Config(object):
                         if key == "port" and str(value).strip() == "auto":
                             config["port"] = "auto"
                         else:
-                            config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
+                            config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore[reportCallIssue]
                     except Exception as e:
                         _warn(
                             f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",  # noqa: E501

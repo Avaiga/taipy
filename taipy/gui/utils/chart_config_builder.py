@@ -99,7 +99,7 @@ def __check_dict(values: t.List[t.Any], properties: t.Iterable[_Chart_iprops]) -
 def __get_multiple_indexed_attributes(
     attributes: t.Dict[str, t.Any], names: t.Iterable[str], index: t.Optional[int] = None
 ) -> t.List[t.Optional[str]]:
-    names = names if index is None else [f"{n}[{index}]" for n in names]  # type: ignore
+    names = names if index is None else [f"{n}[{index}]" for n in names]
     return [attributes.get(name) for name in names]
 
 
@@ -214,7 +214,7 @@ def _build_chart_config(  # noqa: C901
     decimators: t.List[t.Optional[str]] = []
     for tr in traces:
         if tr[_Chart_iprops.decimator.value]:
-            cls = gui._get_user_instance(
+            cls = gui._get_user_instance(  # type: ignore[reportAttributeAccessIssue]
                 class_name=str(tr[_Chart_iprops.decimator.value]), class_type=PropertyType.decimator.value
             )
             if isinstance(cls, PropertyType.decimator.value):

@@ -70,7 +70,7 @@ class _PandasDataAccessor(_DataAccessor):
         if column_name:
             args.append(column_name)  # type: ignore[arg-type]
         try:
-            return str(gui._call_function_with_state(user_function, args))
+            return str(gui._call_function_with_state(user_function, args))  # type: ignore[reportAttributeAccessIssue]
         except Exception as e:
             _warn(f"Exception raised when calling user function {function_name}()", e)
         return ""
@@ -104,7 +104,7 @@ class _PandasDataAccessor(_DataAccessor):
             for k, v in styles.items():
                 col_applied = ""
                 new_data = None
-                func = self._gui._get_user_function(v)
+                func = self._gui._get_user_function(v)  # type: ignore[reportAttributeAccessIssue]
                 if callable(func):
                     col_applied, new_data = self.__apply_user_function(
                         func, k if k in cols else None, v, dataframe, "tps__"
@@ -112,7 +112,7 @@ class _PandasDataAccessor(_DataAccessor):
                 new_cols[col_applied or v] = new_data if col_applied else v
         if tooltips:
             for k, v in tooltips.items():
-                func = self._gui._get_user_function(v)
+                func = self._gui._get_user_function(v)  # type: ignore[reportAttributeAccessIssue]
                 if callable(func):
                     col_applied, new_data = self.__apply_user_function(
                         func, k if k in cols else None, v, dataframe, "tpt__"
@@ -121,7 +121,7 @@ class _PandasDataAccessor(_DataAccessor):
                         new_cols[col_applied] = new_data
         if formats:
             for k, v in formats.items():
-                func = self._gui._get_user_function(v)
+                func = self._gui._get_user_function(v)  # type: ignore[reportAttributeAccessIssue]
                 if callable(func):
                     col_applied, new_data = self.__apply_user_function(
                         func, k if k in cols else None, v, dataframe, "tpf__"
@@ -134,7 +134,7 @@ class _PandasDataAccessor(_DataAccessor):
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
                 dataframe = dataframe.copy()
-            tz = Gui._get_timezone()
+            tz = Gui._get_timezone()  # type: ignore[reportAttributeAccessIssue]
             for col in date_cols:
                 col_name = self.__get_column_names(dataframe, col)
                 new_col = _get_date_col_str_name(cols, col)
@@ -338,7 +338,7 @@ class _PandasDataAccessor(_DataAccessor):
                 applies_with_fn = {
                     self.__get_column_names(df, k): v
                     if v in _PandasDataAccessor.__AGGREGATE_FUNCTIONS
-                    else self._gui._get_user_function(v)
+                    else self._gui._get_user_function(v)  # type: ignore[reportAttributeAccessIssue]
                     for k, v in applies.items()
                 }
 
@@ -401,9 +401,9 @@ class _PandasDataAccessor(_DataAccessor):
                         raise Exception()
                 except Exception:
                     _warn(f"Cannot sort {var_name} on columns {order_by}.")
-                    new_indexes = slice(start, end + 1)  # type: ignore
+                    new_indexes = slice(start, end + 1)
             else:
-                new_indexes = slice(start, end + 1)  # type: ignore
+                new_indexes = slice(start, end + 1)
             df = self.__build_transferred_cols(
                 columns + optional_columns,
                 t.cast(pd.DataFrame, df),
@@ -460,7 +460,7 @@ class _PandasDataAccessor(_DataAccessor):
                     decimated_dfs.append(decimated_df)
                     continue
                 decimator_instance = (
-                    self._gui._get_user_instance(decimator, PropertyType.decimator.value)
+                    self._gui._get_user_instance(decimator, PropertyType.decimator.value)  # type: ignore[reportAttributeAccessIssue]
                     if decimator is not None
                     else None
                 )
@@ -473,7 +473,7 @@ class _PandasDataAccessor(_DataAccessor):
                     # add decimated dataframe to the list of decimated
                     decimated_dfs.append(decimated_df)
                     if is_decimator_applied:
-                        self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(decimated_df))
+                        self._gui._call_on_change(f"{var_name}.{decimator}.nb_rows", len(decimated_df))  # type: ignore[reportAttributeAccessIssue]
             # merge the decimated dataFrames
             if len(decimated_dfs) > 1:
                 # get the unique columns from all decimated dataFrames

@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy
 import pandas
-from flask.json.provider import DefaultJSONProvider
+from flask.json.provider import DefaultJSONProvider  # type: ignore[reportMissingImports]
 
 from .._warnings import _warn
 from ..icon import Icon
@@ -81,5 +81,5 @@ class _TaipyJsonEncoder(JSONEncoder):
 
 
 class _TaipyJsonProvider(DefaultJSONProvider):
-    default = staticmethod(_TaipyJsonAdapter().parse)  # type: ignore
+    default = staticmethod(_TaipyJsonAdapter().parse)
     sort_keys = False

@@ -80,7 +80,7 @@ class RDP(Decimator):
         mask.fill(True)
 
         # The stack to select start and end index
-        stack: t.List[t.Tuple[int, int]] = [(0, data.shape[0] - 1)]  # type: ignore
+        stack: t.List[t.Tuple[int, int]] = [(0, data.shape[0] - 1)]
 
         while stack:
             # Pop the last item
@@ -103,8 +103,8 @@ class RDP(Decimator):
                 # Also include the start index to get absolute index
                 # And not relative
                 mid = np.argmax(dsq) + 1 + start
-                stack.append((start, mid))  # type: ignore
-                stack.append((mid, end))  # type: ignore
+                stack.append((start, mid))  # type: ignore[reportArgumentType]
+                stack.append((mid, end))  # type: ignore[reportArgumentType]
             else:
                 # Points in between are redundant
                 mask[start + 1 : end] = False
@@ -133,7 +133,7 @@ class RDP(Decimator):
             max_dist_index = np.argmax(dsq) + start + 1
             weights[max_dist_index] = np.amax(dsq)
             stack.append((start, max_dist_index))
-            stack.append((max_dist_index, end))
+            stack.append((max_dist_index, end))  # type: ignore[reportArgumentType]
         maxTolerance = np.sort(weights)[M_len - n_out]
 
         return weights >= maxTolerance

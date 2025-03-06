@@ -132,19 +132,19 @@ class _DataAccessors(object):
                 raise TypeError(f"Class {cls.__name__} cannot be instantiated") from e
             if inst:
                 for cl in classes:
-                    self.__access_4_type[cl] = inst  # type: ignore
+                    self.__access_4_type[cl] = inst
 
     def _unregister(self, cls: t.Type[_DataAccessor]) -> None:
         """Unregister a DataAccessor type."""
         if cls in self.__access_4_type:
             del self.__access_4_type[cls]
 
-    def _get_instance(self, value: _TaipyData) -> _DataAccessor:  # type: ignore
+    def _get_instance(self, value: _TaipyData) -> _DataAccessor:
         value = value.get() if isinstance(value, _TaipyData) else value
         access = self.__access_4_type.get(type(value))
         if access is None:
             if value is not None:
-                converted_value = type(self.__gui)._convert_unsupported_data(value)
+                converted_value = type(self.__gui)._convert_unsupported_data(value)  # type: ignore[reportAttributeAccessIssue]
                 if converted_value is not None:
                     access = self.__access_4_type.get(type(converted_value))
                     if access is not None:
