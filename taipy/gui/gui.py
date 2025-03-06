@@ -2737,7 +2737,7 @@ class Gui:
         # Init server if there is no server
         if not hasattr(self, "_server"):
             self._server = _Server(
-                self,
+                self,  # type: ignore[arg-type]
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 async_mode=app_config.get("async_mode"),

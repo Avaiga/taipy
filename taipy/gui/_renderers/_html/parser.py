@@ -91,7 +91,7 @@ class _TaipyHTMLParser(HTMLParser):
             self.body += data
 
     def parse_taipy_tag(self) -> None:
-        tp_string, tp_element_name = self.taipy_tag.parse(self._gui)
+        tp_string, tp_element_name = self.taipy_tag.parse(self._gui)  # type: ignore[misc]
         self.append_data(tp_string)
         self.tag_mapping[f"{self.taipy_tag.namespace}:{self.taipy_tag.control_type}"] = tp_element_name  # type: ignore[misc]
         self.taipy_tag = None
