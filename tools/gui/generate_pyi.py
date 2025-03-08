@@ -37,9 +37,7 @@ classes_xrefs = {
     "Sequence": "core",
     "State": "gui",
 }
-# Read package version
-# {"major": M, "minor": m, "patch": t, "ext": "..."}
-# Point to 'develop' branch if 'ext' is not null
+# Read package version - Point to 'develop' branch if 'ext' is not null
 reference_url = "https://docs.taipy.io/en/[BRANCH]/refmans/reference/pkg_taipy/"
 with open(os.path.join(os.path.join(root_dir, "taipy", "version.json"))) as version_file:
     version = json.load(version_file)
