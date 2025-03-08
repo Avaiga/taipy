@@ -21,12 +21,12 @@ page = Markdown(
     "<|{value}|toggle|lov=Item 1;Item 2;Item 3;Item 4;Item 5|>",
     style={
         ".taipy-toggle": {
-            ".MuiToggleButtonGroup-root": {  # Select the list
-                ".MuiToggleButton-root:nth-child(even)": {  # Even button colors
+            ".MuiToggleButtonGroup-root": {  # Select the buttons group
+                ".MuiToggleButton-root:nth-child(even)": {  # Style for even buttons
                     "background-color": "lightgrey",
                     "color": "black",
                 },
-                ".MuiToggleButton-root:nth-child(odd)": {  # Odd button colors
+                ".MuiToggleButton-root:nth-child(odd)": {  # Style for odd buttons
                     "background-color": "darkgrey",
                     "color": "white",
                 },

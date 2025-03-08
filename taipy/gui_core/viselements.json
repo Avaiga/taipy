@@ -70,7 +70,7 @@
                     {
                         "name": "on_change",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>Scenario^</code>): the selected scenario.</li>\n</ul>",
+                        "doc": "A function or the name of a function that is triggered when the value is updated.<br/>The parameters of that function are all optional:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the variable name.</li><li><i>value</i> (<code>Scenario^</code>): the selected scenario.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -95,7 +95,7 @@
                     {
                         "name": "on_creation",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when a scenario is about to be created.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the identifier of this scenario selector.</li>\n<li>payload (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>config (str): the name of the selected scenario configuration.</li>\n<li>date (datetime): the creation date for the new scenario.</li>\n<li>label (str): the user-specified label.</li>\n<li>properties (dict): a dictionary containing all the user-defined custom properties.</li>\n</ul>\n</li>\n<li>The callback function can return a scenario, a string containing an error message (a scenario will not be created), or None (then a new scenario is created with the user parameters).</li>\n</ul>",
+                        "doc": "A function or the name of a function that is triggered when a scenario is about to be created.<br/><br/>All the parameters of that function are optional:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of this scenario selector.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul><li><i>config</i> (str): the name of the selected scenario configuration.</li><li><i>date</i> (datetime): the creation date for the new scenario.</li><li><i>label</i> (str): the user-specified label.</li><li><i>properties</i> (dict): a dictionary containing all the user-defined custom properties.</li></ul>\n</li>\n<li>The callback function can return a scenario, a string containing an error message (a scenario will not be created), or None (then a new scenario is created with the user parameters).</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -208,7 +208,7 @@
                     {
                         "name": "on_submission_change",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when a submission status is changed.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>submission (Submission): the submission entity containing submission information.</li>\n<li>details (dict): the details on this callback's invocation.<br/>\nThis dictionary has the following keys:\n<ul>\n<li>submission_status (str): the new status of the submission (possible values are: \"SUBMITTED\", \"COMPLETED\", \"CANCELED\", \"FAILED\", \"BLOCKED\", \"WAITING\", or \"RUNNING\").</li>\n<li>job: the Job (if any) that is at the origin of the submission status change.</li>\n<li>submittable_entity (Submittable): the entity (usually a Scenario) that was submitted.</li></ul></ul>",
+                        "doc": "A function or the name of a function that is triggered when a submission status is changed.<br/><br/>All the parameters of that function are optional:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>submission</i> (Submission): the submission entity containing submission information.</li><li><i>details</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul><li><i>submission_status</i> (str): the new status of the submission (possible values are: \"SUBMITTED\", \"COMPLETED\", \"CANCELED\", \"FAILED\", \"BLOCKED\", \"WAITING\", or \"RUNNING\").</li>\n<li><i>job:</i>: the Job (if any) that is at the origin of the submission status change.</li>\n<li><i>submittable_entity</i> (Submittable): the entity (usually a Scenario) that was submitted.</li></ul></ul>",
                         "signature": [
                             [
                                 "state",
@@ -267,7 +267,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when a a node is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>entity (DataNode or Task): the entity that was selected.</li>\n</ul>",
+                        "doc": "A function or the name of a function that is triggered when a a node is selected.<br/><br/>All the parameters of that function are optional:\n<ul>\n<li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>entity</i> (DataNode or Task): the entity that was selected.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -350,7 +350,7 @@
                     {
                         "name": "on_change",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when a data node is selected.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>DataNode^</code>): the selected data node.</li>\n</ul>",
+                        "doc": "A function or the name of a function that is triggered when a data node is selected.<br/>The parameters of that function are all optional:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the variable name.</li><li><i>value</i> (<code>DataNode^</code>): the selected data node.</li>\n</ul>",
                         "signature": [
                             [
                                 "state",
@@ -531,7 +531,7 @@
                     {
                         "name": "on_change",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>var_name (str): the variable name.</li>\n<li>value (<code>Job^</code>): the selected job.</li>\n</ul>",
+                        "doc": "A function or the name of a function that is triggered when the selection is updated.<br/>The parameters of that function are all optional:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the variable name.</li>\n<li><i>value</i> (<code>Job^</code>): the selected job.</li></ul>",
                         "signature": [
                             [
                                 "state",
@@ -556,7 +556,7 @@
                     {
                         "name": "on_details",
                         "type": "Union[str, Callable, bool]",
-                        "doc": "The name of a function that is triggered when the details icon is pressed.<br/>The parameters of that function are all optional:\n<ul>\n<li>state (<code>State^</code>): the state instance.</li>\n<li>id (str): the id of the control.</li>\n<li>payload (<code>dict</code>): a dictionary that contains the Job Id in the value for key <i>args</i>.</li>\n</ul></br>If False, the icon is not shown.",
+                        "doc": "The name of a function that is triggered when the details icon is pressed.<br/>The parameters of that function are all optional:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the id of the control.</li><li><i>payload</i> (<code>dict</code>): a dictionary that contains the Job id in the value for key <i>args</i>.</li></ul></br>If False, the icon is not shown.",
                         "signature": [
                             [
                                 "state",

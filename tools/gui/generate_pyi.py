@@ -22,10 +22,31 @@ __RE_INDEXED_PROPERTY = re.compile(r"^([\w_]+)\[(<\w+>)?([\w]+)(</\w+>)?\]$")
 # Script should be located in <taipy_root>/tools
 script_dir = os.path.dirname(os.path.realpath(__file__))
 # Move to <taipy_root>
-os.chdir(os.path.dirname(os.path.dirname(script_dir)))
+root_dir = os.path.dirname(os.path.dirname(script_dir))
+os.chdir(root_dir)
 # Make sure we can import the mandatory packages
 if not os.path.isdir(os.path.abspath(os.path.join(script_dir, "taipy"))):
     sys.path.append(os.path.abspath(os.path.join(script_dir, os.pardir, os.pardir)))
+
+# Classes package
+classes_xrefs = {
+    "Cycle": "core",
+    "DataNode": "core",
+    "Job": "core",
+    "Scenario": "core",
+    "Sequence": "core",
+    "State": "gui",
+}
+# Read package version
+# {"major": M, "minor": m, "patch": t, "ext": "..."}
+# Point to 'develop' branch if 'ext' is not null
+reference_url = "https://docs.taipy.io/en/[BRANCH]/refmans/reference/pkg_taipy/"
+with open(os.path.join(os.path.join(root_dir, "taipy", "version.json"))) as version_file:
+    version = json.load(version_file)
+    branch = "develop"
+    if not version.get("ext"):
+        branch = f"release-{version.get("major", 0)}.{version.get("minor", 0)}"
+    reference_url = reference_url.replace("[BRANCH]", branch)
 
 # ##################################################################################################
 # Generate gui pyi file (gui/gui.pyi)
@@ -193,6 +214,14 @@ def format_as_parameter(property: Dict[str, str], element_name: str):
     return f"{name}{type}{default_value}"
 
 
+
+def replace_ref_xref(match: re.Match) -> str:
+    if package := classes_xrefs.get(match[1]):
+        return ("<a href=\"" + reference_url + "/".join([f"pkg_{p}" for p in package.split(".")])
+                + f"/{match[1]}/\">" + match[1] + "</a>")
+    else:
+        return match[0]
+
 def build_doc(name: str, desc: Dict[str, Any]):
     if "doc" not in desc:
         return ""
@@ -212,6 +241,8 @@ def build_doc(name: str, desc: Dict[str, Any]):
     # Link anchors # signs are prefixed with a \
     doc = re.sub(r"\\(#[a-z_]+\))", r"\1", doc)
     doc = re.sub(r"(?:\s+\\n)?\s+See below(?:[^\.]*)?\.", "", doc).replace("\n", "\\n")
+    # External links
+    doc = re.sub(r"`(\w+)\^`", replace_ref_xref, doc)
     return f"{desc['name']}{desc['dynamic']}{desc['indexed']}\\n  {doc}\\n\\n"
 
 
