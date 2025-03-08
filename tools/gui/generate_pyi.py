@@ -43,7 +43,7 @@ with open(os.path.join(os.path.join(root_dir, "taipy", "version.json"))) as vers
     version = json.load(version_file)
     branch = "develop"
     if not version.get("ext"):
-        branch = f"release-{version.get("major", 0)}.{version.get("minor", 0)}"
+        branch = f"release-{version.get('major', 0)}.{version.get('minor', 0)}"
     reference_url = reference_url.replace("[BRANCH]", branch)
 
 # ##################################################################################################
