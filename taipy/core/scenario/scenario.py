@@ -417,9 +417,6 @@ class Scenario(_Entity, Submittable, _Labeled):
     def can_duplicate(self) -> ReasonCollection:
         """Indicate if a scenario can be duplicated.
 
-        Arguments:
-            entity (Union[str, Scenario]): The scenario or its id to check if it can be duplicated.
-
         Returns:
             True if the given scenario can be duplicated. False otherwise.
         """
