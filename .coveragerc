@@ -1,6 +1,7 @@
 [run]
 omit =
     tests/*
+    doc/gui/*.py
 
 [report]
 exclude_lines =
