@@ -55,10 +55,13 @@ def check_changed_files_coverage(coverage_file, changed_files, threshold=80):
         else:
             print(f"No coverage data found for {file}")
 
-    if sum_coverage/qty < threshold:
-        print(f"Coverage for changed files is below {threshold}%: {sum_coverage/qty:.2f}%")
-        sys.exit(1)
-    print(f"Coverage for changed files: {sum_coverage/qty:.2f}%")
+    if qty:
+        if sum_coverage/qty < threshold:
+            print(f"Coverage for changed files is below {threshold}%: {sum_coverage/qty:.2f}%")
+            sys.exit(1)
+        print(f"Coverage for changed files: {sum_coverage/qty:.2f}%")
+    else:
+        print("No file detected to run coverage for.")
 
 
 def get_changed_files(base_branch):
