@@ -184,8 +184,8 @@ const Selector = (props: SelectorProps) => {
         }
         return {
             maxHeight: height,
-            display: 'flex',
-            flexFlow: 'column nowrap',
+            display: "flex",
+            flexFlow: "column nowrap",
             overflowY: "auto",
         };
     }, [height]);
@@ -197,11 +197,12 @@ const Selector = (props: SelectorProps) => {
         }
         return sx;
     }, [height]);
+
     const controlSx = useMemo(
         () => ({
             my: 1,
             mx: 0,
-            maxWidth: width,
+            width: width,
             display: "flex",
             "& .MuiFormControl-root": {
                 maxWidth: "unset",
