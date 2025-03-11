@@ -1655,10 +1655,10 @@ class Gui:
                 except Exception:
                     args = [id, payload]
                 self._call_function_with_state(t.cast(t.Callable, action_function), args)
-                return True
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(action_function, e):
                     _warn(f"on_action(): Exception raised in '{_function_name(action_function)}()'", e)
+            return True
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[t.List[t.Any]] = None) -> t.Any:
