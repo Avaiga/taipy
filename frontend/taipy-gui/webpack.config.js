@@ -46,7 +46,7 @@ module.exports = (env, options) => {
     return [{
             mode: options.mode, //'development', //'production',
             name: reactBundleName,
-            entry: ["react", "react-dom",
+            entry: ["react", "react-dom", "date-fns",
             "@emotion/react","@emotion/styled",
             "@mui/icons-material","@mui/material","@mui/x-date-pickers", "@mui/x-tree-view"],
             output: {

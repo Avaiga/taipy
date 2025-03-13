@@ -36,7 +36,6 @@ export class TaipyPortFactory extends AbstractModelFactory<TaipyPortModel, Diagr
         super("taipy-port");
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     generateModel(): TaipyPortModel {
         return new TaipyPortModel({ type: "taipy-port", name: "fred" });
     }

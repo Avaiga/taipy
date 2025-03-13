@@ -75,6 +75,9 @@
     ]
   },
   "devDependencies": {
+    "@eslint/compat": "^1.2.7",
+    "@eslint/eslintrc": "^3.3.0",
+    "@eslint/js": "^9.22.0",
     "@testing-library/jest-dom": "^6.1.3",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.2.1",
@@ -93,7 +96,7 @@
     "@typescript-eslint/parser": "^8.5.0",
     "add-asset-html-webpack-plugin": "^6.0.0",
     "autoprefixer": "^10.4.0",
-    "copy-webpack-plugin": "^12.0.1",
+    "copy-webpack-plugin": "^13.0.0",
     "cross-env": "^7.0.3",
     "css-loader": "^7.1.0",
     "css-mediaquery": "^0.1.2",
@@ -103,7 +106,7 @@
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-tsdoc": "^0.4.0",
-    "eslint-webpack-plugin": "^4.0.0",
+    "eslint-webpack-plugin": "^5.0.0",
     "generate-json-webpack-plugin": "^2.0.0",
     "html-webpack-plugin": "^5.5.0",
     "husky": "^9.0.11",

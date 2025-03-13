@@ -203,7 +203,6 @@ const Selector = (props: SelectorProps) => {
             my: 1,
             mx: 0,
             width: width,
-            display: "flex",
             "& .MuiFormControl-root": {
                 maxWidth: "unset",
                 my: 0,
