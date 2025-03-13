@@ -171,7 +171,7 @@ class _Builder:
                 if _is_function(val) and not hash_name:
                     # if it's not a callable (and not a string), forget it
                     if _is_unnamed_function(val):
-                        # lambda or callable instance
+                        # lambda, inner function or callable instance
                         hash_name = _get_lambda_id(t.cast(LambdaType, val))
                         gui._bind_var_val(hash_name, val)  # type: ignore[arg-type]
                     else:

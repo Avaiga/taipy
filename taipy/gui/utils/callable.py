@@ -27,4 +27,8 @@ def _function_name(s: t.Any) -> str:
 
 
 def _is_unnamed_function(s: t.Any):
-    return (hasattr(s, "__name__") and s.__name__ == "<lambda>") or (callable(s) and not hasattr(s, "__name__"))
+    return (
+        (hasattr(s, "__name__") and s.__name__ == "<lambda>")
+        or (callable(s) and not hasattr(s, "__name__"))
+        or (hasattr(s, "__qualname__") and "<locals>" in s.__qualname__)
+    )

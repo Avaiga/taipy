@@ -108,7 +108,7 @@ class _Element(ABC):
             return value
         if isinstance(value, FunctionType):
             if key.startswith("on_") or self._is_callable(key):
-                return value if value.__name__.startswith("<") else value.__name__
+                return value if "<" in value.__qualname__ else value.__name__
             # Parse lambda function_is_callable
             if (lambda_call := self.__parse_lambda_property(key, value)) is not None:
                 return lambda_call
