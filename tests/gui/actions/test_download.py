@@ -64,8 +64,9 @@ def test_download_fn(gui: Gui, helpers):
     helpers.assert_outward_ws_simple_message(
         received_messages[0],
         "DF",
-        {"name": "filename.txt", "context": "test_download", "onAction": "tp_on_download_action_0"},
+        {"name": "filename.txt", "context": "test_download"},
     )
+    assert "onAction" in received_messages[0]["args"] # inner function is treated as lambda
 
 
 def test_bad_download(gui: Gui, helpers):
