@@ -15,7 +15,7 @@
     {% endif %}</script>
     <style>{%- if root_margin -%}
     #root{margin:{{root_margin}};}{% endif %}
-    .__tgb_inline{display:inline-flex;}{%- if watermark -%}
+    .__tgb_inline{display:inline-block;}{%- if watermark -%}
     .__tp_watermark{position:fixed;bottom:1em;opacity:0.4;color:gray;left:50%;transform:translateX(-50%);font-size:0.7em;}{% endif %}{%- if css_vars -%}
     :root{
       {{css_vars|safe}}
