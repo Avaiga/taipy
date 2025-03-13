@@ -19,7 +19,7 @@ def test_builder_on_function(gui: Gui, test_client, helpers):
     gui._bind_var_val("on_slider", on_slider)
     with tgb.Page(frame=None) as page:
         tgb.slider(value="{value}", on_change=on_slider)  # type: ignore[attr-defined] # noqa: B023
-    expected_list = ['<Slider','onChange="__lambda_"'] # inner function is treated as lambda
+    expected_list = ['<Slider','onChange="__lambda_'] # inner function is treated as lambda
     helpers.test_control_builder(gui, page, expected_list)
 
 
