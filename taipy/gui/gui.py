@@ -773,7 +773,7 @@ class Gui:
         rel_var: t.Optional[str] = None,
         on_change: t.Optional[str] = None,
     ) -> None:
-        if not var_name:
+        if not var_name or "." in var_name:
             return
         # Check if Variable is a managed type
         current_value = _getscopeattr_drill(self, self.__evaluator.get_hash_from_expr(var_name))  # type: ignore[arg-type]
