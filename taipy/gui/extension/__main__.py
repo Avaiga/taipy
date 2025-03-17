@@ -20,7 +20,7 @@ def error(message):
 I = "    "  # noqa: E741 - Indentation is 4 spaces
 
 
-def generate_doc(library: ElementLibrary) -> str:  # noqa: C901F
+def generate_doc(library: ElementLibrary) -> str:  # noqa: C901
     stream = StringIO()
 
     def clean_doc_string(doc_string) -> t.Optional[str]:
