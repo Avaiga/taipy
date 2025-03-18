@@ -53,3 +53,12 @@ class _Topic:
         ):
             return True
         return False
+
+    def __ne__(self, __value) -> bool:
+        return not self.__eq__(__value)
+
+    def __str__(self) -> str:
+        return (f"Topic: {self.entity_type}, "
+                f" {self.entity_id}, "
+                f" {self.operation}, "
+                f" {self.attribute_name}")

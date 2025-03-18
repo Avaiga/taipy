@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from typing import Any, Dict, Optional, Set, Tuple
+from typing import Any, Dict, Optional, Set, Tuple, Union
 
 from ._registration import _Registration
 from ._topic import _Topic
@@ -122,17 +122,11 @@ class Notifier:
         Returns:
             A tuple containing the registration id and the event queue.
         """
-        registration = _Registration(entity_type, entity_id, operation, attribute_name)
-
-        if registrations := cls._topics_registrations_list.get(registration.topic, None):
-            registrations.add(registration)
-        else:
-            cls._topics_registrations_list[registration.topic] = {registration}
-
-        return registration.registration_id, registration.queue
+        registration = _Registration.from_topic(entity_type, entity_id, operation, attribute_name)
+        return cls.__do_register(registration)
 
     @classmethod
-    def unregister(cls, registration_id: str) -> None:
+    def unregister(cls, registration_id: Union[str, _Registration]) -> None:
         """Unregister a listener.
 
         !!! example "Standard usage"
@@ -152,17 +146,21 @@ class Notifier:
         """
         to_remove_registration: Optional[_Registration] = None
 
-        for _, registrations in cls._topics_registrations_list.items():
-            for registration in registrations:
-                if registration.registration_id == registration_id:
-                    to_remove_registration = registration
+        for topic, registrations in cls._topics_registrations_list.items():
+            for reg in registrations:
+                if reg.registration_id == registration_id:
+                    to_remove_registration = reg
                     break
+            if to_remove_registration:
+                break
 
         if to_remove_registration:
-            registrations = cls._topics_registrations_list[to_remove_registration.topic]
-            registrations.remove(to_remove_registration)
-            if len(registrations) == 0:
-                del cls._topics_registrations_list[to_remove_registration.topic]
+            for topic in to_remove_registration.topics:
+                registrations = cls._topics_registrations_list.get(topic)
+                if registrations:
+                    registrations.remove(to_remove_registration)
+                    if len(registrations) == 0:
+                        del cls._topics_registrations_list[topic]
 
     @classmethod
     def publish(cls, event: Event) -> None:
@@ -171,10 +169,25 @@ class Notifier:
         Arguments:
             event (`Event^`): The event to publish.
         """
+        processed_registrations: Set[_Registration] = set()
         for topic, registrations in cls._topics_registrations_list.items():
             if Notifier._is_matching(event, topic):
                 for registration in registrations:
-                    registration.queue.put(event)
+                    if registration not in processed_registrations:
+                        registration.queue.put(event)
+                        processed_registrations.add(registration)
+
+    @classmethod
+    def _register_from_registration(cls, registration: _Registration) -> Tuple[str, SimpleQueue]:
+        """Register a listener from a registration object.
+
+        Arguments:
+            registration (`_Registration`): The registration object.
+
+        Returns:
+            A tuple containing the registration id and the event queue.
+        """
+        return cls.__do_register(registration)
 
     @staticmethod
     def _is_matching(event: Event, topic: _Topic) -> bool:
@@ -188,3 +201,12 @@ class Notifier:
         if topic.attribute_name is not None and event.attribute_name and event.attribute_name != topic.attribute_name:
             return False
         return True
+
+    @classmethod
+    def __do_register(cls, registration: _Registration) -> Tuple[str, SimpleQueue]:
+        for topic in registration.topics:
+            if registrations := cls._topics_registrations_list.get(topic, None):
+                registrations.add(registration)
+            else:
+                cls._topics_registrations_list[topic] = {registration}
+        return registration.registration_id, registration.queue
