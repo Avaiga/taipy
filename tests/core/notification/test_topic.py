@@ -321,13 +321,11 @@ def test_topic_equal():
 
 def test_print():
     topic = _Topic(EventEntityType.TASK, "task_id", EventOperation.UPDATE, "foo")
-    print(topic)
     assert "TASK" in str(topic)
     assert "task_id" in str(topic)
     assert "UPDATE" in str(topic)
     assert "foo" in str(topic)
 
     topic_2 = _Topic(EventEntityType.SCENARIO, None, EventOperation.CREATION, None)
-    print(topic_2)
     assert "SCENARIO" in str(topic_2)
     assert "CREATION" in str(topic_2)

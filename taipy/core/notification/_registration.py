@@ -14,7 +14,7 @@ from typing import Optional, Set
 from uuid import uuid4
 
 from ._topic import _Topic
-from .event import EventEntityType, EventOperation, Event
+from .event import EventEntityType, EventOperation
 from .registration_id import RegistrationId
 
 

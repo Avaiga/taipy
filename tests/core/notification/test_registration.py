@@ -12,8 +12,6 @@
 
 from queue import SimpleQueue
 
-from docutils.nodes import topic
-
 from taipy.core.notification import EventEntityType, EventOperation
 from taipy.core.notification._registration import _Registration
 from taipy.core.notification._topic import _Topic

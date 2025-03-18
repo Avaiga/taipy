@@ -146,7 +146,7 @@ class Notifier:
         """
         to_remove_registration: Optional[_Registration] = None
 
-        for topic, registrations in cls._topics_registrations_list.items():
+        for _, registrations in cls._topics_registrations_list.items():
             for reg in registrations:
                 if reg.registration_id == registration_id:
                     to_remove_registration = reg
