@@ -24,7 +24,7 @@ class _Registration:
     __SEPARATOR = "_"
 
     def __init__(self):
-        self.registration_id: str = self._new_id()
+        self.registration_id: RegistrationId = self._new_id()
         self.queue: SimpleQueue = SimpleQueue()
         self.topics: Set[_Topic] = set()
 

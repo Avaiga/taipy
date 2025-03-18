@@ -156,8 +156,8 @@ class Notifier:
 
         if to_remove_registration:
             for topic in to_remove_registration.topics:
-                registrations = cls._topics_registrations_list.get(topic)
-                if registrations:
+                if topic in cls._topics_registrations_list:
+                    registrations = cls._topics_registrations_list[topic]
                     registrations.remove(to_remove_registration)
                     if len(registrations) == 0:
                         del cls._topics_registrations_list[topic]
