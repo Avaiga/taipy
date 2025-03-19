@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from typing import Any, Dict, Optional, Set, Tuple, Union
+from typing import Any, Dict, Optional, Set, Tuple
 
 from ._registration import _Registration
 from ._topic import _Topic
