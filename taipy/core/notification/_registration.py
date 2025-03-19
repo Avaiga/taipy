@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from queue import SimpleQueue
-from typing import Optional
+from typing import Optional, Set
 from uuid import uuid4
 
 from ._topic import _Topic
@@ -23,17 +23,21 @@ class _Registration:
     _ID_PREFIX = "REGISTRATION"
     __SEPARATOR = "_"
 
-    def __init__(
-        self,
+    def __init__(self) -> None:
+        self.registration_id: RegistrationId = self._new_id()
+        self.queue: SimpleQueue = SimpleQueue()
+        self.topics: Set[_Topic] = set()
+
+    @staticmethod
+    def from_topic(
         entity_type: Optional[EventEntityType] = None,
         entity_id: Optional[str] = None,
         operation: Optional[EventOperation] = None,
         attribute_name: Optional[str] = None,
-    ):
-
-        self.registration_id: str = self._new_id()
-        self.topic: _Topic = _Topic(entity_type, entity_id, operation, attribute_name)
-        self.queue: SimpleQueue = SimpleQueue()
+    ) -> "_Registration":
+        reg = _Registration()
+        reg.topics.add(_Topic(entity_type, entity_id, operation, attribute_name))
+        return reg
 
     @staticmethod
     def _new_id() -> RegistrationId:
@@ -42,3 +46,37 @@ class _Registration:
 
     def __hash__(self) -> int:
         return hash(self.registration_id)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, _Registration):
+            return False
+        return self.registration_id == other.registration_id
+
+    def __ne__(self, other: object) -> bool:
+        return not self.__eq__(other)
+
+    def __str__(self) -> str:
+        return f"Registration ID: {self.registration_id}, Topics: {self.topics}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def add_topic(
+        self,
+        entity_type: Optional[EventEntityType] = None,
+        entity_id: Optional[str] = None,
+        operation: Optional[EventOperation] = None,
+        attribute_name: Optional[str] = None,
+    ) -> None:
+        """Add a topic to the registration."""
+        self.topics.add(_Topic(entity_type, entity_id, operation, attribute_name))
+
+    def remove_topic(
+        self,
+        entity_type: Optional[EventEntityType] = None,
+        entity_id: Optional[str] = None,
+        operation: Optional[EventOperation] = None,
+        attribute_name: Optional[str] = None,
+    ) -> None:
+        """Remove a topic from the registration."""
+        self.topics.remove(_Topic(entity_type, entity_id, operation, attribute_name))

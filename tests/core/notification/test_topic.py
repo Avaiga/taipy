@@ -317,3 +317,15 @@ def test_topic_equal():
     assert _Topic(EventEntityType.JOB, "JOB_id", EventOperation.UPDATE, "status") == _Topic(
         EventEntityType.JOB, "JOB_id", EventOperation.UPDATE, "status"
     )
+
+
+def test_print():
+    topic = _Topic(EventEntityType.TASK, "task_id", EventOperation.UPDATE, "foo")
+    assert "TASK" in str(topic)
+    assert "task_id" in str(topic)
+    assert "UPDATE" in str(topic)
+    assert "foo" in str(topic)
+
+    topic_2 = _Topic(EventEntityType.SCENARIO, None, EventOperation.CREATION, None)
+    assert "SCENARIO" in str(topic_2)
+    assert "CREATION" in str(topic_2)

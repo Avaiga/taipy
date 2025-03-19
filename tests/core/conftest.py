@@ -320,7 +320,7 @@ def cleanup_files():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def clean_repository(init_config, init_managers, init_orchestrator, init_notifier, clean_argparser):
+def clean_core(init_config, init_managers, init_orchestrator, init_notifier, clean_argparser):
     clean_argparser()
     close_all_sessions()
     init_config()
