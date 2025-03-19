@@ -23,7 +23,7 @@ class _Registration:
     _ID_PREFIX = "REGISTRATION"
     __SEPARATOR = "_"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.registration_id: RegistrationId = self._new_id()
         self.queue: SimpleQueue = SimpleQueue()
         self.topics: Set[_Topic] = set()

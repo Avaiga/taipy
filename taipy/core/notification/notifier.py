@@ -126,7 +126,7 @@ class Notifier:
         return cls.__do_register(registration)
 
     @classmethod
-    def unregister(cls, registration_id: Union[str, _Registration]) -> None:
+    def unregister(cls, registration_id: str) -> None:
         """Unregister a listener.
 
         !!! example "Standard usage"
