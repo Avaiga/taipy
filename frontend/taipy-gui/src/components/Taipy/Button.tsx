@@ -17,7 +17,7 @@ import MuiButton from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 
 import { createSendActionNameAction } from "../../context/taipyReducers";
-import { getCssSize, getSuffixedClassNames, TaipyActiveProps } from "./utils";
+import { getCssSize, getSuffixedClassNames, TaipyActiveProps, getInputButtonHeight } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { stringIcon, Icon, IconAvatar } from "../../utils/icon";
 import { getComponentClassName } from "./TaipyStyle";
@@ -42,7 +42,10 @@ const Button = (props: ButtonProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const buttonSx = useMemo(() => (props.width ? { width: getCssSize(props.width) } : undefined), [props.width]);
+    const buttonSx = useMemo(() => ({
+        minHeight: getInputButtonHeight(props.size),
+        ...(props.width && { width: getCssSize(props.width) }),
+    }), [props.size, props.width]);
 
     const handleClick = useCallback(() => {
         dispatch(createSendActionNameAction(id, module, onAction));

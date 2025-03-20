@@ -70,6 +70,7 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, Tai
     multiline?: boolean;
     linesShown?: number;
     width?: string | number;
+    size?: "small" | "medium";
 }
 
 export interface DateProps {
@@ -167,4 +168,16 @@ export const expandSx = (sx: SxProps | undefined, ...partials: (SxProps | undefi
         return prevSx;
     }, start);
     return start === end ? sx : end;
+};
+
+export const getInputButtonHeight = (size?: "small" | "medium" | "large") => {
+    switch (size) {
+        case "small":
+            return "32px";
+        case "large":
+            return "56px";
+        case "medium":
+        default:
+            return "48px";
+    }
 };

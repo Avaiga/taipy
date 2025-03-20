@@ -21,7 +21,7 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
-import { getCssSize, TaipyInputProps } from "./utils";
+import { getCssSize, TaipyInputProps, getInputButtonHeight } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { getComponentClassName } from "./TaipyStyle";
 
@@ -66,6 +66,7 @@ const Input = (props: TaipyInputProps) => {
         multiline = false,
         actionOnBlur = false,
         linesShown = 5,
+        size = "medium",
     } = props;
 
     const [value, setValue] = useState(defaultValue);
@@ -84,14 +85,14 @@ const Input = (props: TaipyInputProps) => {
     const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
     const textSx = useMemo(
-        () =>
-            props.width
-                ? {
-                    ...numberSx,
-                    maxWidth: getCssSize(props.width),
-                }
-                : numberSx,
-        [props.width]
+        () => ({
+            ...numberSx,
+            maxWidth: props.width && getCssSize(props.width),
+            "& .MuiInputBase-root": {
+                minHeight: getInputButtonHeight(props.size),
+            },
+        }),
+        [props.width, props.size]
     );
 
     const updateValueWithDelay = useCallback(
@@ -374,6 +375,7 @@ const Input = (props: TaipyInputProps) => {
                     onKeyDown={handleAction}
                     multiline={multiline}
                     minRows={linesShown}
+                    size={size}
                 />
                 {props.children}
             </>
