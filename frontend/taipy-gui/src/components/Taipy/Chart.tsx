@@ -55,6 +55,7 @@ const Plot = lazy(() => import("react-plotly.js"));
 
 interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     title?: string;
+    defaultTitle?: string;
     width?: string | number;
     height?: string | number;
     defaultConfig: string;
@@ -298,7 +299,6 @@ const getData = (
 
 const Chart = (props: ChartProp) => {
     const {
-        title = "",
         width = "100%",
         height,
         updateVarName,
@@ -322,6 +322,7 @@ const Chart = (props: ChartProp) => {
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
+    const title = useDynamicProperty(props.title, props.defaultTitle, "");
 
     const dataVarNames = useMemo(() => (props.dataVarNames ? props.dataVarNames.split(";") : []), [props.dataVarNames]);
     const oldAdditionalDatas = useRef<Array<Record<string, TraceValueType>>>([]);

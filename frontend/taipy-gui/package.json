@@ -119,8 +119,8 @@
     "ts-jest": "^29.0.0",
     "ts-jest-mock-import-meta": "^1.2.0",
     "ts-loader": "^9.2.6",
-    "typedoc": "^0.27.5",
-    "typedoc-plugin-markdown": "^4.3.2",
+    "typedoc": "^0.28.1",
+    "typedoc-plugin-markdown": "^4.5.2",
     "typescript": "^5.7.2",
     "webpack": "^5.61.0",
     "webpack-cli": "^6.0.1"
