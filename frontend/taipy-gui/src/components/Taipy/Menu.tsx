@@ -36,9 +36,9 @@ const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {
-    const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
+    const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true, expanded } = props;
     const [selectedValue, setSelectedValue] = useState<string>("");
-    const [opened, setOpened] = useState(false);
+    const [opened, setOpened] = useState(expanded);
     const dispatch = useDispatch();
     const theme = useTheme();
     const module = useModule();
