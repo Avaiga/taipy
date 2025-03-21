@@ -88,7 +88,7 @@ const Input = (props: TaipyInputProps) => {
         () => ({
             ...numberSx,
             maxWidth: props.width && getCssSize(props.width),
-            "& .MuiInputBase-root": {
+            "& input": {
                 minHeight: getInputButtonHeight(props.size),
             },
         }),

@@ -34,6 +34,9 @@ _default_stylekit: Stylekit = {
     # DEFINING SHAPES
     # Base border radius in px
     "border_radius": 8,
+    # DEFINING MUI COMPONENTS STYLES
+    # Matching input and button height in css size unit
+    "input_button_height": "48px",
 }
 
 # Default config loaded by app.py
