@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties } from "react";
+import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties, useEffect } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
@@ -39,6 +39,9 @@ const Menu = (props: MenuProps) => {
     const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true, expanded } = props;
     const [selectedValue, setSelectedValue] = useState<string>("");
     const [opened, setOpened] = useState(expanded);
+    useEffect(() => { 
+        setOpened(expanded); 
+    }, [expanded]);
     const dispatch = useDispatch();
     const theme = useTheme();
     const module = useModule();
