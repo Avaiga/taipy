@@ -145,6 +145,12 @@
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If True, the <code>on_action</code> callback is triggered when the input control looses keyboard focus (e.g., when the user presses the Tab key). When this happens, the key name for the event (set in the <i>args</i> property of the <i>payload</i> parameter to the callback function) is set to \"Tab\"."
+                    },
+                    {
+                        "name": "size",
+                        "type": "str",
+                        "default_value": "\"medium\"",
+                        "doc": "The size of the input. Valid values: \"small\" or \"medium\"."
                     }
                 ]
             }

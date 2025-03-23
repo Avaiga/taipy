@@ -331,6 +331,7 @@ class _Factory:
                 ("multiline", PropertyType.boolean, False),
                 ("lines_shown", PropertyType.number, 5),
                 ("width", PropertyType.string_or_number),
+                ("size", PropertyType.string),
             ]
         ),
         "layout": lambda gui, control_type, attrs: _Builder(
