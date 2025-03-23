@@ -40,14 +40,14 @@ describe("Input Component", () => {
         getByDisplayValue("titi");
     });
     it("displays with width=70%", async () => {
-        const { getByDisplayValue, getByTestId } = render(
+        const { getByDisplayValue } = render(
             <Input value="toto" type="text" defaultValue="titi" width="70%"/>
         );
         const element = getByDisplayValue("toto");
         expect(element.parentElement?.parentElement).toHaveStyle('max-width: 70%');
     });
     it("displays with width=500", async () => {
-        const { getByDisplayValue, getByTestId } = render(
+        const { getByDisplayValue } = render(
             <Input value="toto" type="text" defaultValue="titi" width={500}/>
         );
         const element = getByDisplayValue("toto");
@@ -67,6 +67,12 @@ describe("Input Component", () => {
         const { getByDisplayValue } = render(<Input value="val" type="text" active={true} />);
         const elt = getByDisplayValue("val");
         expect(elt).not.toBeDisabled();
+    });
+    it("applies correct size", async ()=> {
+        const { getByRole } = render(<Input value="val" type="text" size="small" />);
+        const elt = getByRole("textbox");
+        expect(elt).toBeInTheDocument();
+        expect(elt).toHaveClass("MuiInputBase-inputSizeSmall");
     });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
