@@ -34,11 +34,11 @@ interface MenuCtlProps extends LovProps<string> {
     defaultInactiveIds?: string;
     selected?: string[];
     defaultSelected?: string;
-    unfolded?: boolean;
+    expanded?: boolean;
 }
 
 const MenuCtl = (props: MenuCtlProps) => {
-    const {id, label, onAction, defaultLov = "", width = "15vw", width_Mobile_ = "85vw",unfolded} = props;
+    const {id, label, onAction, defaultLov = "", width = "15vw", width_Mobile_ = "85vw",expanded} = props;
     const dispatch = useDispatch();
     const isMobile = useIsMobile();
     const module = useModule();
@@ -87,11 +87,11 @@ const MenuCtl = (props: MenuCtlProps) => {
                 width: isMobile ? width_Mobile_ : width,
                 className: className,
                 selected: selected,
-                unfolded: unfolded,
+                expanded: expanded,
             } as MenuProps)
         );
         return () => dispatch(createSetMenuAction({}));
-    }, [label, onAction, active, lovList, inactiveIds, width, width_Mobile_, isMobile, className, dispatch, selected,unfolded]);
+    }, [label, onAction, active, lovList, inactiveIds, width, width_Mobile_, isMobile, className, dispatch, selected,expanded]);
 
     return <></>;
 };

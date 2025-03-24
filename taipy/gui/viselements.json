@@ -1648,10 +1648,10 @@
                         "doc": "The width of the menu when unfolded, in CSS units, when running on a mobile device."
                     },
                     {
-                        "name": "unfolded",
+                        "name": "expanded",
                         "type":"bool",
                         "default_value":"False",
-                        "doc": "Defines whether the menu starts unfolded or folded"
+                        "doc": "Defines whether the menu starts expanded or folded"
                     }
                 ]
             }

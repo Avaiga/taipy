@@ -86,14 +86,14 @@ describe("Menu Component", () => {
         });
     });
 
-    it("starts folded unless 'unfolded' is true", () => {
+    it("starts folded unless 'expanded' is true", () => {
         const improbable_width = "277px";
         const { rerender, container } = render(
             <Menu label="Test Menu" lov={lov} width={improbable_width} />
         );
         const drawer = container.querySelector(".MuiDrawer-root");
         expect(drawer).toHaveStyle(`width: calc(72px + 1px)`); 
-        rerender(<Menu label="Test Menu" unfolded={true} lov={lov} width={improbable_width} />);
+        rerender(<Menu label="Test Menu" expanded={true} lov={lov} width={improbable_width} />);
         expect(drawer).toHaveStyle(`width: ${improbable_width}`);
     });
 
