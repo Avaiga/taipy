@@ -600,7 +600,7 @@
                     },
                     {
                         "name": "title",
-                        "type": "str",
+                        "type": "dynamic(str)",
                         "doc": "The title of the chart control."
                     },
                     {

@@ -128,7 +128,7 @@ class _Factory:
         .set_value_and_default(with_default=False, var_type=PropertyType.data)
         .set_attributes(
             [
-                ("title",),
+                ("title", PropertyType.dynamic_string),
                 ("width", PropertyType.string_or_number),
                 ("height", PropertyType.string_or_number),
                 ("layout", PropertyType.dynamic_dict),

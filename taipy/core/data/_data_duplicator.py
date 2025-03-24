@@ -30,7 +30,7 @@ class _DataDuplicator:
     def duplicate_data(self, dest: DataNode):
         """Duplicate the src data to the data of the destination data node.
 
-        Parameters:
+        Arguments:
             dest (DataNode): The destination data node.
 
         Raises:

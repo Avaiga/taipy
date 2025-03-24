@@ -40,7 +40,7 @@ class _OrchestratorFactory:
         if EnterpriseEditionUtils._using_enterprise():
             cls._orchestrator = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_ORCHESTRATOR_MODULE,
-                "Orchestrator",
+                "_Orchestrator",
             )  # type: ignore
         else:
             cls._orchestrator = _Orchestrator  # type: ignore
