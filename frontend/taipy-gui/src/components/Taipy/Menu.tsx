@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties } from "react";
+import React, { useCallback, useMemo, useState, MouseEvent, CSSProperties,useEffect } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
@@ -36,9 +36,12 @@ const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {
-    const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true } = props;
+    const { label, onAction = "", lov, width, inactiveIds = emptyArray, active = true, unfolded = false } = props;
     const [selectedValue, setSelectedValue] = useState<string>("");
-    const [opened, setOpened] = useState(false);
+    const [opened, setOpened] = useState(unfolded);
+    useEffect(() => { 
+        setOpened(unfolded); 
+    }, [unfolded]);
     const dispatch = useDispatch();
     const theme = useTheme();
     const module = useModule();

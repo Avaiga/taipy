@@ -17,7 +17,7 @@ const lov: LovItem[] = [
 
 const imageItem: LovItem = { id: "ii1", item: { path: "/img/fred.png", text: "Image" } };
 
-describe("Menu Component", () => {
+describe("Menu Component", () => {   
     it("renders", async () => {
         const { getByText } = render(<Menu lov={lov} />);
         const elt = getByText("Item 1");
@@ -85,4 +85,16 @@ describe("Menu Component", () => {
             type: "SEND_ACTION_ACTION",
         });
     });
+
+    it("starts folded unless 'unfolded' is true", () => {
+        const improbable_width = "277px";
+        const { rerender, container } = render(
+            <Menu label="Test Menu" lov={lov} width={improbable_width} />
+        );
+        const drawer = container.querySelector(".MuiDrawer-root");
+        expect(drawer).toHaveStyle(`width: calc(72px + 1px)`); 
+        rerender(<Menu label="Test Menu" unfolded={true} lov={lov} width={improbable_width} />);
+        expect(drawer).toHaveStyle(`width: ${improbable_width}`);
+    });
+
 });
