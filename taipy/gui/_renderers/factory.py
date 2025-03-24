@@ -371,7 +371,7 @@ class _Factory:
                 ("hover_text", PropertyType.dynamic_string),
                 ("width",),
                 ("width[mobile]",),
-                ("expanded",PropertyType.dynamic_boolean, False),
+                ("expanded",PropertyType.boolean, False),
             ]
         )
         ._set_propagate(),
