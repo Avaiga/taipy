@@ -1646,6 +1646,12 @@
                         "type": "str",
                         "default_value": "\"85vw\"",
                         "doc": "The width of the menu when unfolded, in CSS units, when running on a mobile device."
+                    },
+                    {
+                        "name": "expanded",
+                        "type":"bool",
+                        "default_value":"False",
+                        "doc": "Defines whether the menu starts expanded or folded"
                     }
                 ]
             }

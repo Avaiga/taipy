@@ -92,7 +92,6 @@ describe("Menu Component", () => {
             <Menu label="Test Menu" lov={lov} width={improbable_width} />
         );
         const drawer = container.querySelector(".MuiDrawer-root");
-        expect(drawer).not.toBeNull();
         expect(drawer).toHaveStyle(`width: calc(72px + 1px)`); 
         rerender(<Menu label="Test Menu" expanded={true} lov={lov} width={improbable_width} />);
         expect(drawer).toHaveStyle(`width: ${improbable_width}`);
