@@ -169,15 +169,3 @@ export const expandSx = (sx: SxProps | undefined, ...partials: (SxProps | undefi
     }, start);
     return start === end ? sx : end;
 };
-
-export const getInputButtonHeight = (size?: "small" | "medium" | "large") => {
-    switch (size) {
-        case "small":
-            return "32px";
-        case "large":
-            return "56px";
-        case "medium":
-        default:
-            return "48px";
-    }
-};
