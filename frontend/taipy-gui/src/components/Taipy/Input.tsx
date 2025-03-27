@@ -21,7 +21,7 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
-import {expandSx, getCssSize, TaipyInputProps} from "./utils";
+import { getCssSize, TaipyInputProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
 import { getComponentClassName } from "./TaipyStyle";
 
@@ -84,11 +84,16 @@ const Input = (props: TaipyInputProps) => {
     const min = useDynamicProperty(props.min, props.defaultMin, undefined);
     const max = useDynamicProperty(props.max, props.defaultMax, undefined);
 
-    const textSx = useMemo(() =>
-        expandSx(numberSx,
-            props.width ? { width: getCssSize(props.width) } : undefined,
-            size !== "medium" ? { "& input": { minHeight: "unset" } } : undefined)
-    , [props.width, size]);
+    const textSx = useMemo(
+        () =>
+            props.width
+                ? {
+                    ...numberSx,
+                    maxWidth: getCssSize(props.width),
+                }
+                : numberSx,
+        [props.width]
+    );
 
     const updateValueWithDelay = useCallback(
         (value: number | string) => {

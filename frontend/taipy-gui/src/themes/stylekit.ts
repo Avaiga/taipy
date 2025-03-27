@@ -97,6 +97,10 @@ export const stylekitTheme = {
                     "&.MuiInputBase-inputMultiline": {
                         minHeight: "unset",
                     },
+                    // for small size
+                    "&.MuiInputBase-inputSizeSmall": {
+                        minHeight: 'unset',
+                    }
                 },
             },
         },
