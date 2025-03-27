@@ -117,8 +117,13 @@ export const stylekitTheme = {
             styleOverrides: {
                 root: {
                     height: "auto",
-                    minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
                     marginBottom: 4,
+                    "&.MuiButton-sizeMedium": {
+                        minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    },
+                    "&.MuiButton-sizeLarge": {
+                        lineHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    },
                 },
             },
         },
