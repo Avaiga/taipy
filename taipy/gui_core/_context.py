@@ -667,7 +667,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 if isinstance(e, DataNode)
                 else self.filter_entities(d, t.cast(str, col), col_type, False, action, val, col_fn)
                 for e in filtered_list
-                for d in t.cast(list, t.cast(list, e)[2])
+                for d in (t.cast(list, t.cast(list, e)[2]) if isinstance(e, list) else [e])
             ]
         # remove empty cycles
         return [e for e in filtered_list if isinstance(e, DataNode) or (isinstance(e, (tuple, list)) and len(e[2]))]
