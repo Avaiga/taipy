@@ -20,6 +20,7 @@ import React, {
     MouseEvent,
     ChangeEvent,
     SyntheticEvent,
+    ReactNode,
 } from "react";
 import { FilterOptionsState } from "@mui/material";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
@@ -245,7 +246,13 @@ export const getSortByIndex = (cols: Record<string, ColumnDesc>) => (key1: strin
         ? 1
         : cols[key1].index - cols[key2].index;
 
-const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string): string => {
+const formatValue = (
+    val: RowValue,
+    col: ColumnDesc,
+    formatConf: FormatConfig,
+    nanValue: string | undefined,
+    lineBreak: boolean = true
+): ReactNode => {
     if (val === undefined) {
         return "";
     }
@@ -262,7 +269,20 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, n
             }
             return getNumberString(val as number, col.format, formatConf);
         default:
-            return val ? (val as string) : "";
+            return val
+                ? lineBreak
+                    ? (val as string).split("\n").map((p, i) =>
+                          i == 0 ? (
+                              p
+                          ) : (
+                              <>
+                                  <br />
+                                  {p}
+                              </>
+                          )
+                      )
+                    : val
+                : "";
     }
 };
 
@@ -277,11 +297,11 @@ const defaultCursorIcon = { ...iconInRowSx, "& .MuiSwitch-input": defaultCursor 
 const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Partial<TableCellProps> => {
     switch (col.type) {
         case "bool":
-            base = {...base, align: "center"};
+            base = { ...base, align: "center" };
             break;
     }
     if (col.width) {
-        base = {...base, width: col.width};
+        base = { ...base, width: col.width };
     }
     return base;
 };
@@ -577,7 +597,7 @@ export const EditableCell = (props: EditableCellProps) => {
             title={
                 tooltip || comp
                     ? `${tooltip ? tooltip : ""}${
-                          comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""
+                          comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue, false) : ""
                       }`
                     : undefined
             }
