@@ -109,6 +109,8 @@ export interface ColumnDesc {
     headers?: string[];
     /** The index of the multi index if exists. */
     multi?: number;
+    /** If true or not set, line breaks are transformed into <BR>. */
+    lineBreak?: boolean;
 }
 
 export const DEFAULT_SIZE = "small";
@@ -270,7 +272,7 @@ const formatValue = (
             return getNumberString(val as number, col.format, formatConf);
         default:
             return val
-                ? lineBreak
+                ? lineBreak && (col.lineBreak === undefined || col.lineBreak)
                     ? (val as string).split("\n").map((p, i) =>
                           i == 0 ? (
                               p
