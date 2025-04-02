@@ -346,7 +346,7 @@ export interface ColumnDesc {
     width?: number | string;
     /** If true, the column cannot be edited. */
     notEditable?: boolean;
-    /** The name of the column that holds the CSS classname to
+    /** The name of the column that holds the CSS className to
      *  apply to the cells. */
     className?: string;
     /** The name of the column that holds the tooltip to
@@ -365,13 +365,14 @@ export interface ColumnDesc {
     apply?: string;
     /** The flag that allows the user to aggregate the column. */
     groupBy?: boolean;
-    widthHint?: number;
     /** The list of values that can be used on edit. */
     lov?: string[];
     /** If true the user can enter any value besides the lov values. */
     freeLov?: boolean;
     /** If false, the column cannot be sorted */
     sortable?: boolean;
+    /** If true or not set, line breaks are transformed into <BR>. */
+    lineBreak?: boolean;
 }
 /**
  * A cell value type.

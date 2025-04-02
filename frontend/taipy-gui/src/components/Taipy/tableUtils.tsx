@@ -20,6 +20,7 @@ import React, {
     MouseEvent,
     ChangeEvent,
     SyntheticEvent,
+    ReactNode,
 } from "react";
 import { FilterOptionsState } from "@mui/material";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
@@ -88,6 +89,8 @@ export interface ColumnDesc {
     freeLov?: boolean;
     /** If false, the column cannot be sorted */
     sortable?: boolean;
+    /** If true or not set, line breaks are transformed into <BR>. */
+    lineBreak?: boolean;
 }
 
 export const DEFAULT_SIZE = "small";
@@ -216,7 +219,13 @@ export const defaultColumns = {} as Record<string, ColumnDesc>;
 export const getSortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) =>
     cols[key1].index < cols[key2].index ? -1 : cols[key1].index > cols[key2].index ? 1 : 0;
 
-const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string): string => {
+const formatValue = (
+    val: RowValue,
+    col: ColumnDesc,
+    formatConf: FormatConfig,
+    nanValue: string | undefined,
+    lineBreak: boolean = true
+): ReactNode => {
     if (val === undefined) {
         return "";
     }
@@ -233,7 +242,20 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, n
             }
             return getNumberString(val as number, col.format, formatConf);
         default:
-            return val ? (val as string) : "";
+            return val
+                ? lineBreak && (col.lineBreak === undefined || col.lineBreak)
+                    ? (val as string).split("\n").map((p, i) =>
+                          i == 0 ? (
+                              p
+                          ) : (
+                              <>
+                                  <br />
+                                  {p}
+                              </>
+                          )
+                      )
+                    : val
+                : "";
     }
 };
 
@@ -248,11 +270,11 @@ const defaultCursorIcon = { ...iconInRowSx, "& .MuiSwitch-input": defaultCursor 
 const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Partial<TableCellProps> => {
     switch (col.type) {
         case "bool":
-            base = {...base, align: "center"};
+            base = { ...base, align: "center" };
             break;
     }
     if (col.width) {
-        base = {...base, width: col.width};
+        base = { ...base, width: col.width };
     }
     return base;
 };
@@ -542,7 +564,7 @@ export const EditableCell = (props: EditableCellProps) => {
             title={
                 tooltip || comp
                     ? `${tooltip ? tooltip : ""}${
-                          comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue) : ""
+                          comp ? " " + formatValue(comp as RowValue, colDesc, formatConfig, nanValue, false) : ""
                       }`
                     : undefined
             }
