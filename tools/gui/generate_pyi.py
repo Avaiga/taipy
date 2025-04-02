@@ -182,18 +182,18 @@ def format_as_parameter(property: Dict[str, str], element_name: str):
         if get_origin(type_desc) is Union:
             types = get_args(type_desc)
             if not any(t.__name__ in ["str", "Any"] for t in types):
-                type = type.rpartition("]")
-                type = type[0] + ", str]"
+                type = type.rpartition("]")[0]
+                type = type + ", str]"
         elif hasattr(type_desc, "__name__") and type_desc.__name__ not in ["str", "Any"]:
             type = f"Union[{type}, str]"
     except NameError:
         print(f"WARNING - Couldn't parse type '{type}' in {element_name}.{name}")
-    
+
     if default_value is None or default_value == "None":
         default_value = " = None"
         if type.startswith("Union["):
-            type = type.rpartition("]")
-            type = ": " + type[0] + ", None]"
+            type = type.rpartition("]")[0]
+            type = ": " + type + ", None]"
         else:
             type = f": Optional[{type}]"
     else:
@@ -269,7 +269,7 @@ def generate_elements(elements_by_prefix: Dict[str, List], base_class: str):
             desc = element[1]
             properties_doc = ""
             property_list: List[Dict[str, Any]] = []
-            property_names: List[str] = []
+            property_indices: List[int] = []
             properties = resolve_inherit(
                 name,
                 desc["properties"],
@@ -280,26 +280,27 @@ def generate_elements(elements_by_prefix: Dict[str, List], base_class: str):
             )
             # Remove hidden properties
             properties = [p for p in properties if not p.get("hide", False)]
-            # Generate function parameters
+            # Generate function parameters (modifies properties!)
             properties_decl = [format_as_parameter(p, name) for p in properties]
-            # Manually add the 'inline' property for the text control
-            if name == "text":
-                properties_decl.append("inline: bool = False")
             # Generate properties doc
-            for property in properties:
+            for idx, property in enumerate(properties):
                 if "default_property" in property and property["default_property"] is True:
                     property_list.insert(0, property)
-                    property_names.insert(0, property["name"])
+                    property_indices.insert(0, idx)
                     continue
                 property_list.append(property)
-                property_names.append(property["name"])
+                property_indices.append(idx)
             # Append properties doc to element doc (once ordered)
             for property in property_list:
                 property_doc = build_doc(name, property)
                 properties_doc += property_doc
+            # Sort properties by indices
+            properties_decl = [properties_decl[idx] for idx in property_indices]
             if name == "text":
                 properties_doc += ("inline\n  If True, the text is created next to "
                                  + "the previous element and not on a new line.\n\n")
+                # Manually add the 'inline' property for the text control
+                properties_decl.append("inline: bool = False")
             if len(properties_decl) > 1:
                 properties_decl.insert(1, "*")
             # Append element to __init__.pyi
