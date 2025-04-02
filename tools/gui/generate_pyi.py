@@ -290,7 +290,7 @@ def generate_elements(elements_by_prefix: Dict[str, List], base_class: str):
                     continue
                 property_list.append(property)
                 property_indices.append(idx)
-            # Append properties doc to element doc (once ordered)
+            # Append properties doc to element doc
             for property in property_list:
                 property_doc = build_doc(name, property)
                 properties_doc += property_doc
