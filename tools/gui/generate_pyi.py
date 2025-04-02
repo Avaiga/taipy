@@ -216,7 +216,7 @@ def generate_elements(elements_by_prefix: Dict[str, List], base_class: str):
             desc = element[1]
             properties_doc = ""
             property_list: List[Dict[str, Any]] = []
-            property_names: List[str] = []
+            property_indices: List[int] = []
             properties = resolve_inherit(
                 name,
                 desc["properties"],
@@ -230,17 +230,19 @@ def generate_elements(elements_by_prefix: Dict[str, List], base_class: str):
             # Generate function parameters
             properties_decl = [format_as_parameter(p) for p in properties]
             # Generate properties doc
-            for property in properties:
+            for idx, property in enumerate(properties):
                 if "default_property" in property and property["default_property"] is True:
                     property_list.insert(0, property)
-                    property_names.insert(0, property["name"])
+                    property_indices.insert(0, idx)
                     continue
                 property_list.append(property)
-                property_names.append(property["name"])
-            # Append properties doc to element doc (once ordered)
+                property_indices.append(idx)
+            # Append properties doc to element doc
             for property in property_list:
                 property_doc = build_doc(name, property)
                 properties_doc += property_doc
+            # Sort properties by indices
+            properties_decl = [properties_decl[idx] for idx in property_indices]
             if len(properties_decl) > 1:
                 properties_decl.insert(1, "*")
             # Append element to __init__.pyi
