@@ -32,7 +32,7 @@ import {
     AnimationOpts,
     Config,
     Data,
-    Datum, Frame,
+    Frame,
     Layout,
     ModeBarButtonAny,
     PlotDatum,
@@ -717,7 +717,9 @@ const Chart = (props: ChartProp) => {
             ret.orientation = getArrayValue(config.orientations, idx);
             ret.line = getArrayValue(config.lines, idx);
             ret.textposition = getArrayValue(config.textAnchors, idx);
-            ret.animateTo = animationDataValues[Object.keys(animationDataValues || {}).find((e) => trace.includes(e)) as keyof typeof animationDataValues];
+            if (animationData) {
+                ret.animateTo = animationData[Object.keys(animationData).find((e) => trace.includes(e)) as keyof typeof animationData];
+            }
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {
                 ret.selected = { marker: selectedMarker };
@@ -731,7 +733,7 @@ const Chart = (props: ChartProp) => {
             lastDataPl.current = newDataPl;
         }
         return lastDataPl.current;
-    }, [props.figure, selected, data, additionalDatas, config, dataKeys, animationDataValues]);
+    }, [props.figure, selected, data, additionalDatas, config, dataKeys, animationData]);
 
     const plotConfig = useMemo(() => {
         let plConf: Partial<Config> = {};
