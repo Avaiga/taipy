@@ -218,3 +218,18 @@ def test_chart_indexed_properties_with_arrays(gui: Gui, helpers):
         "&quot;lines&quot;: [null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;, null, &#x7B;&quot;dash&quot;: &quot;dashdot&quot;&#x7D;, &#x7B;&quot;dash&quot;: &quot;dash&quot;&#x7D;]",  # noqa: E501
     ]
     helpers.test_control_md(gui, md, expected_list)
+
+
+def test_chart_none_data(gui: Gui, helpers):
+    data = None  # noqa: F841
+    md_string = "<|{data}|chart|>"
+    expected_list = [
+        "<Chart",
+        "data={_TpD_tpec_TpExPr_data_TPMDL_0}",
+        'dataVarNames=""',
+        'defaultConfig="{&quot;traces&quot;: []}"',
+        'libClassName="taipy-chart"',
+        'updateVarName="_TpD_tpec_TpExPr_data_TPMDL_0"',
+    ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_md(gui, md_string, expected_list)
