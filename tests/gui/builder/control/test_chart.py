@@ -276,3 +276,21 @@ def test_chart_multi_data(gui: Gui, helpers, csvdata):
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_builder(gui, page, expected_list)
+
+
+def test_chart_none_data(gui: Gui, helpers):
+    data=None  # noqa: F841
+    with tgb.Page(frame=None) as page:
+        tgb.chart(  # type: ignore[attr-defined]
+            data="{data}",
+        )
+    expected_list = [
+        "<Chart",
+        "data={_TpD_tpec_TpExPr_data_TPMDL_0}",
+        'dataVarNames=""',
+        'defaultConfig="{&quot;traces&quot;: []}"',
+        'libClassName="taipy-chart"',
+        'updateVarName="_TpD_tpec_TpExPr_data_TPMDL_0"',
+    ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_builder(gui, page, expected_list)
