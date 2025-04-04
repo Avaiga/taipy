@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Avaiga Private Limited
+# Copyright 2021-2025 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -33,6 +33,7 @@ from taipy.core import (
     Sequence,
     SequenceId,
     Submission,
+    can_create,
     cancel_job,
     create_scenario,
     delete_job,
@@ -50,14 +51,15 @@ from taipy.core import delete as core_delete
 from taipy.core import get as core_get
 from taipy.core import submit as core_submit
 from taipy.core.data._file_datanode_mixin import _FileDataNodeMixin
+from taipy.core.data.data_node_id import EDIT_COMMENT_KEY, EDIT_EDITOR_ID_KEY, EDIT_JOB_ID_KEY, EDIT_TIMESTAMP_KEY
 from taipy.core.notification import CoreEventConsumerBase, EventEntityType
 from taipy.core.notification.event import Event, EventOperation
 from taipy.core.notification.notifier import Notifier
 from taipy.core.reason import ReasonCollection
 from taipy.core.submission.submission_status import SubmissionStatus
-from taipy.gui import Gui, State
+from taipy.gui import Gui, State, get_state_id
 from taipy.gui._warnings import _warn
-from taipy.gui.gui import _DoNotUpdate
+from taipy.gui.utils import _DoNotUpdate
 from taipy.gui.utils._map_dict import _MapDict
 
 from ._adapters import (
@@ -68,7 +70,7 @@ from ._adapters import (
     _invoke_action,
 )
 from ._utils import _ClientStatus
-from .filters import CustomScenarioFilter
+from .filters import CustomScenarioFilter, ParamType
 
 
 class _GuiCoreContext(CoreEventConsumerBase):
@@ -82,6 +84,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     __ENTITY_PROPS = (__PROP_CONFIG_ID, __PROP_DATE, __PROP_ENTITY_NAME)
     __ACTION = "action"
     _CORE_CHANGED_NAME = "core_changed"
+    _AUTH_CHANGED_NAME = "auth_changed"
 
     def __init__(self, gui: Gui) -> None:
         self.gui = gui
@@ -97,8 +100,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.submissions_lock = Lock()
         # lazy_start
         self.__started = False
+        # Gui event listener
+        gui._add_event_listener("authorization", self._auth_listener, with_state=True) # type: ignore
         # super
         super().__init__(reg_id, reg_queue)
+
+    def on_user_init(self, state: State):
+        self.gui._fire_event("authorization", get_state_id(state), {}) # type: ignore
 
     def __lazy_start(self):
         if self.__started:
@@ -108,17 +116,16 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def process_event(self, event: Event):
         self.__lazy_start()
-        if event.entity_type is EventEntityType.SCENARIO:
-            with self.gui._get_authorization(system=True):
+        with self.gui._get_authorization(system=True): # type: ignore
+            if event.entity_type is EventEntityType.SCENARIO:
                 self.scenario_refresh(
                     event.entity_id
                     if event.operation is EventOperation.DELETION or is_readable(t.cast(ScenarioId, event.entity_id))
                     else None
                 )
-        elif event.entity_type is EventEntityType.SEQUENCE and event.entity_id:
-            sequence = None
-            try:
-                with self.gui._get_authorization(system=True):
+            elif event.entity_type is EventEntityType.SEQUENCE and event.entity_id:
+                sequence = None
+                try:
                     sequence = (
                         core_get(event.entity_id)
                         if event.operation is not EventOperation.DELETION
@@ -127,25 +134,25 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     )
                     if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
                         self.broadcast_core_changed({"scenario": list(sequence.parent_ids)})  # type: ignore
-            except Exception as e:
-                _warn(f"Access to sequence {event.entity_id} failed", e)
-        elif event.entity_type is EventEntityType.JOB:
-            with self.lock:
-                self.jobs_list = None
+                except Exception as e:
+                    _warn(f"Access to sequence {event.entity_id} failed", e)
+            elif event.entity_type is EventEntityType.JOB:
+                with self.lock:
+                    self.jobs_list = None
             # no broadcast because the submission status will do the job
             if event.operation is EventOperation.DELETION:
                 self.broadcast_core_changed({"jobs": True})
-        elif event.entity_type is EventEntityType.SUBMISSION:
-            self.submission_status_callback(event.entity_id, event)
-        elif event.entity_type is EventEntityType.DATA_NODE:
-            with self.lock:
-                self.data_nodes_by_owner = None
-            self.broadcast_core_changed(
-                {"datanode": event.entity_id if event.operation != EventOperation.DELETION else True}
-            )
+            elif event.entity_type is EventEntityType.SUBMISSION:
+                self.submission_status_callback(event.entity_id, event)
+            elif event.entity_type is EventEntityType.DATA_NODE:
+                with self.lock:
+                    self.data_nodes_by_owner = None
+                self.broadcast_core_changed(
+                    {"datanode": event.entity_id if event.operation != EventOperation.DELETION else True}
+                )
 
     def broadcast_core_changed(self, payload: t.Dict[str, t.Any], client_id: t.Optional[str] = None):
-        self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, payload, client_id)
+        self.gui._broadcast(_GuiCoreContext._CORE_CHANGED_NAME, payload, client_id) # type: ignore
 
     def scenario_refresh(self, scenario_id: t.Optional[str]):
         with self.lock:
@@ -186,8 +193,8 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 else:
                     last_client_status.submission_status = new_status
 
-            if client_id:= submission.properties.get("client_id"):
-                with self.gui._get_authorization(client_id):
+            if client_id := submission.properties.get("client_id"):
+                with self.gui._get_authorization(client_id): # type: ignore
                     if payload is not None:
                         running_tasks = {}
                         for job in submission.jobs:
@@ -278,10 +285,18 @@ class _GuiCoreContext(CoreEventConsumerBase):
         return None
 
     def filter_entities(
-        self, cycle_scenario: t.List, col: str, col_type: str, is_dn: bool, action: str, val: t.Any, col_fn=None
+        self,
+        cycle_scenario: t.List,
+        col: str,
+        col_type: str,
+        is_dn: bool,
+        action: str,
+        val: t.Any,
+        col_fn=None,
+        match_case: bool = False,
     ):
         cycle_scenario[2] = [
-            e for e in cycle_scenario[2] if _invoke_action(e, col, col_type, is_dn, action, val, col_fn)
+            e for e in cycle_scenario[2] if _invoke_action(e, col, col_type, is_dn, action, val, col_fn, match_case)
         ]
         return cycle_scenario
 
@@ -320,10 +335,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
             col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
             val = fd.get("value")
             action = fd.get("action", "")
+            match_case = fd.get("matchCase", False) is not False
             customs = CustomScenarioFilter._get_custom(col)
             if customs:
-                with self.gui._set_locals_context(customs[0] or None):
-                    fn = self.gui._get_user_function(customs[1])
+                with self.gui._set_locals_context(customs[0] or None): # type: ignore
+                    fn = self.gui._get_user_function(customs[1]) # type: ignore
                     if callable(fn):
                         col = fn
             if (
@@ -338,14 +354,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 e
                 for e in filtered_list
                 if not isinstance(e, Scenario)
-                or _invoke_action(e, t.cast(str, col), col_type, is_datanode_prop, action, val, col_fn)
+                or _invoke_action(e, t.cast(str, col), col_type, is_datanode_prop, action, val, col_fn, match_case)
             ]
             # level 2 filtering
             filtered_list = [
                 e
                 if isinstance(e, Scenario)
                 else self.filter_entities(
-                    t.cast(list, e), t.cast(str, col), col_type, is_datanode_prop, action, val, col_fn
+                    t.cast(list, e), t.cast(str, col), col_type, is_datanode_prop, action, val, col_fn, match_case
                 )
                 for e in filtered_list
             ]
@@ -457,10 +473,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
             gui = state.get_gui()
             try:
                 on_creation = args[0] if isinstance(args[0], str) else None
-                on_creation_function = gui._get_user_function(on_creation) if on_creation else None
+                on_creation_function = gui._get_user_function(on_creation) if on_creation else None # type: ignore
                 if callable(on_creation_function) and on_creation:
                     try:
-                        res = gui._call_function_with_state(
+                        res = gui._call_function_with_state( # type: ignore
                             on_creation_function,
                             [
                                 id,
@@ -484,7 +500,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             state.assign(error_var, f"{res}")
                             return
                     except Exception as e:  # pragma: no cover
-                        if not gui._call_on_exception(on_creation, e):
+                        if not gui._call_on_exception(on_creation, e): # type: ignore
                             _warn(f"on_creation(): Exception raised in '{on_creation}()'", e)
                         state.assign(
                             error_var,
@@ -510,7 +526,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
             finally:
                 self.scenario_refresh(scenario_id)
                 if (scenario or user_scenario) and (sel_scenario_var := args[1] if isinstance(args[1], str) else None):
-                    self.gui._update_var(
+                    self.gui._update_var( # type: ignore
                         sel_scenario_var[6:] if sel_scenario_var.startswith("_TpLv_") else sel_scenario_var,
                         scenario or user_scenario,
                         on_change=args[2],
@@ -615,10 +631,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 submission_entity = core_submit(
                     entity,
                     on_submission=on_submission,
-                    client_id=self.gui._get_client_id(),
-                    module_context=self.gui._get_locals_context(),
+                    client_id=self.gui._get_client_id(), # type: ignore
+                    module_context=self.gui._get_locals_context(), # type: ignore
                 )
-                client_status = _ClientStatus(self.gui._get_client_id(), None)
+                client_status = _ClientStatus(self.gui._get_client_id(), None) # type: ignore
                 with self.submissions_lock:
                     self.client_submission[submission_entity.id] = client_status
                 if Config.core.mode == "development":
@@ -642,10 +658,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
             col_fn = cp[0] if (cp := col.split("(")) and len(cp) > 1 else None
             val = fd.get("value")
             action = fd.get("action", "")
+            match_case = fd.get("matchCase", False) is not False
             customs = CustomScenarioFilter._get_custom(col)
             if customs:
-                with self.gui._set_locals_context(customs[0] or None):
-                    fn = self.gui._get_user_function(customs[1])
+                with self.gui._set_locals_context(customs[0] or None):  # type: ignore
+                    fn = self.gui._get_user_function(customs[1])  # type: ignore
                     if callable(fn):
                         col = fn
             if (
@@ -659,18 +676,38 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 e
                 for e in filtered_list
                 if not isinstance(e, DataNode)
-                or _invoke_action(e, t.cast(str, col), col_type, False, action, val, col_fn)
+                or _invoke_action(e, t.cast(str, col), col_type, False, action, val, col_fn, match_case)
             ]
             # level 3 filtering
             filtered_list = [
                 e
                 if isinstance(e, DataNode)
-                else self.filter_entities(d, t.cast(str, col), col_type, False, action, val, col_fn)
+                else self.filter_entities(
+                    t.cast(list, d), t.cast(str, col), col_type, False, action, val, col_fn, match_case
+                )
                 for e in filtered_list
                 for d in (t.cast(list, t.cast(list, e)[2]) if isinstance(e, list) else [e])
             ]
         # remove empty cycles
         return [e for e in filtered_list if isinstance(e, DataNode) or (isinstance(e, (tuple, list)) and len(e[2]))]
+
+    @staticmethod
+    def _get_sort_params(params: t.Optional[t.List[t.Any]] = None, parent: t.Optional[Scenario] = None):
+        args: t.Optional[t.List[t.Any]] = None
+        if params:
+            args = []
+            for param in params:
+                if param == ParamType.ScenarioConfigId.value:
+                    args.append(
+                        parent.config_id
+                        if isinstance(parent, Scenario)
+                        else next(filter(lambda id: id != "default", iter(Config.scenarios)), None)  # type: ignore[arg-type]
+                    )
+                elif param == ParamType.ScenarioId.value:
+                    args.append(parent.id if isinstance(parent, Scenario) else None)
+                else:
+                    args.append(None)
+        return args
 
     def get_sorted_datanode_list(
         self,
@@ -679,6 +716,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         ],
         sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
         adapt_dn=False,
+        parent: t.Optional[Scenario] = None,
     ):
         if not entities:
             return entities
@@ -687,7 +725,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
             for sd in reversed(sorts):
                 col = sd.get("col", "")
                 order = sd.get("order", True)
-                sorted_list = sorted(sorted_list, key=_get_entity_property(col, DataNode), reverse=not order)
+                args = self._get_sort_params(t.cast(t.List[int], sd.get("params")), parent)
+                sorted_list = sorted(
+                    sorted_list, key=_get_entity_property(col, DataNode, params=args), reverse=not order
+                )
         else:
             sorted_list = entities
         return [self.data_node_adapter(e, sorts, adapt_dn) for e in sorted_list]
@@ -700,13 +741,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def get_datanodes_tree(
         self,
-        scenarios: t.Optional[t.Union[Scenario, t.List[Scenario]]],
+        scenarios: t.Union[Scenario, t.List[Scenario], None],
         datanodes: t.Optional[t.List[DataNode]],
         filters: t.Optional[t.List[t.Dict[str, t.Any]]],
         sorts: t.Optional[t.List[t.Dict[str, t.Any]]],
     ):
         self.__lazy_start()
-        base_list = []
+        base_list: t.List[t.Union[Cycle, Scenario, DataNode]] = []
+        parent: t.Optional[Scenario] = None
         with self.lock:
             self.__do_datanodes_tree()
         if datanodes is None:
@@ -726,14 +768,18 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 if isinstance(scenarios, (list, tuple)) and len(scenarios) > 1:
                     base_list = list(scenarios)
                 else:
+                    parent = (
+                        scenarios[0]
+                        if scenarios and isinstance(scenarios, (list, tuple))
+                        else t.cast(Scenario, scenarios)
+                    )
                     if self.data_nodes_by_owner:
-                        owners = scenarios if isinstance(scenarios, (list, tuple)) else [scenarios]
-                        base_list = [d for owner in owners for d in (self.data_nodes_by_owner).get(owner.id, [])]
+                        base_list = t.cast(list, self.data_nodes_by_owner.get(parent.id, []))
                     else:
                         base_list = []
         else:
             base_list = t.cast(list, datanodes)
-        adapted_list = self.get_sorted_datanode_list(t.cast(list, base_list), sorts)
+        adapted_list = self.get_sorted_datanode_list(t.cast(list, base_list), sorts, parent=parent)
         return self.get_filtered_datanode_list(t.cast(list, adapted_list), filters)
 
     def data_node_adapter(
@@ -746,8 +792,12 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if isinstance(data, tuple):
             raise NotImplementedError
         if isinstance(data, list):
-            if data[2] and isinstance(t.cast(list, data[2])[0], (Cycle, Scenario, Sequence, DataNode)):
-                data[2] = self.get_sorted_datanode_list(t.cast(list, data[2]), sorts, False)
+            if (
+                data[2]
+                and (parent := t.cast(Scenario, t.cast(list, data[2])[0]))
+                and isinstance(parent, (Cycle, Scenario, Sequence, DataNode))
+            ):
+                data[2] = self.get_sorted_datanode_list(t.cast(list, data[2]), sorts, False, parent=parent)
             return data
         try:
             if hasattr(data, "id") and is_readable(data.id) and core_get(data.id) is not None:
@@ -762,14 +812,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     self.__do_datanodes_tree()
                 if self.data_nodes_by_owner:
                     if isinstance(data, Cycle):
+                        scenarios = (self.scenario_by_cycle or {}).get(data, [])
                         return [
                             data.id,
                             data.get_simple_label(),
                             self.get_sorted_datanode_list(
-                                self.data_nodes_by_owner.get(data.id, [])
-                                + (self.scenario_by_cycle or {}).get(data, []),
+                                self.data_nodes_by_owner.get(data.id, []) + scenarios,
                                 sorts,
                                 False,
+                                parent=scenarios[0] if scenarios else None,
                             ),
                             _EntityType.CYCLE.value,
                             False,
@@ -782,6 +833,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
                                 t.cast(list, self.data_nodes_by_owner.get(data.id, []) + list(data.sequences.values())),
                                 sorts,
                                 False,
+                                parent=data,
                             ),
                             _EntityType.SCENARIO.value,
                             data.is_primary,
@@ -791,7 +843,14 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             return [
                                 data.id,
                                 data.get_simple_label(),
-                                self.get_sorted_datanode_list(datanodes, sorts, False),
+                                self.get_sorted_datanode_list(
+                                    datanodes,
+                                    sorts,
+                                    False,
+                                    parent=t.cast(
+                                        Scenario, core_get(t.cast(ScenarioId, data.owner_id)) if data.owner_id else None
+                                    ),
+                                ),
                                 _EntityType.SEQUENCE.value,
                             ]
         except Exception as e:
@@ -924,9 +983,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if isinstance(entity, DataNode):
             try:
                 if lock:
-                    entity.lock_edit(self.gui._get_client_id())
+                    entity.lock_edit(self.gui._get_client_id()) # type: ignore
                 else:
-                    entity.unlock_edit(self.gui._get_client_id())
+                    entity.unlock_edit(self.gui._get_client_id()) # type: ignore
                 _GuiCoreContext.__assign_var(state, error_var, "")
             except Exception as e:
                 _GuiCoreContext.__assign_var(state, error_var, f"Error locking Data node. {e}")
@@ -982,7 +1041,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if id and (dn := core_get(id)) and isinstance(dn, DataNode):
             res = []
             for e in dn.edits:
-                job_id = e.get("job_id")
+                job_id = e.get(EDIT_JOB_ID_KEY)
                 job: t.Optional[Job] = None
                 if job_id:
                     if not (reason := is_readable(job_id)):
@@ -991,11 +1050,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         job = core_get(job_id)
                 res.append(
                     (
-                        e.get("timestamp"),
-                        job_id if job_id else e.get("writer_identifier", ""),
+                        e.get(EDIT_TIMESTAMP_KEY),
+                        job_id if job_id else e.get(EDIT_EDITOR_ID_KEY, ""),
                         f"Execution of task {job.task.get_simple_label()}."
                         if job and job.task
-                        else e.get("comment", ""),
+                        else e.get(EDIT_COMMENT_KEY, ""),
                     )
                 )
             return sorted(res, key=lambda r: r[0], reverse=True)
@@ -1003,10 +1062,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
 
     def __check_readable_editable(self, state: State, id: str, ent_type: str, var: t.Optional[str]):
         if not (reason := is_readable(t.cast(ScenarioId, id))):
-            _GuiCoreContext.__assign_var(state, var, f"{ent_type} {id} is not readable: {_get_reason(reason)}.")
+            _GuiCoreContext.__assign_var(state, var, f"{ent_type} {id} is not readable: {_get_reason(reason)}")
             return False
         if not (reason := is_editable(t.cast(ScenarioId, id))):
-            _GuiCoreContext.__assign_var(state, var, f"{ent_type} {id} is not editable: {_get_reason(reason)}.")
+            _GuiCoreContext.__assign_var(state, var, f"{ent_type} {id} is not editable: {_get_reason(reason)}")
             return False
         return True
 
@@ -1016,7 +1075,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
             return
         data = t.cast(dict, args[0])
-        error_var = payload.get("error_id")
+        error_var = data.get("error_id")
         entity_id = t.cast(str, data.get(_GuiCoreContext.__PROP_ENTITY_ID))
         if not self.__check_readable_editable(state, entity_id, "Data node", error_var):
             return
@@ -1032,9 +1091,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     else float(val)
                     if data.get("type") == "float"
                     else data.get("value"),
-                    comment=t.cast(dict, data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT)),
+                    editor_id=self.gui._get_client_id(), # type: ignore
+                    comment=t.cast(str, data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT)),
                 )
-                entity.unlock_edit(self.gui._get_client_id())
                 _GuiCoreContext.__assign_var(state, error_var, "")
             except Exception as e:
                 _GuiCoreContext.__assign_var(state, error_var, f"Error updating Data node value. {e}")
@@ -1118,7 +1177,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             "Error updating data node tabular value: type does not support at[] indexer.",
                         )
                 if new_data is not None:
-                    datanode.write(new_data, comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT))
+                    datanode.write(
+                        new_data,
+                        editor_id=self.gui._get_client_id(), # type: ignore
+                        comment=user_data.get(_GuiCoreContext.__PROP_ENTITY_COMMENT),
+                    )
                     _GuiCoreContext.__assign_var(state, error_var, "")
             except Exception as e:
                 _GuiCoreContext.__assign_var(state, error_var, f"Error updating data node tabular value. {e}")
@@ -1128,13 +1191,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.__lazy_start()
         if id and is_readable(t.cast(DataNodeId, id)) and (dn := core_get(id)) and isinstance(dn, DataNode):
             try:
-                return (
-                    (
-                        (k, f"{v}")
-                        for k, v in dn._get_user_properties().items()
-                        if k != _GuiCoreContext.__PROP_ENTITY_NAME
-                    ),
-                )
+                return [
+                    (k, f"{v}") for k, v in dn._get_user_properties().items() if k != _GuiCoreContext.__PROP_ENTITY_NAME
+                ]
             except Exception:
                 return None
         return None
@@ -1145,7 +1204,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_data_node_tabular_data(self, id: str):
         self.__lazy_start()
         if id and is_readable(t.cast(DataNodeId, id)) and (dn := core_get(id)) and isinstance(dn, DataNode):
-            if dn.is_ready_for_reading or (dn.edit_in_progress and dn.editor_id == self.gui._get_client_id()):
+            if dn.is_ready_for_reading or (dn.edit_in_progress and dn.editor_id == self.gui._get_client_id()): # type: ignore
                 try:
                     value = self.__read_tabular_data(dn)
                     if _GuiCoreDatanodeAdapter._is_tabular_data(dn, value):
@@ -1157,11 +1216,11 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_data_node_tabular_columns(self, id: str):
         self.__lazy_start()
         if id and is_readable(t.cast(DataNodeId, id)) and (dn := core_get(id)) and isinstance(dn, DataNode):
-            if dn.is_ready_for_reading or (dn.edit_in_progress and dn.editor_id == self.gui._get_client_id()):
+            if dn.is_ready_for_reading or (dn.edit_in_progress and dn.editor_id == self.gui._get_client_id()): # type: ignore
                 try:
                     value = self.__read_tabular_data(dn)
                     if _GuiCoreDatanodeAdapter._is_tabular_data(dn, value):
-                        return self.gui._tbl_cols(
+                        return self.gui._tbl_cols( # type: ignore
                             True, True, "{}", json.dumps({"data": "tabular_data"}), tabular_data=value
                         )
                 except Exception:
@@ -1171,9 +1230,9 @@ class _GuiCoreContext(CoreEventConsumerBase):
     def get_data_node_chart_config(self, id: str):
         self.__lazy_start()
         if id and is_readable(t.cast(DataNodeId, id)) and (dn := core_get(id)) and isinstance(dn, DataNode):
-            if dn.is_ready_for_reading or (dn.edit_in_progress and dn.editor_id == self.gui._get_client_id()):
+            if dn.is_ready_for_reading or (dn.edit_in_progress and dn.editor_id == self.gui._get_client_id()): # type: ignore
                 try:
-                    return self.gui._chart_conf(
+                    return self.gui._chart_conf( # type: ignore
                         True,
                         True,
                         "{}",
@@ -1189,7 +1248,7 @@ class _GuiCoreContext(CoreEventConsumerBase):
         args = payload.get("args")
         if args is None or not isinstance(args, list) or len(args) < 2:
             return
-        on_action_function = self.gui._get_user_function(args[1]) if args[1] else None
+        on_action_function = self.gui._get_user_function(args[1]) if args[1] else None # type: ignore
         if callable(on_action_function):
             try:
                 entity = (
@@ -1197,24 +1256,20 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if (reason := is_readable(t.cast(ScenarioId, args[0])))
                     else f"{args[0]} is not readable: {_get_reason(reason)}"
                 )
-                self.gui._call_function_with_state(
+                self.gui._call_function_with_state( # type: ignore
                     on_action_function,
                     [entity],
                 )
             except Exception as e:
-                if not self.gui._call_on_exception(args[1], e):
+                if not self.gui._call_on_exception(args[1], e): # type: ignore
                     _warn(f"dag.on_action(): Exception raised in '{args[1]}()' with '{args[0]}'", e)
         elif args[1]:
             _warn(f"dag.on_action(): Invalid function '{args[1]}()'.")
 
-    def get_creation_reason(self):
-        self.__lazy_start()
-        # make this dynamic
-        # return "" if (reason := can_create()) else f"Cannot create scenario: {_get_reason(reason)}"
-        return ""
-
     def on_file_action(self, state: State, id: str, payload: t.Dict[str, t.Any]):
         args = t.cast(list, payload.get("args"))
+        if args is None or not isinstance(args, list) or len(args) < 1 or not isinstance(args[0], dict):
+            return
         act_payload = t.cast(t.Dict[str, str], args[0])
         dn_id = t.cast(DataNodeId, act_payload.get("id"))
         error_id = act_payload.get("error_id", "")
@@ -1222,11 +1277,10 @@ class _GuiCoreContext(CoreEventConsumerBase):
             try:
                 dn = t.cast(_FileDataNodeMixin, core_get(dn_id))
                 if act_payload.get("action") == "export":
-                    path = dn._get_downloadable_path()
-                    if path:
-                        self.gui._download(Path(path), dn_id)
+                    if reason := dn.is_downloadable():
+                        path = dn._get_downloadable_path()
+                        self.gui._download(Path(path), dn_id) # type: ignore
                     else:
-                        reason = dn.is_downloadable()
                         state.assign(
                             error_id,
                             "Data unavailable: "
@@ -1234,11 +1288,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
                         )
                 else:
                     checker_name = act_payload.get("upload_check")
-                    checker = self.gui._get_user_function(checker_name) if checker_name else None
+                    checker = self.gui._get_user_function(checker_name) if checker_name else None # type: ignore
                     if not (
                         reason := dn._upload(
                             act_payload.get("path", ""),
                             t.cast(t.Callable[[str, t.Any], bool], checker) if callable(checker) else None,
+                            editor_id=self.gui._get_client_id(), # type: ignore
+                            comment=None,
                         )
                     ):
                         state.assign(error_id, f"Data unavailable: {reason.reasons}")
@@ -1247,6 +1303,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
                 state.assign(error_id, f"Data node download error: {e}")
         else:
             state.assign(error_id, reason.reasons)
+
+    def _auth_listener(self, state: State, client_id: t.Optional[str], payload: t.Dict[str, t.Any]):
+        self.gui._broadcast( # type: ignore
+            _GuiCoreContext._AUTH_CHANGED_NAME,
+            payload.get("override", "")
+            if (reason := can_create())
+            else f"Cannot create scenario: {_get_reason(reason)}",
+            client_id,
+        )
 
 
 def _get_reason(reason: t.Union[bool, ReasonCollection]):
