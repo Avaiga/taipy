@@ -727,10 +727,10 @@ const Chart = (props: ChartProp) => {
             if (idx == 0) {
                 baseDataPl = ret;
             }
-            return ret as ExtendedPlotData;
+            return ret;
         });
         if (changed) {
-            lastDataPl.current = newDataPl;
+            lastDataPl.current = newDataPl as ExtendedPlotData[];
         }
         return lastDataPl.current;
     }, [props.figure, selected, data, additionalDatas, config, dataKeys, animationData]);
