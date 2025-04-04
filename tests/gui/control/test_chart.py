@@ -226,7 +226,6 @@ def test_chart_none_data(gui: Gui, helpers):
     expected_list = [
         "<Chart",
         "data={_TpD_tpec_TpExPr_data_TPMDL_0}",
-        'dataVarNames=""',
         'defaultConfig="{&quot;traces&quot;: []}"',
         'libClassName="taipy-chart"',
         'updateVarName="_TpD_tpec_TpExPr_data_TPMDL_0"',
