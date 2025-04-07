@@ -18,6 +18,7 @@ import pandas as pd
 import pytest
 
 from taipy import Scope
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.excel import ExcelDataNode
 from taipy.core.exceptions.exceptions import (
     ExposedTypeLengthMismatch,
@@ -62,9 +63,11 @@ custom_pandas_numpy_exposed_type_dict = {"Sheet1": "pandas", "Sheet2": "numpy"}
 
 
 def test_raise_no_data_with_header():
+    not_existing_excel = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx"})
+    assert not_existing_excel.read() is None
     with pytest.raises(NoData):
-        not_existing_excel = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx"})
-        assert not_existing_excel.read() is None
+        _DataManagerFactory._build_manager()._read(not_existing_excel)
+    with pytest.raises(NoData):
         not_existing_excel.read_or_raise()
 
 
@@ -79,12 +82,10 @@ def test_read_empty_excel_with_header():
 
 
 def test_raise_no_data_without_header():
+    not_existing_excel = ExcelDataNode("foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx", "has_header": False})
+    assert not_existing_excel.read() is None
     with pytest.raises(NoData):
-        not_existing_excel = ExcelDataNode(
-            "foo", Scope.SCENARIO, properties={"path": "WRONG.xlsx", "has_header": False}
-        )
-        assert not_existing_excel.read() is None
-        not_existing_excel.read_or_raise()
+        _DataManagerFactory._build_manager()._read(not_existing_excel)
 
 
 def test_read_empty_excel_without_header():
@@ -103,9 +104,9 @@ def test_read_multi_sheet_with_header_no_data():
         Scope.SCENARIO,
         properties={"path": "WRONG.xlsx", "sheet_name": ["sheet_name_1", "sheet_name_2"]},
     )
+    assert not_existing_excel.read() is None
     with pytest.raises(NoData):
-        assert not_existing_excel.read() is None
-        not_existing_excel.read_or_raise()
+        _DataManagerFactory._build_manager()._read(not_existing_excel)
 
 
 def test_read_multi_sheet_without_header_no_data():
@@ -114,9 +115,9 @@ def test_read_multi_sheet_without_header_no_data():
         Scope.SCENARIO,
         properties={"path": "WRONG.xlsx", "has_header": False, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
     )
+    assert not_existing_excel.read() is None
     with pytest.raises(NoData):
-        assert not_existing_excel.read() is None
-        not_existing_excel.read_or_raise()
+        _DataManagerFactory._build_manager()._read(not_existing_excel)
 
 
 ########################## SINGLE SHEET ##########################

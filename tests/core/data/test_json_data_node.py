@@ -162,8 +162,10 @@ class TestJSONDataNode:
 
     def test_read_non_existing_json(self):
         not_existing_json = JSONDataNode("foo", Scope.SCENARIO, properties={"default_path": "WRONG.json"})
+        assert not_existing_json.read() is None
         with pytest.raises(NoData):
-            assert not_existing_json.read() is None
+            _DataManagerFactory._build_manager()._read(not_existing_json)
+        with pytest.raises(NoData):
             not_existing_json.read_or_raise()
 
     def test_read(self):
