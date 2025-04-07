@@ -62,8 +62,7 @@ def test_file_download_with_spaces_path_md(gui: Gui, test_client, helpers):
         md_string = "<|{content}|file_download|>"
         expected_list = [
             "<FileDownload",
-            'defaultContent="/taipy-content/taipyStatic',
-            'test%20file%20with%20spaces.txt"',
+            'defaultContent="/taipy-content/taipyStatic0/test%20file%20with%20spaces.txt"',
         ]
         helpers.test_control_md(gui, md_string, expected_list)
     finally:
