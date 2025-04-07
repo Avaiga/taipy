@@ -54,7 +54,7 @@ class _TaskFunctionWrapper:
 
     def _read_inputs(self, inputs: List[DataNode]) -> List[Any]:
         data_manager = _DataManagerFactory._build_manager()
-        return [data_manager._get(dn.id).read_or_raise() for dn in inputs]
+        return [data_manager._read(data_manager._get(dn.id)) for dn in inputs]
 
     def _write_data(self, outputs: List[DataNode], results, job_id: JobId):
         data_manager = _DataManagerFactory._build_manager()

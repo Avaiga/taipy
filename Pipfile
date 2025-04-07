@@ -38,6 +38,7 @@ charset-normalizer = "==3.3.2"
 numpy = "<2.0.0"
 
 [dev-packages]
+fastparquet = "*"
 freezegun = "*"
 ipython = "*"
 ipykernel = "*"

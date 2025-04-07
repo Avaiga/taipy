@@ -12,7 +12,9 @@
 import os
 import pathlib
 
+import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 
 from taipy import Scope
 from taipy.common.config import Config
@@ -23,7 +25,7 @@ from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
-from taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
+from taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound, NoData
 from taipy.core.reason import EntityDoesNotExist, NotGlobalScope, WrongConfigType
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
@@ -494,6 +496,67 @@ class TestDataManager:
         assert len(dm._get_all()) == 2
 
         dm._delete_all()
+
+    @pytest.mark.parametrize(
+        "storage_type,path",
+        [
+            ("pickle", "pickle_file_path"),
+            ("csv", "csv_file"),
+            ("excel", "excel_file"),
+            ("json", "json_file"),
+            ("parquet", "parquet_file_path"),
+        ],
+    )
+    def test_read(self, storage_type, path, request):
+        path = request.getfixturevalue(path)
+
+        non_exist_dn_config = Config.configure_data_node(id="d1", storage_type=storage_type, path="non_exist_path")
+        dn_config = Config.configure_data_node(id="d2", storage_type=storage_type, path=path)
+        dn_1 = _DataManager._create(non_exist_dn_config, None, None)
+        dn_2 = _DataManager._create(dn_config, None, None)
+
+        with pytest.raises(NoData):
+            _DataManager._read(dn_1)
+
+        assert dn_2._read() is not None
+
+    @pytest.mark.parametrize(
+        "storage_type,path",
+        [
+            ("pickle", "pickle_file_path"),
+            ("csv", "csv_file"),
+            ("parquet", "parquet_file_path"),
+        ],
+    )
+    def test_write(self, storage_type, path, request):
+        path = request.getfixturevalue(path)
+
+        dn_config = Config.configure_data_node(id="d2", storage_type=storage_type, path=path)
+        dn = _DataManager._create(dn_config, None, None)
+
+        new_data = pd.DataFrame([{"a": 11, "b": 12, "c": 13}, {"a": 14, "b": 15, "c": 16}])
+
+        _DataManager._write(dn, new_data)
+        assert_frame_equal(dn._read(), new_data)
+
+    @pytest.mark.parametrize(
+        "storage_type,path",
+        [
+            ("csv", "csv_file"),
+            ("parquet", "parquet_file_path"),
+        ],
+    )
+    def test_append(self, storage_type, path, request):
+        path = request.getfixturevalue(path)
+
+        dn_config = Config.configure_data_node(id="d2", storage_type=storage_type, path=path)
+        dn = _DataManager._create(dn_config, None, None)
+
+        old_data = _DataManager._read(dn)
+        new_data = pd.DataFrame([{"a": 11, "b": 12, "c": 13}, {"a": 14, "b": 15, "c": 16}])
+
+        _DataManager._append(dn, new_data)
+        assert_frame_equal(dn._read(), pd.concat([old_data, new_data], ignore_index=True))
 
     @pytest.mark.parametrize(
         "storage_type,path",
