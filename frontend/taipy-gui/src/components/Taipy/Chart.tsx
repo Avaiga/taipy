@@ -26,6 +26,7 @@ import { useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
+import isEqual from "lodash/isEqual";
 import merge from "lodash/merge";
 import { nanoid } from "nanoid";
 import {
@@ -65,8 +66,6 @@ import {
 import { ColumnDesc } from "./tableUtils";
 import { getComponentClassName } from "./TaipyStyle";
 import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
-
-import { isEqual } from "lodash";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -351,7 +350,7 @@ const getData = (
     idx: number,
 ) => (idx === 0 ? data : idx <= additionalDatas.length ? additionalDatas[idx - 1] : undefined);
 
-const useDeepCompareMemoize = (value: Data[] | number[] | Frame) => {
+const useDeepCompareMemoize = <T,>(value: T): T => {
     const ref = useRef(value);
     if (!isEqual(value, ref.current)) {
         ref.current = value;
@@ -569,16 +568,11 @@ const Chart = (props: ChartProp) => {
         props.figure,
     ]);
 
-    const animationDataVarName = useMemo(() => {
-        if (updateVars) {
-            return getUpdateVar(updateVars, "animationData");
-        }
-    }, [updateVars]);
-
     useEffect(() => {
         if (animationData?.__taipy_refresh) {
-            dispatch(createRequestChartUpdateAction(
-                animationDataVarName,
+            const animationDataVar = getUpdateVar(updateVars || "", "animationData")
+            animationDataVar && dispatch(createRequestChartUpdateAction(
+                animationDataVar,
                 id,
                 module,
                 [],
@@ -586,19 +580,19 @@ const Chart = (props: ChartProp) => {
                 undefined,
             ));
         }
-    }, [animationData, animationData?.__taipy_refresh, dispatch, id, module, animationDataVarName]);
+    }, [animationData?.__taipy_refresh, dispatch, id, module, updateVars]);
 
     const memoizedToFrameData = useDeepCompareMemoize(toFrame.data);
     const memoizedToFrameTraces = useDeepCompareMemoize(toFrame.traces);
     const memoizedToFrame = useDeepCompareMemoize(toFrame);
 
     const runAnimation = useCallback(async () => {
-        if (plotRef.current && plotlyRef.current && memoizedToFrameData && (memoizedToFrameTraces as number[]).length > 0) {
+        if (plotRef.current && plotlyRef.current && memoizedToFrameData && memoizedToFrameTraces.length > 0) {
             await plotlyRef.current.animate(
                 plotRef.current as unknown as PlotlyHTMLElement,
                 {
-                    data: memoizedToFrameData as Data[],
-                    traces: memoizedToFrameTraces as number[],
+                    data: memoizedToFrameData,
+                    traces: memoizedToFrameTraces,
                     layout: layout,
                 },
                 DEFAULT_ANIMATION_SETTINGS,
@@ -935,7 +929,7 @@ const Chart = (props: ChartProp) => {
         });
 
         if (memoizedToFrameData !== toFramesData) {
-            setFromFrame({ ...memoizedToFrame as Frame, name: "from" });
+            setFromFrame({ ...memoizedToFrame, name: "from" });
             setToFrame({
                 name: "to",
                 data: toFramesData,
@@ -971,7 +965,7 @@ const Chart = (props: ChartProp) => {
         const plotElement = plotRef.current as unknown as PlotlyHTMLElement;
         if (!plotElement || !plotElement.data) return;
 
-        const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
+        const timer = setTimeout(() => {
             if (plotRef.current) {
                 runAnimation().catch(console.error);
             }
