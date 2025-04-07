@@ -10,10 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from typing import Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
 from taipy.common.config import Config
 from taipy.common.config._config import _Config
+from taipy.core.job.job_id import JobId
 
 from .._manager._manager import _Manager
 from .._repository._abstract_repository import _AbstractRepository
@@ -21,7 +22,7 @@ from .._version._version_mixin import _VersionMixin
 from ..common.scope import Scope
 from ..config.data_node_config import DataNodeConfig
 from ..cycle.cycle_id import CycleId
-from ..exceptions.exceptions import InvalidDataNodeType
+from ..exceptions.exceptions import InvalidDataNodeType, NoData
 from ..notification import Event, EventEntityType, EventOperation, Notifier, _make_event
 from ..reason import EntityDoesNotExist, NotGlobalScope, ReasonCollection, WrongConfigType
 from ..reason.reason import DataIsNotDuplicable
@@ -124,6 +125,45 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         """
         filters = cls._build_filters_with_version(version_number)
         return cls._repository._load_all(filters)
+
+    @classmethod
+    def _read(cls, data_node: DataNode) -> Any:
+        """Read the data referenced by this data node.
+
+        Returns:
+            The data referenced by this data node.
+
+        Raises:
+            NoData^: If the data has not been written yet.
+        """
+        if not data_node.last_edit_date:
+            raise NoData(f"Data node {data_node.id} from config {data_node.config_id} has not been written yet.")
+
+        return data_node._read()
+
+    @classmethod
+    def _append(
+        cls, data_node: DataNode, data, editor_id: Optional[str] = None, comment: Optional[str] = None, **kwargs: Any
+    ):
+        data_node._append(data)
+        data_node.track_edit(editor_id=editor_id, comment=comment, **kwargs)
+        data_node.unlock_edit()
+        cls._update(data_node)
+
+    @classmethod
+    def _write(
+        cls,
+        data_node: DataNode,
+        data,
+        job_id: Optional[JobId] = None,
+        editor_id: Optional[str] = None,
+        comment: Optional[str] = None,
+        **kwargs: Any,
+    ):
+        data_node._write(data)
+        data_node.track_edit(job_id=job_id, editor_id=editor_id, comment=comment, **kwargs)
+        data_node.unlock_edit()
+        cls._update(data_node)
 
     @classmethod
     def _clean_generated_file(cls, data_node: DataNode) -> None:
