@@ -980,7 +980,7 @@ const Chart = (props: ChartProp) => {
 
     return render ? (
         <Tooltip title={hover || ""}>
-            <Box id={"graph"} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
+            <Box id={props.id} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                     {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
                         <Plot
