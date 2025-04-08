@@ -2,7 +2,7 @@ import { Socket } from "socket.io-client";
 import { nanoid } from 'nanoid'
 
 export const TAIPY_CLIENT_ID = "TaipyClientId";
-export const TAIPY_APP_ID = "TaipyAppId";
+export const TAIPY_GUI_ADDR = "TaipyGuiAddr";
 
 export type WsMessageType =
     | "A"
@@ -20,7 +20,7 @@ export type WsMessageType =
     | "ACK"
     | "GMC"
     | "GDT"
-    | "AID"
+    | "GA"
     | "GR"
     | "FV"
     | "BC"

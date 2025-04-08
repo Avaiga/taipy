@@ -25,8 +25,8 @@ export class TaipyWsAdapter extends WsAdapter {
     initWsMessageTypes: string[];
     constructor() {
         super();
-        this.supportedMessageTypes = ["MU", "ID", "GMC", "GDT", "AID", "GR", "AL", "ACK"];
-        this.initWsMessageTypes = ["ID", "AID", "GMC"];
+        this.supportedMessageTypes = ["MU", "ID", "GMC", "GDT", "GA", "GR", "AL", "ACK"];
+        this.initWsMessageTypes = ["ID", "GA", "GMC"];
     }
     handleWsMessage(message: WsMessage, taipyApp: TaipyApp): boolean {
         if (message.type) {
@@ -86,13 +86,13 @@ export class TaipyWsAdapter extends WsAdapter {
                     taipyApp.functionData = new DataManager(functionData);
                     taipyApp.onInitEvent();
                 }
-            } else if (message.type === "AID") {
+            } else if (message.type === "GA") {
                 const payload = message.payload as Record<string, unknown>;
                 if (payload.name === "reconnect") {
                     taipyApp.init();
                     return true;
                 }
-                taipyApp.appId = payload.id as string;
+                taipyApp.guiAddr = payload.id as string;
             } else if (message.type === "GR") {
                 const payload = message.payload as [string, string][];
                 taipyApp.routes = payload;
@@ -114,7 +114,7 @@ export class TaipyWsAdapter extends WsAdapter {
         if (
             this.initWsMessageTypes.includes(message.type) &&
             taipyApp.clientId !== "" &&
-            taipyApp.appId !== "" &&
+            taipyApp.guiAddr !== "" &&
             taipyApp.context !== "" &&
             taipyApp.routes !== undefined
         ) {
