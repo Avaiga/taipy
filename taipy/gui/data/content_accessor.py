@@ -113,7 +113,7 @@ class _ContentAccessor:
             self.__content_paths[url_path] = dir_path
             file_url = f"{url_path}/{path.name}"
             self.__url_is_image[file_url] = image
-            return (urllib.parse.quote_plus(file_url, safe="/"),)
+            return (urllib.parse.quote(file_url, safe="/"),)
         elif _has_magic_module:
             try:
                 mime = magic.from_buffer(value, mime=True)
