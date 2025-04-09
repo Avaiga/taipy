@@ -11,16 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, {
-    CSSProperties,
-    lazy,
-    Suspense,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { CSSProperties, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -73,7 +64,7 @@ interface PlotlyObject {
     animate: (
         root: Root,
         frameOrGroupNameOrFrameList?: string | string[] | Partial<Frame> | Array<Partial<Frame>>,
-        opts?: Partial<AnimationOpts>,
+        opts?: Partial<AnimationOpts>
     ) => Promise<void>;
 }
 
@@ -146,11 +137,11 @@ export const getColNameFromIndexed = (colName: string): string => {
     return colName;
 };
 
-export const getValue = <T, >(
+export const getValue = <T,>(
     values: TraceValueType | undefined,
     arr: T[],
     idx: number,
-    returnUndefined = false,
+    returnUndefined = false
 ): (string | number)[] | undefined => {
     const value = getValueFromCol(values, getArrayValue(arr, idx) as unknown as string);
     if (!returnUndefined || value.length) {
@@ -188,30 +179,30 @@ const getDecimatorsPayload = (
     modes: string[],
     columns: Record<string, ColumnDesc>,
     traces: string[][],
-    relayoutData?: PlotRelayoutEvent,
+    relayoutData?: PlotRelayoutEvent
 ) => {
     return decimators
         ? {
-            width: plotDiv?.clientWidth,
-            height: plotDiv?.clientHeight,
-            decimators: decimators.map((d, i) =>
-                d
-                    ? {
-                        decimator: d,
-                        xAxis: getAxis(traces, i, columns, 0),
-                        yAxis: getAxis(traces, i, columns, 1),
-                        zAxis: getAxis(traces, i, columns, 2),
-                        chartMode: modes[i],
-                    }
-                    : {
-                        xAxis: getAxis(traces, i, columns, 0),
-                        yAxis: getAxis(traces, i, columns, 1),
-                        zAxis: getAxis(traces, i, columns, 2),
-                        chartMode: modes[i],
-                    },
-            ),
-            relayoutData: relayoutData,
-        }
+              width: plotDiv?.clientWidth,
+              height: plotDiv?.clientHeight,
+              decimators: decimators.map((d, i) =>
+                  d
+                      ? {
+                            decimator: d,
+                            xAxis: getAxis(traces, i, columns, 0),
+                            yAxis: getAxis(traces, i, columns, 1),
+                            zAxis: getAxis(traces, i, columns, 2),
+                            chartMode: modes[i],
+                        }
+                      : {
+                            xAxis: getAxis(traces, i, columns, 0),
+                            yAxis: getAxis(traces, i, columns, 1),
+                            zAxis: getAxis(traces, i, columns, 2),
+                            chartMode: modes[i],
+                        }
+              ),
+              relayoutData: relayoutData,
+          }
         : undefined;
 };
 
@@ -304,7 +295,7 @@ export const TaipyPlotlyButtons: ModeBarButtonAny[] = [
             width: 24,
             path: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
         },
-        click: function(gd: HTMLElement, evt: Event) {
+        click: function (gd: HTMLElement, evt: Event) {
             const div = gd.querySelector("div.svg-container") as HTMLDivElement;
             if (!div) {
                 return;
@@ -347,7 +338,7 @@ const getDataVarName = (updateVarName: string | undefined, dataVarNames: string[
 const getData = (
     data: Record<string, TraceValueType>,
     additionalDatas: Array<Record<string, TraceValueType>>,
-    idx: number,
+    idx: number
 ) => (idx === 0 ? data : idx <= additionalDatas.length ? additionalDatas[idx - 1] : undefined);
 
 const useDeepCompareMemoize = <T,>(value: T): T => {
@@ -376,15 +367,8 @@ const Chart = (props: ChartProp) => {
     const plotRef = useRef<HTMLDivElement | null>(null);
     const plotlyRef = useRef<PlotlyObject | null>(null);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
-    const [fromFrame, setFromFrame] = useState<Frame>({
-        name: "from",
-        data: [],
-        traces: [],
-        layout: {},
-        group: "",
-        baseframe: "",
-    });
 
+    // animation
     const [toFrame, setToFrame] = useState<Frame>({
         name: "to",
         data: [],
@@ -393,6 +377,7 @@ const Chart = (props: ChartProp) => {
         group: "",
         baseframe: "",
     });
+
     const lastDataPl = useRef<ExtendedPlotData[]>([]);
     const theme = useTheme();
     const module = useModule();
@@ -407,7 +392,7 @@ const Chart = (props: ChartProp) => {
     const oldAdditionalDatas = useRef<Array<Record<string, TraceValueType>>>([]);
     const additionalDatas = useMemo(() => {
         const newAdditionalDatas = dataVarNames.map(
-            (_, idx) => (props as unknown as Record<string, Record<string, TraceValueType>>)[`data${idx + 1}`],
+            (_, idx) => (props as unknown as Record<string, Record<string, TraceValueType>>)[`data${idx + 1}`]
         );
         if (newAdditionalDatas.length !== oldAdditionalDatas.current.length) {
             oldAdditionalDatas.current = newAdditionalDatas;
@@ -419,7 +404,7 @@ const Chart = (props: ChartProp) => {
 
     const refresh = useMemo(
         () => (isDataRefresh(data) || additionalDatas.some((d) => isDataRefresh(d)) ? nanoid() : false),
-        [data, additionalDatas],
+        [data, additionalDatas]
     );
 
     // get props.selected[i] values
@@ -484,10 +469,10 @@ const Chart = (props: ChartProp) => {
                                         plotRef.current,
                                         config.modes,
                                         columns,
-                                        config.traces,
-                                    ),
-                                ),
-                            ),
+                                        config.traces
+                                    )
+                                )
+                            )
                         );
                     }
                     return dtKey;
@@ -570,15 +555,9 @@ const Chart = (props: ChartProp) => {
 
     useEffect(() => {
         if (animationData?.__taipy_refresh) {
-            const animationDataVar = getUpdateVar(updateVars || "", "animationData")
-            animationDataVar && dispatch(createRequestChartUpdateAction(
-                animationDataVar,
-                id,
-                module,
-                [],
-                "",
-                undefined,
-            ));
+            const animationDataVar = getUpdateVar(updateVars || "", "animationData");
+            animationDataVar &&
+                dispatch(createRequestChartUpdateAction(animationDataVar, id, module, [], "", undefined));
         }
     }, [animationData?.__taipy_refresh, dispatch, id, module, updateVars]);
 
@@ -595,7 +574,7 @@ const Chart = (props: ChartProp) => {
                     traces: memoizedToFrameTraces,
                     layout: layout,
                 },
-                DEFAULT_ANIMATION_SETTINGS,
+                DEFAULT_ANIMATION_SETTINGS
             );
         }
     }, [layout, memoizedToFrameData, memoizedToFrameTraces]);
@@ -605,7 +584,7 @@ const Chart = (props: ChartProp) => {
             height === undefined
                 ? ({ ...defaultStyle, width: width } as CSSProperties)
                 : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
-        [width, height],
+        [width, height]
     );
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
@@ -628,7 +607,7 @@ const Chart = (props: ChartProp) => {
             }
             const dtKey = getDataKey(
                 idx < config.columns?.length ? config.columns[idx] : undefined,
-                config.decimators,
+                config.decimators
             )[1];
             if (!dataKey.startsWith(dtKey)) {
                 return currentData;
@@ -712,7 +691,10 @@ const Chart = (props: ChartProp) => {
             ret.line = getArrayValue(config.lines, idx);
             ret.textposition = getArrayValue(config.textAnchors, idx);
             if (animationData) {
-                ret.animateTo = animationData[Object.keys(animationData).find((e) => trace.includes(e)) as keyof typeof animationData];
+                ret.animateTo =
+                    animationData[
+                        Object.keys(animationData).find((e) => trace.includes(e)) as keyof typeof animationData
+                    ];
             }
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {
@@ -758,7 +740,7 @@ const Chart = (props: ChartProp) => {
             if (config.decimators && !config.types.includes("scatter3d")) {
                 const [backCols, dtKeyBase] = getDataKey(
                     config.columns?.length ? config.columns[0] : undefined,
-                    config.decimators,
+                    config.decimators
                 );
                 const dtKey = `${dtKeyBase}--${Object.entries(eventData)
                     .map(([k, v]) => `${k}=${v}`)
@@ -782,10 +764,10 @@ const Chart = (props: ChartProp) => {
                                         config.modes,
                                         config.columns?.length ? config.columns[0] : {},
                                         config.traces,
-                                        eventData,
-                                    ),
-                                ),
-                            ),
+                                        eventData
+                                    )
+                                )
+                            )
                         );
                         return [dtKey, ...oldDataKeys.slice(1)];
                     }
@@ -804,7 +786,7 @@ const Chart = (props: ChartProp) => {
             config.decimators,
             updateVarName,
             module,
-        ],
+        ]
     );
 
     const clickHandler = useCallback(
@@ -833,22 +815,25 @@ const Chart = (props: ChartProp) => {
                         y: map ? undefined : transform(yaxis, "top")(evt?.clientY),
                         lon: map ? xaxis.p2c() : undefined,
                         x: map ? undefined : transform(xaxis, "left")(evt?.clientX),
-                    }),
-                ),
+                    })
+                )
             );
         },
-        [dispatch, module, id, onClick],
+        [dispatch, module, id, onClick]
     );
 
-    const onInitialized = useCallback((figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
-        onClick && graphDiv.addEventListener("click", clickHandler);
-        plotRef.current = graphDiv as HTMLDivElement;
-        plotlyRef.current = window.Plotly as unknown as PlotlyObject;
+    const onInitialized = useCallback(
+        (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
+            onClick && graphDiv.addEventListener("click", clickHandler);
+            plotRef.current = graphDiv as HTMLDivElement;
+            plotlyRef.current = window.Plotly as unknown as PlotlyObject;
 
-        if (animationData) {
-            runAnimation().catch(console.error);
-        }
-    }, [onClick, clickHandler, animationData, runAnimation]);
+            if (animationData) {
+                runAnimation().catch(console.error);
+            }
+        },
+        [onClick, clickHandler, animationData, runAnimation]
+    );
 
     const getRealIndex = useCallback(
         (dataIdx: number, index?: number) => {
@@ -861,11 +846,11 @@ const Chart = (props: ChartProp) => {
                 ? props.figure
                     ? index
                     : lData[dtKey].tp_index
-                        ? (lData[dtKey].tp_index[index] as number)
-                        : index
+                    ? (lData[dtKey].tp_index[index] as number)
+                    : index
                 : 0;
         },
-        [data, additionalDatas, dataKeys, props.figure],
+        [data, additionalDatas, dataKeys, props.figure]
     );
 
     const onSelect = useCallback(
@@ -892,8 +877,8 @@ const Chart = (props: ChartProp) => {
                                 traces,
                                 module,
                                 props.onChange,
-                                propagate,
-                            ),
+                                propagate
+                            )
                         );
                         return;
                     }
@@ -910,47 +895,48 @@ const Chart = (props: ChartProp) => {
                 }
             }
         },
-        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module],
+        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module]
     );
 
     useEffect(() => {
-        if (!dataPl.length || !animationData) return;
+        if (!dataPl.length || !animationData) {
+            return;
+        }
 
-        const toFramesData = dataPl.map((trace) => {
-            const isYaxisAnimated = Object.hasOwn(animationData, (trace as ScatterData).name);
-            const isXaxisAnimated = (trace as ExtendedPlotData).meta?.xAxisName &&
-                Object.hasOwn(animationData, (trace as ExtendedPlotData).meta?.xAxisName as PropertyKey);
+        const toFramesData = dataPl
+            .map((trace) => {
+                const yName = trace.name;
+                const isYaxisAnimated = yName && !!animationData[yName];
 
-            return {
-                name: (trace as ScatterData).name,
-                x: isXaxisAnimated ? animationData[(trace as ExtendedPlotData).meta?.xAxisName as keyof typeof animationData] ?? [] : (trace as ScatterData).x,
-                y: isYaxisAnimated ? animationData[(trace as ScatterData).name as keyof typeof animationData] ?? [] : (trace as ScatterData).y,
-            };
-        });
+                const xName = trace.meta?.xAxisName;
+                const isXaxisAnimated = xName && !!animationData[xName];
 
-        if (memoizedToFrameData !== toFramesData) {
-            setFromFrame({ ...memoizedToFrame, name: "from" });
+                if (!isYaxisAnimated && !isXaxisAnimated) {
+                    return undefined;
+                }
+
+                return {
+                    name: yName,
+                    x: isXaxisAnimated ? animationData[xName] : trace.x,
+                    y: isYaxisAnimated ? animationData[yName] : trace.y,
+                };
+            })
+            .filter((t) => t);
+
+        if (toFramesData.length && !isEqual(memoizedToFrameData, toFramesData)) {
             setToFrame({
                 name: "to",
-                data: toFramesData,
+                data: toFramesData as Data[],
                 traces: dataPl.map((_, idx) => idx),
                 layout: {},
                 group: "",
-                baseframe: "from",
+                baseframe: "",
             });
         }
     }, [dataPl, animationData, memoizedToFrameData, memoizedToFrame]);
 
     useEffect(() => {
         if (!plotRef.current || !toFrame.data?.length) {
-            setFromFrame({
-                name: "from",
-                data: [],
-                traces: [],
-                layout: {},
-                group: "",
-                baseframe: "",
-            });
             setToFrame({
                 name: "to",
                 data: [],
@@ -963,7 +949,9 @@ const Chart = (props: ChartProp) => {
         }
 
         const plotElement = plotRef.current as unknown as PlotlyHTMLElement;
-        if (!plotElement || !plotElement.data) return;
+        if (!plotElement?.data) {
+            return;
+        }
 
         const timer = setTimeout(() => {
             if (plotRef.current) {
@@ -1000,7 +988,6 @@ const Chart = (props: ChartProp) => {
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}
-                            frames={[fromFrame, toFrame]}
                             onSelected={isOnClick(config.types) ? undefined : onSelect}
                             onDeselect={isOnClick(config.types) ? undefined : onSelect}
                             onClick={isOnClick(config.types) ? onSelect : undefined}
