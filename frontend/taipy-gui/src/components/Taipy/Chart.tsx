@@ -34,7 +34,6 @@ import {
     PlotRelayoutEvent,
     PlotSelectionEvent,
     Root,
-    ScatterData,
     ScatterLine,
 } from "plotly.js";
 import { Figure } from "react-plotly.js";
