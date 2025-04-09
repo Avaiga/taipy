@@ -38,7 +38,6 @@ SKIP_ITEMS = {
         "build_taipy",
         "doc",
         "frontend",
-        "readme_img",
         "tests",
         "tools",
         ".git",
