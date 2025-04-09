@@ -32,7 +32,7 @@ class JsonAdapter(ABC):
         _TaipyJsonAdapter().register(self)
 
     @abstractmethod
-    def parse(self, o) -> t.Union[t.Any, None]:
+    def parse(self, o) -> t.Optional[t.Any]:
         return None
 
 

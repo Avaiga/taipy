@@ -23,7 +23,7 @@ with open(version_path) as version_file:
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-test_requirements = ["pytest>=3.8"]
+test_requirements = ["pytest>=6.0"]
 
 setup(
     packages=find_namespace_packages(where=".") + find_packages(include=["taipy"]),
