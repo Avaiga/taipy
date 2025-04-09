@@ -5,7 +5,7 @@ import { TaipyApp } from "./app";
 export const initSocket = (socket: Socket, taipyApp: TaipyApp) => {
     socket.on("connect", () => {
         taipyApp.onWsMessageEvent("connect", null);
-        if (taipyApp.clientId === "" || taipyApp.appId === "") {
+        if (taipyApp.clientId === "" || taipyApp.guiAddr === "") {
             taipyApp.init();
         }
     });
@@ -13,7 +13,7 @@ export const initSocket = (socket: Socket, taipyApp: TaipyApp) => {
     socket.io.on("reconnect", () => {
         taipyApp.onWsMessageEvent("reconnect", null);
         console.log("WebSocket reconnected");
-        taipyApp.sendWsMessage("AID", "reconnect", taipyApp.appId);
+        taipyApp.sendWsMessage("GA", "reconnect", taipyApp.guiAddr);
     });
     // try to reconnect on connect_error
     socket.on("connect_error", (err) => {

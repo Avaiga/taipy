@@ -704,10 +704,9 @@ class Gui:
                     payload.get("id", "") if isinstance(payload, dict) else str(payload)
                 )
                 client_id = res[0] if res[1] else None
-                if self._config.config.get("app_id", False):
-                    front_app_id = payload.get("app_id", None) if isinstance(payload, dict) else None
-                    if front_app_id is not None:
-                        self.__handle_ws_app_id({"name": message.get("name"), "payload": front_app_id})
+                front_gui_addr = payload.get("gui_addr", None) if isinstance(payload, dict) else None
+                if front_gui_addr is not None:
+                    self.__handle_ws_gui_addr({"name": message.get("name"), "payload": front_gui_addr})
             expected_client_id = client_id or message.get(Gui.__ARG_CLIENT_ID)
             self.__set_client_id_in_context(expected_client_id)
             g.ws_client_id = expected_client_id
@@ -732,8 +731,8 @@ class Gui:
                         self.__handle_ws_get_module_context(payload)
                     elif msg_type == _WsType.GET_DATA_TREE.value:
                         self.__handle_ws_get_data_tree()
-                    elif msg_type == _WsType.APP_ID.value:
-                        self.__handle_ws_app_id(message)
+                    elif msg_type == _WsType.GUI_ADDR.value:
+                        self.__handle_ws_gui_addr(message)
                     elif msg_type == _WsType.GET_ROUTES.value:
                         self.__handle_ws_get_routes()
                     elif msg_type == _WsType.LOCAL_STORAGE.value:
@@ -1341,18 +1340,18 @@ class Gui:
             send_back_only=True,
         )
 
-    def __handle_ws_app_id(self, message: t.Any):
+    def __handle_ws_gui_addr(self, message: t.Any):
         if not isinstance(message, dict):
             return
         name = message.get("name", "")
         payload = message.get("payload", "")
-        app_id = id(self)
-        if payload == app_id:
+        gui_addr = id(self)
+        if payload == gui_addr:
             return
         self.__send_ws(
             {
-                "type": _WsType.APP_ID.value,
-                "payload": {"name": name, "id": app_id},
+                "type": _WsType.GUI_ADDR.value,
+                "payload": {"name": name, "id": gui_addr},
             },
             send_back_only=True,
         )

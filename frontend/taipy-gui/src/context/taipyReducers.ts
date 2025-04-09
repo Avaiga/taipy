@@ -24,7 +24,7 @@ import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 import { changeFavicon, getLocalStorageValue, IdMessage, storeClientId } from "./utils";
-import { lightenPayload, sendWsMessage, TAIPY_APP_ID, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
+import { lightenPayload, sendWsMessage, TAIPY_GUI_ADDR, TAIPY_CLIENT_ID, WsMessage } from "./wsUtils";
 
 export enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -242,8 +242,8 @@ export const messageToAction = (message: WsMessage) => {
             changeFavicon((message.payload as Record<string, string>)?.value);
         } else if (message.type == "BC") {
             stackBroadcast((message as NamePayload).name, (message as NamePayload).payload.value);
-        } else if (message.type == "AID") {
-            checkAppId((message.payload as Record<string, string>).id);
+        } else if (message.type == "GA") {
+            checkGuiAddr((message.payload as Record<string, string>).id);
         }
     }
     return {} as TaipyBaseAction;
@@ -288,16 +288,19 @@ const initializeBroadcastManagement = (dispatch: Dispatch<TaipyBaseAction>) => {
     }, broadcast_timeout);
 };
 
-// App id
-const checkAppId = (appId: string) => {
-    if (!appId) {
+// Gui Address
+const checkGuiAddr = (guiAddr: string) => {
+    if (!guiAddr) {
         return;
     }
-    appId = `${appId}`;
-    const localAppId = getLocalStorageValue(TAIPY_APP_ID, "");
-    if (!localAppId || localAppId !== appId) {
-        localStorage && localStorage.setItem(TAIPY_APP_ID, appId);
-        localAppId && window.location.assign(getBaseURL());
+    guiAddr = `${guiAddr}`;
+    const localGuiAddr = getLocalStorageValue(TAIPY_GUI_ADDR, "");
+    if (!localGuiAddr || localGuiAddr !== guiAddr) {
+        localStorage && localStorage.setItem(TAIPY_GUI_ADDR, guiAddr);
+        if (localGuiAddr) {
+            console.info("Taipy GUI address changed, reloading the page");
+            window.location.assign(getBaseURL());
+        }
     }
 };
 
@@ -311,7 +314,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
             const id = getLocalStorageValue(TAIPY_CLIENT_ID, "");
             const payload: Record<string, unknown> = { id };
             if (lastReasonServer) {
-                payload["app_id"] = Number(getLocalStorageValue(TAIPY_APP_ID, ""));
+                payload["gui_addr"] = Number(getLocalStorageValue(TAIPY_GUI_ADDR, ""));
             }
             sendWsMessage(socket, "ID", TAIPY_CLIENT_ID, payload, id, undefined, false, () => {
                 dispatch({ type: Types.SocketConnected });
