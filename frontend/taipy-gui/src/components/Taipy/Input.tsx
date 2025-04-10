@@ -349,6 +349,7 @@ const Input = (props: TaipyInputProps) => {
                 onKeyDown={handleAction}
                 multiline={multiline}
                 minRows={linesShown}
+                maxRows={linesShown}
             />
         </Tooltip>
     );
