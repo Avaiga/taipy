@@ -11,7 +11,7 @@
 # --------------------------------------------------------------------------------------------------
 # Increments the patch version number in all the packages' version.json file.
 #
-# Invoked from the workflow in build-and-release.yml.
+# Invoked from the workflow in build-and-release.yml when releasing production packages.
 # --------------------------------------------------------------------------------------------------
 
 import argparse
