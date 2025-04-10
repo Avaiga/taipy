@@ -44,10 +44,6 @@ def test_default_adapter():
     json_string = json.dumps(var, cls=_TaipyJsonEncoder)
     assert json_string == '"1 day, 12:00:00"'
 
-    var = timedelta(1.5)
-    json_string = json.dumps(var, cls=_TaipyJsonEncoder)
-    assert json_string == '"1 day, 12:00:00"'
-
     var = numpy.int32(123)
     json_string = json.dumps(var, cls=_TaipyJsonEncoder)
     assert json_string == "123"
