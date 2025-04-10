@@ -33,7 +33,7 @@ class JsonAdapter(ABC):
 
     @abstractmethod
     def parse(self, o) -> t.Optional[t.Any]:
-        return None
+        ...  # pragma: no cover
 
 
 class _DefaultJsonAdapter(JsonAdapter):
