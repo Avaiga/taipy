@@ -17,7 +17,6 @@ from math import ceil, cos
 
 from taipy.gui import Gui
 
-
 # Available waveforms to choose from
 waveforms = ["Sine", "Square"]
 # The initially selected waveform
