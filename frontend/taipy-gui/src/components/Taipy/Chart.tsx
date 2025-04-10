@@ -92,12 +92,6 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     dataVarNames?: string;
 }
 
-interface AnimationConfig {
-    animate_from?: string[];
-    animate_to?: string[];
-    on?: string;
-}
-
 interface ChartConfig {
     columns: Array<Record<string, ColumnDesc>>;
     labels: string[];
@@ -117,7 +111,6 @@ interface ChartConfig {
     axisNames: Array<string[]>;
     addIndex: Array<boolean>;
     decimators?: string[];
-    animation: AnimationConfig;
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -217,7 +210,7 @@ const DEFAULT_ANIMATION_SETTINGS: Partial<AnimationOpts> = {
     frame: {
         duration: 500,
     },
-    mode: "immediate" as "next" | "immediate" | "afterall", // codespell:ignore
+    mode: "immediate",
 };
 
 const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t === "pie") : false);
@@ -279,7 +272,6 @@ const defaultConfig = {
     options: [],
     axisNames: [],
     addIndex: [],
-    animation: {} as Record<string, AnimationConfig>,
 } as ChartConfig;
 
 const emptyLayout = {} as Partial<Layout>;
@@ -340,14 +332,6 @@ const getData = (
     idx: number
 ) => (idx === 0 ? data : idx <= additionalDatas.length ? additionalDatas[idx - 1] : undefined);
 
-const useDeepCompareMemoize = <T,>(value: T): T => {
-    const ref = useRef(value);
-    if (!isEqual(value, ref.current)) {
-        ref.current = value;
-    }
-    return ref.current;
-};
-
 const Chart = (props: ChartProp) => {
     const {
         width = "100%",
@@ -368,13 +352,9 @@ const Chart = (props: ChartProp) => {
     const [dataKeys, setDataKeys] = useState<string[]>([]);
 
     // animation
-    const [toFrame, setToFrame] = useState<Frame>({
-        name: "to",
+    const [toFrame, setToFrame] = useState<Partial<Frame>>({
         data: [],
         traces: [],
-        layout: {},
-        group: "",
-        baseframe: "",
     });
 
     const lastDataPl = useRef<ExtendedPlotData[]>([]);
@@ -560,23 +540,22 @@ const Chart = (props: ChartProp) => {
         }
     }, [animationData?.__taipy_refresh, dispatch, id, module, updateVars]);
 
-    const memoizedToFrameData = useDeepCompareMemoize(toFrame.data);
-    const memoizedToFrameTraces = useDeepCompareMemoize(toFrame.traces);
-    const memoizedToFrame = useDeepCompareMemoize(toFrame);
-
-    const runAnimation = useCallback(async () => {
-        if (plotRef.current && plotlyRef.current && memoizedToFrameData && memoizedToFrameTraces.length > 0) {
-            await plotlyRef.current.animate(
+    const runAnimation = useCallback(() => {
+        return (
+            plotRef.current &&
+            plotlyRef.current &&
+            toFrame.data &&
+            (toFrame.traces && toFrame.traces.length > 0 ? true : null) &&
+            plotlyRef.current.animate(
                 plotRef.current as unknown as PlotlyHTMLElement,
                 {
-                    data: memoizedToFrameData,
-                    traces: memoizedToFrameTraces,
+                    ...toFrame,
                     layout: layout,
                 },
                 DEFAULT_ANIMATION_SETTINGS
-            );
-        }
-    }, [layout, memoizedToFrameData, memoizedToFrameTraces]);
+            )
+        );
+    }, [layout, toFrame]);
 
     const style = useMemo(
         () =>
@@ -689,12 +668,6 @@ const Chart = (props: ChartProp) => {
             ret.orientation = getArrayValue(config.orientations, idx);
             ret.line = getArrayValue(config.lines, idx);
             ret.textposition = getArrayValue(config.textAnchors, idx);
-            if (animationData) {
-                ret.animateTo =
-                    animationData[
-                        Object.keys(animationData).find((e) => trace.includes(e)) as keyof typeof animationData
-                    ];
-            }
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {
                 ret.selected = { marker: selectedMarker };
@@ -708,7 +681,7 @@ const Chart = (props: ChartProp) => {
             lastDataPl.current = newDataPl as ExtendedPlotData[];
         }
         return lastDataPl.current;
-    }, [props.figure, selected, data, additionalDatas, config, dataKeys, animationData]);
+    }, [props.figure, selected, data, additionalDatas, config, dataKeys]);
 
     const plotConfig = useMemo(() => {
         let plConf: Partial<Config> = {};
@@ -795,7 +768,7 @@ const Chart = (props: ChartProp) => {
                 (evt?.currentTarget as PlotlyDiv)?._fullLayout?.geo ||
                 (evt?.currentTarget as PlotlyDiv)?._fullLayout?.mapbox;
             const xaxis = map ? map._subplot?.xaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.xaxis;
-            const yaxis = map ? map._subplot?.xaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.yaxis;
+            const yaxis = map ? map._subplot?.yaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.yaxis;
             if (!xaxis || !yaxis) {
                 console.info("clickHandler: Plotly div does not have an xaxis object", evt);
                 return;
@@ -828,7 +801,7 @@ const Chart = (props: ChartProp) => {
             plotlyRef.current = window.Plotly as unknown as PlotlyObject;
 
             if (animationData) {
-                runAnimation().catch(console.error);
+                runAnimation()?.catch(console.error);
             }
         },
         [onClick, clickHandler, animationData, runAnimation]
@@ -898,52 +871,46 @@ const Chart = (props: ChartProp) => {
     );
 
     useEffect(() => {
-        if (!dataPl.length || !animationData) {
+        if (!dataPl.length || !animationData || isDataRefresh(animationData)) {
+            return;
+        }
+        const animationKeys = Object.keys(animationData) as Array<keyof ExtendedPlotData>;
+
+        let found = false;
+        const toFramesData = dataPl
+            .map((trace) => {
+                const traceAnimationKeys = animationKeys.filter(
+                    (key) => trace.hasOwnProperty(key) && Array.isArray(trace[key]) && Array.isArray(animationData[key])
+                );
+                if (!traceAnimationKeys.length) {
+                    return undefined;
+                }
+                return traceAnimationKeys.reduce(
+                    (tr, key) => {
+                        if (!isEqual(trace[key], animationData[key])) {
+                            found = true;
+                            tr[key] = animationData[key];
+                        }
+                        return tr;
+                    },
+                    { ...trace } as Record<string, unknown>
+                ) as unknown as ExtendedPlotData;
+            })
+            .filter((t) => t);
+        if (!found) {
             return;
         }
 
-        const toFramesData = dataPl
-            .map((trace) => {
-                const yName = trace.name;
-                const isYaxisAnimated = yName && !!animationData[yName];
-
-                const xName = trace.meta?.xAxisName;
-                const isXaxisAnimated = xName && !!animationData[xName];
-
-                if (!isYaxisAnimated && !isXaxisAnimated) {
-                    return undefined;
-                }
-
-                return {
-                    name: yName,
-                    x: isXaxisAnimated ? animationData[xName] : trace.x,
-                    y: isYaxisAnimated ? animationData[yName] : trace.y,
-                };
-            })
-            .filter((t) => t);
-
-        if (toFramesData.length && !isEqual(memoizedToFrameData, toFramesData)) {
+        if (toFramesData.length) {
             setToFrame({
-                name: "to",
                 data: toFramesData as Data[],
                 traces: dataPl.map((_, idx) => idx),
-                layout: {},
-                group: "",
-                baseframe: "",
             });
         }
-    }, [dataPl, animationData, memoizedToFrameData, memoizedToFrame]);
+    }, [dataPl, animationData]);
 
     useEffect(() => {
         if (!plotRef.current || !toFrame.data?.length) {
-            setToFrame({
-                name: "to",
-                data: [],
-                traces: [],
-                layout: {},
-                group: "",
-                baseframe: "",
-            });
             return;
         }
 
@@ -954,7 +921,7 @@ const Chart = (props: ChartProp) => {
 
         const timer = setTimeout(() => {
             if (plotRef.current) {
-                runAnimation().catch(console.error);
+                runAnimation()?.catch(console.error);
             }
         }, 100);
 
@@ -963,7 +930,7 @@ const Chart = (props: ChartProp) => {
                 clearTimeout(timer);
             }
         };
-    }, [runAnimation, toFrame.data?.length]);
+    }, [toFrame.data?.length, runAnimation]);
 
     return render ? (
         <Tooltip title={hover || ""}>
