@@ -243,7 +243,7 @@ const formatValue = (
             return getNumberString(val as number, col.format, formatConf);
         default:
             return val
-                ? lineBreak && (col.lineBreak === undefined || col.lineBreak)
+                ? lineBreak && (col.lineBreak === undefined || col.lineBreak) && typeof val === "string"
                     ? (val as string).split("\n").map((p, i) =>
                           i == 0 ? (
                               p
@@ -574,25 +574,25 @@ export const EditableCell = (props: EditableCellProps) => {
                     colDesc.type?.startsWith("bool") ? (
                         <Box sx={cellBoxSx}>
                             {useCheckbox ? (
-                            <input
-                                type="checkbox"
-                                checked={val as boolean}
-                                title={boolTitle}
-                                style={iconInRowSx}
-                                className={getSuffixedClassNames(tableClassName, "-bool")}
-                                ref={setInputFocus}
-                                onChange={onBoolChange}
-                            />
+                                <input
+                                    type="checkbox"
+                                    checked={val as boolean}
+                                    title={boolTitle}
+                                    style={iconInRowSx}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                    ref={setInputFocus}
+                                    onChange={onBoolChange}
+                                />
                             ) : (
-                            <Switch
-                                checked={val as boolean}
-                                size="small"
-                                title={boolTitle}
-                                sx={iconInRowSx}
-                                onChange={onBoolChange}
-                                inputRef={setInputFocus}
-                                className={getSuffixedClassNames(tableClassName, "-bool")}
-                            />
+                                <Switch
+                                    checked={val as boolean}
+                                    size="small"
+                                    title={boolTitle}
+                                    sx={iconInRowSx}
+                                    onChange={onBoolChange}
+                                    inputRef={setInputFocus}
+                                    className={getSuffixedClassNames(tableClassName, "-bool")}
+                                />
                             )}
                             <Box sx={iconsWrapperSx}>
                                 <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
