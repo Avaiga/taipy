@@ -272,7 +272,7 @@ const formatValue = (
             return getNumberString(val as number, col.format, formatConf);
         default:
             return val
-                ? lineBreak && (col.lineBreak === undefined || col.lineBreak)
+                ? lineBreak && (col.lineBreak === undefined || col.lineBreak) && typeof val === "string"
                     ? (val as string).split("\n").map((p, i) =>
                           i == 0 ? (
                               p
