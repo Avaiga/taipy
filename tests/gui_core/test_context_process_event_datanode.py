@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 import pytest
 
-from taipy import Gui, Sequence, SequenceId, DataNode, Scope
+from taipy import DataNode, Gui, Scope
 from taipy.core.notification import Event, EventEntityType, EventOperation
 from taipy.gui_core._context import _GuiCoreContext
 
