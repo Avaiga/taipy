@@ -43,7 +43,7 @@ class _WsType(Enum):
     BLOCK = "BL"
     NAVIGATE = "NA"
     CLIENT_ID = "ID"
-    APP_ID = "AID"
+    GUI_ADDR = "GA"
     MULTIPLE_MESSAGE = "MS"
     DOWNLOAD_FILE = "DF"
     PARTIAL = "PR"

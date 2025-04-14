@@ -14,43 +14,17 @@
 import json
 from pathlib import Path
 
-from setuptools import find_packages, setup
+from setuptools import setup
 
 root_folder = Path(__file__).parent
 
-package_desc = Path(root_folder / "package_desc.md").read_text("UTF-8")
-
-version_path = "taipy/common/version.json"
-
-setup_requirements = Path("taipy/common/setup.requirements.txt")
-
-with open(version_path) as version_file:
+with open(root_folder / "taipy" / "common" / "version.json") as version_file:
     version = json.load(version_file)
-    version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
+    version_string = f'{version.get("major")}.{version.get("minor")}.{version.get("patch")}'
     if vext := version.get("ext"):
         version_string = f"{version_string}.{vext}"
 
-requirements = [r for r in (setup_requirements).read_text("UTF-8").splitlines() if r]
-
-test_requirements = ["pytest>=3.8"]
-
 setup(
     version=version_string,
-    install_requires=requirements,
-    packages=find_packages(
-        where=root_folder, include=[
-            "taipy",
-            "taipy.common",
-            "taipy.common.*",
-            "taipy.common.config",
-            "taipy.common.config.*",
-            "taipy.common.logger",
-            "taipy.common.logger.*",
-            "taipy.common._cli",
-            "taipy.common._cli.*"
-        ]
-    ),
-    include_package_data=True,
-    data_files=[('version', [version_path])],
-    tests_require=test_requirements,
+    install_requires=[r for r in (root_folder / "setup.requirements.txt").read_text("UTF-8").splitlines() if r]
 )

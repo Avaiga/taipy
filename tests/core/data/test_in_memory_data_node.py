@@ -52,8 +52,10 @@ class TestInMemoryDataNodeEntity:
     def test_read_and_write(self):
         no_data_dn = InMemoryDataNode("foo", Scope.SCENARIO, DataNodeId("dn_id"))
         _DataManagerFactory._build_manager()._repository._save(no_data_dn)
+        assert no_data_dn.read() is None
         with pytest.raises(NoData):
-            assert no_data_dn.read() is None
+            _DataManagerFactory._build_manager()._read(no_data_dn)
+        with pytest.raises(NoData):
             no_data_dn.read_or_raise()
         in_mem_dn = InMemoryDataNode("foo", Scope.SCENARIO, properties={"default_data": "bar"})
         _DataManagerFactory._build_manager()._repository._save(in_mem_dn)

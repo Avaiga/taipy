@@ -1,4 +1,5 @@
+# Package taipy-templates
 recursive-include taipy/templates *
-include *.json
-include taipy/templates/setup.requirements.txt
+
+include setup.requirements.txt
 include package_desc.md

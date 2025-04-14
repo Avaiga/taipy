@@ -73,7 +73,7 @@ export type WsMessageType =
     | "ACK"
     | "GMC"
     | "GDT"
-    | "AID"
+    | "GA"
     | "GR"
     | "FV"
     | "BC"
@@ -125,7 +125,7 @@ export declare class TaipyApp {
     _cookieHandler: CookieHandler | undefined;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
-    appId: string;
+    guiAddr: string;
     clientId: string;
     context: string;
     metadata: Record<string, unknown>;

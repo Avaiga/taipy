@@ -1142,7 +1142,7 @@ describe("initializeWebSocket function", () => {
                 mockSocket,
                 "ID",
                 "TaipyClientId",
-                { "id": "mockId" },
+                { id: "mockId" },
                 "mockId",
                 undefined,
                 false,
@@ -1167,8 +1167,9 @@ describe("initializeWebSocket function", () => {
         initializeWebSocket(mockSocket, mockDispatch);
         const connectErrorCallback = mockSocket.on.mock.calls.find((call) => call[0] === "connect_error")?.[1];
         expect(connectErrorCallback).toBeDefined();
+
         if (connectErrorCallback) {
-            connectErrorCallback();
+            connectErrorCallback(new Error("connect_error"));
             jest.advanceTimersByTime(500);
             expect(mockSocket.connect).toHaveBeenCalled();
         }

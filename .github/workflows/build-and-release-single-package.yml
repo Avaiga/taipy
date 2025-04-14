@@ -1,119 +1,136 @@
-name: Build and release one taipy sub-package
+name: Build one taipy sub-package release
 
 on:
   workflow_dispatch:
     inputs:
-      internal_dep_on_pypi:
-        description: "Point taipy internal dependencies to Pypi? If false it will point to the github .tar.gz release file"
-        default: "false"
+      target_package:
+        description: "Package name"
+        required: true
+        type: choice
+        options:
+          - gui
+          - common
+          - core
+          - rest
+          - templates
+          - taipy
+      target_version:
+        description: "Package version"
         required: true
       release_type:
-        description: "The type of release to be made (dev or production)"
+        description: "Release type"
+        required: true
+        type: choice
+        options:
+          - dev
+          - production
         default: "dev"
+      sub_packages_location:
+        description: "Dependencies location"
         required: true
-      target_version:
-        description: "The version of the package to be released"
-        required: true
-      target_package:
-        description: "The package to be released (gui, common, core, rest, templates, taipy)"
-        required: true
+        type: choice
+        options:
+          - GitHub
+          - Pypi
+        default: "GitHub"
 
 env:
   NODE_OPTIONS: --max-old-space-size=4096
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  fetch-versions:
+  setup-versions:
     runs-on: ubuntu-latest
     outputs:
+        branch: ${{ steps.version-setup.outputs.branch }}
         common_VERSION: ${{ steps.version-setup.outputs.common_VERSION }}
         core_VERSION: ${{ steps.version-setup.outputs.core_VERSION }}
         gui_VERSION: ${{ steps.version-setup.outputs.gui_VERSION }}
         rest_VERSION: ${{ steps.version-setup.outputs.rest_VERSION }}
         templates_VERSION: ${{ steps.version-setup.outputs.templates_VERSION }}
         taipy_VERSION: ${{ steps.version-setup.outputs.taipy_VERSION }}
+        LATEST_TAIPY_VERSION: ${{ steps.version-setup.outputs.LATEST_TAIPY_VERSION }}
     steps:
       - uses: actions/checkout@v4
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
 
-      - name: Setup Version
+      - name: Validate target version
+        run: |
+          version="${{ github.event.inputs.target_version }}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid version format: '$version' - <M>.<m>.<patch> is mandatory."
+            exit 1
+          fi
+          echo "✅ Valid target version: $version"
+
+      - name: Install mandatory Python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Setup versions
         id: version-setup
         run: |
-          python tools/release/fetch_latest_versions.py \
-          ${{ github.event.inputs.release_type }} \
-          ${{ github.event.inputs.internal_dep_on_pypi }} \
-          ${{ github.event.inputs.target_version }} \
-          ${{ github.event.inputs.target_package }} >> $GITHUB_OUTPUT
+          python tools/release/setup_versions.py \
+          ${{ github.event.inputs.target_package }} \
+          -v ${{ github.event.inputs.target_version }} \
+          -t ${{ github.event.inputs.release_type }} \
+          -r ${{ github.repository }} >>$GITHUB_OUTPUT
+          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >>$GITHUB_OUTPUT
 
-  build-and-release-package:
-    needs: [fetch-versions]
+  build-package-release:
+    needs: setup-versions
     timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ssh-key: ${{secrets.DEPLOY_KEY}}
       - uses: actions/setup-python@v5
         with:
           python-version: 3.9
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Extract commit hash
+        id: extract_hash
         shell: bash
         run: echo "HASH=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-        id: extract_hash
 
-      - name: Set Build Variables
-        id: set-variables
+      - name: Install mandatory Python packages
         run: |
-          if [ "${{ github.event.inputs.target_package }}" == "common" ]; then
-            echo "package_version=${{needs.fetch-versions.outputs.common_VERSION}}" >> $GITHUB_OUTPUT
-            echo "package_dir=./taipy/common" >> $GITHUB_OUTPUT
-            echo "release_name=${{needs.fetch-versions.outputs.common_VERSION}}-common" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}-common-${{needs.fetch-versions.outputs.common_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.inputs.target_package }}" == "core" ]; then
-            echo "package_version=${{needs.fetch-versions.outputs.core_VERSION}}" >> $GITHUB_OUTPUT
-            echo "package_dir=./taipy/core" >> $GITHUB_OUTPUT
-            echo "release_name=${{needs.fetch-versions.outputs.core_VERSION}}-core" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}-core-${{needs.fetch-versions.outputs.core_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.inputs.target_package }}" == "gui" ]; then
-            echo "package_version=${{needs.fetch-versions.outputs.gui_VERSION}}" >> $GITHUB_OUTPUT
-            echo "package_dir=./taipy/gui" >> $GITHUB_OUTPUT
-            echo "release_name=${{needs.fetch-versions.outputs.gui_VERSION}}-gui" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}-gui-${{needs.fetch-versions.outputs.gui_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.inputs.target_package }}" == "rest" ]; then
-            echo "package_version=${{needs.fetch-versions.outputs.rest_VERSION}}" >> $GITHUB_OUTPUT
-            echo "package_dir=./taipy/rest" >> $GITHUB_OUTPUT
-            echo "release_name=${{needs.fetch-versions.outputs.rest_VERSION}}-rest" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}-rest-${{needs.fetch-versions.outputs.rest_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.inputs.target_package }}" == "templates" ]; then
-            echo "package_version=${{needs.fetch-versions.outputs.templates_VERSION}}" >> $GITHUB_OUTPUT
-            echo "package_dir=./taipy/templates" >> $GITHUB_OUTPUT
-            echo "release_name=${{needs.fetch-versions.outputs.templates_VERSION}}-templates" >> $GITHUB_OUTPUT
-            echo "tar_path=./dist/${{ github.event.repository.name }}-templates-${{needs.fetch-versions.outputs.templates_VERSION}}.tar.gz" >> $GITHUB_OUTPUT
-          fi
-        shell: bash
+          python -m pip install --upgrade pip
+          pip install requests
 
       - name: Update setup.requirements.txt
         run: |
-          python tools/release/update_setup_requirements.py taipy-${{ github.event.inputs.target_package }} \
-            ${{needs.fetch-versions.outputs.common_VERSION}} \
-            ${{needs.fetch-versions.outputs.core_VERSION}} \
-            ${{needs.fetch-versions.outputs.gui_VERSION}} \
-            ${{needs.fetch-versions.outputs.rest_VERSION}} \
-            ${{needs.fetch-versions.outputs.templates_VERSION}} \
-            ${{ github.event.inputs.internal_dep_on_pypi }}
+          python tools/release/update_setup_requirements.py ${{ github.event.inputs.target_package }} \
+            ${{ needs.setup-versions.outputs.common_VERSION }} \
+            ${{ needs.setup-versions.outputs.core_VERSION }} \
+            ${{ needs.setup-versions.outputs.gui_VERSION }} \
+            ${{ needs.setup-versions.outputs.rest_VERSION }} \
+            ${{ needs.setup-versions.outputs.templates_VERSION }} \
+            -deps ${{ github.event.inputs.sub_packages_location }} \
+            -r ${{ github.repository }}
 
-      - name: Copy tools
+      - name: Set package version for ${{ github.event.inputs.target_package }} ${{ github.event.inputs.target_version }}
+        id: package-version
+        shell: bash
         run: |
-          cp -r tools ${{ steps.set-variables.outputs.package_dir }}
+          if [ "${{ github.event.inputs.target_package }}" == "common" ]; then
+            echo "version=${{ needs.setup-versions.outputs.common_VERSION }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.target_package }}" == "core" ]; then
+            echo "version=${{ needs.setup-versions.outputs.core_VERSION }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.target_package }}" == "gui" ]; then
+            echo "version=${{ needs.setup-versions.outputs.gui_VERSION }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.target_package }}" == "rest" ]; then
+            echo "version=${{ needs.setup-versions.outputs.rest_VERSION }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.target_package }}" == "templates" ]; then
+            echo "version=${{ needs.setup-versions.outputs.templates_VERSION }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.inputs.target_package }}" == "taipy" ]; then
+            echo "version=${{ needs.setup-versions.outputs.taipy_VERSION }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Install dependencies
         run: |
@@ -121,63 +138,80 @@ jobs:
           pip install build wheel pipenv mypy black isort
 
       - name: Install GUI dependencies
-        if: github.event.inputs.target_package == 'gui'
+        if: ${{ github.event.inputs.target_package == 'gui' || github.event.inputs.target_package == 'taipy' }}
         run: |
           pipenv install --dev
 
       - name: Generate GUI pyi file
-        if: github.event.inputs.target_package == 'gui'
+        if: ${{ github.event.inputs.target_package == 'gui' }}
         run: |
           pipenv run python tools/gui/generate_pyi.py
 
-      - name: Build frontends
-        if: github.event.inputs.target_package == 'gui'
+      - name: Build Taipy GUI front-end
+        if: ${{ github.event.inputs.target_package == 'gui' || github.event.inputs.target_package == 'taipy' }}
         run: |
-          python tools/frontend/bundle_build.py
+          python tools/frontend/bundle_build.py gui
 
-      - name: Copy files from tools
+      - name: Build Taipy front-end
+        if: ${{ github.event.inputs.target_package == 'taipy' }}
         run: |
-          cp -r tools/packages/taipy-${{ github.event.inputs.target_package }}/. ${{ steps.set-variables.outputs.package_dir }}
+          python tools/frontend/bundle_build.py taipy
 
       - name: Build Package Structure
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
         run: |
-          python tools/release/build_package_structure.py  ${{ github.event.inputs.target_package }}
-
-      - name: Copy Taipy Logger
-        if: github.event.inputs.target_package == 'common'
-        run: |
-          cp -r taipy/logger/. ${{ steps.set-variables.outputs.package_dir }}/taipy/logger
-
-      - name: Copy _cli folder
-        run: |
-          cp -r taipy/_cli/. ${{ steps.set-variables.outputs.package_dir }}/taipy/_cli
+          python tools/release/build_package_structure.py ${{ github.event.inputs.target_package }} ${{ steps.package-version.outputs.version }}
 
       - name: Build package
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
+        working-directory: "build_${{ github.event.inputs.target_package }}"
         run: |
           python -m build
-
-      - name: Rename files
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
-        run: |
-          for file in ./dist/*; do mv "$file" "${file//_/-}"; done
-
+          if compgen -G "./dist/*_*" > /dev/null; then
+            for file in ./dist/*_*; do mv "$file" "${file//_/-}"; done
+          fi
+          
       - name: Create tag and release
-        working-directory: ${{ steps.set-variables.outputs.package_dir }}
+        working-directory: "build_${{ github.event.inputs.target_package }}"
         run: |
-           if [ "${{ github.event.inputs.release_type }}" == "dev" ]; then
-            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title ${{ steps.set-variables.outputs.release_name }} --notes "Release Draft ${{ steps.set-variables.outputs.release_name }}"
-           else
-            gh release create ${{ steps.set-variables.outputs.release_name }} ${{ steps.set-variables.outputs.tar_path }} --target ${{ steps.extract_hash.outputs.HASH }} --title ${{ steps.set-variables.outputs.release_name }} --notes "Release ${{ steps.set-variables.outputs.release_name }}"
-           fi
+          package_suffix=""
+          if [ "${{ github.event.inputs.target_package }}" != "taipy" ]; then
+            package_suffix="-${{ github.event.inputs.target_package }}"
+          fi
+          release_name="${{ steps.package-version.outputs.version }}$package_suffix"
+          tar_path="./dist/taipy$package_suffix-${{ steps.package-version.outputs.version }}.tar.gz"
+          if [ "${{ github.event.inputs.release_type }}" == "dev" ]; then
+            gh release create $release_name $tar_path --target ${{ steps.extract_hash.outputs.HASH }} --prerelease --title $release_name --notes "Dev Release $release_name"
+          else
+            gh release create $release_name $tar_path --target ${{ steps.extract_hash.outputs.HASH }} --title $release_name --notes "Release $release_name"
+          fi
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Ensure Taipy release is marked as latest
+      - name: Bump patch version
+        if: ${{ github.event.inputs.release_type == 'production' }}
         run: |
-           gh release edit ${{needs.fetch-versions.outputs.taipy_VERSION}} --latest
+          python tools/release/bump_patch_version.py ${{ github.event.inputs.target_package }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: ${{ github.event.inputs.release_type == 'production' }}
+        with:
+          branch: "devops/bump-patch-version-for-${{ github.event.inputs.target_package }}-${{ github.run_id }}"
+          create_branch: "true"
+          file_pattern: "**/version.json"
+          commit_message: Bump patch versions for ${{ github.event.inputs.target_package }}
+
+      - name: Create pull request
+        if: ${{ github.event.inputs.release_type == 'production' }}
+        run: gh pr create -B "${{ needs.setup-versions.outputs.branch }}" -H "devops/bump-patch-version-for-${{ github.event.inputs.target_package }}-${{ github.run_id }}" --title "Bump patch version" --body "Created by GitHub action build-and-release-single-package"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Ensure the latest 'taipy' production release, if there is one, is marked as *latest* no matter what
+      - name: Force latest 'taipy' production release
+        run: |
+          if [ "${{ needs.setup-versions.outputs.LATEST_TAIPY_VERSION }}" != "0.0.0" ]; then
+            gh release edit ${{ needs.setup-versions.outputs.LATEST_TAIPY_VERSION }} --latest
+          fi
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

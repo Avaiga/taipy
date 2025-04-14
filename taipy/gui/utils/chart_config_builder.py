@@ -115,7 +115,7 @@ def __get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
 def _build_chart_config(  # noqa: C901
     gui: "Gui", attributes: t.Dict[str, t.Any], cols_descriptions_list: t.List[t.Dict[str, t.Dict[str, str]]]
 ):
-    if "data" not in attributes and "figure" in attributes:
+    if ("data" not in attributes and "figure" in attributes) or (attributes.get("data") is None):
         return {"traces": []}
     default_type = attributes.get("_default_type", "scatter")
     default_mode = attributes.get("_default_mode", "lines+markers")
@@ -192,6 +192,7 @@ def _build_chart_config(  # noqa: C901
         or ({"color": t[_Chart_iprops.color.value]} if t[_Chart_iprops.color.value] else None)
         for t in traces
     ]
+
     opt_cols: t.List[t.Set[str]] = [set()] * len(traces)
     for idx, m in enumerate(markers):
         if isinstance(m, (dict, _MapDict)):
@@ -227,9 +228,9 @@ def _build_chart_config(  # noqa: C901
         [
             c2
             for c2 in [
-                __get_col_from_indexed(c1, i)
-                for c1 in t.cast(dict, col_dicts[i] if i < len(col_dicts) else col_dicts[0]).keys()
-            ]
+            __get_col_from_indexed(c1, i)
+            for c1 in t.cast(dict, col_dicts[i] if i < len(col_dicts) else col_dicts[0]).keys()
+        ]
             if c2
         ]
         for i in range(len(traces))

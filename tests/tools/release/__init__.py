@@ -8,19 +8,3 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
-import sys
-
-
-def extract_gui_version(base_path: str) -> None:
-    with open("setup.py") as f:
-        for line in f:
-            if "taipy-gui" in line:
-                start = line.find("taipy-gui")
-                end = line.rstrip().find('",')
-                print(f"VERSION={line[start:end]}")  # noqa: T201
-                break
-
-
-if __name__ == "__main__":
-    extract_gui_version(sys.argv[1])

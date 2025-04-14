@@ -190,8 +190,11 @@ const Metric = (props: MetricProps) => {
         if (template) {
             layout.template = template;
         }
+
         if (props.title) {
-            layout.title = { text: props.title };
+            layout.title = {
+                text: props.title
+            }
         }
         return layout as Partial<Layout>;
     }, [

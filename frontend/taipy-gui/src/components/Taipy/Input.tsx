@@ -375,6 +375,7 @@ const Input = (props: TaipyInputProps) => {
                     onKeyDown={handleAction}
                     multiline={multiline}
                     minRows={linesShown}
+                    maxRows={linesShown}
                     size={size}
                 />
                 {props.children}

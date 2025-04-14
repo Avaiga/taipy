@@ -17,17 +17,23 @@ import { useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
+import isEqual from "lodash/isEqual";
 import merge from "lodash/merge";
 import { nanoid } from "nanoid";
 import {
+    AnimationOpts,
     Config,
     Data,
+    Frame,
     Layout,
     ModeBarButtonAny,
     PlotDatum,
+    PlotData,
+    PlotlyHTMLElement,
     PlotMarker,
     PlotRelayoutEvent,
     PlotSelectionEvent,
+    Root,
     ScatterLine,
 } from "plotly.js";
 import { Figure } from "react-plotly.js";
@@ -53,6 +59,14 @@ import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from 
 
 const Plot = lazy(() => import("react-plotly.js"));
 
+interface PlotlyObject {
+    animate: (
+        root: Root,
+        frameOrGroupNameOrFrameList?: string | string[] | Partial<Frame> | Array<Partial<Frame>>,
+        opts?: Partial<AnimationOpts>
+    ) => Promise<void>;
+}
+
 interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     title?: string;
     defaultTitle?: string;
@@ -61,6 +75,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     defaultConfig: string;
     config?: string;
     data?: Record<string, TraceValueType>;
+    animationData?: Record<string, TraceValueType>;
     //data${number}?: Record<string, TraceValueType>;
     defaultLayout?: string;
     layout?: string;
@@ -187,15 +202,28 @@ const selectedPropRe = /selected(\d+)/;
 
 const MARKER_TO_COL = ["color", "size", "symbol", "opacity", "colors"];
 
+const DEFAULT_ANIMATION_SETTINGS: Partial<AnimationOpts> = {
+    transition: {
+        duration: 500,
+        easing: "cubic-in-out",
+    },
+    frame: {
+        duration: 500,
+    },
+    mode: "immediate",
+};
+
 const isOnClick = (types: string[]) => (types?.length ? types.every((t) => t === "pie") : false);
 
 interface Axis {
     p2c: () => number;
     p2d: (a: number) => number;
 }
+
 interface PlotlyMap {
     _subplot?: { xaxis: Axis; yaxis: Axis };
 }
+
 interface PlotlyDiv extends HTMLDivElement {
     _fullLayout?: {
         map?: PlotlyMap;
@@ -203,6 +231,13 @@ interface PlotlyDiv extends HTMLDivElement {
         mapbox?: PlotlyMap;
         xaxis?: Axis;
         yaxis?: Axis;
+    };
+}
+
+interface ExtendedPlotData extends PlotData {
+    meta?: {
+        xAxisName?: string;
+        yAxisName?: string;
     };
 }
 
@@ -308,15 +343,23 @@ const Chart = (props: ChartProp) => {
         onRangeChange,
         propagate = true,
         onClick,
+        animationData,
     } = props;
     const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
-    const plotRef = useRef<HTMLDivElement>(null);
+    const plotRef = useRef<HTMLDivElement | null>(null);
+    const plotlyRef = useRef<PlotlyObject | null>(null);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
-    const lastDataPl = useRef<Data[]>([]);
+
+    // animation
+    const [toFrame, setToFrame] = useState<Partial<Frame>>({
+        data: [],
+        traces: [],
+    });
+
+    const lastDataPl = useRef<ExtendedPlotData[]>([]);
     const theme = useTheme();
     const module = useModule();
-
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
@@ -489,6 +532,31 @@ const Chart = (props: ChartProp) => {
         props.figure,
     ]);
 
+    useEffect(() => {
+        if (animationData?.__taipy_refresh) {
+            const animationDataVar = getUpdateVar(updateVars || "", "animationData");
+            animationDataVar &&
+                dispatch(createRequestChartUpdateAction(animationDataVar, id, module, [], "", undefined));
+        }
+    }, [animationData?.__taipy_refresh, dispatch, id, module, updateVars]);
+
+    const runAnimation = useCallback(() => {
+        return (
+            plotRef.current &&
+            plotlyRef.current &&
+            toFrame.data &&
+            (toFrame.traces && toFrame.traces.length > 0 ? true : null) &&
+            plotlyRef.current.animate(
+                plotRef.current as unknown as PlotlyHTMLElement,
+                {
+                    ...toFrame,
+                    layout: layout,
+                },
+                DEFAULT_ANIMATION_SETTINGS
+            )
+        );
+    }, [layout, toFrame]);
+
     const style = useMemo(
         () =>
             height === undefined
@@ -589,6 +657,10 @@ const Chart = (props: ChartProp) => {
             ret.xaxis = config.xaxis[idx];
             ret.yaxis = config.yaxis[idx];
             ret.hovertext = getValue(datum, config.labels, idx, true);
+            ret.meta = {
+                xAxisName: config.traces[idx][0],
+                yAxisName: config.traces[idx][1],
+            };
             const selPoints = getArrayValue(selected, idx, []);
             if (selPoints?.length) {
                 ret.selectedpoints = selPoints;
@@ -603,10 +675,10 @@ const Chart = (props: ChartProp) => {
             if (idx == 0) {
                 baseDataPl = ret;
             }
-            return ret as Data;
+            return ret;
         });
         if (changed) {
-            lastDataPl.current = newDataPl;
+            lastDataPl.current = newDataPl as ExtendedPlotData[];
         }
         return lastDataPl.current;
     }, [props.figure, selected, data, additionalDatas, config, dataKeys]);
@@ -696,7 +768,7 @@ const Chart = (props: ChartProp) => {
                 (evt?.currentTarget as PlotlyDiv)?._fullLayout?.geo ||
                 (evt?.currentTarget as PlotlyDiv)?._fullLayout?.mapbox;
             const xaxis = map ? map._subplot?.xaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.xaxis;
-            const yaxis = map ? map._subplot?.xaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.yaxis;
+            const yaxis = map ? map._subplot?.yaxis : (evt?.currentTarget as PlotlyDiv)?._fullLayout?.yaxis;
             if (!xaxis || !yaxis) {
                 console.info("clickHandler: Plotly div does not have an xaxis object", evt);
                 return;
@@ -725,8 +797,14 @@ const Chart = (props: ChartProp) => {
     const onInitialized = useCallback(
         (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
             onClick && graphDiv.addEventListener("click", clickHandler);
+            plotRef.current = graphDiv as HTMLDivElement;
+            plotlyRef.current = window.Plotly as unknown as PlotlyObject;
+
+            if (animationData) {
+                runAnimation()?.catch(console.error);
+            }
         },
-        [onClick, clickHandler]
+        [onClick, clickHandler, animationData, runAnimation]
     );
 
     const getRealIndex = useCallback(
@@ -792,9 +870,71 @@ const Chart = (props: ChartProp) => {
         [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module]
     );
 
+    useEffect(() => {
+        if (!dataPl.length || !animationData || isDataRefresh(animationData)) {
+            return;
+        }
+        const animationKeys = Object.keys(animationData) as Array<keyof ExtendedPlotData>;
+
+        let found = false;
+        const toFramesData = dataPl
+            .map((trace) => {
+                const traceAnimationKeys = animationKeys.filter(
+                    (key) => trace.hasOwnProperty(key) && Array.isArray(trace[key]) && Array.isArray(animationData[key])
+                );
+                if (!traceAnimationKeys.length) {
+                    return undefined;
+                }
+                return traceAnimationKeys.reduce(
+                    (tr, key) => {
+                        if (!isEqual(trace[key], animationData[key])) {
+                            found = true;
+                            tr[key] = animationData[key];
+                        }
+                        return tr;
+                    },
+                    { ...trace } as Record<string, unknown>
+                ) as unknown as ExtendedPlotData;
+            })
+            .filter((t) => t);
+        if (!found) {
+            return;
+        }
+
+        if (toFramesData.length) {
+            setToFrame({
+                data: toFramesData as Data[],
+                traces: dataPl.map((_, idx) => idx),
+            });
+        }
+    }, [dataPl, animationData]);
+
+    useEffect(() => {
+        if (!plotRef.current || !toFrame.data?.length) {
+            return;
+        }
+
+        const plotElement = plotRef.current as unknown as PlotlyHTMLElement;
+        if (!plotElement?.data) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            if (plotRef.current) {
+                runAnimation()?.catch(console.error);
+            }
+        }, 100);
+
+        return () => {
+            if (timer) {
+                clearTimeout(timer);
+            }
+        };
+    }, [toFrame.data?.length, runAnimation]);
+
     return render ? (
         <Tooltip title={hover || ""}>
-            <Box id={id} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
+            <Box id={props.id} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                     {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
                         <Plot

@@ -509,6 +509,11 @@
                         "doc": "Chart type.<br/>See the Plotly <a href=\"https://plotly.com/javascript/reference/\">chart type</a> documentation for more details."
                     },
                     {
+                        "name": "animation_data",
+                        "type": "dynamic(Any)",
+                        "doc": "A dictionary representing updated values for the dataset defined in <i>data</i>.<br/>Each key in <i>animation_data</i> must exist in <i>data</i>. Changing this property triggers an animation of the chart, showing the changes between the original (<i>data</i>) and updated (<i>animation_data</i>) values.<br/> This animation functionality currently works only with <i>scatter</i> trace types. If you are using other trace types, the animation may not behave as expected."
+                    },
+                    {
                         "name": "mode",
                         "type": "indexed(str)",
                         "default_value": "\"lines+markers\"",

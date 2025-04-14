@@ -16,31 +16,31 @@ const path = require("path");
 const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
+const AddAssetHtmlPlugin = require("add-asset-html-webpack-plugin");
 const ESLintPlugin = require("eslint-webpack-plugin");
-const GenerateJsonPlugin = require('generate-json-webpack-plugin');
+const GenerateJsonPlugin = require("generate-json-webpack-plugin");
 
 const resolveApp = relativePath => path.resolve(__dirname, relativePath);
 
-const reactBundle = "taipy-gui-deps"
-const taipyBundle = "taipy-gui"
+const reactBundle = "taipy-gui-deps";
+const taipyBundle = "taipy-gui";
 
-const reactBundleName = "TaipyGuiDependencies"
-const taipyBundleName = "TaipyGui"
-const taipyGuiBaseBundleName = "TaipyGuiBase"
+const reactBundleName = "TaipyGuiDependencies";
+const taipyBundleName = "TaipyGui";
+const taipyGuiBaseBundleName = "TaipyGuiBase";
 
 const basePath = "../../taipy/gui/webapp";
 const webAppPath = resolveApp(basePath);
 const reactManifestPath = resolveApp(basePath + "/" + reactBundle + "-manifest.json");
-const reactDllPath = resolveApp(basePath + "/" + reactBundle + ".dll.js")
-const taipyDllPath = resolveApp(basePath + "/" + taipyBundle + ".js")
+const reactDllPath = resolveApp(basePath + "/" + reactBundle + ".dll.js");
+const taipyDllPath = resolveApp(basePath + "/" + taipyBundle + ".js");
 const taipyGuiBaseExportPath = resolveApp(basePath + "/taipy-gui-base-export");
 
 module.exports = (env, options) => {
     const envVariables = {
-        frontend_version: require(resolveApp('package.json')).version,
+        frontend_version: require(resolveApp("package.json")).version,
         frontend_build_date: new Date().toISOString(),
-        frontend_build_mode: options.mode
+        frontend_build_mode: options.mode,
     };
 
     return [{
@@ -71,7 +71,7 @@ module.exports = (env, options) => {
                 path: webAppPath,
                 library: {
                     name: taipyBundleName,
-                    type: "umd"
+                    type: "umd",
                 },
                 publicPath: "",
             },
@@ -96,7 +96,7 @@ module.exports = (env, options) => {
                             fullySpecified: false,
                         },
                     },
-                ]
+                ],
             },
             plugins: [
                 new ESLintPlugin({
@@ -106,9 +106,9 @@ module.exports = (env, options) => {
                 }),
                 new webpack.DllReferencePlugin({
                     name: reactBundleName,
-                    manifest: reactManifestPath
-                })
-            ]
+                    manifest: reactManifestPath,
+                }),
+            ],
         },
         {
             mode: options.mode, //'development', //'production',
@@ -120,7 +120,7 @@ module.exports = (env, options) => {
                 publicPath: "",
             },
             dependencies: [taipyBundleName, reactBundleName],
-            externals: {"taipy-gui": taipyBundleName},
+            externals: { "taipy-gui": taipyBundleName },
 
             // Enable sourcemaps for debugging webpack's output.
             devtool: options.mode === "development" && "inline-source-map",
@@ -136,20 +136,20 @@ module.exports = (env, options) => {
                         use: "ts-loader",
                         exclude: /node_modules/,
                     },
-                ]
+                ],
             },
 
             plugins: [
                 new CopyWebpackPlugin({
                     patterns: [
                         { from: "../public", filter: (name) => !name.endsWith(".html") },
-                        { from: "../packaging", filter: (name) => !name.includes(".gen.") }
+                        { from: "../packaging", filter: (name) => !name.includes(".gen.") },
                     ],
                 }),
                 new HtmlWebpackPlugin({
                     template: "../public/index.html",
                     hash: true,
-                    ...envVariables
+                    ...envVariables,
                 }),
                 new GenerateJsonPlugin("taipy.status.json", envVariables),
                 new ESLintPlugin({
@@ -159,94 +159,94 @@ module.exports = (env, options) => {
                 }),
                 new webpack.DllReferencePlugin({
                     name: reactBundleName,
-                    manifest: reactManifestPath
+                    manifest: reactManifestPath,
                 }),
                 new AddAssetHtmlPlugin([{
                     filepath: reactDllPath,
-                    hash: true
-                },{
+                    hash: true,
+                }, {
                     filepath: taipyDllPath,
-                    hash: true
+                    hash: true,
                 }]),
             ],
-    },
-    {
-        mode: options.mode,
-        target: "web",
-        entry: {
-            "default": "./base/src/index.ts",
         },
-        output: {
-            filename: (arg) => {
-                if (arg.chunk.name === "default") {
-                    return "taipy-gui-base.js";
-                }
-                return "[name].taipy-gui-base.js";
+        {
+            mode: options.mode,
+            target: "web",
+            entry: {
+                "default": "./base/src/index.ts",
             },
-            chunkFilename: "[name].taipy-gui-base.js",
-            path: webAppPath,
-            globalObject: "this",
-            library: {
-                name: taipyGuiBaseBundleName,
-                type: "umd",
-            },
-        },
-        optimization: {
-            splitChunks: {
-                chunks: 'all',
-                name: "shared",
-            },
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    use: "ts-loader",
-                    exclude: /node_modules/,
+            output: {
+                filename: (arg) => {
+                    if (arg.chunk.name === "default") {
+                        return "taipy-gui-base.js";
+                    }
+                    return "[name].taipy-gui-base.js";
                 },
-            ],
-        },
-        resolve: {
-            extensions: [".tsx", ".ts", ".js", ".tsx"],
-        },
-        // externals: {
-        //     "socket.io-client": {
-        //         commonjs: "socket.io-client",
-        //         commonjs2: "socket.io-client",
-        //         amd: "socket.io-client",
-        //         root: "_",
-        //     },
-        // },
-    },
-    {
-        entry: "./base/src/exports.ts",
-        output: {
-            filename: "taipy-gui-base.js",
-            path: taipyGuiBaseExportPath,
-            library: {
-                name: taipyGuiBaseBundleName,
-                type: "umd",
-            },
-            publicPath: "",
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    use: "ts-loader",
-                    exclude: /node_modules/,
+                chunkFilename: "[name].taipy-gui-base.js",
+                path: webAppPath,
+                globalObject: "this",
+                library: {
+                    name: taipyGuiBaseBundleName,
+                    type: "umd",
                 },
-            ],
-        },
-        resolve: {
-            extensions: [".tsx", ".ts", ".js", ".tsx"],
-        },
-        plugins: [
-            new CopyWebpackPlugin({
-                patterns: [
-                    { from: "./base/src/packaging", to: taipyGuiBaseExportPath },
+            },
+            optimization: {
+                splitChunks: {
+                    chunks: "all",
+                    name: "shared",
+                },
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.tsx?$/,
+                        use: "ts-loader",
+                        exclude: /node_modules/,
+                    },
                 ],
-            }),
-        ],
-    }];
+            },
+            resolve: {
+                extensions: [".tsx", ".ts", ".js", ".tsx"],
+            },
+            // externals: {
+            //     "socket.io-client": {
+            //         commonjs: "socket.io-client",
+            //         commonjs2: "socket.io-client",
+            //         amd: "socket.io-client",
+            //         root: "_",
+            //     },
+            // },
+        },
+        {
+            entry: "./base/src/exports.ts",
+            output: {
+                filename: "taipy-gui-base.js",
+                path: taipyGuiBaseExportPath,
+                library: {
+                    name: taipyGuiBaseBundleName,
+                    type: "umd",
+                },
+                publicPath: "",
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.tsx?$/,
+                        use: "ts-loader",
+                        exclude: /node_modules/,
+                    },
+                ],
+            },
+            resolve: {
+                extensions: [".tsx", ".ts", ".js", ".tsx"],
+            },
+            plugins: [
+                new CopyWebpackPlugin({
+                    patterns: [
+                        { from: "./base/src/packaging", to: taipyGuiBaseExportPath },
+                    ],
+                }),
+            ],
+        }];
 };

@@ -1,5 +1,6 @@
+# Package taipy-core
 include taipy/core/*.json
 include taipy/core/config/*.json
-include *.json
-include taipy/core/setup.requirements.txt
+
+include setup.requirements.txt
 include package_desc.md

@@ -50,6 +50,26 @@ def test_file_download_path_md(gui: Gui, test_client, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_file_download_with_spaces_path_md(gui: Gui, test_client, helpers):
+    resources_dir = pathlib.Path(__file__).parent.parent / "resources"
+    test_file_path = resources_dir / "test file with spaces.txt"
+
+    try:
+        with open(test_file_path, "w") as f:
+            f.write("Test content")
+
+        gui._bind_var_val("content", str(test_file_path.resolve()))
+        md_string = "<|{content}|file_download|>"
+        expected_list = [
+            "<FileDownload",
+            'defaultContent="/taipy-content/taipyStatic0/test%20file%20with%20spaces.txt"',
+        ]
+        helpers.test_control_md(gui, md_string, expected_list)
+    finally:
+        if test_file_path.exists():
+            test_file_path.unlink()
+
+
 def test_file_download_any_file_md(gui: Gui, test_client, helpers):
     with open(os.path.abspath(__file__), "rb") as content:
         gui._bind_var_val("content", content.read())

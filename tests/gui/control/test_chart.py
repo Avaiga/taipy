@@ -219,6 +219,7 @@ def test_chart_indexed_properties_with_arrays(gui: Gui, helpers):
     ]
     helpers.test_control_md(gui, md, expected_list)
 
+
 def test_chart_multi_data(gui: Gui, helpers, csvdata):
     md_string = "<|{csvdata}|chart|x=Day|y=Daily hospital occupancy|data[1]={csvdata}|>"
     expected_list = [
@@ -227,6 +228,21 @@ def test_chart_multi_data(gui: Gui, helpers, csvdata):
         'dataVarNames="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
         "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         "data1={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
+    ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
+def test_chart_none_data(gui: Gui, helpers):
+    data = None  # noqa: F841
+    md_string = "<|{data}|chart|>"
+    expected_list = [
+        "<Chart",
+        "data={_TpD_tpec_TpExPr_data_TPMDL_0}",
+        'dataVarNames=""',
+        'defaultConfig="{&quot;traces&quot;: []}"',
+        'libClassName="taipy-chart"',
+        'updateVarName="_TpD_tpec_TpExPr_data_TPMDL_0"',
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_md(gui, md_string, expected_list)

@@ -40,7 +40,7 @@ export class TaipyApp {
     _cookieHandler: CookieHandler | undefined;
     variableData: DataManager | undefined;
     functionData: DataManager | undefined;
-    appId: string;
+    guiAddr: string;
     clientId: string;
     context: string;
     metadata: Record<string, unknown>;
@@ -63,7 +63,7 @@ export class TaipyApp {
         this.clientId = "";
         this.context = "";
         this.metadata = {};
-        this.appId = "";
+        this.guiAddr = "";
         this.routes = undefined;
         this.path = path;
         this.socket = socket;
@@ -168,7 +168,7 @@ export class TaipyApp {
     init() {
         this.clientId = "";
         this.context = "";
-        this.appId = "";
+        this.guiAddr = "";
         this.routes = undefined;
         const id = getLocalStorageValue(TAIPY_CLIENT_ID, "");
         this.sendWsMessage("ID", TAIPY_CLIENT_ID, id);
@@ -180,7 +180,7 @@ export class TaipyApp {
     }
 
     initApp() {
-        this.sendWsMessage("AID", "connect", "");
+        this.sendWsMessage("GA", "connect", "");
         this.sendWsMessage("GR", "", "");
     }
 
