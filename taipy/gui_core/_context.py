@@ -104,17 +104,15 @@ class _GuiCoreContext(CoreEventConsumerBase):
         self.start()
 
     def process_event(self, event: Event):
-        if event.entity_type == EventEntityType.SCENARIO:
-            with self.gui._get_autorization(system=True):
+        with self.gui._get_autorization(system=True):
+            if event.entity_type == EventEntityType.SCENARIO:
                 self.scenario_refresh(
                     event.entity_id
                     if event.operation != EventOperation.DELETION and is_readable(t.cast(ScenarioId, event.entity_id))
                     else None
                 )
-        elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
-            sequence = None
-            try:
-                with self.gui._get_autorization(system=True):
+            elif event.entity_type == EventEntityType.SEQUENCE and event.entity_id:
+                try:
                     sequence = (
                         core_get(event.entity_id)
                         if event.operation != EventOperation.DELETION
@@ -126,20 +124,20 @@ class _GuiCoreContext(CoreEventConsumerBase):
                             _GuiCoreContext._CORE_CHANGED_NAME,
                             {"scenario": [x for x in sequence.parent_ids]},  # type: ignore
                         )
-            except Exception as e:
-                _warn(f"Access to sequence {event.entity_id} failed", e)
-        elif event.entity_type == EventEntityType.JOB:
-            with self.lock:
-                self.jobs_list = None
-        elif event.entity_type == EventEntityType.SUBMISSION:
-            self.submission_status_callback(event.entity_id)
-        elif event.entity_type == EventEntityType.DATA_NODE:
-            with self.lock:
-                self.data_nodes_by_owner = None
-            self.gui._broadcast(
-                _GuiCoreContext._CORE_CHANGED_NAME,
-                {"datanode": event.entity_id if event.operation != EventOperation.DELETION else True},
-            )
+                except Exception as e:
+                    _warn(f"Access to sequence {event.entity_id} failed", e)
+            elif event.entity_type == EventEntityType.JOB:
+                with self.lock:
+                    self.jobs_list = None
+            elif event.entity_type == EventEntityType.SUBMISSION:
+                self.submission_status_callback(event.entity_id)
+            elif event.entity_type == EventEntityType.DATA_NODE:
+                with self.lock:
+                    self.data_nodes_by_owner = None
+                self.gui._broadcast(
+                    _GuiCoreContext._CORE_CHANGED_NAME,
+                    {"datanode": event.entity_id if event.operation != EventOperation.DELETION else True},
+                )
 
     def scenario_refresh(self, scenario_id: t.Optional[str]):
         with self.lock:
