@@ -124,7 +124,6 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     else None
                 )
             elif event.entity_type is EventEntityType.SEQUENCE and event.entity_id:
-                sequence = None
                 try:
                     sequence = (
                         core_get(event.entity_id)
@@ -135,13 +134,13 @@ class _GuiCoreContext(CoreEventConsumerBase):
                     if sequence and hasattr(sequence, "parent_ids") and sequence.parent_ids:  # type: ignore
                         self.broadcast_core_changed({"scenario": list(sequence.parent_ids)})  # type: ignore
                 except Exception as e:
-                    _warn(f"Access to sequence {event.entity_id} failed", e)
+                    _warn(f"Access to sequence '{event.entity_id}' failed", e)
             elif event.entity_type is EventEntityType.JOB:
                 with self.lock:
                     self.jobs_list = None
-            # no broadcast because the submission status will do the job
-            if event.operation is EventOperation.DELETION:
-                self.broadcast_core_changed({"jobs": True})
+                # no broadcast because the submission status will do the job
+                if event.operation is EventOperation.DELETION:
+                    self.broadcast_core_changed({"jobs": True})
             elif event.entity_type is EventEntityType.SUBMISSION:
                 self.submission_status_callback(event.entity_id, event)
             elif event.entity_type is EventEntityType.DATA_NODE:
