@@ -38,12 +38,12 @@ class TestGuiCoreContextProcessJobEvent:
         event = Event(entity_type=EventEntityType.JOB,
                       operation=EventOperation.DELETION,
                       entity_id="job_id")
-        with (patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast,
-              patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth):
-            gui_core_context = _GuiCoreContext(Gui())
-            gui_core_context.process_event(event=event)
+        with patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast:
+            with patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth:
+                gui_core_context = _GuiCoreContext(Gui())
+                gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
-            mock_broadcast.assert_not_called()
-            assert gui_core_context.jobs_list is None
+                mock_get_auth.assert_called_once_with(system=True)
+                mock_broadcast.assert_not_called()
+                assert gui_core_context.jobs_list is None
 

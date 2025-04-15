@@ -31,35 +31,31 @@ class TestGuiCoreContextProcessScenarioEvent:
         event = Event(entity_type=EventEntityType.SCENARIO,
                       operation=operation,
                       entity_id=scenario_id)
-        with (
-            patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast,
-            patch("taipy.gui_core._context.is_readable") as mock_is_readable,
-            patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth
-        ):
-            mock_is_readable.return_value = scenario_is_valid
-            gui_core_context = _GuiCoreContext(Gui())
-            gui_core_context.process_event(event=event)
+        with patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast:
+            with patch("taipy.gui_core._context.is_readable") as mock_is_readable:
+                with patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth:
+                    mock_is_readable.return_value = scenario_is_valid
+                    gui_core_context = _GuiCoreContext(Gui())
+                    gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
-            if scenario_is_valid:
-                mock_broadcast.assert_called_once_with("core_changed", {"scenario": scenario_id})
-            else:
-                mock_broadcast.assert_called_once_with("core_changed", {"scenario": True})
+                    mock_get_auth.assert_called_once_with(system=True)
+                    if scenario_is_valid:
+                        mock_broadcast.assert_called_once_with("core_changed", {"scenario": scenario_id})
+                    else:
+                        mock_broadcast.assert_called_once_with("core_changed", {"scenario": True})
 
     @pytest.mark.parametrize("scenario_is_valid", [True, False])
     def test_scenario_deletion(self, scenario_is_valid):
         event = Event(entity_type=EventEntityType.SCENARIO,
                       operation=EventOperation.DELETION,
                       entity_id="scenario_id")
-        with (
-            patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast,
-            patch("taipy.gui_core._context.is_readable") as mock_is_readable,
-            patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth
-        ):
-            mock_is_readable.return_value = scenario_is_valid
-            gui_core_context = _GuiCoreContext(Gui())
-            gui_core_context.process_event(event=event)
+        with patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast:
+            with patch("taipy.gui_core._context.is_readable") as mock_is_readable:
+                with patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth:
+                    mock_is_readable.return_value = scenario_is_valid
+                    gui_core_context = _GuiCoreContext(Gui())
+                    gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
-            mock_broadcast.assert_called_once_with("core_changed", {"scenario": True})
+                    mock_get_auth.assert_called_once_with(system=True)
+                    mock_broadcast.assert_called_once_with("core_changed", {"scenario": True})
 

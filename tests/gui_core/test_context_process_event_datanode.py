@@ -47,10 +47,10 @@ class TestGuiCoreContextProcessDatanodeEvent:
         gui_core_context.data_nodes_by_owner["owner_id"] = [DataNode(config_id="cfg_id", scope=Scope.SCENARIO)]
         assert len(gui_core_context.data_nodes_by_owner) == 1
 
-        with (patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast,
-              patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth):
-            gui_core_context.process_event(event=event)
+        with patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast:
+            with patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth:
+                gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
-            assert gui_core_context.data_nodes_by_owner is None
-            mock_broadcast.assert_called_once_with("core_changed", {"datanode": True})
+                mock_get_auth.assert_called_once_with(system=True)
+                assert gui_core_context.data_nodes_by_owner is None
+                mock_broadcast.assert_called_once_with("core_changed", {"datanode": True})

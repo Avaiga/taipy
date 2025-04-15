@@ -55,17 +55,16 @@ class TestGuiCoreContextProcessSequenceEvent:
         event = Event(entity_type=EventEntityType.SEQUENCE,
                       operation=EventOperation.DELETION,
                       entity_id="sequence_id")
-        with (
-            patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast,
-            patch("taipy.gui_core._context.is_readable") as mock_is_readable,
-            patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth
-        ):
-            mock_is_readable.return_value = sequence_is_valid
-            gui_core_context = _GuiCoreContext(Gui())
-            gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
-            mock_broadcast.assert_not_called()
+        with patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast:
+            with patch("taipy.gui_core._context.is_readable") as mock_is_readable:
+                with patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth:
+                    mock_is_readable.return_value = sequence_is_valid
+                    gui_core_context = _GuiCoreContext(Gui())
+                    gui_core_context.process_event(event=event)
+
+                    mock_get_auth.assert_called_once_with(system=True)
+                    mock_broadcast.assert_not_called()
 
     @pytest.mark.parametrize("operation", [EventOperation.CREATION, EventOperation.UPDATE, EventOperation.SUBMISSION])
     def test_sequence_without_parent_ids(self, operation):
@@ -75,16 +74,14 @@ class TestGuiCoreContextProcessSequenceEvent:
         event = Event(entity_type=EventEntityType.SEQUENCE,
                       operation=operation,
                       entity_id=seq_id)
-        with (
-            patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast,
-            patch("taipy.gui_core._context.is_readable") as mock_is_readable,
-            patch("taipy.gui_core._context.core_get") as mock_core_get,
-            patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth
-        ):
-            mock_core_get.return_value = sequence
-            mock_is_readable.return_value = True
-            gui_core_context = _GuiCoreContext(Gui())
-            gui_core_context.process_event(event=event)
+        with patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast:
+            with patch("taipy.gui_core._context.is_readable") as mock_is_readable:
+                with patch("taipy.gui_core._context.core_get") as mock_core_get:
+                    with patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth:
+                        mock_core_get.return_value = sequence
+                        mock_is_readable.return_value = True
+                        gui_core_context = _GuiCoreContext(Gui())
+                        gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
-            mock_broadcast.assert_not_called()
+                        mock_get_auth.assert_called_once_with(system=True)
+                        mock_broadcast.assert_not_called()
