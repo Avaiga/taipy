@@ -33,22 +33,20 @@ class TestGuiCoreContextProcessSequenceEvent:
         event = Event(entity_type=EventEntityType.SEQUENCE,
                       operation=operation,
                       entity_id=seq_id)
-        with (
-            patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast,
-            patch("taipy.gui_core._context.is_readable") as mock_is_readable,
-            patch("taipy.gui_core._context.core_get") as mock_core_get,
-            patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth
-        ):
-            mock_core_get.return_value = sequence
-            mock_is_readable.return_value = sequence_is_valid
-            gui_core_context = _GuiCoreContext(Gui())
-            gui_core_context.process_event(event=event)
+        with patch("taipy.gui.gui.Gui._broadcast") as mock_broadcast:
+            with patch("taipy.gui_core._context.is_readable") as mock_is_readable:
+                with patch("taipy.gui_core._context.core_get") as mock_core_get:
+                    with patch("taipy.gui.gui.Gui._get_autorization") as mock_get_auth:
+                        mock_core_get.return_value = sequence
+                        mock_is_readable.return_value = sequence_is_valid
+                        gui_core_context = _GuiCoreContext(Gui())
+                        gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
-            if sequence_is_valid:
-                mock_broadcast.assert_called_once_with("core_changed", {"scenario": list(seq_parent_ids)})
-            else:
-                mock_broadcast.assert_not_called()
+                        mock_get_auth.assert_called_once_with(system=True)
+                        if sequence_is_valid:
+                            mock_broadcast.assert_called_once_with("core_changed", {"scenario": list(seq_parent_ids)})
+                        else:
+                            mock_broadcast.assert_not_called()
 
     @pytest.mark.parametrize("sequence_is_valid", [True, False])
     def test_sequence_deletion(self, sequence_is_valid):
