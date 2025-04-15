@@ -15,7 +15,7 @@ from typing import Any, Dict, List
 from taipy.common.config import Config, Frequency
 from taipy.core import taipy as tp
 from taipy.core.job.status import Status
-from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
+from taipy.core.notification._core_event_consumer import _CoreEventConsumerBase
 from taipy.core.notification.event import Event, EventEntityType, EventOperation
 from taipy.core.notification.notifier import Notifier
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
@@ -45,7 +45,7 @@ class Snapshot:
                 self.attr_value_collected[event.attribute_name] = [event.attribute_value]
 
 
-class RecordingConsumer(CoreEventConsumerBase):
+class RecordingConsumer(_CoreEventConsumerBase):
     """
     A straightforward and no-thread core events consumer that allows to
     capture snapshots of received events.

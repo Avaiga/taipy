@@ -50,8 +50,8 @@ from taipy.core import delete as core_delete
 from taipy.core import get as core_get
 from taipy.core import submit as core_submit
 from taipy.core.data._file_datanode_mixin import _FileDataNodeMixin
-from taipy.core.notification import CoreEventConsumerBase, EventEntityType
-from taipy.core.notification.event import Event, EventOperation
+from taipy.core.notification._core_event_consumer import _CoreEventConsumerBase
+from taipy.core.notification.event import Event, EventOperation, EventEntityType
 from taipy.core.notification.notifier import Notifier
 from taipy.core.reason import ReasonCollection
 from taipy.core.submission.submission_status import SubmissionStatus
@@ -71,7 +71,7 @@ from ._utils import _ClientStatus
 from .filters import CustomScenarioFilter
 
 
-class _GuiCoreContext(CoreEventConsumerBase):
+class _GuiCoreContext(_CoreEventConsumerBase):
     __PROP_ENTITY_ID = "id"
     __PROP_ENTITY_COMMENT = "comment"
     __PROP_CONFIG_ID = "config"
