@@ -23,6 +23,8 @@ import { SnackbarProvider } from "notistack";
 import { HelmetProvider } from "react-helmet-async";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { ErrorBoundary } from "react-error-boundary";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { PageContext, TaipyContext } from "../context/taipyContext";
 import {
@@ -111,62 +113,68 @@ const Router = () => {
                 <ThemeProvider theme={state.theme}>
                     <SnackbarProvider maxSnack={5}>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
-                            <PageContext.Provider value={pageStore}>
-                                <BrowserRouter>
-                                    <Box style={containerSx}>
-                                        <CssBaseline />
-                                        <ErrorBoundary FallbackComponent={ErrorFallback}>
-                                            <Menu {...state.menu} />
-                                        </ErrorBoundary>
-                                        <Box component="main" sx={mainSx}>
+                            <DndProvider backend={HTML5Backend}>
+                                <PageContext.Provider value={pageStore}>
+                                    <BrowserRouter>
+                                        <Box style={containerSx}>
+                                            <CssBaseline />
                                             <ErrorBoundary FallbackComponent={ErrorFallback}>
-                                                {Object.keys(routes).length ? (
-                                                    <Routes>
-                                                        <Route
-                                                            path={baseURL}
-                                                            element={
-                                                                <MainPage
-                                                                    path={routes["/"]}
-                                                                    route={Object.keys(routes).find(
-                                                                        (path) => path !== "/",
-                                                                    )}
-                                                                />
-                                                            }
-                                                        >
-                                                            {Object.entries(routes)
-                                                                .filter(([path]) => path !== "/")
-                                                                .map(([path, name]) => (
-                                                                    <Route
-                                                                        key={name}
-                                                                        path={path.substring(1)}
-                                                                        element={<TaipyRendered />}
-                                                                    />
-                                                                ))}
-                                                            <Route path="*" key="NotFound" element={<NotFound404 />} />
-                                                        </Route>
-                                                    </Routes>
-                                                ) : null}
+                                                <Menu {...state.menu} />
                                             </ErrorBoundary>
-                                        </Box>
-                                        {state.ackList.length ? (
-                                            <Box sx={progressSx} className="taipy-busy">
-                                                <CircularProgress size="1em" disableShrink />
+                                            <Box component="main" sx={mainSx}>
+                                                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                                                    {Object.keys(routes).length ? (
+                                                        <Routes>
+                                                            <Route
+                                                                path={baseURL}
+                                                                element={
+                                                                    <MainPage
+                                                                        path={routes["/"]}
+                                                                        route={Object.keys(routes).find(
+                                                                            (path) => path !== "/"
+                                                                        )}
+                                                                    />
+                                                                }
+                                                            >
+                                                                {Object.entries(routes)
+                                                                    .filter(([path]) => path !== "/")
+                                                                    .map(([path, name]) => (
+                                                                        <Route
+                                                                            key={name}
+                                                                            path={path.substring(1)}
+                                                                            element={<TaipyRendered />}
+                                                                        />
+                                                                    ))}
+                                                                <Route
+                                                                    path="*"
+                                                                    key="NotFound"
+                                                                    element={<NotFound404 />}
+                                                                />
+                                                            </Route>
+                                                        </Routes>
+                                                    ) : null}
+                                                </ErrorBoundary>
                                             </Box>
-                                        ) : null}
-                                    </Box>
-                                    <ErrorBoundary FallbackComponent={ErrorFallback}>
-                                        <TaipyNotification notifications={state.notifications} />
-                                        <UIBlocker block={state.block} />
-                                        <Navigate
-                                            to={state.navigateTo}
-                                            params={state.navigateParams}
-                                            tab={state.navigateTab}
-                                            force={state.navigateForce}
-                                        />
-                                        <GuiDownload download={state.download} />
-                                    </ErrorBoundary>
-                                </BrowserRouter>
-                            </PageContext.Provider>
+                                            {state.ackList.length ? (
+                                                <Box sx={progressSx} className="taipy-busy">
+                                                    <CircularProgress size="1em" disableShrink />
+                                                </Box>
+                                            ) : null}
+                                        </Box>
+                                        <ErrorBoundary FallbackComponent={ErrorFallback}>
+                                            <TaipyNotification notifications={state.notifications} />
+                                            <UIBlocker block={state.block} />
+                                            <Navigate
+                                                to={state.navigateTo}
+                                                params={state.navigateParams}
+                                                tab={state.navigateTab}
+                                                force={state.navigateForce}
+                                            />
+                                            <GuiDownload download={state.download} />
+                                        </ErrorBoundary>
+                                    </BrowserRouter>
+                                </PageContext.Provider>
+                            </DndProvider>
                         </LocalizationProvider>
                     </SnackbarProvider>
                 </ThemeProvider>

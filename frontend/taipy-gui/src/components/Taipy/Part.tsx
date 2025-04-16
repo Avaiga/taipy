@@ -11,14 +11,17 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ReactNode, useContext, useMemo } from "react";
+import React, { ReactNode, useCallback, useContext, useMemo, useRef } from "react";
 import Box from "@mui/material/Box";
 
-import { useClassNames, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty, useModule } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
 import { expandSx, getCssSize, TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { getComponentClassName } from "./TaipyStyle";
+import { useDrag, useDrop } from "react-dnd";
+import { createSendActionNameAction } from "../../context/taipyReducers";
+import { DragItem, dragSx } from "./lovUtils";
 
 interface PartProps extends TaipyBaseProps {
     render?: boolean;
@@ -31,6 +34,10 @@ interface PartProps extends TaipyBaseProps {
     height?: string;
     defaultHeight?: string;
     width?: string | number;
+    dragType?: string;
+    dropTypes?: string;
+    onAction?: string;
+    dragParameters?: string;
 }
 
 const IframeStyle = {
@@ -40,7 +47,8 @@ const IframeStyle = {
 
 const Part = (props: PartProps) => {
     const { id, partial, defaultPartial } = props;
-    const { state } = useContext(TaipyContext);
+    const { state, dispatch } = useContext(TaipyContext);
+    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
@@ -57,9 +65,86 @@ const Part = (props: PartProps) => {
         return false;
     }, [state.locations, page, defaultPartial]);
 
-    const boxSx = useMemo(() => expandSx(height ? { height: height } : undefined, props.width ? {width: getCssSize(props.width)}: undefined), [height, props.width]);
+    // Droppable area for drag and drop
+    const dropTypes = useMemo(() => {
+        if (props.dropTypes) {
+            try {
+                return JSON.parse(props.dropTypes);
+            } catch (e) {
+                console.error("Invalid dropTypes JSON string", e);
+            }
+        }
+        return [];
+    }, [props.dropTypes]);
+    const handleDrop = useCallback(
+        (itemId: string, _dropIndex: number, _targetVarName: string, targetId?: string, dragParameters?: unknown) => {
+            dispatch(
+                createSendActionNameAction(props.onAction, module, {
+                    reason: "drop",
+                    source_id: id,
+                    item_id: itemId,
+                    target_id: targetId,
+                    drag_parameters: dragParameters,
+                })
+            );
+        },
+        [dispatch, module, props.onAction, id]
+    );
+    const dragParameters = useMemo(() => {
+        if (props.dragType && props.dragParameters) {
+            try {
+                return JSON.parse(props.dragParameters);
+            } catch (e) {
+                console.error("Invalid dragParameters JSON string", e);
+            }
+        }
+        return undefined;
+    }
+    , [props.dragType, props.dragParameters]);
+
+    const itemRef = useRef<HTMLDivElement>(null);
+    const getDragItem = useCallback(() => (props.dragType ? { id: "", index: -1 } : null), [props.dragType]);
+
+    const [{ isDragging }, drag] = useDrag(
+        () => ({
+            type: props.dragType || "",
+            item: getDragItem,
+            collect: (monitor) => ({
+                isDragging: monitor.isDragging(),
+            }),
+            end: (item: DragItem, monitor) => {
+                const dropResult = monitor.getDropResult();
+                if (dropResult) {
+                    handleDrop?.(item.id, item.index, "", item.targetId, dragParameters);
+                }
+            },
+        }),
+        [props.dragType, getDragItem, id]
+    );
+    const [, drop] = useDrop(
+        () => ({
+            accept: dropTypes || "",
+            hover: (item: DragItem) => {
+                item.index = -1;
+                item.targetId = id;
+            },
+        }),
+        [dropTypes]
+    );
+    drag(drop(itemRef));
+
+    const boxSx = useMemo(
+        () =>
+            expandSx(
+                height ? { height: height } : undefined,
+                props.width ? { width: getCssSize(props.width) } : undefined,
+                isDragging ? dragSx : undefined
+            ),
+        [height, props.width, isDragging]
+    );
+
     return render ? (
-        <Box id={id} className={`${className} ${getComponentClassName(props.children)}`} sx={boxSx}>
+        <Box id={id} className={`${className} ${getComponentClassName(props.children)}`} sx={boxSx} ref={itemRef}>
             {iFrame ? (
                 <iframe src={page} style={IframeStyle} />
             ) : page ? (
