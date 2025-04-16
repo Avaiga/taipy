@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, useMemo, MouseEvent } from "react";
+import React, { CSSProperties, useMemo, MouseEvent, useCallback, useRef } from "react";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -20,6 +20,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Tooltip from "@mui/material/Tooltip";
 import { TypographyProps } from "@mui/material";
 import { SxProps } from "@mui/system";
+import { useDrag, useDrop } from "react-dnd";
 
 import { TaipyActiveProps, TaipyChangeProps, TaipyLabelProps } from "./utils";
 import { getInitials } from "../../utils";
@@ -30,6 +31,9 @@ export interface SelTreeProps extends LovProps, TaipyLabelProps {
     filter?: boolean;
     multiple?: boolean;
     width?: string | number;
+    dragType?: string;
+    dropTypes?: string;
+    onAction?: string;
 }
 
 export interface LovProps<T = string | string[], U = string> extends TaipyActiveProps, TaipyChangeProps {
@@ -122,7 +126,7 @@ export const LovImage = ({
             avatar={<IconAvatar img={item} sx={sx} />}
             title={item.text}
             disableTypography={disableTypo}
-            titleTypographyProps={titleTypographyProps}
+            slotProps={{ title: titleTypographyProps }}
         />
     );
 };
@@ -136,6 +140,13 @@ export const showItem = (elt: LovItem, searchValue: string) => {
     );
 };
 
+export interface DragItem {
+    index: number;
+    id: string;
+    targetId?: string;
+}
+
+export const dragSx = { opacity: 0.5, cursor: "move" } as SxProps;
 export interface ItemProps {
     value: string;
     clickHandler: (evt: MouseEvent<HTMLElement>) => void;
@@ -144,6 +155,12 @@ export interface ItemProps {
     disabled: boolean;
     withAvatar?: boolean;
     titleTypographyProps?: TypographyProps<"span", { component?: "span" }>;
+    dragType?: string;
+    dropTypes?: string[];
+    index?: number;
+    handleDrop?: (itemId: string, dropIndex: number, targetVarName: string, targetId?: string) => void;
+    lovVarName?: string;
+    targetId?: string;
 }
 
 export const SingleItem = ({
@@ -154,37 +171,80 @@ export const SingleItem = ({
     disabled,
     withAvatar = false,
     titleTypographyProps,
-}: ItemProps) => (
-    <ListItemButton
-        onClick={clickHandler}
-        data-id={value}
-        selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value}
-        disabled={disabled}
-    >
-        {typeof item === "string" ? (
-            withAvatar ? (
-                <ListItemAvatar>
-                    <CardHeader
-                        sx={cardSx}
-                        avatar={
-                            <Tooltip title={item}>
-                                <Avatar sx={avatarSx}>{getInitials(item)}</Avatar>
-                            </Tooltip>
-                        }
-                        title={item}
-                        titleTypographyProps={titleTypographyProps}
-                    />
-                </ListItemAvatar>
+    dragType = "",
+    dropTypes,
+    index = -1,
+    handleDrop,
+    lovVarName,
+    targetId,
+}: ItemProps) => {
+    const itemRef = useRef<HTMLDivElement>(null);
+    const getDragItem = useCallback(() => (dragType && !disabled ? { id: value, index: -1 } : null), [dragType, disabled, value]);
+
+    const [{ isDragging }, drag] = useDrag(
+        () => ({
+            type: dragType,
+            item: getDragItem,
+            collect: (monitor) => ({
+                isDragging: monitor.isDragging(),
+            }),
+            end: (item: DragItem, monitor) => {
+                const dropResult = monitor.getDropResult();
+                if (dropResult) {
+                    handleDrop?.(item.id, item.index, lovVarName || "", item.targetId);
+                }
+            },
+        }),
+        [dragType, getDragItem]
+    );
+    const [, drop] = useDrop<DragItem, void, { handlerId: string }>(
+        () => ({
+            accept: dropTypes || "",
+            hover: (item: DragItem) => {
+                item.index = index;
+                item.targetId = targetId;
+            },
+        }),
+        [dropTypes, index, targetId]
+    );
+    drag(drop(itemRef));
+
+    return (
+        <ListItemButton
+            onClick={clickHandler}
+            data-id={value}
+            selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value}
+            disabled={disabled}
+            ref={itemRef}
+            sx={isDragging ? dragSx : undefined}
+        >
+            {typeof item === "string" ? (
+                withAvatar ? (
+                    <ListItemAvatar>
+                        <CardHeader
+                            sx={cardSx}
+                            avatar={
+                                <Tooltip title={item}>
+                                    <Avatar sx={avatarSx}>{getInitials(item)}</Avatar>
+                                </Tooltip>
+                            }
+                            title={item}
+                            slotProps={{
+                                title: titleTypographyProps,
+                            }}
+                        />
+                    </ListItemAvatar>
+                ) : (
+                    <ListItemText primary={item} />
+                )
             ) : (
-                <ListItemText primary={item} />
-            )
-        ) : (
-            <ListItemAvatar>
-                <LovImage item={item} titleTypographyProps={titleTypographyProps} />
-            </ListItemAvatar>
-        )}
-    </ListItemButton>
-);
+                <ListItemAvatar>
+                    <LovImage item={item} titleTypographyProps={titleTypographyProps} />
+                </ListItemAvatar>
+            )}
+        </ListItemButton>
+    );
+};
 
 export const isLovParent = (lov: LovItem[] | undefined, id: string, childId: string, path: string[] = []): boolean => {
     if (!lov) {

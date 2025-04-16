@@ -16,6 +16,7 @@ import React, {
     useCallback,
     useEffect,
     useMemo,
+    useRef,
     CSSProperties,
     MouseEvent,
     ChangeEvent,
@@ -46,10 +47,21 @@ import RadioGroup from "@mui/material/RadioGroup";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import { Theme, useTheme } from "@mui/material";
+import { useDrag, useDrop } from "react-dnd";
 
 import { doNotPropagateEvent, getSuffixedClassNames, getUpdateVar } from "./utils";
-import { createSendUpdateAction } from "../../context/taipyReducers";
-import { ItemProps, LovImage, paperBaseSx, SelTreeProps, showItem, SingleItem, useLovListMemo } from "./lovUtils";
+import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
+import {
+    DragItem,
+    dragSx,
+    ItemProps,
+    LovImage,
+    paperBaseSx,
+    SelTreeProps,
+    showItem,
+    SingleItem,
+    useLovListMemo,
+} from "./lovUtils";
 import {
     useClassNames,
     useDispatch,
@@ -61,26 +73,81 @@ import { Icon } from "../../utils/icon";
 import { LovItem } from "../../utils/lov";
 import { getComponentClassName } from "./TaipyStyle";
 
-const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
-    <ListItemButton onClick={clickHandler} data-id={value} dense disabled={disabled}>
-        <ListItemIcon>
-            <Checkbox
-                disabled={disabled}
-                edge="start"
-                checked={selectedValue.includes(value)}
-                tabIndex={-1}
-                disableRipple
-            />
-        </ListItemIcon>
-        {typeof item === "string" ? (
-            <ListItemText primary={item} />
-        ) : (
-            <ListItemAvatar>
-                <LovImage item={item} />
-            </ListItemAvatar>
-        )}
-    </ListItemButton>
-);
+const MultipleItem = ({
+    value,
+    clickHandler,
+    selectedValue,
+    item,
+    disabled,
+    dragType = "",
+    dropTypes,
+    handleDrop,
+    index = -1,
+    lovVarName,
+    targetId,
+}: ItemProps) => {
+    const itemRef = useRef<HTMLDivElement>(null);
+    const getDragItem = useCallback(
+        () => (dragType && !disabled ? { id: value, index: -1 } : null),
+        [dragType, disabled, value]
+    );
+
+    const [{ isDragging }, drag] = useDrag(
+        () => ({
+            type: dragType,
+            item: getDragItem,
+            collect: (monitor) => ({
+                isDragging: monitor.isDragging(),
+            }),
+            end: (item: DragItem, monitor) => {
+                const dropResult = monitor.getDropResult();
+                if (dropResult) {
+                    handleDrop?.(item.id, item.index, lovVarName || "", item.targetId);
+                }
+            },
+        }),
+        [dragType, getDragItem, lovVarName, targetId]
+    );
+    const [, drop] = useDrop<DragItem, void, { handlerId: string }>(
+        () => ({
+            accept: dropTypes || "",
+            hover: (item: DragItem) => {
+                item.index = index;
+                item.targetId = targetId;
+            },
+        }),
+        [dropTypes, index, targetId]
+    );
+    drag(drop(itemRef));
+
+    return (
+        <ListItemButton
+            onClick={clickHandler}
+            data-id={value}
+            dense
+            disabled={disabled}
+            ref={itemRef}
+            sx={isDragging ? dragSx : undefined}
+        >
+            <ListItemIcon>
+                <Checkbox
+                    disabled={disabled}
+                    edge="start"
+                    checked={selectedValue.includes(value)}
+                    tabIndex={-1}
+                    disableRipple
+                />
+            </ListItemIcon>
+            {typeof item === "string" ? (
+                <ListItemText primary={item} />
+            ) : (
+                <ListItemAvatar>
+                    <LovImage item={item} />
+                </ListItemAvatar>
+            )}
+        </ListItemButton>
+    );
+};
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -168,6 +235,46 @@ const Selector = (props: SelectorProps) => {
     const dropdown = isRadio || isCheck || props.dropdown === undefined ? false : props.dropdown;
     const multiple = isCheck ? true : isRadio || props.multiple === undefined ? false : props.multiple;
 
+    const lovVarName = useMemo(() => getUpdateVar(updateVars, "lov"), [updateVars]);
+
+    // Droppable area for drag and drop
+    const dropTypes = useMemo(() => {
+        if (props.dropTypes) {
+            try {
+                return JSON.parse(props.dropTypes);
+            } catch (e) {
+                console.error("Invalid dropTypes JSON string", e);
+            }
+        }
+        return [];
+    }, [props.dropTypes]);
+    const [, dropRef] = useDrop(
+        () => ({
+            accept: dropTypes,
+            hover: (item: DragItem) => {
+                item.index = -1;
+                item.targetId = id;
+            },
+        }),
+        [dropTypes, id]
+    );
+    const handleDrop = useCallback(
+        (itemId: string, dropIndex: number, targetVarName: string, targetId?: string) => {
+            dispatch(
+                createSendActionNameAction(props.onAction, module, {
+                    reason: "drop",
+                    source_var: lovVarName,
+                    source_id: id,
+                    item_id: itemId,
+                    drop_index: dropIndex,
+                    target_var: targetVarName,
+                    target_id: targetId,
+                })
+            );
+        },
+        [lovVarName, dispatch, module, props.onAction, id]
+    );
+
     const lovList = useLovListMemo(lov, defaultLov);
     const listSx = useMemo(
         () => ({
@@ -246,7 +353,7 @@ const Selector = (props: SelectorProps) => {
                             module,
                             props.onChange,
                             propagate,
-                            valueById ? undefined : getUpdateVar(updateVars, "lov")
+                            valueById ? undefined : lovVarName
                         )
                     );
                     return newKeys;
@@ -258,14 +365,14 @@ const Selector = (props: SelectorProps) => {
                             module,
                             props.onChange,
                             propagate,
-                            valueById ? undefined : getUpdateVar(updateVars, "lov")
+                            valueById ? undefined : lovVarName
                         )
                     );
                     return [key];
                 }
             });
         },
-        [updateVarName, dispatch, multiple, propagate, updateVars, valueById, props.onChange, module]
+        [updateVarName, dispatch, multiple, propagate, lovVarName, valueById, props.onChange, module]
     );
 
     const clickHandler = useCallback(
@@ -301,11 +408,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : getUpdateVar(updateVars, "lov")
+                    valueById ? undefined : lovVarName
                 )
             );
         },
-        [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
+        [dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
     );
 
     const handleCheckAllChange = useCallback(
@@ -319,11 +426,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : getUpdateVar(updateVars, "lov")
+                    valueById ? undefined : lovVarName
                 )
             );
         },
-        [lovList, dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
+        [lovList, dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
     );
 
     const [autoValue, setAutoValue] = useState<LovItem | LovItem[] | null>(() => (multiple ? [] : null));
@@ -338,11 +445,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : getUpdateVar(updateVars, "lov")
+                    valueById ? undefined : lovVarName
                 )
             );
         },
-        [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
+        [dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
     );
 
     const handleDelete = useCallback(
@@ -358,13 +465,13 @@ const Selector = (props: SelectorProps) => {
                             module,
                             props.onChange,
                             propagate,
-                            valueById ? undefined : getUpdateVar(updateVars, "lov")
+                            valueById ? undefined : lovVarName
                         )
                     );
                     return keys;
                 });
         },
-        [updateVarName, propagate, dispatch, updateVars, valueById, props.onChange, module]
+        [updateVarName, propagate, dispatch, lovVarName, valueById, props.onChange, module]
     );
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
@@ -602,10 +709,9 @@ const Selector = (props: SelectorProps) => {
                                     />
                                 </Box>
                             ) : null}
-                            <List sx={listSx} id={id}>
-                                {lovList
-                                    .filter((elt) => showItem(elt, searchValue))
-                                    .map((elt) =>
+                            <List sx={listSx} id={id} ref={dropRef}>
+                                {lovList.map((elt, idx) =>
+                                    showItem(elt, searchValue) ? (
                                         multiple ? (
                                             <MultipleItem
                                                 key={elt.id}
@@ -614,6 +720,12 @@ const Selector = (props: SelectorProps) => {
                                                 selectedValue={selectedValue}
                                                 clickHandler={clickHandler}
                                                 disabled={!active}
+                                                dragType={props.dragType}
+                                                dropTypes={dropTypes}
+                                                index={idx}
+                                                handleDrop={handleDrop}
+                                                lovVarName={lovVarName}
+                                                targetId={id}
                                             />
                                         ) : (
                                             <SingleItem
@@ -623,9 +735,16 @@ const Selector = (props: SelectorProps) => {
                                                 selectedValue={selectedValue}
                                                 clickHandler={clickHandler}
                                                 disabled={!active}
+                                                dragType={props.dragType}
+                                                dropTypes={dropTypes}
+                                                index={idx}
+                                                handleDrop={handleDrop}
+                                                lovVarName={lovVarName}
+                                                targetId={id}
                                             />
                                         )
-                                    )}
+                                    ) : null
+                                )}
                             </List>
                         </Paper>
                     </Tooltip>

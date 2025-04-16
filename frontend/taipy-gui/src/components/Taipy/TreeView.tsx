@@ -19,20 +19,30 @@ import React, {
     SyntheticEvent,
     HTMLAttributes,
     forwardRef,
-    Ref,
     CSSProperties,
+    RefObject,
 } from "react";
 import Box from "@mui/material/Box";
 import { SimpleTreeView as MuiTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { TreeItem, TreeItemContentProps, useTreeItemState, TreeItemProps } from "@mui/x-tree-view/TreeItem";
+import { TreeItemContentProps, useTreeItemState, TreeItemProps } from "@mui/x-tree-view/TreeItem";
+import { TreeItem2 } from "@mui/x-tree-view/TreeItem2";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
-import { createSendUpdateAction } from "../../context/taipyReducers";
-import { isLovParent, LovImage, paperBaseSx, SelTreeProps, showItem, useLovListMemo } from "./lovUtils";
+import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
+import {
+    DragItem,
+    dragSx,
+    isLovParent,
+    LovImage,
+    paperBaseSx,
+    SelTreeProps,
+    showItem,
+    useLovListMemo,
+} from "./lovUtils";
 import {
     useClassNames,
     useDispatch,
@@ -41,16 +51,27 @@ import {
     useModule,
 } from "../../utils/hooks";
 import { LovItem } from "../../utils/lov";
-import { getUpdateVar } from "./utils";
+import { expandSx, getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
 import { getComponentClassName } from "./TaipyStyle";
+import { useDrag, useDrop } from "react-dnd";
 
 const treeSlots = { expandIcon: ChevronRightIcon };
 
 const CustomContent = forwardRef(function CustomContent(props: TreeItemContentProps, ref) {
     // need a display name
     const { classes, className, label, itemId, icon: iconProp, expansionIcon, displayIcon } = props;
-    const { allowSelection, lovIcon, height } = props as unknown as CustomTreeProps;
+    const {
+        allowSelection,
+        lovIcon,
+        height,
+        dragType = "",
+        dropTypes,
+        index = -1,
+        handleDrop,
+        lovVarName,
+        targetId,
+    } = props as unknown as CustomTreeProps;
 
     const { disabled, expanded, selected, focused, handleExpansion, handleSelection, preventSelection } =
         useTreeItemState(itemId);
@@ -70,13 +91,47 @@ const CustomContent = forwardRef(function CustomContent(props: TreeItemContentPr
     if (disabled) {
         classNames.push(classes.disabled);
     }
-    const divStyle = useMemo(() => (height ? { height: height } : undefined), [height]);
+
+    const getDragItem = useCallback(
+        () => (dragType && !disabled ? { id: itemId, index: -1 } : null),
+        [dragType, disabled, itemId]
+    );
+
+    const [{ isDragging }, drag] = useDrag(
+        () => ({
+            type: dragType,
+            item: getDragItem,
+            collect: (monitor) => ({
+                isDragging: monitor.isDragging(),
+            }),
+            end: (item: DragItem, monitor) => {
+                const dropResult = monitor.getDropResult();
+                if (dropResult) {
+                    handleDrop?.(item.id, item.index, lovVarName || "", item.targetId);
+                }
+            },
+        }),
+        [dragType, getDragItem]
+    );
+    const [, drop] = useDrop<DragItem, void, { handlerId: string }>(
+        () => ({
+            accept: dropTypes || "",
+            hover: (item: DragItem) => {
+                item.index = index;
+                item.targetId = targetId;
+            },
+        }),
+        [dropTypes, index, targetId]
+    );
+    drag(drop(ref as RefObject<HTMLDivElement>));
+
+    const divStyle = useMemo(() => expandSx(height ? { height: height } : undefined, isDragging ? dragSx: undefined) as CSSProperties, [height, isDragging]);
 
     return (
         <div
             className={classNames.join(" ")}
             onMouseDown={preventSelection}
-            ref={ref as Ref<HTMLDivElement>}
+            ref={ref as RefObject<HTMLDivElement>}
             style={divStyle}
         >
             <div onClick={handleExpansion} className={classes.iconContainer}>
@@ -97,12 +152,28 @@ interface CustomTreeProps extends HTMLAttributes<HTMLElement> {
     allowSelection: boolean;
     lovIcon?: Icon;
     height?: string;
+    dragType?: string;
+    dropTypes?: string[];
+    index?: number;
+    handleDrop?: (itemId: string, dropIndex: number, targetVarName: string, targetId?: string) => void;
+    lovVarName?: string;
+    targetId?: string;
 }
 
 const CustomTreeItem = (props: TreeItemProps & CustomTreeProps) => {
-    const { allowSelection, lovIcon, height, ...tiProps } = props;
-    const ctProps = { allowSelection, lovIcon, height } as CustomTreeProps;
-    return <TreeItem ContentComponent={CustomContent} ContentProps={ctProps} {...tiProps} />;
+    const { allowSelection, lovIcon, height, dragType, dropTypes, handleDrop, lovVarName, targetId, ...tiProps } =
+        props;
+    const ctProps = {
+        allowSelection,
+        lovIcon,
+        height,
+        dragType,
+        dropTypes,
+        handleDrop,
+        lovVarName,
+        targetId,
+    } as CustomTreeProps;
+    return <TreeItem2 ContentComponent={CustomContent} ContentProps={ctProps} {...tiProps} />;
 };
 
 const renderTree = (
@@ -110,10 +181,16 @@ const renderTree = (
     active: boolean,
     searchValue: string,
     selectLeafsOnly: boolean,
-    rowHeight?: string
+    rowHeight?: string,
+    dragType?: string,
+    dropTypes?: string[],
+    index: number = 0,
+    handleDrop: ((itemId: string, dropIndex: number, targetVarName: string, targetId?: string) => void) | undefined = undefined,
+    lovVarName?: string,
+    id?: string
 ) => {
     return lov.map((li) => {
-        const children = li.children ? renderTree(li.children, active, searchValue, selectLeafsOnly, rowHeight) : [];
+        const children = li.children ? renderTree(li.children, active, searchValue, selectLeafsOnly, rowHeight, dragType, dropTypes, index, handleDrop, lovVarName, id) : [];
         if (!children.filter((c) => c).length && !showItem(li, searchValue)) {
             return null;
         }
@@ -126,6 +203,12 @@ const renderTree = (
                 allowSelection={selectLeafsOnly ? !children || children.length == 0 : true}
                 lovIcon={typeof li.item !== "string" ? (li.item as Icon) : undefined}
                 height={rowHeight}
+                dragType={dragType}
+                dropTypes={dropTypes}
+                index={index}
+                handleDrop={handleDrop}
+                lovVarName={lovVarName}
+                targetId={id}
             >
                 {children}
             </CustomTreeItem>
@@ -175,6 +258,8 @@ const TreeView = (props: TreeViewProps) => {
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, updateVarName);
 
+    const lovVarName = useMemo(() => getUpdateVar(updateVars, "lov"), [updateVars]);
+
     const lovList = useLovListMemo(lov, defaultLov, true);
     const treeSx = useMemo(
         () => ({ bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width }),
@@ -184,6 +269,44 @@ const TreeView = (props: TreeViewProps) => {
         const sx = height === undefined ? paperBaseSx : { ...paperBaseSx, maxHeight: height };
         return { ...sx, overflow: "hidden", py: 1 };
     }, [height]);
+
+    // Droppable area for drag and drop
+    const dropTypes = useMemo(() => {
+        if (props.dropTypes) {
+            try {
+                return JSON.parse(props.dropTypes);
+            } catch (e) {
+                console.error("Invalid dropTypes JSON string", e);
+            }
+        }
+        return [];
+    }, [props.dropTypes]);
+    const [, dropRef] = useDrop(
+        () => ({
+            accept: dropTypes,
+            hover: (item: DragItem) => {
+                item.index = -1;
+                item.targetId = id;
+            },
+        }),
+        [dropTypes, id]
+    );
+    const handleDrop = useCallback(
+        (itemId: string, dropIndex: number, targetVarName: string, targetId?: string) => {
+            dispatch(
+                createSendActionNameAction(props.onAction, module, {
+                    reason: "drop",
+                    source_var: lovVarName,
+                    source_id: id,
+                    item_id: itemId,
+                    drop_index: dropIndex,
+                    target_var: targetVarName,
+                    target_id: targetId,
+                })
+            );
+        },
+        [lovVarName, dispatch, module, props.onAction, id]
+    );
 
     useEffect(() => {
         let refExp = false;
@@ -248,11 +371,11 @@ const TreeView = (props: TreeViewProps) => {
                         module,
                         props.onChange,
                         propagate,
-                        valueById ? undefined : getUpdateVar(updateVars, "lov")
+                        valueById ? undefined : lovVarName
                     )
                 );
         },
-        [updateVarName, dispatch, propagate, updateVars, valueById, props.onChange, module]
+        [updateVarName, dispatch, propagate, lovVarName, valueById, props.onChange, module]
     );
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
@@ -287,7 +410,7 @@ const TreeView = (props: TreeViewProps) => {
     );
 
     return (
-        <Box id={id} sx={boxSx} className={`${className} ${getComponentClassName(props.children)}`}>
+        <Box id={id} sx={boxSx} className={`${className} ${getComponentClassName(props.children)}`} ref={dropRef}>
             <Tooltip title={hover || ""}>
                 <Paper sx={paperSx}>
                     <Box>
@@ -311,7 +434,7 @@ const TreeView = (props: TreeViewProps) => {
                         onExpandedItemsChange={handleNodeToggle}
                         {...treeProps}
                     >
-                        {renderTree(lovList, !!active, searchValue, selectLeafsOnly, rowHeight)}
+                        {renderTree(lovList, !!active, searchValue, selectLeafsOnly, rowHeight, props.dragType, dropTypes, -1, handleDrop, lovVarName, id)}
                     </MuiTreeView>
                 </Paper>
             </Tooltip>

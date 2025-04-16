@@ -1156,6 +1156,35 @@
                         "name": "height",
                         "type": "Union[str, int]",
                         "doc": "The height of the selector, in CSS units."
+                    },
+                    {
+                        "name": "drag_type",
+                        "type": "str",
+                        "doc": "The draggable type associated to this selector."
+                    },
+                    {
+                        "name": "drop_types",
+                        "type": "list(str)",
+                        "doc": "The list of the draggable types that can be dropped on this selector."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the user drops a draggable item.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the selector id.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul><li><i>action</i>: the name of the action that triggered this callback.</li><li><i>reason</i> (str): the reason that triggered this action here \"drop\", the item id, the item index on which the item was dropped, the source lov variable name if any, the source component id if any, the target lov variable name if any, the target component id if any.</li></ul></li></ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
                     }
                 ]
             }
@@ -1660,8 +1689,8 @@
                     },
                     {
                         "name": "expanded",
-                        "type":"bool",
-                        "default_value":"False",
+                        "type": "bool",
+                        "default_value": "False",
                         "doc": "Defines whether the menu starts expanded or folded"
                     }
                 ]
@@ -1959,6 +1988,40 @@
                         "name": "content",
                         "type": "dynamic(Any)",
                         "doc": "The content provided to the part. See the documentation section on content providers."
+                    },
+                    {
+                        "name": "drag_type",
+                        "type": "str",
+                        "doc": "The draggable type associated to this part."
+                    },
+                    {
+                        "name": "drop_types",
+                        "type": "list(str)",
+                        "doc": "The list of the draggable types that can be dropped on this part."
+                    },
+                    {
+                        "name": "drag_parameters",
+                        "type": "dict",
+                        "doc": "The parameters associated to the part if draggable."
+                    },
+                    {
+                        "name": "on_action",
+                        "type": "Union[str, Callable]",
+                        "doc": "A function or the name of a function that is triggered when the user drops a draggable item.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the part id.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul><li><i>action</i>: the name of the action that triggered this callback.</li><li><i>reason</i> (str): the reason that triggered this action here \"drop\", the item id if any, the source component id if any, the target component id if any, the drag parameters if any.</li></ul></li></ul>",
+                        "signature": [
+                            [
+                                "state",
+                                "State"
+                            ],
+                            [
+                                "id",
+                                "str"
+                            ],
+                            [
+                                "payload",
+                                "dict"
+                            ]
+                        ]
                     }
                 ]
             }
@@ -2044,10 +2107,10 @@
                         "doc": "The height of the dialog, in CSS units."
                     },
                     {
-			"name": "ref_id",
-			"type": "dynamic(str)",
-			"doc": "The id of an HTML element or a query selector that identifies the reference element serving as the anchor for the dialog."
-		    }
+                        "name": "ref_id",
+                        "type": "dynamic(str)",
+                        "doc": "The id of an HTML element or a query selector that identifies the reference element serving as the anchor for the dialog."
+                    }
                 ]
             }
         ],

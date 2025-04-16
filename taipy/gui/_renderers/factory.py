@@ -373,7 +373,7 @@ class _Factory:
                 ("hover_text", PropertyType.dynamic_string),
                 ("width",),
                 ("width[mobile]",),
-                ("expanded",PropertyType.boolean, False),
+                ("expanded", PropertyType.boolean, False),
             ]
         )
         ._set_propagate(),
@@ -475,6 +475,10 @@ class _Factory:
                 ("height", PropertyType.dynamic_string),
                 ("content", PropertyType.toHtmlContent),
                 ("width", PropertyType.string_or_number),
+                ("drag_type", PropertyType.string),
+                ("drop_types", PropertyType.string_list),
+                ("on_action", PropertyType.function),
+                ("drag_parameters", PropertyType.dict),
             ]
         ),
         "progress": lambda gui, control_type, attrs: _Builder(
@@ -514,6 +518,9 @@ class _Factory:
                 ("lov", PropertyType.lov),
                 ("selection_message", PropertyType.dynamic_string),
                 ("show_select_all", PropertyType.boolean),
+                ("drag_type", PropertyType.string),
+                ("drop_types", PropertyType.string_list),
+                ("on_action", PropertyType.function),
             ]
         )
         ._set_propagate(),
@@ -670,6 +677,9 @@ class _Factory:
                 ("select_leafs_only", PropertyType.boolean),
                 ("row_height", PropertyType.string),
                 ("lov", PropertyType.lov),
+                ("drag_type", PropertyType.string),
+                ("drop_types", PropertyType.string_list),
+                ("on_action", PropertyType.function),
             ]
         )
         ._set_propagate(),

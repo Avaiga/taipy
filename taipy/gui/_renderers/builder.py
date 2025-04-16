@@ -356,8 +356,9 @@ class _Builder:
         if isinstance(value, list):
             self.__set_json_attribute(_to_camel_case(f"default_{name}"), value)
         if hash := self.__hashes.get(name):
-            self.__update_vars.append(f"{name}={hash}")
-            self.__set_react_attribute(name, hash)
+            prop_name = _to_camel_case(name)
+            self.__update_vars.append(f"{prop_name}={hash}")
+            self.__set_react_attribute(prop_name, hash)
         return self
 
     def __set_list_attribute(
@@ -373,11 +374,12 @@ class _Builder:
         if not hash and isinstance(value, str):
             value = [elt_type(t.strip()) for t in value.split(";")]
         if isinstance(value, list):
+            prop_name = _to_camel_case(name)
             if hash and dynamic:
-                self.__set_react_attribute(name, hash)
-                return [f"{name}={hash}"]
+                self.__set_react_attribute(prop_name, hash)
+                return [f"{prop_name}={hash}"]
             else:
-                self.__set_json_attribute(name, value)
+                self.__set_json_attribute(prop_name, value)
         elif value is not None:
             _warn(f"{self.__element_name}: {name} should be a list of {elt_type}.")
         return []
