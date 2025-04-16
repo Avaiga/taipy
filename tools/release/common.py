@@ -239,7 +239,7 @@ def retrieve_github_path() -> t.Optional[str]:
 def fetch_github_releases(gh_path: t.Optional[str] = None) -> dict[Package, list[Version]]:
     # Retrieve all available releases (potentially paginating results) for all packages.
     # Returns a dictionary of package_short_name-Value pairs.
-    # Note for reviewers: using a Package as the dictionary is is cumbersome in the rest of the
+    # Note for reviewers: using a Package as the dictionary is cumbersome in the rest of the
     # code.
     all_releases: dict[str, list[Version]] = {}
     if gh_path is None:
