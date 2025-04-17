@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Avaiga Private Limited
+# Copyright 2021-2025 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -48,15 +48,15 @@ def test_from_string():
 
 def test_extension():
     version = Version.from_string("1.2.3")
-    extension = version._split_ext()
+    extension = version.split_ext()
     assert extension == ("", -1)
 
     version = Version.from_string("1.2.3.some_ext")
-    extension = version._split_ext()
+    extension = version.split_ext()
     assert extension == ("some_ext", -1)
 
     version = Version.from_string("1.2.3.some_ext123")
-    extension = version._split_ext()
+    extension = version.split_ext()
     assert extension == ("some_ext", 123)
 
 
@@ -142,15 +142,15 @@ def test_order():
     assert v1 < v2, "Version 1.0.0 is older than 1.0.1"
     assert v2 > v1, "Version 1.0.1 is newer than 1.0.0"
 
+    v1 = Version(major=1, minor=2, patch=3)
+    v2 = Version(major=1, minor=2, patch=3, ext="dev0")
+    assert v1 > v2, "Version 1.2.3 is newer than 1.2.3.dev0"
+    assert v2 < v1, "Version 1.2.3.dev0 is older than 1.2.3"
+
+    v1 = Version(major=1, minor=2, patch=3, ext="dev0")
+    v2 = Version(major=1, minor=2, patch=3, ext="dev1")
+    assert v1 < v2, "Version 1.2.3.dev0 is older than 1.2.3.dev1"
+    assert v2 > v1, "Version 1.2.3.dev1 is newer 1.2.3.dev0"
+
     versions = [Version(1, 0), Version(2, 1), Version(3, 4), Version(2, 0)]
     assert max(versions) == Version(3, 4), "Cannot find max in Version list"
-
-
-def test_bump_ext():
-    version = Version(major=1, minor=2, patch=3)
-    new_version = version.bump_ext_version()
-    assert version == new_version
-
-    version = Version(major=1, minor=2, patch=3, ext="ext0")
-    new_version = version.bump_ext_version()
-    assert new_version.ext == "ext1"

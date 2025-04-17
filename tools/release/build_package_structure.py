@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Avaiga Private Limited
+# Copyright 2021-2025 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -14,14 +14,14 @@
 # Invoked by the workflow files build-and-release-single-package.yml and build-and-release.yml.
 # Working directory must be '[checkout-root]'.
 # --------------------------------------------------------------------------------------------------
-
+import argparse
+import json
 import os
 import re
 import shutil
-import sys
 from pathlib import Path
 
-from common import PACKAGES, Package
+from common import Package, Version
 
 # Base build directory name
 DEST_ROOT = "build_"
@@ -38,7 +38,6 @@ SKIP_ITEMS = {
         "build_taipy",
         "doc",
         "frontend",
-        "readme_img",
         "tests",
         "tools",
         ".git",
@@ -52,7 +51,7 @@ SKIP_ITEMS = {
 }
 
 # Regexp identifying subpackage directories in taipy hierarchy
-packages = "|".join(PACKAGES)
+packages = "|".join(Package.NAMES)
 SUB_PACKAGE_DIR_PATTERN = re.compile(rf"taipy/(?:{packages})")
 
 
@@ -73,18 +72,39 @@ def skip_path(path: str, package: Package, parent: str) -> bool:
     return False
 
 
-def usage() -> None:
-    print(f"Usage: {sys.argv[0]} <package>")  # noqa: T201
-    packages = "', '".join(PACKAGES)
-    print(f"   <package> must be one of '{packages}', or 'taipy'.")  # noqa: T201
+def recursive_copy(package: Package, source, dest, *, parent: str = "", skip_root: bool = False):
+    dest_path = dest if skip_root else os.path.join(dest, os.path.basename(source))
+    if not skip_root:
+        os.makedirs(dest_path, exist_ok=True)
+
+    for item in os.listdir(source):
+        src_item = os.path.join(source, item)
+        dest_item = os.path.join(dest_path, item)
+        if not skip_path(src_item, package, parent):
+            if os.path.isfile(src_item):
+                shutil.copy2(src_item, dest_item)
+            elif os.path.isdir(src_item):
+                if (s := src_item.replace("\\", "/")).startswith("./"):
+                    s = s[2:]
+                recursive_copy(package, src_item, dest_path, parent=s)
 
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        usage()
-        raise ValueError("Missing arguments.")
-
-    package = Package(sys.argv[1])
+def main():
+    parser = argparse.ArgumentParser(
+        description="Creates the directory structure to build a Taipy package.",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument(
+        "package",
+        type=Package.check_argument,
+        action="store",
+        help="""The name of the package to setup the build version for.
+This must be the short name of a Taipy package (common, core...) or 'taipy'.
+""",
+    )
+    parser.add_argument("version", type=Version.check_argument, action="store", help="Version of the package to build.")
+    args = parser.parse_args()
+    package = Package(args.package)
 
     if package.name == "taipy":
         # Check that gui_core bundle was built
@@ -105,24 +125,8 @@ if __name__ == "__main__":
         dest_dir = build_dir / "taipy"
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    def recursive_copy(source, dest, *, parent: str = "", skip_root: bool = False):
-        dest_path = dest if skip_root else os.path.join(dest, os.path.basename(source))
-        if not skip_root:
-            os.makedirs(dest_path, exist_ok=True)
-
-        for item in os.listdir(source):
-            src_item = os.path.join(source, item)
-            dest_item = os.path.join(dest_path, item)
-            if not skip_path(src_item, package, parent):
-                if os.path.isfile(src_item):
-                    shutil.copy2(src_item, dest_item)
-                elif os.path.isdir(src_item):
-                    if (s := src_item.replace("\\", "/")).startswith("./"):
-                        s = s[2:]
-                    recursive_copy(src_item, dest_path, parent=s)
-
     # Copy the package build files from taipy[/package] to build_<package>/taipy
-    recursive_copy("." if package.name == "taipy" else package.package_dir, dest_dir)
+    recursive_copy(package, "." if package.name == "taipy" else package.package_dir, dest_dir)
 
     # This is needed for local builds (i.e. not in a Github workflow)
     if package.name == "taipy":
@@ -131,7 +135,7 @@ if __name__ == "__main__":
         tools_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2("tools/frontend/bundle_build.py", tools_dir)
         # Copy the build files from tools/packages/taipy to build_taipy
-        recursive_copy(Path("tools") / "packages" / "taipy", build_dir, skip_root=True)
+        recursive_copy(package, Path("tools") / "packages" / "taipy", build_dir, skip_root=True)
     else:
         build_package_dir = build_dir / package.package_dir
         # Copy build files from package to build dir
@@ -141,7 +145,7 @@ if __name__ == "__main__":
         for filename in BUILD_MV_FILES:
             shutil.move(build_package_dir / filename, build_dir)
         # Copy the build files from tools/packages/taipy-<package> to build_<package>
-        recursive_copy(Path("tools") / "packages" / f"taipy-{package.short_name}", build_dir, skip_root=True)
+        recursive_copy(package, Path("tools") / "packages" / f"taipy-{package.short_name}", build_dir, skip_root=True)
 
     # Check that versions were set in setup.requirements.txt
     with open(build_dir / "setup.requirements.txt") as requirements_file:
@@ -150,7 +154,14 @@ if __name__ == "__main__":
                 if not match[2]:  # Version not updated
                     print(f"setup.requirements.txt not up-to-date in 'tools/packages/{package.short_name}'.")  # noqa: T201
                     raise SystemError(f"Version for dependency on {match[1]} is missing.")
+    # Update package's version.json
+    with open(build_dir / package.package_dir / "version.json", "w") as version_file:
+        json.dump(args.version.to_dict(), version_file)
 
     # Copy topmost __init__
     if package.name != "taipy":
         shutil.copy2(Path("taipy") / "__init__.py", dest_dir)
+
+
+if __name__ == "__main__":
+    main()

@@ -7,12 +7,11 @@ name = "taipy-rest"
 description = "Library to expose taipy-core REST APIs."
 readme = "package_desc.md"
 requires-python = ">=3.9,<3.13"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 authors = [{name = "Avaiga", email = "dev@taipy.io"}]
 keywords = ["taipy", "rest", "taipy-rest"]
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",

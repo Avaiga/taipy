@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Avaiga Private Limited
+# Copyright 2021-2025 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -11,22 +11,21 @@
 # --------------------------------------------------------------------------------------------------
 # Common artifacts used by the other scripts located in this directory.
 # --------------------------------------------------------------------------------------------------
+import argparse
+import json
 import os
 import re
 import subprocess
 import typing as t
 from dataclasses import asdict, dataclass
-
+from datetime import datetime
+from pathlib import Path
+from functools import total_ordering
 import requests
-
-# These are the base name of the sub packages taipy-*
-# They also are the names of the directory where their code belongs, under the 'taipy' directory
-# in the root of the Taipy repository.
-PACKAGES = ["common", "core", "gui", "rest", "templates"]
 
 
 # --------------------------------------------------------------------------------------------------
-@dataclass(order=True)
+@dataclass(frozen=True)
 class Version:
     """Helps manipulate version numbers."""
 
@@ -34,6 +33,11 @@ class Version:
     minor: int
     patch: int = 0
     ext: t.Optional[str] = None
+
+    # Matching level
+    MAJOR: t.ClassVar[int] = 1
+    MINOR: t.ClassVar[int] = 2
+    PATCH: t.ClassVar[int] = 3
 
     # Unknown version constant
     UNKNOWN: t.ClassVar["Version"]
@@ -87,22 +91,20 @@ class Version:
         """Returns this Version as a dictionary."""
         return {k: v for k, v in asdict(self).items() if v is not None}
 
-    def bump_ext_version(self) -> "Version":
-        """Returns a new Version object where the extension part version was incremented.
-
-        If this Version has no extension part, this method returns *self*.
-        """
-        if not self.ext or (m := re.search(r"([0-9]+)$", self.ext)) is None:
-            return self
-
-        ext_ver = int(m[1]) + 1
-        return Version(self.major, self.minor, self.patch, f"{self.ext[: m.start(1)]}{ext_ver}")
+    @staticmethod
+    def check_argument(value: str) -> "Version":
+        """Checks version parameter in an argparse context."""
+        try:
+            version = Version.from_string(value)
+        except Exception as e:
+            raise argparse.ArgumentTypeError(f"'{value}' is not a valid version number.") from e
+        return version
 
     def validate_extension(self, ext="dev"):
         """Returns True if the extension part of this Version is the one queried."""
-        return self._split_ext()[0] == ext
+        return self.split_ext()[0] == ext
 
-    def _split_ext(self) -> t.Tuple[str, int]:
+    def split_ext(self) -> t.Tuple[str, int]:
         """Splits extension into the (identifier, index) tuple
 
         Returns:
@@ -160,13 +162,67 @@ class Version:
             return False
 
         # Both have extensions → check identifiers. Dissimilar identifiers → Not compatible
-        self_prefix, _ = self._split_ext()
-        other_prefix, _ = version._split_ext()
+        self_prefix, _ = self.split_ext()
+        other_prefix, _ = version.split_ext()
         if self_prefix != other_prefix:
             return False
 
         # Same identifiers → Compatible
         return True
+
+    def matches(self, version: "Version", level: int = PATCH) -> bool:
+        """Checks whether this version matches another, up to some level.
+
+        Arguments:
+            version: The version to check against.
+            level: The level of precision for the match:
+            - Version.MAJOR: compare only the major version;
+            - Version.MINOR: compare major and minor versions;
+            - Version.PATCH: compare major, minor, and patch versions.
+
+        Returns:
+            True if the versions match up to the given level, False otherwise.
+        """
+        if self.major != version.major:
+            return False
+        if level >= self.MINOR and self.minor != version.minor:
+            return False
+        if level >= self.PATCH and self.patch != version.patch:
+            return False
+        return True
+
+    def __lt__(self, other: "Version") -> bool:
+        if not isinstance(other, Version):
+            return NotImplemented
+
+        # Compare major, minor, patch
+        self_tuple = (self.major, self.minor, self.patch)
+        other_tuple = (other.major, other.minor, other.patch)
+        if self_tuple != other_tuple:
+            return self_tuple < other_tuple
+
+        # Same version number, now compare extensions
+        return self._ext_sort_key() < other._ext_sort_key()
+
+    def _ext_sort_key(self) -> t.Tuple[int, str, int]:
+        """
+        Defines ordering for extensions.
+        Final versions (None) are considered greater than prereleases.
+
+        Example sort order:
+        1.0.0.dev1 < 1.0.0.rc1 < 1.0.0 < 1.0.1
+        """
+        if self.ext is None:
+            return (2, "", 0)  # Final release — highest priority
+
+        # Parse extension like "dev1" into prefix + number
+        match = re.match(r"([a-zA-Z]+)(\d*)", self.ext)
+        if match:
+            label, num = match.groups()
+            num_val = int(num) if num else 0
+            return (1, label, num_val)  # Pre-release
+        else:
+            return (0, self.ext, 0)  # Unknown extension format — lowest priority
 
 
 Version.UNKNOWN = Version(0, 0)
@@ -175,6 +231,23 @@ Version.UNKNOWN = Version(0, 0)
 # --------------------------------------------------------------------------------------------------
 class Package:
     """Information on any Taipy package and sub-package."""
+
+    # Base names of the sub packages taipy-*
+    # They also are the names of the directory where their code belongs, under the 'taipy' directory,
+    # in the root of the Taipy repository.
+    # Order is important: package that are dependent of others must appear first.
+    NAMES = ["common", "core", "gui", "rest", "templates"]
+
+    _packages = {}
+
+    def __new__(cls, name: str) -> "Package":
+        if name.startswith("taipy-"):
+            name = name[6:]
+        if name in cls._packages:
+            return cls._packages[name]
+        package = super().__new__(cls)
+        cls._packages[name] = package
+        return package
 
     def __init__(self, package: str) -> None:
         self._name = package
@@ -186,8 +259,20 @@ class Package:
             else:
                 self._name = f"taipy-{package}"
                 self._short = package
-            if self._short not in PACKAGES:
-                raise ValueError(f"Invalid package name {package}.")
+            if self._short not in Package.NAMES:
+                raise ValueError(f"Invalid package name '{package}'.")
+
+    @classmethod
+    def names(cls, add_taipy=False) -> list[str]:
+        return cls.NAMES + (["taipy"] if add_taipy else [])
+
+    @staticmethod
+    def check_argument(value: str) -> str:
+        """Checks package parameter in an argparse context."""
+        n_value = value.lower()
+        if n_value in Package.names(True) or value == "all":
+            return n_value
+        raise argparse.ArgumentTypeError(f"'{value}' is not a valid Taipy package name.")
 
     @property
     def name(self) -> str:
@@ -202,6 +287,21 @@ class Package:
     @property
     def package_dir(self) -> str:
         return "taipy" if self._name == "taipy" else os.path.join("taipy", self._short)
+
+    def load_version(self) -> Version:
+        """
+        Returns the Version defined in this package's version.json content.
+        """
+        with open(Path(self.package_dir) / "version.json") as version_file:
+            data = json.load(version_file)
+            return Version(**data)
+
+    def save_version(self, version: Version) -> None:
+        """
+        Saves the Version to this package's version.json file.
+        """
+        with open(os.path.join(Path(self.package_dir), "version.json"), "w") as version_file:
+            json.dump(version.to_dict(), version_file)
 
     def __str__(self) -> str:
         """Returns a string representation of this package."""
@@ -219,54 +319,71 @@ class Package:
 
 
 # --------------------------------------------------------------------------------------------------
-def retrieve_github_path() -> t.Optional[str]:
-    # Retrieve current Git branch remote URL
-    def run(*args) -> str:
-        return subprocess.run(args, stdout=subprocess.PIPE, text=True, check=True).stdout.strip()
-
-    branch_name = run("git", "branch", "--show-current")
-    remote_name = run("git", "config", f"branch.{branch_name}.remote")
-    url = run("git", "remote", "get-url", remote_name)
-    if match := re.fullmatch(r"git@github.com:(.*)\.git", url):
-        return match[1]
-    if match := re.fullmatch(r"https://github.com/(.*)$", url):
-        return match[1]
-    print("ERROR - Could not retrieve GibHub branch path")  # noqa: T201
-    return None
+def run_command(*args) -> str:
+    return subprocess.run(args, stdout=subprocess.PIPE, text=True, check=True).stdout.strip()
 
 
 # --------------------------------------------------------------------------------------------------
-def fetch_github_releases(gh_path: t.Optional[str] = None) -> dict[Package, list[Version]]:
+class Git:
+    @staticmethod
+    def get_current_branch() -> str:
+        return run_command("git", "branch", "--show-current")
+
+    @staticmethod
+    def get_github_path() -> t.Optional[str]:
+        """Retrieve current Git path (<owner>/<repo>)."""
+        branch_name = Git.get_current_branch()
+        remote_name = run_command("git", "config", f"branch.{branch_name}.remote")
+        url = run_command("git", "remote", "get-url", remote_name)
+        if match := re.fullmatch(r"(?:git@github\.com:|https://github\.com/)(.*)\.git", url):
+            return match[1]
+        print("ERROR - Could not retrieve GibHub branch path")  # noqa: T201
+        return None
+
+
+# --------------------------------------------------------------------------------------------------
+class Release(t.TypedDict):
+    version: Version
+    id: str
+    tag: str
+    published_at: str
+
+
+def fetch_github_releases(gh_path: t.Optional[str] = None) -> dict[Package, list[Release]]:
     # Retrieve all available releases (potentially paginating results) for all packages.
-    # Returns a dictionary of package_short_name-Value pairs.
-    # Note for reviewers: using a Package as the dictionary is cumbersome in the rest of the
-    # code.
-    all_releases: dict[str, list[Version]] = {}
+    # Returns a dictionary of package_short_name/list-of-releases pairs.
+    # A 'release' is a dictionary where "version" if the package version, "id" is the release id and
+    # "tag" is the release tag name.
+    headers = {"Accept": "application/vnd.github+json"}
+    all_releases: dict[str, list[Release]] = {}
     if gh_path is None:
-        gh_path = retrieve_github_path()
+        gh_path = Git.get_github_path()
         if gh_path is None:
             raise ValueError("Couldn't figure out GitHub branch path.")
     url = f"https://api.github.com/repos/{gh_path}/releases"
     page = 1
     # Read all release versions and store them in a package_name - list[Version] dictionary
     while url:
-        response = requests.get(url, params={"per_page": 50, "page": page})
+        response = requests.get(url, params={"per_page": 50, "page": page}, headers=headers)
         response.raise_for_status()  # Raise error for bad responses
         for release in response.json():
-            tag_name = release["tag_name"]
-            pkg_ver, pkg = tag_name.split("-") if "-" in tag_name else (tag_name, "taipy")
+            release_id = release["id"]
+            tag = release["tag_name"]
+            published_at = release["published_at"]
+            pkg_ver, pkg = tag.split("-") if "-" in tag else (tag, "taipy")
             # Drop legacy packages (config...)
-            if pkg != "taipy" and pkg not in PACKAGES:
+            if pkg != "taipy" and pkg not in Package.NAMES:
                 continue
 
             # Exception for legacy version: v1.0.0 -> 1.0.0
             if pkg_ver == "v1.0.0":
                 pkg_ver = pkg_ver[1:]
             version = Version.from_string(pkg_ver)
-            if versions := all_releases.get(pkg):
-                versions.append(version)
+            new_release: Release = {"version": version, "id": release_id, "tag": tag, "published_at": published_at}
+            if releases := all_releases.get(pkg):
+                releases.append(new_release)
             else:
-                all_releases[pkg] = [version]
+                all_releases[pkg] = [new_release]
 
         # Check for pagination in the `Link` header
         link_header = response.headers.get("Link", "")
@@ -276,19 +393,29 @@ def fetch_github_releases(gh_path: t.Optional[str] = None) -> dict[Package, list
         else:
             url = None  # No more pages
 
+    # Sort all releases for all packages by publishing date (most recent first)
+    for p in all_releases.keys():
+        all_releases[p].sort(
+            key=lambda r: datetime.fromisoformat(r["published_at"].replace("Z", "+00:00")), reverse=True
+        )
     # Build and return the dictionary using Package instances
     return {Package(p): v for p, v in all_releases.items()}
 
 
 # --------------------------------------------------------------------------------------------------
 def fetch_latest_github_taipy_releases(
-    all_releases: t.Optional[dict[Package, list[Version]]] = None, gh_path: t.Optional[str] = None
+    all_releases: t.Optional[dict[Package, list[Release]]] = None, gh_path: t.Optional[str] = None
 ) -> Version:
     # Retrieve all available releases if necessary
     if all_releases is None:
         all_releases = fetch_github_releases(gh_path)
     # Find the latest 'taipy' version that has no extension
     latest_taipy_version = Version.UNKNOWN
-    if versions := all_releases.get(Package("taipy")):
-        latest_taipy_version = max(filter(lambda v: v.ext is None, versions))
+    releases = all_releases.get(Package("taipy"))
+    if releases := all_releases.get(Package("taipy")):
+        # Retrieve all non-dev releases
+        versions = [release["version"] for release in releases if release["version"].ext is None]
+        # Find the latest
+        if versions:
+            latest_taipy_version = max(versions)
     return latest_taipy_version

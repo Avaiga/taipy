@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Avaiga Private Limited
+# Copyright 2021-2025 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -15,28 +15,14 @@
 # Working directory must be [root_dir].
 # --------------------------------------------------------------------------------------------------
 
+import argparse
 import os
 import re
-import sys
 import typing as t
 
-from common import PACKAGES, Version, retrieve_github_path
+from common import Git, Package, Version
 
 BASE_PATH = "./tools/packages"
-
-
-def usage() -> None:
-    packages = "> <".join(f"{p}_ver" for p in PACKAGES)
-    print(  # noqa: T201
-        f"Usage: {sys.argv[0]} <package> <{packages}> <deps> [<gh_path>]"
-    )
-    packages = ", ".join(f"'{p}'" for p in PACKAGES[:-1])
-    packages = f"{packages}, or '{PACKAGES[-1]}'"
-    print(f"   <package> must be one of {packages}.")  # noqa: T201
-    for p in PACKAGES:
-        print(f"   <{p}_ver>: minimal version of the taipy-{p} dependency.")  # noqa: T201
-    print("   <deps> must be 'Pypi' or 'GitHub', indicating where to find Taipy package dependencies.")  # noqa: T201
-    print("   <gh_path>: The path of GitHub repository (owner/repo), used if <deps> is 'GitHub'.")  # noqa: T201
 
 
 def __build_taipy_package_line(line: str, version: Version, use_pypi: bool, gh_path: t.Optional[str]) -> str:
@@ -50,9 +36,9 @@ def __build_taipy_package_line(line: str, version: Version, use_pypi: bool, gh_p
 
 
 def update_setup_requirements(
-    package: str, versions: dict[str, Version], publish_on_py_pi: bool, gh_path: t.Optional[str]
+    package: Package, versions: dict[str, Version], publish_on_py_pi: bool, gh_path: t.Optional[str]
 ) -> None:
-    path = os.path.join(BASE_PATH, "taipy" if package == "taipy" else f"taipy-{package}", "setup.requirements.txt")
+    path = os.path.join(BASE_PATH, package.name, "setup.requirements.txt")
     lines = []
     with open(path, mode="r") as req:
         for line in req:
@@ -73,23 +59,93 @@ def update_setup_requirements(
     print("-" * 32)  # noqa: T201
 
 
-if __name__ == "__main__":
-    if len(sys.argv) < len(PACKAGES) + 3:
-        usage()
-        raise ValueError("Missing arguments.")
-    package = sys.argv[1]
-    # Store the provided version for each package listed in PACKAGES
-    versions = {f"taipy-{p}": Version.from_string(sys.argv[i]) for i, p in enumerate(PACKAGES, 2)}
-    # Keep compatibility with legacy actions ('true' is equivalent to 'Pypi')
-    pypi_deps = sys.argv[len(PACKAGES) + 2].lower() in ["true", "pypi"]
-    gh_path = None
-    if not pypi_deps:
-        if len(sys.argv) < len(PACKAGES) + 4:
-            gh_path = retrieve_github_path()
-            if gh_path is None:
-                usage()
-                raise ValueError("Couldn't figure out GitHub branch path.")
-        else:
-            gh_path = sys.argv[len(PACKAGES) + 3]
+def main():
+    parser = argparse.ArgumentParser(
+        description="Computes the Taipy package versions to be build.", formatter_class=argparse.RawTextHelpFormatter
+    )
 
-    update_setup_requirements(package, versions, pypi_deps, gh_path)
+    # <package> argument
+    parser.add_argument(
+        "package",
+        type=Package,
+        action="store",
+        help="""The name of the package to setup the build version for.
+This must be the short name of a Taipy package (common, core...) or 'taipy'.
+""",
+    )
+
+    # <common-version> argument
+    parser.add_argument(
+        "common_version",
+        type=Version.check_argument,
+        action="store",
+        help="Full name of the target version (M.m.p) for the taipy-common package.",
+    )
+    # <core-version> argument
+    parser.add_argument(
+        "core_version",
+        type=Version.check_argument,
+        action="store",
+        help="Full name of the target version (M.m.p) for the taipy-core package.",
+    )
+    # <gui-version> argument
+    parser.add_argument(
+        "gui_version",
+        type=Version.check_argument,
+        action="store",
+        help="Full name of the target version (M.m.p) for the taipy-gui package.",
+    )
+    # <rest-version> argument
+    parser.add_argument(
+        "rest_version",
+        type=Version.check_argument,
+        action="store",
+        help="Full name of the target version (M.m.p) for the taipy-rest package.",
+    )
+    # <rest-version> argument
+    parser.add_argument(
+        "templates_version",
+        type=Version.check_argument,
+        action="store",
+        help="Full name of the target version (M.m.p) for the taipy-templates package.",
+    )
+    # <dependencies-location> argument
+    parser.add_argument(
+        "-deps",
+        "-dl",
+        "--dependencies-location",
+        type=str.lower,
+        choices=["github", "pypi"],
+        required=True,
+        help="Where to point dependencies to.",
+    )
+
+    # <repository_name> argument
+    def _check_repository_name(value: str) -> str:
+        if len(value.split("/")) != 2:
+            raise argparse.ArgumentTypeError(f"'{value}' is not a valid '<owner>/<repo>' pair.")
+        return value
+
+    parser.add_argument(
+        "-r",
+        "--repository_name",
+        type=_check_repository_name,
+        help="""The '<owner>/<repo>' string that identifies the repository where releases are fetched.
+The default is the current repository.""",
+    )
+
+    args = parser.parse_args()
+    versions = {
+        "taipy-common": args.common_version,
+        "taipy-core": args.core_version,
+        "taipy-gui": args.gui_version,
+        "taipy-rest": args.rest_version,
+        "taipy-templates": args.templates_version,
+    }
+    publish_on_py_pi = args.dependencies_location == "pypi"
+    repository_name = args.repository_name if args.repository_name else Git.get_github_path()
+    update_setup_requirements(args.package, versions, publish_on_py_pi, repository_name)
+
+
+if __name__ == "__main__":
+    main()
