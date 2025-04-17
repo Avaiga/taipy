@@ -1,18 +1,17 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=76", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "taipy-gui"
 description = "Low-code library to create graphical user interfaces on the Web for your Python applications."
 readme = "package_desc.md"
-requires-python = ">=3.9"
-license = {text = "Apache License 2.0"}
+requires-python = ">=3.9,<3.13"
+license = "Apache-2.0"
 authors = [{name = "Avaiga", email = "dev@taipy.io"}]
-keywords = ["taipy-gui"]
+keywords = ["taipy", "gui", "taipy-gui"]
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
@@ -22,6 +21,9 @@ classifiers = [
 ]
 dynamic = ["version", "dependencies"]
 
+[tool.setuptools.packages]
+find = {include = ["taipy", "taipy.gui", "taipy.gui.*"]}
+
 [project.optional-dependencies]
 ngrok = ["pyngrok>=5.1,<6.0"]
 image = [
@@ -29,9 +31,7 @@ image = [
     "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
 ]
 arrow = ["pyarrow>=16.0.0,<19.0"]
-
-[tool.setuptools.packages]
-find = {include = ["taipy", "taipy.gui", "taipy.gui.*"]}
+test = ["pytest>=6.0"]
 
 [project.urls]
-homepage = "https://github.com/avaiga/taipy"
+Homepage = "https://github.com/Avaiga/taipy"
