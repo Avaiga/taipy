@@ -25,7 +25,7 @@
     "react-jsx-parser": "^2.1.0",
     "react-markdown": "^9.0.1",
     "react-plotly.js": "^2.5.1",
-    "react-router": "^7.1.1",
+    "react-router": "^7.5.2",
     "react-virtualized-auto-sizer": "^1.0.6",
     "react-window": "^1.8.6",
     "react-window-infinite-loader": "^1.0.7",
