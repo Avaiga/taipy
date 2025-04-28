@@ -161,6 +161,7 @@ export interface ItemProps {
     handleDrop?: (itemId: string, dropIndex: number, targetVarName: string, targetId?: string) => void;
     lovVarName?: string;
     targetId?: string;
+    handleHover?: (itemId?: string, dropIndex?: number) => void;
 }
 
 export const SingleItem = ({
@@ -177,9 +178,13 @@ export const SingleItem = ({
     handleDrop,
     lovVarName,
     targetId,
+    handleHover,
 }: ItemProps) => {
     const itemRef = useRef<HTMLDivElement>(null);
-    const getDragItem = useCallback(() => (dragType && !disabled ? { id: value, index: -1 } : null), [dragType, disabled, value]);
+    const getDragItem = useCallback(
+        () => (dragType && !disabled ? { id: value, index: -1 } : null),
+        [dragType, disabled, value]
+    );
 
     const [{ isDragging }, drag] = useDrag(
         () => ({
@@ -189,9 +194,8 @@ export const SingleItem = ({
                 isDragging: monitor.isDragging(),
             }),
             end: (item: DragItem, monitor) => {
-                const dropResult = monitor.getDropResult();
-                if (dropResult) {
-                    handleDrop?.(item.id, item.index, lovVarName || "", item.targetId);
+                if (monitor.getDropResult()) {
+                    handleDrop?.(item.targetId || "", item.index, lovVarName || "", item.targetId);
                 }
             },
         }),
@@ -203,7 +207,10 @@ export const SingleItem = ({
             hover: (item: DragItem) => {
                 item.index = index;
                 item.targetId = targetId;
+                handleHover?.(item.id, index);
             },
+            drop: () => handleHover?.(),
+
         }),
         [dropTypes, index, targetId]
     );

@@ -28,6 +28,6 @@ module.exports = {
     coverageReporters: ["json", "html", "text"],
     modulePathIgnorePatterns: ["<rootDir>/packaging/"],
     moduleNameMapper: {"react-markdown": "<rootDir>/test-config/markdown.tsx"},
-    transformIgnorePatterns: ["<rootDir>/node_modules/(?!react-jsx-parser/)"],
+    transformIgnorePatterns: ["<rootDir>/node_modules/(?!react-jsx-parser|react-dnd|dnd-core|@react-dnd|react-dnd-test-utils/)"],
     ...createJsWithTsPreset()
 };

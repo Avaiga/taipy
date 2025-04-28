@@ -85,6 +85,7 @@ const MultipleItem = ({
     index = -1,
     lovVarName,
     targetId,
+    handleHover,
 }: ItemProps) => {
     const itemRef = useRef<HTMLDivElement>(null);
     const getDragItem = useCallback(
@@ -100,8 +101,7 @@ const MultipleItem = ({
                 isDragging: monitor.isDragging(),
             }),
             end: (item: DragItem, monitor) => {
-                const dropResult = monitor.getDropResult();
-                if (dropResult) {
+                if (monitor.getDropResult()) {
                     handleDrop?.(item.id, item.index, lovVarName || "", item.targetId);
                 }
             },
@@ -114,7 +114,10 @@ const MultipleItem = ({
             hover: (item: DragItem) => {
                 item.index = index;
                 item.targetId = targetId;
+                handleHover?.(item.id, index);
             },
+            drop: () => handleHover?.(),
+
         }),
         [dropTypes, index, targetId]
     );
@@ -192,6 +195,7 @@ const renderBoxSx = {
     width: "100%",
 } as CSSProperties;
 
+const dropItem = { id: "__TAIPY_DROP__", item: "Drop Here ..." } as LovItem;
 interface SelectorProps extends SelTreeProps {
     dropdown?: boolean;
     mode?: string;
@@ -219,6 +223,7 @@ const Selector = (props: SelectorProps) => {
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
+    const [lovListWithDrop, setLovListWithDrop] = useState<LovItem[]>();
     const dispatch = useDispatch();
     const module = useModule();
     const theme = useTheme();
@@ -254,7 +259,9 @@ const Selector = (props: SelectorProps) => {
             hover: (item: DragItem) => {
                 item.index = -1;
                 item.targetId = id;
+                handleHover?.(item.id, 0);
             },
+            drop: () => handleHover?.(),
         }),
         [dropTypes, id]
     );
@@ -274,8 +281,41 @@ const Selector = (props: SelectorProps) => {
         },
         [lovVarName, dispatch, module, props.onAction, id]
     );
+    const dragLeaveHandler = useCallback(() => {
+        setLovListWithDrop((oldList) => {
+            if (!oldList) {
+                return oldList;
+            }
+            return oldList.filter((item) => item.id !== dropItem.id);
+        });
+    }, []);
+    const handleHover = useCallback(
+        (_itemId?: string, dropIndex?: number) =>
+            setLovListWithDrop((oldList) => {
+                if (!oldList) {
+                    return oldList;
+                }
+                if (dropIndex === undefined) {
+                    return oldList.filter((item) => item.id !== dropItem.id);
+                }
+                const oldDropIndex = oldList.findIndex((item) => item.id === dropItem.id);
+                if (oldDropIndex !== -1) {
+                    if (dropIndex === oldDropIndex) {
+                        return oldList;
+                    }
+                    oldList.splice(oldDropIndex, 1);
+                }
+                if (dropIndex < oldList.length) {
+                    return oldList.slice(0, dropIndex).concat(dropItem).concat(oldList.slice(dropIndex));
+                }
+                return oldList.concat(dropItem);
+            }),
+        []
+    );
 
     const lovList = useLovListMemo(lov, defaultLov);
+    useEffect(() => (props.dropTypes ? setLovListWithDrop(lovList) : undefined), [lovList, props.dropTypes]);
+
     const listSx = useMemo(
         () => ({
             bgcolor: "transparent",
@@ -709,8 +749,8 @@ const Selector = (props: SelectorProps) => {
                                     />
                                 </Box>
                             ) : null}
-                            <List sx={listSx} id={id} ref={dropRef}>
-                                {lovList.map((elt, idx) =>
+                            <List sx={listSx} id={id} ref={dropRef} onDragLeave={dragLeaveHandler}>
+                                {(lovListWithDrop || lovList).map((elt, idx) =>
                                     showItem(elt, searchValue) ? (
                                         multiple ? (
                                             <MultipleItem
@@ -726,6 +766,7 @@ const Selector = (props: SelectorProps) => {
                                                 handleDrop={handleDrop}
                                                 lovVarName={lovVarName}
                                                 targetId={id}
+                                                handleHover={handleHover}
                                             />
                                         ) : (
                                             <SingleItem
@@ -741,6 +782,7 @@ const Selector = (props: SelectorProps) => {
                                                 handleDrop={handleDrop}
                                                 lovVarName={lovVarName}
                                                 targetId={id}
+                                                handleHover={handleHover}
                                             />
                                         )
                                     ) : null

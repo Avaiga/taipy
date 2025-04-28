@@ -14,12 +14,14 @@
 import React from "react";
 import {render} from "@testing-library/react";
 import "@testing-library/jest-dom";
+import { wrapWithBackend } from "react-dnd-test-utils";
 
 import Part from './Part';
 
 describe("Part Component", () => {
     it("renders", async () => {
-        const {getByText} = render(<Part>bar</Part>);
+        const PartContext = wrapWithBackend(Part)
+        const {getByText} = render(<PartContext>bar</PartContext>);
         const elt = getByText("bar");
         expect(elt.tagName).toBe("DIV");
         expect(elt).toHaveClass("MuiBox-root")
