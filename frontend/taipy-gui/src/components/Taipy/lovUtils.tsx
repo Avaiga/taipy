@@ -11,22 +11,28 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, useMemo, MouseEvent } from "react";
+import React, { ComponentProps, CSSProperties, useMemo, MouseEvent, useEffect, useRef, useState } from "react";
+import {
+    draggable,
+    dropTargetForElements,
+    // type ElementDropTargetEventBasePayload,
+    // monitorForElements,
+} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Tooltip from "@mui/material/Tooltip";
-import { TypographyProps } from "@mui/material";
 import { SxProps } from "@mui/system";
 
 import { TaipyActiveProps, TaipyChangeProps, TaipyLabelProps } from "./utils";
 import { getInitials } from "../../utils";
 import { LovItem } from "../../utils/lov";
 import { stringIcon, Icon, IconAvatar, avatarSx } from "../../utils/icon";
+import { DndInternalProps, DndProps, draggedSx, droppableSx } from "./dndUtils";
 
-export interface SelTreeProps extends LovProps, TaipyLabelProps {
+export interface SelTreeProps extends LovProps, TaipyLabelProps, DndProps {
     filter?: boolean;
     multiple?: boolean;
     width?: string | number;
@@ -105,12 +111,12 @@ export const LovImage = ({
     item,
     disableTypo,
     height,
-    titleTypographyProps,
+    slotProps,
 }: {
     item: Icon;
     disableTypo?: boolean;
     height?: string;
-    titleTypographyProps?: TypographyProps<"span", { component?: "span" }>;
+    slotProps?: ComponentProps<typeof CardHeader>["slotProps"];
 }) => {
     const sx = useMemo(
         () => (height ? { height: height, "& .MuiAvatar-img": { objectFit: "contain" } } : undefined) as SxProps,
@@ -122,7 +128,7 @@ export const LovImage = ({
             avatar={<IconAvatar img={item} sx={sx} />}
             title={item.text}
             disableTypography={disableTypo}
-            titleTypographyProps={titleTypographyProps}
+            slotProps={slotProps}
         />
     );
 };
@@ -136,14 +142,14 @@ export const showItem = (elt: LovItem, searchValue: string) => {
     );
 };
 
-export interface ItemProps {
+export interface ItemProps extends DndInternalProps {
     value: string;
     clickHandler: (evt: MouseEvent<HTMLElement>) => void;
     selectedValue: string[] | string;
     item: stringIcon;
     disabled: boolean;
     withAvatar?: boolean;
-    titleTypographyProps?: TypographyProps<"span", { component?: "span" }>;
+    slotProps?: ComponentProps<typeof CardHeader>["slotProps"];
 }
 
 export const SingleItem = ({
@@ -153,38 +159,91 @@ export const SingleItem = ({
     item,
     disabled,
     withAvatar = false,
-    titleTypographyProps,
-}: ItemProps) => (
-    <ListItemButton
-        onClick={clickHandler}
-        data-id={value}
-        selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value}
-        disabled={disabled}
-    >
-        {typeof item === "string" ? (
-            withAvatar ? (
-                <ListItemAvatar>
-                    <CardHeader
-                        sx={cardSx}
-                        avatar={
-                            <Tooltip title={item}>
-                                <Avatar sx={avatarSx}>{getInitials(item)}</Avatar>
-                            </Tooltip>
-                        }
-                        title={item}
-                        titleTypographyProps={titleTypographyProps}
-                    />
-                </ListItemAvatar>
+    slotProps,
+    dragType,
+    dragVarName,
+    sourceId,
+    dropTypes,
+    onDrop,
+    dragParams,
+}: ItemProps) => {
+    const itemRef = useRef<HTMLDivElement>(null);
+    const [isDragging, setDragging] = useState(false);
+    const [isDraggedOver, setIsDraggedOver] = useState(false);
+
+    useEffect(() => {
+        const elt = itemRef.current;
+        if (!elt) {
+            return;
+        }
+        return draggable({
+            element: elt,
+            onDragStart: () => setDragging(true),
+            onDrop: () => setDragging(false),
+            getInitialData: () => ({ itemId: value, type: dragType, varName: dragVarName, sourceId, dragParams }),
+            canDrag: () => !!dragType,
+        });
+    }, [value, dragType, dragVarName, sourceId, dragParams]);
+
+    useEffect(() => {
+        const elt = itemRef.current;
+        if (!elt) {
+            return;
+        }
+
+        return dropTargetForElements({
+            element: elt,
+            onDragEnter: () => setIsDraggedOver(true),
+            onDragLeave: () => setIsDraggedOver(false),
+            onDrop: ({ source }) => {
+                setIsDraggedOver(false);
+                onDrop &&
+                    onDrop(
+                        source.data.sourceId as string,
+                        source.data.itemId as string,
+                        source.data.dragParams as Record<string, unknown>,
+                        dragVarName,
+                        value
+                    );
+            },
+            canDrop: ({ source }) => !!dropTypes && dropTypes.includes(source.data.type as string),
+        });
+    }, [dropTypes, value, dragVarName, onDrop]);
+
+    return (
+        <ListItemButton
+            onClick={clickHandler}
+            data-id={value}
+            selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value}
+            disabled={disabled}
+            ref={itemRef}
+            sx={isDragging ? draggedSx : isDraggedOver ? droppableSx : undefined}
+        >
+            {typeof item === "string" ? (
+                withAvatar ? (
+                    <ListItemAvatar>
+                        <CardHeader
+                            sx={cardSx}
+                            avatar={
+                                <Tooltip title={item}>
+                                    <Avatar sx={avatarSx}>{getInitials(item)}</Avatar>
+                                </Tooltip>
+                            }
+                            title={item}
+                            slotProps={slotProps}
+                        />
+                    </ListItemAvatar>
+                ) : (
+                    <ListItemText primary={item} />
+                )
             ) : (
-                <ListItemText primary={item} />
-            )
-        ) : (
-            <ListItemAvatar>
-                <LovImage item={item} titleTypographyProps={titleTypographyProps} />
-            </ListItemAvatar>
-        )}
-    </ListItemButton>
-);
+                <ListItemAvatar>
+                    <LovImage item={item} slotProps={slotProps} />
+                </ListItemAvatar>
+            )}
+        </ListItemButton>
+    );
+};
 
 export const isLovParent = (lov: LovItem[] | undefined, id: string, childId: string, path: string[] = []): boolean => {
     if (!lov) {

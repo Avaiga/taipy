@@ -12,16 +12,23 @@
  */
 
 import React, {
-    useState,
+    ChangeEvent,
+    CSSProperties,
+    HTMLAttributes,
+    MouseEvent,
+    SyntheticEvent,
     useCallback,
     useEffect,
     useMemo,
-    CSSProperties,
-    MouseEvent,
-    ChangeEvent,
-    SyntheticEvent,
-    HTMLAttributes,
+    useRef,
+    useState,
 } from "react";
+import {
+    draggable,
+    dropTargetForElements,
+    // type ElementDropTargetEventBasePayload,
+    // monitorForElements,
+} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import Autocomplete from "@mui/material/Autocomplete";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -47,40 +54,105 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import { Theme, useTheme } from "@mui/material";
 
-import { doNotPropagateEvent, getSuffixedClassNames, getUpdateVar } from "./utils";
-import { createSendUpdateAction } from "../../context/taipyReducers";
+import { doNotPropagateEvent, expandSx, getSuffixedClassNames, getUpdateVar } from "./utils";
+import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { ItemProps, LovImage, paperBaseSx, SelTreeProps, showItem, SingleItem, useLovListMemo } from "./lovUtils";
 import {
     useClassNames,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
+    useDynamicJsonProperty,
     useDynamicProperty,
     useModule,
 } from "../../utils/hooks";
 import { Icon } from "../../utils/icon";
 import { LovItem } from "../../utils/lov";
 import { getComponentClassName } from "./TaipyStyle";
+import { draggedSx, droppableSx } from "./dndUtils";
 
-const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
-    <ListItemButton onClick={clickHandler} data-id={value} dense disabled={disabled}>
-        <ListItemIcon>
-            <Checkbox
-                disabled={disabled}
-                edge="start"
-                checked={selectedValue.includes(value)}
-                tabIndex={-1}
-                disableRipple
-            />
-        </ListItemIcon>
-        {typeof item === "string" ? (
-            <ListItemText primary={item} />
-        ) : (
-            <ListItemAvatar>
-                <LovImage item={item} />
-            </ListItemAvatar>
-        )}
-    </ListItemButton>
-);
+const MultipleItem = ({
+    value,
+    clickHandler,
+    selectedValue,
+    item,
+    disabled,
+    dragType,
+    dragVarName,
+    sourceId,
+    onDrop,
+    dropTypes,
+    dragParams,
+}: ItemProps) => {
+    const itemRef = useRef<HTMLDivElement>(null);
+    const [isDragging, setDragging] = useState(false);
+    const [isDraggedOver, setIsDraggedOver] = useState(false);
+
+    useEffect(() => {
+        const elt = itemRef.current;
+        if (!elt) {
+            return;
+        }
+        return draggable({
+            element: elt,
+            onDragStart: () => setDragging(true),
+            onDrop: () => setDragging(false),
+            getInitialData: () => ({ itemId: value, type: dragType, varName: dragVarName, sourceId, dragParams }),
+            canDrag: () => !!dragType,
+        });
+    }, [value, dragType, dragVarName, sourceId, dragParams]);
+
+    useEffect(() => {
+        const elt = itemRef.current;
+        if (!elt) {
+            return;
+        }
+
+        return dropTargetForElements({
+            element: elt,
+            onDragEnter: () => setIsDraggedOver(true),
+            onDragLeave: () => setIsDraggedOver(false),
+            onDrop: ({ source }) => {
+                setIsDraggedOver(false);
+                onDrop &&
+                    onDrop(
+                        source.data.sourceId as string,
+                        source.data.itemId as string,
+                        source.data.dragParams as Record<string, unknown>,
+                        dragVarName,
+                        value
+                    );
+            },
+            canDrop: ({ source }) => !!dropTypes && dropTypes.includes(source.data.type as string),
+        });
+    }, [dropTypes, value, dragVarName, onDrop]);
+
+    return (
+        <ListItemButton
+            onClick={clickHandler}
+            data-id={value}
+            dense
+            disabled={disabled}
+            sx={isDragging ? draggedSx : isDraggedOver ? droppableSx : undefined}
+        >
+            <ListItemIcon>
+                <Checkbox
+                    disabled={disabled}
+                    edge="start"
+                    checked={selectedValue.includes(value)}
+                    tabIndex={-1}
+                    disableRipple
+                />
+            </ListItemIcon>
+            {typeof item === "string" ? (
+                <ListItemText primary={item} />
+            ) : (
+                <ListItemAvatar>
+                    <LovImage item={item} />
+                </ListItemAvatar>
+            )}
+        </ListItemButton>
+    );
+};
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -155,6 +227,7 @@ const Selector = (props: SelectorProps) => {
     const dispatch = useDispatch();
     const module = useModule();
     const theme = useTheme();
+    const listRef = useRef<HTMLUListElement>(null);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -167,16 +240,17 @@ const Selector = (props: SelectorProps) => {
     const isCheck = mode && mode.toLocaleLowerCase() == "check";
     const dropdown = isRadio || isCheck || props.dropdown === undefined ? false : props.dropdown;
     const multiple = isCheck ? true : isRadio || props.multiple === undefined ? false : props.multiple;
+    const [isDraggedOver, setIsDraggedOver] = useState(false);
 
     const lovList = useLovListMemo(lov, defaultLov);
+    const lovVarName = useMemo(() => getUpdateVar(updateVars, "lov"), [updateVars]);
     const listSx = useMemo(
-        () => ({
-            bgcolor: "transparent",
-            overflowY: "auto",
-            width: "100%",
-            maxWidth: width,
-        }),
-        [width]
+        () =>
+            expandSx(
+                { bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width },
+                isDraggedOver ? droppableSx : undefined
+            ),
+        [width, isDraggedOver]
     );
     const heightSx = useMemo(() => {
         if (!height) {
@@ -246,7 +320,7 @@ const Selector = (props: SelectorProps) => {
                             module,
                             props.onChange,
                             propagate,
-                            valueById ? undefined : getUpdateVar(updateVars, "lov")
+                            valueById ? undefined : lovVarName
                         )
                     );
                     return newKeys;
@@ -258,14 +332,14 @@ const Selector = (props: SelectorProps) => {
                             module,
                             props.onChange,
                             propagate,
-                            valueById ? undefined : getUpdateVar(updateVars, "lov")
+                            valueById ? undefined : lovVarName
                         )
                     );
                     return [key];
                 }
             });
         },
-        [updateVarName, dispatch, multiple, propagate, updateVars, valueById, props.onChange, module]
+        [updateVarName, dispatch, multiple, propagate, lovVarName, valueById, props.onChange, module]
     );
 
     const clickHandler = useCallback(
@@ -301,11 +375,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : getUpdateVar(updateVars, "lov")
+                    valueById ? undefined : lovVarName
                 )
             );
         },
-        [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
+        [dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
     );
 
     const handleCheckAllChange = useCallback(
@@ -319,11 +393,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : getUpdateVar(updateVars, "lov")
+                    valueById ? undefined : lovVarName
                 )
             );
         },
-        [lovList, dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
+        [lovList, dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
     );
 
     const [autoValue, setAutoValue] = useState<LovItem | LovItem[] | null>(() => (multiple ? [] : null));
@@ -338,11 +412,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : getUpdateVar(updateVars, "lov")
+                    valueById ? undefined : lovVarName
                 )
             );
         },
-        [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
+        [dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
     );
 
     const handleDelete = useCallback(
@@ -358,19 +432,82 @@ const Selector = (props: SelectorProps) => {
                             module,
                             props.onChange,
                             propagate,
-                            valueById ? undefined : getUpdateVar(updateVars, "lov")
+                            valueById ? undefined : lovVarName
                         )
                     );
                     return keys;
                 });
         },
-        [updateVarName, propagate, dispatch, updateVars, valueById, props.onChange, module]
+        [updateVarName, propagate, dispatch, lovVarName, valueById, props.onChange, module]
     );
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
 
     const dropdownValue = ((dropdown || isRadio) &&
         (multiple ? selectedValue : selectedValue.length ? selectedValue[0] : "")) as string[];
+
+    const dragParams = useDynamicJsonProperty(
+        props.dndParameters,
+        props.defaultDndParameters || "",
+        undefined as Record<string, unknown> | undefined
+    );
+    const dropTypes = useMemo(() => {
+        if (props.dropTypes) {
+            try {
+                return JSON.parse(props.dropTypes);
+            } catch (e) {
+                console.error("Error parsing dropTypes: ", e);
+            }
+            return undefined;
+        }
+    }, [props.dropTypes]);
+
+    const dropHandler = useCallback(
+        (
+            sourceId?: string,
+            sourceItemId?: string,
+            sourceParams?: Record<string, unknown>,
+            sourceVarName?: string,
+            targetItemId?: string
+        ) => {
+            dispatch(
+                createSendActionNameAction(props.onAction, module, {
+                    reason: "drop",
+                    sourceId,
+                    sourceItemId,
+                    sourceParams,
+                    sourceVarName,
+                    targetId: id,
+                    targetItemId,
+                    targetParams: dragParams,
+                    targetVarName: lovVarName,
+                })
+            );
+        },
+        [props.onAction, dispatch, module, id, lovVarName, dragParams]
+    );
+
+    useEffect(() => {
+        const elt = listRef.current;
+        if (!elt) {
+            return;
+        }
+
+        return dropTargetForElements({
+            element: elt,
+            onDragEnter: () => setIsDraggedOver(true),
+            onDragLeave: () => setIsDraggedOver(false),
+            onDrop: ({ source }) => {
+                setIsDraggedOver(false);
+                if (source.element !== elt) {
+                    return;
+                }
+                dropHandler &&
+                    dropHandler(source.data.sourceId as string, source.data.itemId as string, dragParams, lovVarName);
+            },
+            canDrop: ({ source }) => !!dropTypes && dropTypes.includes(source.data.type as string),
+        });
+    }, [dropTypes, lovVarName, dropHandler, dragParams]);
 
     return (
         <>
@@ -602,7 +739,7 @@ const Selector = (props: SelectorProps) => {
                                     />
                                 </Box>
                             ) : null}
-                            <List sx={listSx} id={id}>
+                            <List sx={listSx} id={id} ref={listRef}>
                                 {lovList
                                     .filter((elt) => showItem(elt, searchValue))
                                     .map((elt) =>
@@ -614,6 +751,12 @@ const Selector = (props: SelectorProps) => {
                                                 selectedValue={selectedValue}
                                                 clickHandler={clickHandler}
                                                 disabled={!active}
+                                                dragType={props.dragType}
+                                                dropTypes={dropTypes}
+                                                dragVarName={lovVarName}
+                                                sourceId={props.id}
+                                                onDrop={dropHandler}
+                                                dragParams={dragParams}
                                             />
                                         ) : (
                                             <SingleItem
@@ -623,6 +766,12 @@ const Selector = (props: SelectorProps) => {
                                                 selectedValue={selectedValue}
                                                 clickHandler={clickHandler}
                                                 disabled={!active}
+                                                dragType={props.dragType}
+                                                dropTypes={dropTypes}
+                                                dragVarName={lovVarName}
+                                                sourceId={props.id}
+                                                onDrop={dropHandler}
+                                                dragParams={dragParams}
                                             />
                                         )
                                     )}

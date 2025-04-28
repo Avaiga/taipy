@@ -373,11 +373,12 @@ class _Builder:
         if not hash and isinstance(value, str):
             value = [elt_type(t.strip()) for t in value.split(";")]
         if isinstance(value, list):
+            var_name = _to_camel_case(name)
             if hash and dynamic:
-                self.__set_react_attribute(name, hash)
-                return [f"{name}={hash}"]
+                self.__set_react_attribute(var_name, hash)
+                return [f"{var_name}={hash}"]
             else:
-                self.__set_json_attribute(name, value)
+                self.__set_json_attribute(var_name, value)
         elif value is not None:
             _warn(f"{self.__element_name}: {name} should be a list of {elt_type}.")
         return []
