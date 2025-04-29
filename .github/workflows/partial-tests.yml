@@ -17,6 +17,8 @@ jobs:
           mypy_flags:  "--ignore-missing-imports --implicit-optional --disable-error-code attr-defined --no-namespace-packages --exclude (taipy/templates/|tools/|doc/gui/examples/.*/builder.py|taipy/common/config/config.pyi) --follow-imports skip --disable-error-code import-untyped"
 
       - uses: chartboost/ruff-action@v1
+        with:
+          src: './taipy ./tests'
   tests:
     needs: linter
     timeout-minutes: 50
