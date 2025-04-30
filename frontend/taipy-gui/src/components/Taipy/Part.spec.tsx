@@ -12,37 +12,133 @@
  */
 
 import React from "react";
-import {render} from "@testing-library/react";
+import { render, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import userEvent from "@testing-library/user-event";
 
-import Part from './Part';
+import Part from "./Part";
+import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
+import { TaipyContext } from "../../context/taipyContext";
 
 describe("Part Component", () => {
     it("renders", async () => {
-        const {getByText} = render(<Part>bar</Part>);
+        const { getByText } = render(<Part>bar</Part>);
         const elt = getByText("bar");
         expect(elt.tagName).toBe("DIV");
-        expect(elt).toHaveClass("MuiBox-root")
-    })
+        expect(elt).toHaveClass("MuiBox-root");
+    });
     it("displays the right info for string", async () => {
-        const {getByText} = render(<Part className="taipy-part">bar</Part>);
+        const { getByText } = render(<Part className="taipy-part">bar</Part>);
         const elt = getByText("bar");
         expect(elt).toHaveClass("taipy-part");
-    })
+    });
     it("displays with width=70%", async () => {
         const { getByText } = render(<Part width="70%">bar</Part>);
         const elt = getByText("bar");
-        expect(elt).toHaveStyle('width: 70%');
+        expect(elt).toHaveStyle("width: 70%");
     });
     it("displays with width=500", async () => {
         const { getByText } = render(<Part width={500}>bar</Part>);
         const elt = getByText("bar");
-        expect(elt).toHaveStyle('width: 500px');
+        expect(elt).toHaveStyle("width: 500px");
     });
     it("renders an iframe", async () => {
-        const {getByText} = render(<Part className="taipy-part" page="http://taipy.io">bar</Part>);
+        const { getByText } = render(
+            <Part className="taipy-part" page="http://taipy.io">
+                bar
+            </Part>
+        );
         const elt = getByText("bar");
         expect(elt.parentElement?.firstElementChild?.tagName).toBe("DIV");
         expect(elt.parentElement?.firstElementChild?.firstElementChild?.tagName).toBe("IFRAME");
-    })
+    });
+    describe("Drag n Drop", () => {
+        it("is not draggable if not dragType", async () => {
+            const { getByText } = render(<Part dragType="">bar</Part>);
+            const elt = getByText("bar");
+            expect(elt.draggable).toBe(false);
+        });
+        it("is draggable if dragType", async () => {
+            const { getByText } = render(<Part dragType="drag_type">bar</Part>);
+            const elt = getByText("bar");
+            expect(elt.draggable).toBe(true);
+        });
+        it("does not send a message if drag_type is not in drop_types", async () => {
+            const dispatch = jest.fn();
+            const state: TaipyState = INITIAL_STATE;
+            const { getByText } = render(
+                <TaipyContext.Provider value={{ state, dispatch }}>
+                    <Part dragType="drag_type">bar</Part>
+                    <Part dropTypes={'"drop_type"'}>foo</Part>
+                </TaipyContext.Provider>
+            );
+            const sourceElt = getByText("bar");
+            const targetElt = getByText("foo");
+            fireEvent.drop(targetElt, {
+                dataTransfer: {
+                    getData: (type: string) =>
+                        type.endsWith("-done")
+                            ? undefined
+                            : JSON.stringify({
+                                  type: "drag_type",
+                                  itemId: "itemId",
+                                  varName: "varName",
+                                  sourceId: "sourceId",
+                                  dragParams: { par: "par" },
+                              }),
+                    setData: jest.fn(),
+                },
+            });
+            fireEvent.dragEnd(sourceElt);
+            expect(dispatch).not.toHaveBeenCalled();
+        });
+        it("sends a message if drag_type is in drop_types", async () => {
+            const dispatch = jest.fn();
+            const state: TaipyState = INITIAL_STATE;
+            const { getByText } = render(
+                <TaipyContext.Provider value={{ state, dispatch }}>
+                    <Part dragType="drag_type">bar</Part>
+                    <Part dropTypes={JSON.stringify(["drop_type", "drag_type"])} defaultDndParameters={JSON.stringify({drop: "drop"})}>foo</Part>
+                </TaipyContext.Provider>
+            );
+            const sourceElt = getByText("bar");
+            const targetElt = getByText("foo");
+            fireEvent.dragStart(sourceElt, { dataTransfer: { setData: jest.fn() } });
+            fireEvent.dragOver(targetElt);
+            fireEvent.drop(targetElt, {
+                dataTransfer: {
+                    getData: (type: string) =>
+                        type.endsWith("-done")
+                            ? undefined
+                            : JSON.stringify({
+                                  type: "drag_type",
+                                  itemId: "itemId",
+                                  varName: "varName",
+                                  sourceId: "sourceId",
+                                  dragParams: { par: "par" },
+                              }),
+                    setData: jest.fn(),
+                },
+            });
+            fireEvent.dragEnd(sourceElt);
+            expect(dispatch).toHaveBeenCalledWith({
+                context: undefined,
+                name: "",
+                payload: {
+                    args: [],
+                    reason: "drop",
+                    sourceId: "sourceId",
+                    sourceItemId: "itemId",
+                    sourceParams: {
+                        par: "par",
+                    },
+                    sourceVarName: "varName",
+                    targetId: undefined,
+                    targetItemId: undefined,
+                    targetParams: {drop: "drop"},
+                },
+                type: "SEND_ACTION_ACTION",
+            });
+        });
+    });
 });

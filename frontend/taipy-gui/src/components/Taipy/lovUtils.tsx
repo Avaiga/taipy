@@ -11,13 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ComponentProps, CSSProperties, useMemo, MouseEvent, useEffect, useRef, useState } from "react";
-import {
-    draggable,
-    dropTargetForElements,
-    // type ElementDropTargetEventBasePayload,
-    // monitorForElements,
-} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import React, { ComponentProps, CSSProperties, useMemo, MouseEvent, useRef } from "react";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -30,7 +24,7 @@ import { TaipyActiveProps, TaipyChangeProps, TaipyLabelProps } from "./utils";
 import { getInitials } from "../../utils";
 import { LovItem } from "../../utils/lov";
 import { stringIcon, Icon, IconAvatar, avatarSx } from "../../utils/icon";
-import { DndInternalProps, DndProps, draggedSx, droppableSx } from "./dndUtils";
+import { DndInternalProps, DndProps, draggedSx, droppableSx, useDrag, useDrop } from "./dndUtils";
 
 export interface SelTreeProps extends LovProps, TaipyLabelProps, DndProps {
     filter?: boolean;
@@ -168,47 +162,9 @@ export const SingleItem = ({
     dragParams,
 }: ItemProps) => {
     const itemRef = useRef<HTMLDivElement>(null);
-    const [isDragging, setDragging] = useState(false);
-    const [isDraggedOver, setIsDraggedOver] = useState(false);
 
-    useEffect(() => {
-        const elt = itemRef.current;
-        if (!elt) {
-            return;
-        }
-        return draggable({
-            element: elt,
-            onDragStart: () => setDragging(true),
-            onDrop: () => setDragging(false),
-            getInitialData: () => ({ itemId: value, type: dragType, varName: dragVarName, sourceId, dragParams }),
-            canDrag: () => !!dragType,
-        });
-    }, [value, dragType, dragVarName, sourceId, dragParams]);
-
-    useEffect(() => {
-        const elt = itemRef.current;
-        if (!elt) {
-            return;
-        }
-
-        return dropTargetForElements({
-            element: elt,
-            onDragEnter: () => setIsDraggedOver(true),
-            onDragLeave: () => setIsDraggedOver(false),
-            onDrop: ({ source }) => {
-                setIsDraggedOver(false);
-                onDrop &&
-                    onDrop(
-                        source.data.sourceId as string,
-                        source.data.itemId as string,
-                        source.data.dragParams as Record<string, unknown>,
-                        dragVarName,
-                        value
-                    );
-            },
-            canDrop: ({ source }) => !!dropTypes && dropTypes.includes(source.data.type as string),
-        });
-    }, [dropTypes, value, dragVarName, onDrop]);
+    const [isDragging] = useDrag(itemRef, dragType, dragParams, value, dragVarName, sourceId);
+    const [isDraggedOver] = useDrop(itemRef, dropTypes, value, onDrop);
 
     return (
         <ListItemButton

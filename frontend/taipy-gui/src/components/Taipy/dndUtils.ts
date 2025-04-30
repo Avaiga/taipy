@@ -1,3 +1,5 @@
+import { useEffect, useState, RefObject } from "react";
+
 export interface dropHandlerInterface {
     (
         sourceId?: string,
@@ -15,11 +17,107 @@ export interface DndProps {
     dropTypes?: string;
     onAction?: string;
 }
-export interface DndInternalProps extends Omit<DndProps, "dndParameters" | "defaultDndParameters"> {
+export interface DndInternalProps {
+    dragType?: string;
     dragVarName?: string;
     sourceId?: string;
     onDrop?: dropHandlerInterface;
     dragParams?: Record<string, unknown>;
+    dropTypes?: string[];
 }
 export const draggedSx = { opacity: 0.5 };
 export const droppableSx = { color: "red" };
+
+const dndDataType = "application/taipy-dnd";
+export const useDrag = (
+    eltRef: RefObject<HTMLElement>,
+    dragType?: string,
+    dragParams?: Record<string, unknown>,
+    itemId?: string,
+    varName?: string,
+    sourceId?: string
+) => {
+    const [isDragging, setDragging] = useState(false);
+    useEffect(() => {
+        const elt = eltRef.current;
+        if (!elt || !dragType) {
+            return;
+        }
+        const dragStartHandler = (e: DragEvent) => {
+            setDragging(true);
+            e.dataTransfer?.setData(
+                dndDataType,
+                JSON.stringify({ type: dragType, itemId, varName, sourceId, dragParams })
+            );
+        };
+        const dragEndHandler = () => {
+            setDragging(false);
+        };
+
+        elt.addEventListener("dragstart", dragStartHandler);
+        elt.addEventListener("dragend", dragEndHandler);
+        elt.draggable = true;
+        return () => {
+            elt.removeEventListener("dragstart", dragStartHandler);
+            elt.removeEventListener("dragend", dragEndHandler);
+        };
+    }, [dragType, itemId, varName, sourceId, dragParams, eltRef]);
+    return [isDragging];
+};
+
+export const useDrop = (
+    eltRef: RefObject<HTMLElement>,
+    dropTypes?: string[],
+    targetItemId?: string,
+    onDrop?: dropHandlerInterface
+) => {
+    const [isDraggedOver, setIsDraggedOver] = useState(false);
+    useEffect(() => {
+        const elt = eltRef.current;
+        if (!elt || !dropTypes) {
+            return;
+        }
+
+        const dragEnterHandler = () => {
+            setIsDraggedOver(true);
+        };
+        const dragLeaveHandler = () => {
+            setIsDraggedOver(false);
+        };
+        const dragOverHandler = (e: DragEvent) => {
+            const data = e.dataTransfer?.getData(dndDataType);
+            if (data) {
+            }
+            e.preventDefault();
+        };
+        const dropHandler = (e: DragEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDraggedOver(false);
+            const data = e.dataTransfer?.getData(dndDataType);
+            if (data && onDrop && !e.dataTransfer?.getData(dndDataType + "-done")) {
+                try {
+                    const { type, itemId, varName, sourceId, dragParams } = JSON.parse(data);
+                    if (dropTypes && dropTypes.includes(type)) {
+                        e.dataTransfer?.setData(dndDataType + "-done", "done");
+                        onDrop(sourceId, itemId, dragParams, varName, targetItemId);
+                    }
+                } catch (e) {
+                    console.error("Error parsing data: ", e);
+                }
+            }
+        };
+        elt.addEventListener("dragenter", dragEnterHandler);
+        elt.addEventListener("dragleave", dragLeaveHandler);
+        elt.addEventListener("dragover", dragOverHandler);
+        elt.addEventListener("drop", dropHandler);
+        return () => {
+            elt.removeEventListener("dragenter", dragEnterHandler);
+            elt.removeEventListener("dragleave", dragLeaveHandler);
+            elt.removeEventListener("dragover", dragOverHandler);
+            elt.removeEventListener("drop", dropHandler);
+        };
+    }, [dropTypes, targetItemId, onDrop, eltRef]);
+
+    return [isDraggedOver];
+};

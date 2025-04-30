@@ -23,12 +23,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import {
-    draggable,
-    dropTargetForElements,
-    // type ElementDropTargetEventBasePayload,
-    // monitorForElements,
-} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import Autocomplete from "@mui/material/Autocomplete";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -68,7 +62,7 @@ import {
 import { Icon } from "../../utils/icon";
 import { LovItem } from "../../utils/lov";
 import { getComponentClassName } from "./TaipyStyle";
-import { draggedSx, droppableSx } from "./dndUtils";
+import { draggedSx, droppableSx, useDrag, useDrop } from "./dndUtils";
 
 const MultipleItem = ({
     value,
@@ -84,47 +78,8 @@ const MultipleItem = ({
     dragParams,
 }: ItemProps) => {
     const itemRef = useRef<HTMLDivElement>(null);
-    const [isDragging, setDragging] = useState(false);
-    const [isDraggedOver, setIsDraggedOver] = useState(false);
-
-    useEffect(() => {
-        const elt = itemRef.current;
-        if (!elt) {
-            return;
-        }
-        return draggable({
-            element: elt,
-            onDragStart: () => setDragging(true),
-            onDrop: () => setDragging(false),
-            getInitialData: () => ({ itemId: value, type: dragType, varName: dragVarName, sourceId, dragParams }),
-            canDrag: () => !!dragType,
-        });
-    }, [value, dragType, dragVarName, sourceId, dragParams]);
-
-    useEffect(() => {
-        const elt = itemRef.current;
-        if (!elt) {
-            return;
-        }
-
-        return dropTargetForElements({
-            element: elt,
-            onDragEnter: () => setIsDraggedOver(true),
-            onDragLeave: () => setIsDraggedOver(false),
-            onDrop: ({ source }) => {
-                setIsDraggedOver(false);
-                onDrop &&
-                    onDrop(
-                        source.data.sourceId as string,
-                        source.data.itemId as string,
-                        source.data.dragParams as Record<string, unknown>,
-                        dragVarName,
-                        value
-                    );
-            },
-            canDrop: ({ source }) => !!dropTypes && dropTypes.includes(source.data.type as string),
-        });
-    }, [dropTypes, value, dragVarName, onDrop]);
+    const [isDragging] = useDrag(itemRef, dragType, dragParams, value, dragVarName, sourceId);
+    const [isDraggedOver] = useDrop(itemRef, dropTypes, value, onDrop);
 
     return (
         <ListItemButton
@@ -240,10 +195,56 @@ const Selector = (props: SelectorProps) => {
     const isCheck = mode && mode.toLocaleLowerCase() == "check";
     const dropdown = isRadio || isCheck || props.dropdown === undefined ? false : props.dropdown;
     const multiple = isCheck ? true : isRadio || props.multiple === undefined ? false : props.multiple;
-    const [isDraggedOver, setIsDraggedOver] = useState(false);
 
     const lovList = useLovListMemo(lov, defaultLov);
     const lovVarName = useMemo(() => getUpdateVar(updateVars, "lov"), [updateVars]);
+
+    const dragParams = useDynamicJsonProperty(
+        props.dndParameters,
+        props.defaultDndParameters || "",
+        undefined as Record<string, unknown> | undefined
+    );
+    const dropTypes = useMemo(() => {
+        if (props.dropTypes) {
+            try {
+                const drops = JSON.parse(props.dropTypes);
+                if (Array.isArray(drops) && drops.length) {
+                    return drops as string[];
+                }
+            } catch (e) {
+                console.error("Error parsing dropTypes: ", e);
+            }
+        }
+        return undefined;
+    }, [props.dropTypes]);
+
+    const dropHandler = useCallback(
+        (
+            sourceId?: string,
+            sourceItemId?: string,
+            sourceParams?: Record<string, unknown>,
+            sourceVarName?: string,
+            targetItemId?: string,
+        ) => {
+            dispatch(
+                createSendActionNameAction(props.onAction, module, {
+                    reason: "drop",
+                    sourceId,
+                    sourceItemId,
+                    sourceParams,
+                    sourceVarName,
+                    targetId: id,
+                    targetItemId,
+                    targetParams: dragParams,
+                    targetVarName: lovVarName,
+                })
+            );
+        },
+        [props.onAction, dispatch, module, id, lovVarName, dragParams]
+    );
+
+    const [isDraggedOver] = useDrop(listRef, dropTypes, undefined, dropHandler);
+
     const listSx = useMemo(
         () =>
             expandSx(
@@ -445,69 +446,6 @@ const Selector = (props: SelectorProps) => {
 
     const dropdownValue = ((dropdown || isRadio) &&
         (multiple ? selectedValue : selectedValue.length ? selectedValue[0] : "")) as string[];
-
-    const dragParams = useDynamicJsonProperty(
-        props.dndParameters,
-        props.defaultDndParameters || "",
-        undefined as Record<string, unknown> | undefined
-    );
-    const dropTypes = useMemo(() => {
-        if (props.dropTypes) {
-            try {
-                return JSON.parse(props.dropTypes);
-            } catch (e) {
-                console.error("Error parsing dropTypes: ", e);
-            }
-            return undefined;
-        }
-    }, [props.dropTypes]);
-
-    const dropHandler = useCallback(
-        (
-            sourceId?: string,
-            sourceItemId?: string,
-            sourceParams?: Record<string, unknown>,
-            sourceVarName?: string,
-            targetItemId?: string
-        ) => {
-            dispatch(
-                createSendActionNameAction(props.onAction, module, {
-                    reason: "drop",
-                    sourceId,
-                    sourceItemId,
-                    sourceParams,
-                    sourceVarName,
-                    targetId: id,
-                    targetItemId,
-                    targetParams: dragParams,
-                    targetVarName: lovVarName,
-                })
-            );
-        },
-        [props.onAction, dispatch, module, id, lovVarName, dragParams]
-    );
-
-    useEffect(() => {
-        const elt = listRef.current;
-        if (!elt) {
-            return;
-        }
-
-        return dropTargetForElements({
-            element: elt,
-            onDragEnter: () => setIsDraggedOver(true),
-            onDragLeave: () => setIsDraggedOver(false),
-            onDrop: ({ source }) => {
-                setIsDraggedOver(false);
-                if (source.element !== elt) {
-                    return;
-                }
-                dropHandler &&
-                    dropHandler(source.data.sourceId as string, source.data.itemId as string, dragParams, lovVarName);
-            },
-            canDrop: ({ source }) => !!dropTypes && dropTypes.includes(source.data.type as string),
-        });
-    }, [dropTypes, lovVarName, dropHandler, dragParams]);
 
     return (
         <>

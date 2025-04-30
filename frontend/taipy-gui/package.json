@@ -3,7 +3,6 @@
   "version": "4.1.0",
   "private": true,
   "dependencies": {
-    "@atlaskit/pragmatic-drag-and-drop": "^1.5.3",
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
     "@mui/icons-material": "^6.0.1",

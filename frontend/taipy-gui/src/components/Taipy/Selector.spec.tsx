@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -27,6 +27,12 @@ const lov: LoV = [
     ["id2", "Item 2"],
     ["id3", "Item 3"],
     ["id4", "Item 4"],
+];
+const lov2: LoV = [
+    ["id21", "Item 21"],
+    ["id22", "Item 22"],
+    ["id23", "Item 23"],
+    ["id24", "Item 24"],
 ];
 const defLov = '[["id10","Default Item"]]';
 
@@ -74,18 +80,18 @@ describe("Selector Component", () => {
     });
     it("is disabled", async () => {
         const { getAllByRole } = render(<Selector lov={lov} active={false} />);
-        const elts = getAllByRole("button");
-        elts.forEach((elt) => expect(elt).toHaveClass("Mui-disabled"));
+        const elements = getAllByRole("button");
+        elements.forEach((elt) => expect(elt).toHaveClass("Mui-disabled"));
     });
     it("is enabled by default", async () => {
         const { getAllByRole } = render(<Selector lov={lov} />);
-        const elts = getAllByRole("button");
-        elts.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
+        const elements = getAllByRole("button");
+        elements.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
     });
     it("is enabled by active", async () => {
         const { getAllByRole } = render(<Selector lov={lov} active={true} />);
-        const elts = getAllByRole("button");
-        elts.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
+        const elements = getAllByRole("button");
+        elements.forEach((elt) => expect(elt).not.toHaveClass("Mui-disabled"));
     });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
@@ -215,7 +221,9 @@ describe("Selector Component", () => {
             expect(queryAllByRole("listbox")).toHaveLength(0);
         });
         it("renders selectionMessage if defined", async () => {
-            const { getByText, getByRole } = render(<Selector lov={lov} dropdown={true} selectionMessage="a selection message" />);
+            const { getByText, getByRole } = render(
+                <Selector lov={lov} dropdown={true} selectionMessage="a selection message" />
+            );
             const butElt = getByRole("combobox");
             expect(butElt).toBeInTheDocument();
             await userEvent.click(butElt);
@@ -226,7 +234,9 @@ describe("Selector Component", () => {
             expect(msg).toBeInTheDocument();
         });
         it("renders showSelectAll in dropdown if True", async () => {
-            const { getByText, getByRole } = render(<Selector lov={lov} dropdown={true} multiple={true} showSelectAll={true} />);
+            const { getByText, getByRole } = render(
+                <Selector lov={lov} dropdown={true} multiple={true} showSelectAll={true} />
+            );
             const checkElt = getByRole("checkbox");
             expect(checkElt).toBeInTheDocument();
             expect(checkElt).not.toBeChecked();
@@ -249,7 +259,7 @@ describe("Selector Component", () => {
             const elt = getByText("Item 2");
             await userEvent.click(elt);
             expect(checkElement?.parentElement).toHaveClass("MuiCheckbox-indeterminate");
-            checkElement && await userEvent.click(checkElement);
+            checkElement && (await userEvent.click(checkElement));
             expect(checkElement).toBeChecked();
         });
     });
@@ -334,7 +344,7 @@ describe("Selector Component", () => {
             const selector = getByRole("radiogroup");
             const style = window.getComputedStyle(selector);
             expect(style.maxHeight).toBe(height);
-          });
+        });
     });
 
     describe("Selector Component check mode", () => {
@@ -372,12 +382,106 @@ describe("Selector Component", () => {
             expect(elt2.parentElement?.querySelector("span.Mui-checked")).not.toBeNull();
             expect(elt3.parentElement?.querySelector("span.Mui-checked")).not.toBeNull();
         });
+        it("sets the correct height for the check mode", async () => {
+            const height = "200px";
+            const { container } = render(<Selector lov={lov} mode="check" height={height} />);
+            const selector = container.querySelector(".MuiFormGroup-root");
+            const style = window.getComputedStyle(selector!);
+            expect(style.maxHeight).toBe(height);
+        });
     });
-    it("sets the correct height for the check mode", async () => {
-        const height = "200px";
-        const { container } = render(<Selector lov={lov} mode="check" height={height} />);
-        const selector = container.querySelector(".MuiFormGroup-root");
-        const style = window.getComputedStyle(selector!);
-        expect(style.maxHeight).toBe(height);
-      });
+    describe("Drag n Drop", () => {
+        it("is not draggable if not dragType", async () => {
+            const { getByText } = render(<Selector dragType="" lov={lov} />);
+            const elt = getByText("Item 1");
+            expect(elt.parentElement?.parentElement?.draggable).toBe(false);
+        });
+        it("is draggable if dragType", async () => {
+            const { getByText } = render(<Selector dragType="drag_type" lov={lov} />);
+            const elt = getByText("Item 1");
+            expect(elt.parentElement?.parentElement?.draggable).toBe(true);
+        });
+        it("does not send a message if drag_type is not in drop_types", async () => {
+            const dispatch = jest.fn();
+            const state: TaipyState = INITIAL_STATE;
+            const { getByText } = render(
+                <TaipyContext.Provider value={{ state, dispatch }}>
+                    <Selector dragType="drag_type" lov={lov} />
+                    <Selector dropTypes={'"drop_type"'} lov={lov2} />
+                </TaipyContext.Provider>
+            );
+            const sourceElt = getByText("Item 1");
+            const targetElt = getByText("Item 21");
+            fireEvent.drop(targetElt, {
+                dataTransfer: {
+                    getData: (type: string) =>
+                        type.endsWith("-done")
+                            ? undefined
+                            : JSON.stringify({
+                                  type: "drag_type",
+                                  itemId: "itemId",
+                                  varName: "varName",
+                                  sourceId: "sourceId",
+                                  dragParams: { par: "par" },
+                              }),
+                    setData: jest.fn(),
+                },
+            });
+            fireEvent.dragEnd(sourceElt);
+            expect(dispatch).not.toHaveBeenCalled();
+        });
+        it("sends a message if drag_type is in drop_types", async () => {
+            const dispatch = jest.fn();
+            const state: TaipyState = INITIAL_STATE;
+            const { getByText } = render(
+                <TaipyContext.Provider value={{ state, dispatch }}>
+                    <Selector dragType="drag_type" lov={lov} />
+                    <Selector
+                        lov={lov2}
+                        dropTypes={JSON.stringify(["drop_type", "drag_type"])}
+                        defaultDndParameters={JSON.stringify({ drop: "drop" })}
+                    />
+                </TaipyContext.Provider>
+            );
+            const sourceElt = getByText("Item 1");
+            const targetElt = getByText("Item 21");
+            fireEvent.dragStart(sourceElt, { dataTransfer: { setData: jest.fn() } });
+            fireEvent.dragOver(targetElt);
+            fireEvent.drop(targetElt, {
+                dataTransfer: {
+                    getData: (type: string) =>
+                        type.endsWith("-done")
+                            ? undefined
+                            : JSON.stringify({
+                                  type: "drag_type",
+                                  itemId: "itemId",
+                                  varName: "varName",
+                                  sourceId: "sourceId",
+                                  dragParams: { par: "par" },
+                              }),
+                    setData: jest.fn(),
+                },
+            });
+            fireEvent.dragEnd(sourceElt);
+            expect(dispatch).toHaveBeenCalledWith({
+                context: undefined,
+                name: "",
+                payload: {
+                    args: [],
+                    reason: "drop",
+                    sourceId: "sourceId",
+                    sourceItemId: "itemId",
+                    sourceParams: {
+                        par: "par",
+                    },
+                    sourceVarName: "varName",
+                    targetId: undefined,
+                    targetItemId: "id21",
+                    targetParams: { drop: "drop" },
+                    targetVarName: "",
+                },
+                type: "SEND_ACTION_ACTION",
+            });
+        });
+    });
 });

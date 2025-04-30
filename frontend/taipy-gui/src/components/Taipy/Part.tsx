@@ -11,13 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ReactNode, useContext, useEffect, useMemo, useRef, useState } from "react";
-import {
-    draggable,
-    dropTargetForElements,
-    // type ElementDropTargetEventBasePayload,
-    // monitorForElements,
-} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import React, { ReactNode, useCallback, useContext, useMemo, useRef } from "react";
 import Box from "@mui/material/Box";
 
 import { useClassNames, useDynamicJsonProperty, useDynamicProperty, useModule } from "../../utils/hooks";
@@ -25,7 +19,7 @@ import TaipyRendered from "../pages/TaipyRendered";
 import { expandSx, getCssSize, TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { getComponentClassName } from "./TaipyStyle";
-import { DndProps, draggedSx, droppableSx } from "./dndUtils";
+import { DndProps, draggedSx, droppableSx, useDrag, useDrop } from "./dndUtils";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 
 interface PartProps extends TaipyBaseProps, DndProps {
@@ -67,8 +61,6 @@ const Part = (props: PartProps) => {
     }, [state.locations, page, defaultPartial]);
 
     const itemRef = useRef<HTMLDivElement>(null);
-    const [isDragging, setDragging] = useState(false);
-    const [isDraggedOver, setIsDraggedOver] = useState(false);
 
     const dragParams = useDynamicJsonProperty(
         props.dndParameters,
@@ -78,53 +70,45 @@ const Part = (props: PartProps) => {
     const dropTypes = useMemo(() => {
         if (props.dropTypes) {
             try {
-                return JSON.parse(props.dropTypes);
+                const drops = JSON.parse(props.dropTypes);
+                if (Array.isArray(drops) && drops.length) {
+                    return drops as string[];
+                }
+                if (typeof drops === "string" && drops.length) {
+                    return [drops];
+                }
             } catch (e) {
                 console.error("Error parsing dropTypes: ", e);
             }
-            return undefined;
         }
+        return undefined;
     }, [props.dropTypes]);
+    const dropHandler = useCallback(
+        (
+            sourceId?: string,
+            sourceItemId?: string,
+            sourceParams?: Record<string, unknown>,
+            sourceVarName?: string,
+            targetItemId?: string,
+        ) => {
+            dispatch(
+                createSendActionNameAction(props.onAction, module, {
+                    reason: "drop",
+                    sourceId,
+                    sourceItemId,
+                    sourceParams,
+                    sourceVarName,
+                    targetId: id,
+                    targetItemId,
+                    targetParams: dragParams,
+                })
+            );
+        },
+        [props.onAction, dispatch, module, id, dragParams]
+    );
 
-    useEffect(() => {
-        const elt = itemRef.current;
-        if (!elt) {
-            return;
-        }
-        return draggable({
-            element: elt,
-            onDragStart: () => setDragging(true),
-            onDrop: () => setDragging(false),
-            getInitialData: () => ({ type: dragType, sourceId: id, dragParams }),
-            canDrag: () => !!dragType,
-        });
-    }, [, dragType, id, dragParams]);
-
-    useEffect(() => {
-        const elt = itemRef.current;
-        if (!elt) {
-            return;
-        }
-
-        return dropTargetForElements({
-            element: elt,
-            onDragEnter: () => setIsDraggedOver(true),
-            onDragLeave: () => setIsDraggedOver(false),
-            onDrop: ({ source }) => {
-                setIsDraggedOver(false);
-                dispatch(
-                    createSendActionNameAction(props.onAction, module, {
-                        reason: "drop",
-                        sourceId: source.data.sourceId as string,
-                        sourceParams: source.data.dragParams as Record<string, unknown>,
-                        targetId: id,
-                        targetParams: dragParams,
-                    })
-                );
-            },
-            canDrop: ({ source }) => !!dropTypes && dropTypes.includes(source.data.type as string),
-        });
-    }, [dropTypes, id, dragParams, dispatch, module, props.onAction]);
+    const [isDragging] = useDrag(itemRef, dragType, dragParams, undefined, undefined, id);
+    const [isDraggedOver] = useDrop(itemRef, dropTypes, undefined, dropHandler);
 
     const boxSx = useMemo(
         () =>
