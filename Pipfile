@@ -22,20 +22,6 @@ networkx = "==2.6"
 openpyxl = "==3.1.2"
 pandas = "==1.3.5"
 pyarrow = "==16.0.0"
-pymongo = {extras = ["srv"], version = "==4.6.3"}
-python-dotenv = "==1.0.0"
-python-magic = {version = "==0.4.24", markers="sys_platform != 'win32'"}
-python-magic-bin = {version = "==0.4.14", markers="sys_platform == 'win32'"}
-pytz = "==2021.3"
-simple-websocket = "==0.10.1"
-sqlalchemy = "==2.0.16"
-toml = "==0.10"
-twisted = "==24.7.0"
-tzlocal = "==3.0"
-boto3 = "==1.29.1"
-watchdog = "==4.0.0"
-charset-normalizer = "==3.3.2"
-numpy = "<2.0.0"
 
 [dev-packages]
 
