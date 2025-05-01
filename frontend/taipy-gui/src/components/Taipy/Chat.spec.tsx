@@ -23,6 +23,7 @@ import { stringIcon } from "../../utils/icon";
 import { TableValueType } from "./tableUtils";
 
 import { toDataUrl } from "../../utils/image";
+import { LoVElt } from "./lovUtils";
 jest.mock('../../utils/image', () => ({
     toDataUrl: (url: string) => new Promise((resolve) => resolve(url)),
   }));
@@ -40,9 +41,10 @@ const messages: TableValueType = {
         start: 0,
     },
 };
-const user1: [string, stringIcon] = ["Fred", { path: "/images/favicon.png", text: "Fred.png" }];
+const user1: [string, stringIcon] = ["Fred", { path: "/images/favicon.png", text: "Fred" }];
 const user2: [string, stringIcon] = ["Fredi", { path: "/images/fred.png", text: "Fredi.png" }];
 const users = [user1, user2];
+const users2 = [["<taipy.gui.icon.Icon 1", user1[1]], ["<taipy.gui.icon.Icon 2", user2[1]]] as LoVElt[];
 
 const searchMsg = messages[valueKey].data[0][1];
 
@@ -65,7 +67,12 @@ describe("Chat Component", () => {
     });
     it("can display an avatar", async () => {
         const { getByAltText } = render(<Chat messages={messages} users={users} defaultKey={valueKey} mode="raw" />);
-        const elt = getByAltText("Fred.png");
+        const elt = getByAltText("Fred");
+        expect(elt.tagName).toBe("IMG");
+    });
+    it("can display an avatar from Icon", async () => {
+        const { getByAltText } = render(<Chat messages={messages} users={users2} defaultKey={valueKey} mode="raw" />);
+        const elt = getByAltText("Fred");
         expect(elt.tagName).toBe("IMG");
     });
     it("is disabled", async () => {
