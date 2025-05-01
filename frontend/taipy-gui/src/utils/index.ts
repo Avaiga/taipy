@@ -206,7 +206,7 @@ export const formatWSValue = (
 export const getInitials = (value: string, max = 2): string =>
     (value || "")
         .split(" ", max)
-        .map((word) => (word.length ? word.charAt(0) : ""))
+        .map((word) => (word.length ? String.fromCodePoint(word.codePointAt(0) || 0) : ""))
         .join("")
         .toUpperCase();
 
