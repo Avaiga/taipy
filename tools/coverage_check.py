@@ -10,19 +10,20 @@
 # specific language governing permissions and limitations under the License.
 
 import argparse
-import xmltodict
-import sys
 import subprocess
+import sys
+
+import xmltodict
 
 
 def check_total_coverage(coverage_file, threshold=80):
     """Check the total project coverage."""
     with open(coverage_file) as f:
         data = xmltodict.parse(f.read())
-    total_coverage = float(data['coverage']['@line-rate']) * 100
-    print(f"Total Coverage: {total_coverage:.2f}%")
+    total_coverage = float(data["coverage"]["@line-rate"]) * 100
+    print(f"Total Coverage: {total_coverage:.2f}%")  # noqa: T201
     if total_coverage < threshold:
-        print(f"Total project coverage is below {threshold}%: {total_coverage:.2f}%")
+        print(f"Total project coverage is below {threshold}%: {total_coverage:.2f}%")  # noqa: T201
         sys.exit(1)
 
 
@@ -49,56 +50,58 @@ def check_changed_files_coverage(coverage_file, changed_files, threshold=80):
     for file in changed_files:
         if file in files:
             coverage = files[file]
-            print(f"Coverage for {file}: {coverage:.2f}%")
+            print(f"Coverage for {file}: {coverage:.2f}%")  # noqa: T201
             sum_coverage += coverage
             qty += 1
         else:
-            print(f"No coverage data found for {file}")
+            print(f"No coverage data found for {file}")  # noqa: T201
 
     if qty:
-        if sum_coverage/qty < threshold:
-            print(f"Coverage for changed files is below {threshold}%: {sum_coverage/qty:.2f}%")
+        if sum_coverage / qty < threshold:
+            print(f"Coverage for changed files is below {threshold}%: {sum_coverage/qty:.2f}%")  # noqa: T201
             sys.exit(1)
-        print(f"Coverage for changed files: {sum_coverage/qty:.2f}%")
+        print(f"Coverage for changed files: {sum_coverage/qty:.2f}%")  # noqa: T201
     else:
-        print("No file detected to run coverage for.")
+        print("No file detected to run coverage for.")  # noqa: T201
 
 
 def get_changed_files(base_branch):
     """Get the list of changed Python files in the pull request."""
     try:
         result = subprocess.run(
-            ['git', 'diff', '--name-only', f"origin/{base_branch}", '--', '*.py'],
+            ["git", "diff", "--name-only", f"origin/{base_branch}", "--", "*.py"],
             capture_output=True,
             text=True,
             check=True,
         )
         changed_files = [
-            file.replace("taipy/", "") for file in result.stdout.strip().splitlines() if not file.startswith(('tests/', 'tools/'))
+            file.replace("taipy/", "")
+            for file in result.stdout.strip().splitlines()
+            if not file.startswith(("tests/", "tools/"))
         ]
         return changed_files
     except subprocess.CalledProcessError as e:
-        print(f"Error fetching changed files: {e}")
+        print(f"Error fetching changed files: {e}") # noqa: T201
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Coverage check script.")
-    parser.add_argument('command', choices=['check-total', 'check-changed'], help="Command to execute")
-    parser.add_argument('--coverage-file', default='coverage.xml', help="Path to the coverage XML file")
-    parser.add_argument('--threshold', type=float, default=80, help="Coverage threshold percentage")
-    parser.add_argument('--base-branch', help="Base branch for comparing changed files")
+    parser.add_argument("command", choices=["check-total", "check-changed"], help="Command to execute")
+    parser.add_argument("--coverage-file", default="coverage.xml", help="Path to the coverage XML file")
+    parser.add_argument("--threshold", type=float, default=80, help="Coverage threshold percentage")
+    parser.add_argument("--base-branch", help="Base branch for comparing changed files")
 
     args = parser.parse_args()
 
-    if args.command == 'check-total':
+    if args.command == "check-total":
         check_total_coverage(args.coverage_file, args.threshold)
-    elif args.command == 'check-changed':
+    elif args.command == "check-changed":
         if not args.base_branch:
-            print("Error: --base-branch is required for check-changed")
+            print("Error: --base-branch is required for check-changed") # noqa: T201
             sys.exit(1)
         changed_files = get_changed_files(args.base_branch)
         if not changed_files:
-            print("No relevant Python files changed.")
+            print("No relevant Python files changed.") # noqa: T201
             sys.exit(0)
         check_changed_files_coverage(args.coverage_file, changed_files, args.threshold)

@@ -20,7 +20,7 @@ import typing as t
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from functools import total_ordering
+
 import requests
 
 
