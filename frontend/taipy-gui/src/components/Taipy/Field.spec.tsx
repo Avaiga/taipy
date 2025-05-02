@@ -61,13 +61,31 @@ describe("Field Component", () => {
         expect(elt).toHaveStyle("width: 500px");
     });
     it("can render markdown", async () => {
-        render(<Field value="titi" className="taipy-text" mode="md" />);
-        const elt = document.querySelector(".taipy-text");
-        await waitFor(() => expect(elt?.querySelector("p")).not.toBeNull());
+        const { container, getByText, findByText } = render(<Field value="titi" className="taipy-text" mode="md" />);
+        getByText(/markdown/i);
+        // https://stackoverflow.com/questions/72382316/jest-encountered-an-unexpected-token-react-markdown
+        // expect(await findByText(/titi/i)).toBeInTheDocument();
     });
     it("can render pre", async () => {
-        render(<Field value="titi" className="taipy-text" mode="pre" />);
-        const elt = document.querySelector("pre.taipy-text");
+        const { container } = render(<Field value="titi" className="taipy-text" mode="pre" />);
+        const elt = container.querySelector("pre.taipy-text-pre");
         expect(elt).toBeInTheDocument();
+    });
+    describe("latex mode", () => {
+        it("renders LaTeX as block math", async () => {
+            const { container, getByText } = render(
+                <Field value={"$$x = y + 1$$"} className="taipy-text" mode="latex" />
+            );
+            getByText(/latex/i);
+            await waitFor(() => expect(container.querySelector(".taipy-text-latex")).toBeInTheDocument());
+        });
+        it("renders LaTeX as inline math", async () => {
+            const { container, getByText, findByText } = render(
+                <Field value={"This is inline $x = y + 1$ math."} className="taipy-text" mode="latex" />
+            );
+            // getByText(/latex/i); // already loaded ?
+            await waitFor(() => expect(container.querySelector(".taipy-text-latex")).toBeInTheDocument());
+            expect(await findByText(/inline/i)).toBeInTheDocument();
+        });
     });
 });
