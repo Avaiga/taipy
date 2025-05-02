@@ -81,9 +81,10 @@ with open(gui_pyi_file, "w", encoding="utf-8") as write_file:
 # Generate Page Builder pyi file (gui/builder/__init__.pyi)
 # ##################################################################################################
 # Types that appear in viselements.json
-from taipy.gui import Icon  # noqa: E402
-from taipy.core import Cycle, DataNode, Job, Scenario  # noqa: E402
-from datetime import datetime
+from datetime import datetime  # noqa: E402, F401
+
+from taipy.core import Cycle, DataNode, Job, Scenario  # noqa: E402, F401
+from taipy.gui import Icon  # noqa: E402, F401
 
 # Read the version
 current_version = "latest"
@@ -187,7 +188,7 @@ def format_as_parameter(property: Dict[str, str], element_name: str):
         elif hasattr(type_desc, "__name__") and type_desc.__name__ not in ["str", "Any"]:
             type = f"Union[{type}, str]"
     except NameError:
-        print(f"WARNING - Couldn't parse type '{type}' in {element_name}.{name}")
+        print(f"WARNING - Couldn't parse type '{type}' in {element_name}.{name}") # noqa: T201
 
     if default_value is None or default_value == "None":
         default_value = " = None"
