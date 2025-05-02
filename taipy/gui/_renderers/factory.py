@@ -302,6 +302,7 @@ class _Factory:
                 ("action_keys",),
                 ("label",),
                 ("change_delay", PropertyType.number, gui._get_config("change_delay", None)),
+                ("action_on_blur", PropertyType.boolean, False),
                 ("multiline", PropertyType.boolean, False),
                 ("lines_shown", PropertyType.number, 5),
                 ("width", PropertyType.string_or_number),
@@ -409,6 +410,7 @@ class _Factory:
                 ("on_action", PropertyType.function),
                 ("label",),
                 ("change_delay", PropertyType.number, gui._get_config("change_delay", None)),
+                ("action_on_blur", PropertyType.boolean, False),
                 ("width", PropertyType.string_or_number),
             ]
         ),
