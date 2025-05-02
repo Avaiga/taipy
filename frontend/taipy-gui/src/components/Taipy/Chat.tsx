@@ -22,6 +22,7 @@ import React, {
     ReactNode,
     lazy,
     ChangeEvent,
+    UIEvent,
 } from "react";
 import { SxProps, Theme, darken, lighten } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
@@ -38,9 +39,10 @@ import Tooltip from "@mui/material/Tooltip";
 import Send from "@mui/icons-material/Send";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
+import AttachFile from "@mui/icons-material/AttachFile";
 
 import {
-    createNotificationAction,
+    createAlertAction,
     createRequestInfiniteTableUpdateAction,
     createSendActionNameAction,
 } from "../../context/taipyReducers";
@@ -58,6 +60,7 @@ const Markdown = lazy(() => import("react-markdown"));
 
 interface ChatProps extends TaipyActiveProps {
     messages?: TableValueType;
+    maxFileSize?: number;
     withInput?: boolean;
     users?: LoVElt[];
     defaultUsers?: string;
@@ -147,6 +150,7 @@ interface key2Rows {
 interface ChatRowProps {
     senderId: string;
     message: string;
+    image?: string;
     name: string;
     className?: string;
     getAvatar: (id: string, sender: boolean) => ReactNode;
@@ -156,7 +160,7 @@ interface ChatRowProps {
 }
 
 const ChatRow = (props: ChatRowProps) => {
-    const { senderId, message, name, className, getAvatar, index, showSender, mode } = props;
+    const { senderId, message, image, name, className, getAvatar, index, showSender, mode } = props;
     const sender = senderId == name;
     const avatar = getAvatar(name, sender);
 
@@ -225,7 +229,7 @@ const Chat = (props: ChatProps) => {
         onAction,
         withInput = true,
         defaultKey = "",
-        maxFileSize = .8 * 1024 * 1024, // 0.8 MB
+        maxFileSize = 0.8 * 1024 * 1024, // 0.8 MB
         pageSize = 50,
         showSender = false,
         allowSendImages = true,
@@ -242,6 +246,10 @@ const Chat = (props: ChatProps) => {
     const [enableSend, setEnableSend] = useState(false);
     const [showMessage, setShowMessage] = useState(false);
     const [anchorPopup, setAnchorPopup] = useState<HTMLDivElement | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [objectURLs, setObjectURLs] = useState<string[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const userScrolled = useRef(false);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -317,32 +325,35 @@ const Chat = (props: ChatProps) => {
         [sendAction]
     );
 
-    const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files ? event.target.files[0] : null;
-        if (file) {
-            if (file.type.startsWith("image/") && file.size <= maxFileSize) {
-                setSelectedFile(file);
-                const newImagePreview = URL.createObjectURL(file);
-                setImagePreview(newImagePreview);
-                setObjectURLs((prevURLs) => [...prevURLs, newImagePreview]);
-            } else {
-                dispatch(
-                    createNotificationAction({
-                        atype: "info",
-                        message:
-                            file.size > maxFileSize
-                                ? `Image size is limited to ${maxFileSize / 1024} KB`
-                                : "Only image file are authorized",
-                        system: false,
-                        duration: 3000,
-                    })
-                );
-                setSelectedFile(null);
-                setImagePreview(null);
-                fileInputRef.current && (fileInputRef.current.value = "");
+    const handleFileSelect = useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            const file = event.target.files ? event.target.files[0] : null;
+            if (file) {
+                if (file.type.startsWith("image/") && file.size <= maxFileSize) {
+                    setSelectedFile(file);
+                    const newImagePreview = URL.createObjectURL(file);
+                    setImagePreview(newImagePreview);
+                    setObjectURLs((prevURLs) => [...prevURLs, newImagePreview]);
+                } else {
+                    dispatch(
+                        createAlertAction({
+                            atype: "info",
+                            message:
+                                file.size > maxFileSize
+                                    ? `Image size is limited to ${maxFileSize / 1024} KB`
+                                    : "Only image file are authorized",
+                            system: false,
+                            duration: 3000,
+                        })
+                    );
+                    setSelectedFile(null);
+                    setImagePreview(null);
+                    fileInputRef.current && (fileInputRef.current.value = "");
+                }
             }
-        }
-    }, [maxFileSize, dispatch]);
+        },
+        [maxFileSize, dispatch]
+    );
 
     const handleAttachClick = useCallback(() => fileInputRef.current && fileInputRef.current.click(), [fileInputRef]);
 
@@ -466,6 +477,14 @@ const Chat = (props: ChatProps) => {
         loadMoreItems(0);
     }, [loadMoreItems]);
 
+    useEffect(() => {
+        return () => {
+            for (const objectURL of objectURLs) {
+                URL.revokeObjectURL(objectURL);
+            }
+        };
+    }, [objectURLs]);
+
     const loadOlder = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
             const { start } = evt.currentTarget.dataset;
@@ -477,7 +496,11 @@ const Chat = (props: ChatProps) => {
     );
 
     const handleOnScroll = useCallback((evt: UIEvent) => {
-        userScrolled.current = (evt.target as HTMLDivElement).scrollHeight - (evt.target as HTMLDivElement).offsetHeight - (evt.target as HTMLDivElement).scrollTop > 1;
+        userScrolled.current =
+            (evt.target as HTMLDivElement).scrollHeight -
+                (evt.target as HTMLDivElement).offsetHeight -
+                (evt.target as HTMLDivElement).scrollTop >
+            1;
     }, []);
 
     return (
