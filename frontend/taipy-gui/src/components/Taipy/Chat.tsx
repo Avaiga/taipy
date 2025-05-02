@@ -21,7 +21,7 @@ import React, {
     useEffect,
     ReactNode,
     lazy,
-    UIEvent,
+    ChangeEvent,
 } from "react";
 import { SxProps, Theme, darken, lighten } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
@@ -39,7 +39,11 @@ import Send from "@mui/icons-material/Send";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 
-import { createRequestInfiniteTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
+import {
+    createNotificationAction,
+    createRequestInfiniteTableUpdateAction,
+    createSendActionNameAction,
+} from "../../context/taipyReducers";
 import { TaipyActiveProps, disableColor, getSuffixedClassNames } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useElementVisible, useModule } from "../../utils/hooks";
 import { LoVElt, useLovListMemo } from "./lovUtils";
@@ -47,6 +51,8 @@ import { IconAvatar, avatarSx } from "../../utils/icon";
 import { emptyArray, getInitials } from "../../utils";
 import { RowType, TableValueType } from "./tableUtils";
 import { Stack } from "@mui/material";
+import { noDisplayStyle } from "./utils";
+import { toDataUrl } from "../../utils/image";
 
 const Markdown = lazy(() => import("react-markdown"));
 
@@ -62,6 +68,7 @@ interface ChatProps extends TaipyActiveProps {
     pageSize?: number;
     showSender?: boolean;
     mode?: string;
+    allowSendImages?: boolean;
 }
 
 const ENTER_KEY = "Enter";
@@ -132,7 +139,7 @@ const defaultBoxSx = {
 } as SxProps<Theme>;
 const noAnchorSx = { overflowAnchor: "none", "& *": { overflowAnchor: "none" } } as SxProps<Theme>;
 const anchorSx = { overflowAnchor: "auto", height: "1px", width: "100%" } as SxProps<Theme>;
-
+const imageSx = { width: 3 / 5, height: "auto" };
 interface key2Rows {
     key: string;
 }
@@ -162,6 +169,11 @@ const ChatRow = (props: ChatRowProps) => {
             justifyContent={sender ? "flex-end" : undefined}
         >
             <Grid sx={sender ? senderMsgSx : undefined}>
+                {image ? (
+                    <Grid container justifyContent={sender ? "flex-end" : undefined}>
+                        <Box component="img" sx={imageSx} alt="Uploaded image" src={image} />
+                    </Grid>
+                ) : null}
                 {(!sender || showSender) && avatar ? (
                     <Stack direction="row" gap={1}>
                         {!sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
@@ -213,8 +225,10 @@ const Chat = (props: ChatProps) => {
         onAction,
         withInput = true,
         defaultKey = "",
+        maxFileSize = .8 * 1024 * 1024, // 0.8 MB
         pageSize = 50,
         showSender = false,
+        allowSendImages = true,
     } = props;
     const dispatch = useDispatch();
     const module = useModule();
@@ -225,6 +239,7 @@ const Chat = (props: ChatProps) => {
     const scrollDivRef = useRef<HTMLDivElement>(null);
     const anchorDivRef = useRef<HTMLElement>(null);
     const isAnchorDivVisible = useElementVisible(anchorDivRef);
+    const [enableSend, setEnableSend] = useState(false);
     const [showMessage, setShowMessage] = useState(false);
     const [anchorPopup, setAnchorPopup] = useState<HTMLDivElement | null>(null);
     const userScrolled = useRef(false);
@@ -251,35 +266,94 @@ const Chat = (props: ChatProps) => {
         [props.height]
     );
 
+    const onChangeHandler = useCallback((evt: ChangeEvent<HTMLInputElement>) => setEnableSend(!!evt.target.value), []);
+
+    const sendAction = useCallback(
+        (elt: HTMLInputElement | null | undefined, reason: string) => {
+            if (elt && (elt?.value || imagePreview)) {
+                toDataUrl(imagePreview)
+                    .then((dataUrl) => {
+                        dispatch(
+                            createSendActionNameAction(
+                                id,
+                                module,
+                                onAction,
+                                reason,
+                                updateVarName,
+                                elt?.value,
+                                senderId,
+                                dataUrl
+                            )
+                        );
+                        elt.value = "";
+                        setSelectedFile(null);
+                        setImagePreview((url) => {
+                            url && URL.revokeObjectURL(url);
+                            return null;
+                        });
+                        fileInputRef.current && (fileInputRef.current.value = "");
+                    })
+                    .catch(console.log);
+            }
+        },
+        [imagePreview, updateVarName, onAction, senderId, id, dispatch, module]
+    );
+
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
             if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && ENTER_KEY == evt.key) {
-                const elt = evt.currentTarget.querySelector("input");
-                if (elt?.value) {
-                    dispatch(
-                        createSendActionNameAction(id, module, onAction, evt.key, updateVarName, elt?.value, senderId)
-                    );
-                    elt.value = "";
-                }
+                sendAction(evt.currentTarget.querySelector("input"), evt.key);
                 evt.preventDefault();
             }
         },
-        [updateVarName, onAction, senderId, id, dispatch, module]
+        [sendAction]
     );
 
     const handleClick = useCallback(
         (evt: MouseEvent<HTMLButtonElement>) => {
-            const elt = evt.currentTarget.parentElement?.parentElement?.querySelector("input");
-            if (elt?.value) {
-                dispatch(
-                    createSendActionNameAction(id, module, onAction, "click", updateVarName, elt?.value, senderId)
-                );
-                elt.value = "";
-            }
+            sendAction(evt.currentTarget.parentElement?.parentElement?.querySelector("input"), "click");
             evt.preventDefault();
         },
-        [updateVarName, onAction, senderId, id, dispatch, module]
+        [sendAction]
     );
+
+    const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files ? event.target.files[0] : null;
+        if (file) {
+            if (file.type.startsWith("image/") && file.size <= maxFileSize) {
+                setSelectedFile(file);
+                const newImagePreview = URL.createObjectURL(file);
+                setImagePreview(newImagePreview);
+                setObjectURLs((prevURLs) => [...prevURLs, newImagePreview]);
+            } else {
+                dispatch(
+                    createNotificationAction({
+                        atype: "info",
+                        message:
+                            file.size > maxFileSize
+                                ? `Image size is limited to ${maxFileSize / 1024} KB`
+                                : "Only image file are authorized",
+                        system: false,
+                        duration: 3000,
+                    })
+                );
+                setSelectedFile(null);
+                setImagePreview(null);
+                fileInputRef.current && (fileInputRef.current.value = "");
+            }
+        }
+    }, [maxFileSize, dispatch]);
+
+    const handleAttachClick = useCallback(() => fileInputRef.current && fileInputRef.current.click(), [fileInputRef]);
+
+    const handleImageDelete = useCallback(() => {
+        setSelectedFile(null);
+        setImagePreview((url) => {
+            url && URL.revokeObjectURL(url);
+            return null;
+        });
+        fileInputRef.current && (fileInputRef.current.value = "");
+    }, []);
 
     const avatars = useMemo(() => {
         return users.reduce((pv, elt) => {
@@ -430,6 +504,11 @@ const Chat = (props: ChatProps) => {
                                 senderId={senderId}
                                 message={`${row[columns[1]]}`}
                                 name={columns[2] ? `${row[columns[2]]}` : "Unknown"}
+                                image={
+                                    columns[3] && columns[3] != "_tp_index" && row[columns[3]]
+                                        ? `${row[columns[3]]}`
+                                        : undefined
+                                }
                                 className={className}
                                 getAvatar={getAvatar}
                                 index={idx}
@@ -449,31 +528,69 @@ const Chat = (props: ChatProps) => {
                     />
                 </Popper>
                 {withInput ? (
-                    <TextField
-                        margin="dense"
-                        fullWidth
-                        className={getSuffixedClassNames(className, "-input")}
-                        label={`message (${senderId})`}
-                        disabled={!active}
-                        onKeyDown={handleAction}
-                        slotProps={{
-                            input: {
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="send message"
-                                            onClick={handleClick}
-                                            edge="end"
-                                            disabled={!active}
-                                        >
-                                            <Send color={disableColor("primary", !active)} />
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            },
-                        }}
-                        sx={inputSx}
-                    />
+                    <>
+                        {imagePreview && (
+                            <Box mb={1}>
+                                <Chip
+                                    label={selectedFile?.name}
+                                    avatar={<Avatar alt="Image preview" src={imagePreview} />}
+                                    onDelete={handleImageDelete}
+                                    variant="outlined"
+                                />
+                            </Box>
+                        )}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            style={noDisplayStyle}
+                            onChange={handleFileSelect}
+                            accept="image/*"
+                        />
+
+                        <TextField
+                            margin="dense"
+                            fullWidth
+                            onChange={onChangeHandler}
+                            className={getSuffixedClassNames(className, "-input")}
+                            label={`message (${senderId})`}
+                            disabled={!active}
+                            onKeyDown={handleAction}
+                            slotProps={{
+                                input: {
+                                    startAdornment: allowSendImages ? (
+                                        <InputAdornment position="start">
+                                            <IconButton
+                                                aria-label="upload image"
+                                                onClick={handleAttachClick}
+                                                edge="start"
+                                                disabled={!active}
+                                            >
+                                                <AttachFile color={disableColor("primary", !active)} />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ) : undefined,
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="send message"
+                                                onClick={handleClick}
+                                                edge="end"
+                                                disabled={!active || !(enableSend || imagePreview)}
+                                            >
+                                                <Send
+                                                    color={disableColor(
+                                                        "primary",
+                                                        !active || !(enableSend || imagePreview)
+                                                    )}
+                                                />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
+                            }}
+                            sx={inputSx}
+                        />
+                    </>
                 ) : null}
             </Paper>
         </Tooltip>

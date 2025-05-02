@@ -1728,6 +1728,18 @@
                         "type": "str",
                         "default_value": "\"markdown\"",
                         "doc": "Define the way the messages are processed when they are displayed:\n<ul><li>&quot;raw&quot; no processing</li><li>&quot;pre&quot;: keeps spaces and new lines</li><li>&quot;markdown&quot; or &quot;md&quot;: basic support for Markdown.</li></ul>"
+                    },
+                    {
+                        "name": "max_file_size",
+                        "type": "int",
+                        "default_value": "0.8 * 1024 * 1024",
+                        "doc": "The maximum allowable file size, in bytes, for files uploaded to a chat message.\nThe default is 0.8 MB."
+                    },
+                    {
+                        "name": "allow_send_images",
+                        "type": "bool",
+                        "default_value": "True",
+                        "doc": "TODO if True, an upload image icon is shown."
                     }
                 ]
             }

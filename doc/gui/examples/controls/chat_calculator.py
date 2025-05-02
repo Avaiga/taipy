@@ -26,7 +26,7 @@ messages: list[tuple[str, str, str]] = []
 
 def evaluate(state, var_name: str, payload: dict):
     # Retrieve the callback parameters
-    (_, _, expression, sender_id) = payload.get("args", [])
+    (_, _, expression, sender_id, _) = payload.get("args", [])
     # Add the input content as a sent message
     messages.append((f"{len(messages)}", expression, sender_id))
     # Default message used if evaluation fails
@@ -42,7 +42,7 @@ def evaluate(state, var_name: str, payload: dict):
 
 
 page = """
-<|{messages}|chat|users={users}|sender_id={users[0]}|on_action=evaluate|>
+<|{messages}|chat|users={users}|sender_id={users[0]}|on_action=evaluate|don't allow_send_images|>
 """
 
 Gui(page).run(title="Chat - Calculator")
