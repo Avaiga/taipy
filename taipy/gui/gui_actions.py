@@ -15,6 +15,7 @@ import typing as t
 from ._warnings import _warn
 from .gui import Gui
 from .state import State
+from .utils.callable import _is_function
 
 
 def download(
@@ -372,18 +373,19 @@ def invoke_long_callback(
     """
     if not state or not isinstance(state._gui, Gui):
         _warn("'invoke_long_callback()' must be called in the context of a callback.")
+        return
 
     if user_status_function_args is None:
         user_status_function_args = []
     if user_function_args is None:
         user_function_args = []
 
-    state_id = get_state_id(state)
-    module_context = get_module_context(state)
+    this_gui = state.get_gui()
+
+    state_id = this_gui._get_client_id()
+    module_context = this_gui._get_locals_context()
     if not isinstance(state_id, str) or not isinstance(module_context, str):
         return
-
-    this_gui = state._gui
 
     def callback_on_exception(state: State, function_name: str, e: Exception):
         if not this_gui._call_on_exception(function_name, e):
@@ -395,10 +397,10 @@ def invoke_long_callback(
         function_name: t.Optional[str] = None,
         function_result: t.Optional[t.Any] = None,
     ):
-        if callable(user_status_function):
+        if _is_function(user_status_function):
             this_gui.invoke_callback(
                 str(state_id),
-                user_status_function,
+                t.cast(t.Callable, user_status_function),
                 [status] + list(user_status_function_args) + [function_result],  # type: ignore
                 str(module_context),
             )
@@ -428,5 +430,5 @@ def invoke_long_callback(
 
     thread = threading.Thread(target=user_function_in_thread, args=user_function_args)
     thread.start()
-    if isinstance(period, int) and period >= 500 and callable(user_status_function):
+    if isinstance(period, int) and period >= 500 and _is_function(user_status_function):
         thread_status(thread.name, period / 1000.0, 0)

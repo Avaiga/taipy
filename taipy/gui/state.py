@@ -175,10 +175,7 @@ class _GuiState(State):
         "_get_placeholder_attrs",
         "_add_attribute",
     )
-    __placeholder_attrs = (
-        "_taipy_p1",
-        "_current_context",
-    )
+    __placeholder_attrs = ("_taipy_p1", "_current_context", "__state_id")
     __excluded_attrs = __attrs + __methods + __placeholder_attrs
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str], context_list: t.Iterable[str]) -> None:
@@ -277,3 +274,27 @@ class _GuiState(State):
             gui = super().__getattribute__(_GuiState.__gui_attr)
             return gui._bind_var_val(name, default_value)
         return False
+
+
+class _AsyncState(_GuiState):
+    def __init__(self, state: State) -> None:
+        super().__init__(state.get_gui(), [], [])
+        self._set_placeholder("__state_id", state.get_gui()._get_client_id())
+
+    @staticmethod
+    def __set_var_in_state(state: State, var_name: str, value: t.Any):
+        setattr(state, var_name, value)
+
+    @staticmethod
+    def __get_var_from_state(state: State, var_name: str):
+        return getattr(state, var_name)
+
+    def __setattr__(self, var_name: str, var_value: t.Any) -> None:
+        self.get_gui().invoke_callback(
+            t.cast(str, self._get_placeholder("__state_id")), _AsyncState.__set_var_in_state, [var_name, var_value]
+        )
+
+    def __getattr__(self, var_name: str) -> t.Any:
+        return self.get_gui().invoke_callback(
+            t.cast(str, self._get_placeholder("__state_id")), _AsyncState.__get_var_from_state, [var_name]
+        )
