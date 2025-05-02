@@ -71,7 +71,7 @@ from .extension.library import Element, ElementLibrary
 from .page import Page
 from .partial import Partial
 from .server import _Server
-from .state import State
+from .state import State, _GuiState
 from .types import _WsType
 from .utils import (
     _delscopeattr,
@@ -2278,8 +2278,15 @@ class Gui:
         callback: t.Optional[t.Union[str, t.Callable]] = None,
         message: t.Optional[str] = "Work in Progress...",
     ):  # pragma: no cover
-        action_name = callback.__name__ if callable(callback) else callback
-        # TODO: what if lambda? (it does work)
+        action_name = (
+            callback
+            if isinstance(callback, str)
+            else _get_lambda_id(t.cast(LambdaType, callback))
+            if _is_unnamed_function(callback)
+            else callback.__name__
+            if callback is not None
+            else None
+        )
         func = self.__get_on_cancel_block_ui(action_name)
         def_action_name = func.__name__
         _setscopeattr(self, def_action_name, func)
@@ -2805,7 +2812,9 @@ class Gui:
         self.__var_dir.set_default(self.__frame)
 
         if self.__state is None or is_reloading:
-            self.__state = State(self, self.__locals_context.get_all_keys(), self.__locals_context.get_all_context())
+            self.__state = _GuiState(
+                self, self.__locals_context.get_all_keys(), self.__locals_context.get_all_context()
+            )
 
         if _is_in_notebook():
             # Allow gui.state.x in notebook mode
