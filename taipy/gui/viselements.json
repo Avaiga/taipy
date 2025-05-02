@@ -1037,10 +1037,21 @@
                         "doc": "If True, the list of items is shown in a dropdown menu.<br/><br/>You cannot use the filter in that situation."
                     },
                     {
+                        "name": "selection_message",
+                        "type": "dynamic(str)",
+                        "doc": "TODO the message shown in the selection area of a dropdown selector when at least one element is selected, list the selected elements if None."
+                    },
+                    {
                         "name": "multiple",
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If True, the user can select multiple items."
+                    },
+                    {
+                        "name": "show_select_all",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "TODO If True and multiple, show a select all option"
                     },
                     {
                         "name": "filter",

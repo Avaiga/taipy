@@ -122,7 +122,15 @@ const renderBoxSx = {
     width: "100%",
 } as CSSProperties;
 
-const Selector = (props: SelTreeProps) => {
+interface SelectorProps extends SelTreeProps {
+    dropdown?: boolean;
+    mode?: string;
+    defaultSelectionMessage?: string;
+    selectionMessage?: string;
+    showSelectAll?: boolean;
+}
+
+const Selector = (props: SelectorProps) => {
     const {
         id,
         defaultValue = "",
@@ -137,6 +145,7 @@ const Selector = (props: SelTreeProps) => {
         height,
         valueById,
         mode = "",
+        showSelectAll = false,
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
@@ -147,6 +156,7 @@ const Selector = (props: SelTreeProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const selectionMessage = useDynamicProperty(props.selectionMessage, props.defaultSelectionMessage, undefined);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, updateVarName);
 
@@ -283,6 +293,24 @@ const Selector = (props: SelTreeProps) => {
         [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
     );
 
+    const handleCheckAllChange = useCallback(
+        (event: SelectChangeEvent<HTMLInputElement>, checked: boolean) => {
+            const sel = checked ? lovList.map((elt) => elt.id) : [];
+            setSelectedValue(sel);
+            dispatch(
+                createSendUpdateAction(
+                    updateVarName,
+                    sel,
+                    module,
+                    props.onChange,
+                    propagate,
+                    valueById ? undefined : getUpdateVar(updateVars, "lov")
+                )
+            );
+        },
+        [lovList, dispatch, updateVarName, propagate, updateVars, valueById, props.onChange, module]
+    );
+
     const [autoValue, setAutoValue] = useState<LovItem | LovItem[] | null>(() => (multiple ? [] : null));
     const handleAutoChange = useCallback(
         (e: SyntheticEvent, sel: LovItem | LovItem[] | null) => {
@@ -329,183 +357,265 @@ const Selector = (props: SelTreeProps) => {
     const dropdownValue = ((dropdown || isRadio) &&
         (multiple ? selectedValue : selectedValue.length ? selectedValue[0] : "")) as string[];
 
-    return isRadio || isCheck ? (
-        <FormControl sx={controlSx} className={className}>
-            {props.label ? <FormLabel>{props.label}</FormLabel> : null}
-            <Tooltip title={hover || ""}>
-                {isRadio ? (
-                    <RadioGroup
-                        value={dropdownValue}
-                        onChange={handleChange}
-                        className={getSuffixedClassNames(className, "-radio-group")}
-                    >
-                        {lovList.map((item) => (
-                            <FormControlLabel
-                                key={item.id}
-                                value={item.id}
-                                control={<Radio />}
-                                label={
-                                    typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />
-                                }
-                                style={getStyles(item.id, selectedValue, theme)}
-                                disabled={!active}
-                            />
-                        ))}
-                    </RadioGroup>
-                ) : (
-                    <FormGroup className={getSuffixedClassNames(className, "-check-group")}>
-                        {lovList.map((item) => (
-                            <FormControlLabel
-                                key={item.id}
-                                control={
-                                    <Checkbox
-                                        data-id={item.id}
-                                        checked={selectedValue.includes(item.id)}
-                                        onChange={changeHandler}
-                                    />
-                                }
-                                label={
-                                    typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />
-                                }
-                                style={getStyles(item.id, selectedValue, theme)}
-                                disabled={!active}
-                            ></FormControlLabel>
-                        ))}
-                    </FormGroup>
-                )}
-            </Tooltip>
-        </FormControl>
-    ) : dropdown ? (
-        filter ? (
-            <Tooltip title={hover || ""} placement="top">
-                <Autocomplete
-                    id={id}
-                    disabled={!active}
-                    multiple={multiple}
-                    options={lovList}
-                    value={autoValue}
-                    onChange={handleAutoChange}
-                    getOptionLabel={getOptionLabel}
-                    getOptionKey={getOptionKey}
-                    isOptionEqualToValue={isOptionEqualToValue}
-                    sx={controlSx}
-                    className={className}
-                    renderInput={(params) => <TextField {...params} label={props.label} margin="dense" />}
-                    renderOption={renderOption}
-                />
-            </Tooltip>
-        ) : (
-            <FormControl sx={controlSx} className={className}>
-                {props.label ? <InputLabel disableAnimation>{props.label}</InputLabel> : null}
-                <Tooltip title={hover || ""} placement="top">
-                    <Select
-                        id={id}
-                        multiple={multiple}
-                        value={dropdownValue}
-                        onChange={handleChange}
-                        input={<OutlinedInput label={props.label} />}
-                        disabled={!active}
-                        renderValue={(selected) => (
-                            <Box sx={renderBoxSx}>
-                                {lovList
-                                    .filter((it) =>
-                                        Array.isArray(selected) ? selected.includes(it.id) : selected === it.id
-                                    )
-                                    .map((item, idx) => {
-                                        if (multiple) {
-                                            const chipProps = {} as Record<string, unknown>;
-                                            if (typeof item.item === "string") {
-                                                chipProps.label = item.item;
-                                            } else {
-                                                chipProps.label = item.item.text || "";
-                                                chipProps.avatar = <Avatar src={item.item.path} />;
-                                            }
-                                            return (
-                                                <Chip
-                                                    key={item.id}
-                                                    {...chipProps}
-                                                    onDelete={handleDelete}
-                                                    data-id={item.id}
-                                                    onMouseDown={doNotPropagateEvent}
-                                                    disabled={!active}
-                                                />
-                                            );
-                                        } else if (idx === 0) {
-                                            return typeof item.item === "string" ? (
+    return (
+        <>
+            {isRadio || isCheck ? (
+                <FormControl sx={controlSx} className={className}>
+                    {props.label ? <FormLabel>{props.label}</FormLabel> : null}
+                    <Tooltip title={hover || ""}>
+                        {isRadio ? (
+                            <RadioGroup
+                                value={dropdownValue}
+                                onChange={handleChange}
+                                className={getSuffixedClassNames(className, "-radio-group")}
+                            >
+                                {lovList.map((item) => (
+                                    <FormControlLabel
+                                        key={item.id}
+                                        value={item.id}
+                                        control={<Radio />}
+                                        label={
+                                            typeof item.item === "string" ? (
                                                 item.item
                                             ) : (
-                                                <LovImage item={item.item} />
-                                            );
-                                        } else {
-                                            return null;
+                                                <LovImage item={item.item as Icon} />
+                                            )
                                         }
-                                    })}
-                            </Box>
+                                        style={getStyles(item.id, selectedValue, theme)}
+                                        disabled={!active}
+                                    />
+                                ))}
+                            </RadioGroup>
+                        ) : (
+                            <FormGroup className={getSuffixedClassNames(className, "-check-group")}>
+                                {lovList.map((item) => (
+                                    <FormControlLabel
+                                        key={item.id}
+                                        control={
+                                            <Checkbox
+                                                data-id={item.id}
+                                                checked={selectedValue.includes(item.id)}
+                                                onChange={changeHandler}
+                                            />
+                                        }
+                                        label={
+                                            typeof item.item === "string" ? (
+                                                item.item
+                                            ) : (
+                                                <LovImage item={item.item as Icon} />
+                                            )
+                                        }
+                                        style={getStyles(item.id, selectedValue, theme)}
+                                        disabled={!active}
+                                    ></FormControlLabel>
+                                ))}
+                            </FormGroup>
                         )}
-                        MenuProps={getMenuProps(height)}
-                    >
-                        {lovList.map((item) => (
-                            <MenuItem
-                                key={item.id}
-                                value={item.id}
-                                style={getStyles(item.id, selectedValue, theme)}
-                                disabled={item.id === null}
-                            >
-                                {typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </Tooltip>
-            </FormControl>
-        )
-    ) : (
-        <FormControl sx={controlSx} className={className}>
-            {props.label ? (
-                <InputLabel disableAnimation className="static-label">
-                    {props.label}
-                </InputLabel>
-            ) : null}
-            <Tooltip title={hover || ""}>
-                <Paper sx={paperSx}>
-                    {filter && (
-                        <Box>
-                            <OutlinedInput
-                                margin="dense"
-                                placeholder="Search field"
-                                value={searchValue}
-                                onChange={handleInput}
+                    </Tooltip>
+                </FormControl>
+            ) : dropdown ? (
+                filter ? (
+                    <Tooltip title={hover || ""} placement="top">
+                        <Autocomplete
+                            id={id}
+                            disabled={!active}
+                            multiple={multiple}
+                            options={lovList}
+                            value={autoValue}
+                            onChange={handleAutoChange}
+                            getOptionLabel={getOptionLabel}
+                            getOptionKey={getOptionKey}
+                            isOptionEqualToValue={isOptionEqualToValue}
+                            sx={controlSx}
+                            className={className}
+                            renderInput={(params) => <TextField {...params} label={props.label} margin="dense" />}
+                            renderOption={renderOption}
+                        />
+                    </Tooltip>
+                ) : (
+                    <FormControl sx={controlSx} className={className}>
+                        {props.label ? <InputLabel disableAnimation>{props.label}</InputLabel> : null}
+                        <Tooltip title={hover || ""} placement="top">
+                            <Select
+                                id={id}
+                                multiple={multiple}
+                                value={dropdownValue}
+                                onChange={handleChange}
+                                input={
+                                    <OutlinedInput
+                                        label={props.label}
+                                        startAdornment={
+                                            multiple && showSelectAll ? (
+                                                <Tooltip
+                                                    title={
+                                                        selectedValue.length == lovList.length
+                                                            ? "Deselect All"
+                                                            : "Select All"
+                                                    }
+                                                >
+                                                    <Checkbox
+                                                        disabled={!active}
+                                                        indeterminate={
+                                                            selectedValue.length > 0 &&
+                                                            selectedValue.length < lovList.length
+                                                        }
+                                                        checked={selectedValue.length == lovList.length}
+                                                        onChange={handleCheckAllChange}
+                                                    ></Checkbox>
+                                                </Tooltip>
+                                            ) : null
+                                        }
+                                    />
+                                }
                                 disabled={!active}
-                            />
-                        </Box>
-                    )}
-                    <List sx={listSx} id={id}>
-                        {lovList
-                            .filter((elt) => showItem(elt, searchValue))
-                            .map((elt) =>
-                                multiple ? (
-                                    <MultipleItem
-                                        key={elt.id}
-                                        value={elt.id}
-                                        item={elt.item}
-                                        selectedValue={selectedValue}
-                                        clickHandler={clickHandler}
+                                renderValue={(selected) => (
+                                    <Box sx={renderBoxSx}>
+                                        {typeof selectionMessage === "string"
+                                            ? selectionMessage
+                                            : lovList
+                                                  .filter((it) =>
+                                                      Array.isArray(selected)
+                                                          ? selected.includes(it.id)
+                                                          : selected === it.id
+                                                  )
+                                                  .map((item, idx) => {
+                                                      if (multiple) {
+                                                          const chipProps = {} as Record<string, unknown>;
+                                                          if (typeof item.item === "string") {
+                                                              chipProps.label = item.item;
+                                                          } else {
+                                                              chipProps.label = item.item.text || "";
+                                                              chipProps.avatar = <Avatar src={item.item.path} />;
+                                                          }
+                                                          return (
+                                                              <Chip
+                                                                  key={item.id}
+                                                                  {...chipProps}
+                                                                  onDelete={handleDelete}
+                                                                  data-id={item.id}
+                                                                  onMouseDown={doNotPropagateEvent}
+                                                                  disabled={!active}
+                                                              />
+                                                          );
+                                                      } else if (idx === 0) {
+                                                          return typeof item.item === "string" ? (
+                                                              item.item
+                                                          ) : (
+                                                              <LovImage item={item.item} />
+                                                          );
+                                                      } else {
+                                                          return null;
+                                                      }
+                                                  })}
+                                    </Box>
+                                )}
+                                MenuProps={getMenuProps(height)}
+                            >
+                                {lovList.map((item) => (
+                                    <MenuItem
+                                        key={item.id}
+                                        value={item.id}
+                                        style={getStyles(item.id, selectedValue, theme)}
+                                        disabled={item.id === null}
+                                    >
+                                        {typeof item.item === "string" ? (
+                                            item.item
+                                        ) : (
+                                            <LovImage item={item.item as Icon} />
+                                        )}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </Tooltip>
+                    </FormControl>
+                )
+            ) : (
+                <FormControl sx={controlSx} className={className}>
+                    {props.label ? (
+                        <InputLabel disableAnimation className="static-label">
+                            {props.label}
+                        </InputLabel>
+                    ) : null}
+                    <Tooltip title={hover || ""}>
+                        <Paper sx={paperSx}>
+                            {filter ? (
+                                <Box>
+                                    <OutlinedInput
+                                        margin="dense"
+                                        placeholder="Search field"
+                                        value={searchValue}
+                                        onChange={handleInput}
                                         disabled={!active}
+                                        startAdornment={
+                                            multiple && showSelectAll ? (
+                                                <Tooltip
+                                                    title={
+                                                        selectedValue.length == lovList.length
+                                                            ? "Deselect All"
+                                                            : "Select All"
+                                                    }
+                                                >
+                                                    <Checkbox
+                                                        disabled={!active}
+                                                        indeterminate={
+                                                            selectedValue.length > 0 &&
+                                                            selectedValue.length < lovList.length
+                                                        }
+                                                        checked={selectedValue.length == lovList.length}
+                                                        onChange={handleCheckAllChange}
+                                                    ></Checkbox>
+                                                </Tooltip>
+                                            ) : null
+                                        }
                                     />
-                                ) : (
-                                    <SingleItem
-                                        key={elt.id}
-                                        value={elt.id}
-                                        item={elt.item}
-                                        selectedValue={selectedValue}
-                                        clickHandler={clickHandler}
-                                        disabled={!active}
+                                </Box>
+                            ) : multiple && showSelectAll ? (
+                                <Box paddingLeft={1}>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                disabled={!active}
+                                                indeterminate={
+                                                    selectedValue.length > 0 && selectedValue.length < lovList.length
+                                                }
+                                                checked={selectedValue.length == lovList.length}
+                                                onChange={handleCheckAllChange}
+                                            ></Checkbox>
+                                        }
+                                        label={selectedValue.length == lovList.length ? "Deselect All" : "Select All"}
                                     />
-                                )
-                            )}
-                    </List>
-                </Paper>
-            </Tooltip>
-        </FormControl>
+                                </Box>
+                            ) : null}
+                            <List sx={listSx} id={id}>
+                                {lovList
+                                    .filter((elt) => showItem(elt, searchValue))
+                                    .map((elt) =>
+                                        multiple ? (
+                                            <MultipleItem
+                                                key={elt.id}
+                                                value={elt.id}
+                                                item={elt.item}
+                                                selectedValue={selectedValue}
+                                                clickHandler={clickHandler}
+                                                disabled={!active}
+                                            />
+                                        ) : (
+                                            <SingleItem
+                                                key={elt.id}
+                                                value={elt.id}
+                                                item={elt.item}
+                                                selectedValue={selectedValue}
+                                                clickHandler={clickHandler}
+                                                disabled={!active}
+                                            />
+                                        )
+                                    )}
+                            </List>
+                        </Paper>
+                    </Tooltip>
+                </FormControl>
+            )}
+        </>
     );
 };
 

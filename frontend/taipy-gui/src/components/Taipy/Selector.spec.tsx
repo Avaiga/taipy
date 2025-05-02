@@ -214,6 +214,44 @@ describe("Selector Component", () => {
             await userEvent.click(elt);
             expect(queryAllByRole("listbox")).toHaveLength(0);
         });
+        it("renders selectionMessage if defined", async () => {
+            const { getByText, getByRole } = render(<Selector lov={lov} dropdown={true} selectionMessage="a selection message" />);
+            const butElt = getByRole("combobox");
+            expect(butElt).toBeInTheDocument();
+            await userEvent.click(butElt);
+            getByRole("listbox");
+            const elt = getByText("Item 2");
+            await userEvent.click(elt);
+            const msg = getByText("a selection message");
+            expect(msg).toBeInTheDocument();
+        });
+        it("renders showSelectAll in dropdown if True", async () => {
+            const { getByText, getByRole } = render(<Selector lov={lov} dropdown={true} multiple={true} showSelectAll={true} />);
+            const checkElt = getByRole("checkbox");
+            expect(checkElt).toBeInTheDocument();
+            expect(checkElt).not.toBeChecked();
+            const butElt = getByRole("combobox");
+            await userEvent.click(butElt);
+            getByRole("listbox");
+            const elt = getByText("Item 2");
+            await userEvent.click(elt);
+            expect(checkElt.parentElement).toHaveClass("MuiCheckbox-indeterminate");
+            await userEvent.click(checkElt);
+            expect(checkElt).toBeChecked();
+        });
+        it("renders showSelectAll in list if True", async () => {
+            const { getByText, getByRole } = render(<Selector lov={lov} multiple={true} showSelectAll={true} />);
+            const msgElt = getByText(/select all/i);
+            expect(msgElt).toBeInTheDocument();
+            const checkElement = msgElt.parentElement?.querySelector("input");
+            expect(checkElement).not.toBeNull();
+            expect(checkElement).not.toBeChecked();
+            const elt = getByText("Item 2");
+            await userEvent.click(elt);
+            expect(checkElement?.parentElement).toHaveClass("MuiCheckbox-indeterminate");
+            checkElement && await userEvent.click(checkElement);
+            expect(checkElement).toBeChecked();
+        });
     });
 
     describe("Selector Component with dropdown + filter", () => {

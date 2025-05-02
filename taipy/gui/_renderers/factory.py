@@ -480,6 +480,8 @@ class _Factory:
                 ("label",),
                 ("mode",),
                 ("lov", PropertyType.lov),
+                ("selection_message", PropertyType.dynamic_string),
+                ("show_select_all", PropertyType.boolean),
             ]
         )
         ._set_propagate(),
