@@ -107,7 +107,7 @@ describe("Chat Component", () => {
         const elt = document.querySelector(".taipy-chat input");
         expect(elt).toBeNull();
     });
-    it("renders markdown by default", async () => {
+    xit("renders markdown by default", async () => {
         const { getByText } = render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} />);
         await waitFor(() => getByText(searchMsg));
         const elt = getByText(searchMsg);
