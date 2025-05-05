@@ -55,7 +55,7 @@ jobs:
           cache: 'pipenv'
           cache-dependency-path: 'Pipfile'
       - name: Install Setuptools and wheel
-        run: pip install --upgrade setuptools wheel
+        run: pip install --upgrade "setuptools<80.0.0" wheel
 
       - name: Install pipenv
         run: pip install pipenv --upgrade
