@@ -12,9 +12,9 @@
 from functools import lru_cache
 from typing import Type
 
+from ...common._check_dependencies import EnterpriseEditionUtils
 from .._manager._manager_factory import _ManagerFactory
 from ..common import _utils
-from ..common._check_dependencies import EnterpriseEditionUtils
 from ._version_fs_repository import _VersionFSRepository
 from ._version_manager import _VersionManager
 

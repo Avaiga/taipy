@@ -12,8 +12,8 @@
 from functools import lru_cache
 from typing import Type
 
+from ...common._check_dependencies import EnterpriseEditionUtils
 from .._manager._manager_factory import _ManagerFactory
-from ..common._check_dependencies import EnterpriseEditionUtils
 from ..common._utils import _load_fct
 from ._data_fs_repository import _DataFSRepository
 from ._data_manager import _DataManager

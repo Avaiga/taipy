@@ -14,8 +14,8 @@ from importlib import util
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
+from ...common._check_dependencies import _check_dependency_is_installed
 from .._version._version_manager_factory import _VersionManagerFactory
-from ..common._check_dependencies import _check_dependency_is_installed
 from ..common.scope import Scope
 
 if util.find_spec("pymongo"):
@@ -84,7 +84,7 @@ class MongoCollectionDataNode(DataNode):
         editor_expiration_date: Optional[datetime] = None,
         properties: Dict = None,
     ) -> None:
-        _check_dependency_is_installed("Mongo Data Node", "pymongo")
+        _check_dependency_is_installed("Mongo Data Node", "pymongo", "mongo")
         if properties is None:
             properties = {}
         required = self._REQUIRED_PROPERTIES
@@ -269,4 +269,3 @@ class MongoCollectionDataNode(DataNode):
             The document dictionary.
         """
         return document_object.__dict__
-

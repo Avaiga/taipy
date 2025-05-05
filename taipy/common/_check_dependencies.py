@@ -8,26 +8,33 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from importlib import util
+from typing import Optional
 
 
-def _check_dependency_is_installed(module_name: str, package_name: str) -> None:
+def _check_dependency_is_installed(
+    module_name: str, package_name: str, extra_taipy_package_name: str, taipy_sublibrary: Optional[str] = None
+) -> None:
     """
-        Check if a package is installed.
+    Check if an extra package for taipy is installed.
 
-        Args:
-            module_name: Name of the taipy module importing the package.
-            package_name: Name of the package.
-    .
+    Args:
+        module_name: Name of the taipy module importing the package.
+        package_name: Name of the package.
+        extra_taipy_package_name: Name of the extra taipy package.
+        taipy_sublibrary: Optional name of the taipy sublibrary.
+
+    Raises:
+        RuntimeError: If the package is not installed.
     """
-    extras = {
-        "boto3": "s3",
-        "pymongo": "mongo",
-    }
+    if taipy_sublibrary is None:
+        taipy_sublibrary = "taipy"
+
     if not util.find_spec(package_name):
         raise RuntimeError(
-            f"Cannot use {module_name} as {package_name} package is not installed. Please install it  "
-            f"using `pip install taipy[{extras.get(package_name)}]`."
+            f"Cannot use {module_name} as {package_name} package is not installed. Please install it "
+            f"using `pip install {taipy_sublibrary}[{extra_taipy_package_name}]`."
         )
 
 
