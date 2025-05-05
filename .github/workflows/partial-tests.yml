@@ -55,7 +55,7 @@ jobs:
           cache: 'pipenv'
           cache-dependency-path: 'Pipfile'
       - name: Install Setuptools and wheel
-        run: pip install --upgrade "setuptools<80.0.0" wheel
+        run: pip install --upgrade setuptools wheel
 
       - name: Install pipenv
         run: pip install "pipenv<2025.0.0"
@@ -74,3 +74,141 @@ jobs:
           node-version: 20
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
+
+      - name: Hash frontend source code
+        if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
+        id: hash-frontend
+        run: |
+          pipenv run python tools/frontend/hash_source.py
+          echo "HASH=$(cat hash.txt)" >> $GITHUB_OUTPUT
+          rm hash.txt
+        shell: bash
+      - name: Restore cached frontend build
+        if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
+        id: cache-fe-build
+        uses: actions/cache@v4
+        with:
+          path: |
+            taipy/gui/webapp
+            taipy/gui_core/lib
+          key: frontend-build-${{ runner.os }}-${{ steps.hash-frontend.outputs.HASH }}
+
+      - name: Frontend Bundle Build
+        if: (steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true') && steps.cache-fe-build.outputs.cache-hit != 'true'
+        run: pipenv run python tools/frontend/bundle_build.py
+
+      - name: Install Playwright
+        if: steps.changes.outputs.gui == 'true' || steps.changes.outputs.gui-core == 'true'
+        run: pipenv run playwright install chromium --with-deps
+
+      - name: Pytest Common
+        if: steps.changes.outputs.common == 'true'
+        run: pipenv run pytest tests/common
+
+      - name: Pytest Core
+        if: steps.changes.outputs.core == 'true'
+        run: pipenv run pytest -m "not orchestrator_dispatcher and not standalone" tests/core
+
+      - name: Run GUI Test Action
+        if: steps.changes.outputs.gui == 'true'
+        uses: ./.github/actions/gui-test
+        with:
+          os: ${{ matrix.os }}
+
+      - name: Pytest GUI Core
+        if: steps.changes.outputs.gui-core == 'true'
+        run: pipenv run pytest tests/gui_core
+
+      - name: Pytest Rest
+        if: steps.changes.outputs.rest == 'true'
+        run: pipenv run pytest tests/rest
+
+      - name: Pytest Templates
+        if: steps.changes.outputs.templates == 'true'
+        run: pipenv run pytest tests/templates
+
+  submit_tests:
+    needs: linter
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+        os: [ubuntu-latest, windows-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            core:
+              - 'taipy/core/**'
+
+      - name: Setup Python with cache
+        if: steps.changes.outputs.core == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
+          cache: 'pipenv'
+          cache-dependency-path: 'Pipfile'
+
+      - name: Install pipenv
+        if: steps.changes.outputs.core == 'true'
+        run: pip install "pipenv<2025.0.0"
+
+      - name: Install Dependencies
+        if: steps.changes.outputs.core == 'true'
+        run: pipenv install --dev --python=${{ matrix.python-version }}
+
+      - name: Setup LibMagic (MacOS)
+        if: matrix.os == 'macos-13' && steps.changes.outputs.core == 'true'
+        run: brew install libmagic
+
+      - name: Pytest Core orchestrator_dispatcher
+        if: steps.changes.outputs.core == 'true'
+        run: pipenv run pytest -m "orchestrator_dispatcher" tests/core
+
+  standalone_tests:
+    needs: linter
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+        os: [ubuntu-latest, windows-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            core:
+              - 'taipy/core/**'
+
+      - name: Setup Python with cache
+        if: steps.changes.outputs.core == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
+          cache: 'pipenv'
+          cache-dependency-path: 'Pipfile'
+
+      - name: Install pipenv
+        if: steps.changes.outputs.core == 'true'
+        run: pip install "pipenv<2025.0.0"
+
+      - name: Install Dependencies
+        if: steps.changes.outputs.core == 'true'
+        run: pipenv install --dev --python=${{ matrix.python-version }}
+
+      - name: Setup LibMagic (MacOS)
+        if: matrix.os == 'macos-13' && steps.changes.outputs.core == 'true'
+        run: brew install libmagic
+
+      - name: Pytest Core standalone
+        if: steps.changes.outputs.core == 'true'
+        run: pipenv run pytest -m "standalone" tests/core

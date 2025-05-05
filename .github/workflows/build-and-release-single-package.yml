@@ -135,7 +135,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build wheel pipenv mypy black isort
+          pip install build wheel "pipenv<2025.0.0" mypy black isort
 
       - name: Install GUI dependencies
         if: ${{ github.event.inputs.target_package == 'gui' || github.event.inputs.target_package == 'taipy' }}
@@ -168,7 +168,7 @@ jobs:
           if compgen -G "./dist/*_*" > /dev/null; then
             for file in ./dist/*_*; do mv "$file" "${file//_/-}"; done
           fi
-          
+
       - name: Create tag and release
         working-directory: "build_${{ github.event.inputs.target_package }}"
         run: |
