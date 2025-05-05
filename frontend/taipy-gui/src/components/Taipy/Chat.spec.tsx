@@ -108,9 +108,10 @@ describe("Chat Component", () => {
         expect(elt).toBeNull();
     });
     it("renders markdown by default", async () => {
-        render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} />);
-        const elt = document.querySelector(".taipy-chat .taipy-chat-received .MuiPaper-root");
-        await waitFor(() => expect(elt?.querySelector("p")).not.toBeNull());
+        const { getByText } = render(<Chat messages={messages} className="taipy-chat" defaultKey={valueKey} />);
+        await waitFor(() => getByText(searchMsg));
+        const elt = getByText(searchMsg);
+        expect(elt.parentElement).toHaveClass("taipy-chat-markdown");
     });
     it("can render pre", async () => {
         const { getByText } = render(
