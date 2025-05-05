@@ -368,7 +368,8 @@ const Chat = (props: ChatProps) => {
     const avatars = useMemo(() => {
         return users.reduce((pv, elt) => {
             if (elt.id) {
-                pv[elt.id] =
+                const id = elt.id.startsWith("<taipy.gui.icon.Icon") && typeof elt.item !== "string" ? elt.item.text : elt.id;
+                pv[id] =
                     typeof elt.item == "string" ? (
                         <Tooltip title={elt.item}>
                             <Avatar sx={chatAvatarSx}>{getInitials(elt.item)}</Avatar>
