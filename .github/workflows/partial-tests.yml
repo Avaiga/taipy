@@ -17,6 +17,7 @@ jobs:
           mypy_flags:  "--ignore-missing-imports --implicit-optional --disable-error-code attr-defined --no-namespace-packages --exclude (taipy/templates/|tools/|doc/gui/examples/.*/builder.py|taipy/common/config/config.pyi) --follow-imports skip --disable-error-code import-untyped"
 
       - uses: chartboost/ruff-action@v1
+
   tests:
     needs: linter
     timeout-minutes: 50
@@ -56,7 +57,7 @@ jobs:
         run: pip install --upgrade setuptools wheel
 
       - name: Install pipenv
-        run: pip install pipenv --upgrade
+        run: pip install "pipenv<2025.0.0"
 
       - name: Install Dependencies
         run: pipenv install --dev --python=${{ matrix.python-version }}
@@ -154,7 +155,7 @@ jobs:
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
-        run: pip install pipenv --upgrade
+        run: pip install "pipenv<2025.0.0"
 
       - name: Install Dependencies
         if: steps.changes.outputs.core == 'true'
@@ -197,7 +198,7 @@ jobs:
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
-        run: pip install pipenv --upgrade
+        run: pip install "pipenv<2025.0.0"
 
       - name: Install Dependencies
         if: steps.changes.outputs.core == 'true'
