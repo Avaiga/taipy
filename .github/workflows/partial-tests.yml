@@ -58,7 +58,7 @@ jobs:
         run: pip install --upgrade "setuptools<80.0.0" wheel
 
       - name: Install pipenv
-        run: pip install pipenv --upgrade
+        run: pip install "pipenv<=2025.0.0"
 
       - name: Install Dependencies
         run: pipenv install --dev --python=${{ matrix.python-version }}
