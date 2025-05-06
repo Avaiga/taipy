@@ -8,11 +8,12 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+
 from functools import lru_cache
 from typing import Type
 
+from ...common._check_dependencies import EnterpriseEditionUtils
 from .._manager._manager_factory import _ManagerFactory
-from ..common._check_dependencies import EnterpriseEditionUtils
 from ..common._utils import _load_fct
 from ._task_fs_repository import _TaskFSRepository
 from ._task_manager import _TaskManager
