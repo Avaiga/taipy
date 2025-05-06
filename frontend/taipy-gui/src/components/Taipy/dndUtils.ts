@@ -97,7 +97,7 @@ export const useDrop = (
             const data = e.dataTransfer?.getData(dndDataType);
             if (data && onDrop && !e.dataTransfer?.getData(dndDataType + "-done")) {
                 try {
-                    const { type, itemId, varName, sourceId, dragData: sourceData } = JSON.parse(data);
+                    const { type, itemId, varName, sourceId, sourceData } = JSON.parse(data);
                     if (dropTypes && dropTypes.includes(type)) {
                         e.dataTransfer?.setData(dndDataType + "-done", "done");
                         onDrop(sourceId, itemId, sourceData, varName, targetItemId);
