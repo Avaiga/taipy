@@ -32,7 +32,7 @@ const dndDataType = "application/taipy-dnd";
 export const useDrag = (
     eltRef: RefObject<HTMLElement>,
     dragType?: string,
-    dragData?: Record<string, unknown>,
+    sourceData?: Record<string, unknown>,
     itemId?: string,
     varName?: string,
     sourceId?: string
@@ -47,7 +47,7 @@ export const useDrag = (
             setDragging(true);
             e.dataTransfer?.setData(
                 dndDataType,
-                JSON.stringify({ type: dragType, itemId, varName, sourceId, dragData })
+                JSON.stringify({ type: dragType, itemId, varName, sourceId, sourceData })
             );
         };
         const dragEndHandler = () => {
@@ -61,7 +61,7 @@ export const useDrag = (
             elt.removeEventListener("dragstart", dragStartHandler);
             elt.removeEventListener("dragend", dragEndHandler);
         };
-    }, [dragType, itemId, varName, sourceId, dragData, eltRef]);
+    }, [dragType, itemId, varName, sourceId, sourceData, eltRef]);
     return [isDragging];
 };
 
@@ -97,10 +97,10 @@ export const useDrop = (
             const data = e.dataTransfer?.getData(dndDataType);
             if (data && onDrop && !e.dataTransfer?.getData(dndDataType + "-done")) {
                 try {
-                    const { type, itemId, varName, sourceId, dragParams: dragData } = JSON.parse(data);
+                    const { type, itemId, varName, sourceId, dragData: sourceData } = JSON.parse(data);
                     if (dropTypes && dropTypes.includes(type)) {
                         e.dataTransfer?.setData(dndDataType + "-done", "done");
-                        onDrop(sourceId, itemId, dragData, varName, targetItemId);
+                        onDrop(sourceId, itemId, sourceData, varName, targetItemId);
                     }
                 } catch (e) {
                     console.error("Error parsing data: ", e);

@@ -98,7 +98,12 @@ describe("Part Component", () => {
             const { getByText } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
                     <Part dragType="drag_type">bar</Part>
-                    <Part dropTypes={JSON.stringify(["drop_type", "drag_type"])} defaultDndData={JSON.stringify({drop: "drop"})}>foo</Part>
+                    <Part
+                        dropTypes={JSON.stringify(["drop_type", "drag_type"])}
+                        defaultDndData={JSON.stringify({ drop: "drop" })}
+                    >
+                        foo
+                    </Part>
                 </TaipyContext.Provider>
             );
             const sourceElt = getByText("bar");
@@ -115,7 +120,7 @@ describe("Part Component", () => {
                                   itemId: "itemId",
                                   varName: "varName",
                                   sourceId: "sourceId",
-                                  dragData: { par: "par" },
+                                  sourceData: { par: "par" },
                               }),
                     setData: jest.fn(),
                 },
@@ -135,7 +140,7 @@ describe("Part Component", () => {
                     sourceVarName: "varName",
                     targetId: undefined,
                     targetItemId: undefined,
-                    targetData: {drop: "drop"},
+                    targetData: { drop: "drop" },
                 },
                 type: "SEND_ACTION_ACTION",
             });
