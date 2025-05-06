@@ -84,7 +84,7 @@ describe("Part Component", () => {
                                   itemId: "itemId",
                                   varName: "varName",
                                   sourceId: "sourceId",
-                                  dragParams: { par: "par" },
+                                  dragData: { par: "par" },
                               }),
                     setData: jest.fn(),
                 },
@@ -115,7 +115,7 @@ describe("Part Component", () => {
                                   itemId: "itemId",
                                   varName: "varName",
                                   sourceId: "sourceId",
-                                  dragParams: { par: "par" },
+                                  dragData: { par: "par" },
                               }),
                     setData: jest.fn(),
                 },
@@ -129,13 +129,13 @@ describe("Part Component", () => {
                     reason: "drop",
                     sourceId: "sourceId",
                     sourceItemId: "itemId",
-                    sourceParams: {
+                    sourceData: {
                         par: "par",
                     },
                     sourceVarName: "varName",
                     targetId: undefined,
                     targetItemId: undefined,
-                    targetParams: {drop: "drop"},
+                    targetData: {drop: "drop"},
                 },
                 type: "SEND_ACTION_ACTION",
             });

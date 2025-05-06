@@ -87,7 +87,7 @@ const Part = (props: PartProps) => {
         (
             sourceId?: string,
             sourceItemId?: string,
-            sourceParams?: Record<string, unknown>,
+            sourceData?: Record<string, unknown>,
             sourceVarName?: string,
             targetItemId?: string,
         ) => {
@@ -96,11 +96,11 @@ const Part = (props: PartProps) => {
                     reason: "drop",
                     sourceId,
                     sourceItemId,
-                    sourceParams,
+                    sourceData,
                     sourceVarName,
                     targetId: id,
                     targetItemId,
-                    targetParams: dndData,
+                    targetData: dndData,
                 })
             );
         },
