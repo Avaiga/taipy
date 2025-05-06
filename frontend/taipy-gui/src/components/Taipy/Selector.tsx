@@ -75,10 +75,10 @@ const MultipleItem = ({
     sourceId,
     onDrop,
     dropTypes,
-    dragData: dragParams,
+    dragData,
 }: ItemProps) => {
     const itemRef = useRef<HTMLDivElement>(null);
-    const [isDragging] = useDrag(itemRef, dragType, dragParams, value, dragVarName, sourceId);
+    const [isDragging] = useDrag(itemRef, dragType, dragData, value, dragVarName, sourceId);
     const [isDraggedOver] = useDrop(itemRef, dropTypes, value, onDrop);
 
     return (
