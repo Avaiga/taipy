@@ -60,7 +60,7 @@ jobs:
         run: pip install --upgrade setuptools wheel
 
       - name: Install pipenv
-        run: pip install --upgrade pipenv
+        run: pip install "pipenv<2025.0.0"
 
       - name: Install Dependencies
         run: pipenv install --dev --python=${{ matrix.python-version }}
@@ -139,7 +139,7 @@ jobs:
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
-        run: pip install --upgrade pipenv
+        run: pip install "pipenv<2025.0.0"
 
       - name: Install Dependencies
         if: steps.changes.outputs.core == 'true'
@@ -178,7 +178,7 @@ jobs:
 
       - name: Install pipenv
         if: steps.changes.outputs.core == 'true'
-        run: pip install --upgrade pipenv
+        run: pip install "pipenv<2025.0.0"
 
       - name: Install Dependencies
         if: steps.changes.outputs.core == 'true'

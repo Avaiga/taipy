@@ -27,7 +27,7 @@ runs:
         python-version: ${{ inputs.python-version }}
 
     - name: Install pipenv
-      run: pip install pipenv --upgrade
+      run: pip install "pipenv<2025.0.0"
       shell: bash
 
     - name: Install minimum supported dependencies
