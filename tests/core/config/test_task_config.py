@@ -12,6 +12,7 @@
 import os
 from unittest import mock
 
+from taipy import Scope
 from taipy.common.config import Config
 from taipy.core.config import DataNodeConfig
 from tests.core.utils.named_temporary_file import NamedTemporaryFile
@@ -95,15 +96,30 @@ def test_data_node_instance_when_configure_task_by_overriding_toml():
 
 def test_task_config_creation():
     input_config = Config.configure_data_node("input")
-    output_config = Config.configure_data_node("output")
-    task_config = Config.configure_task("tasks1", print, input_config, output_config)
+    output_config = Config.configure_data_node("output", scope=Scope.GLOBAL)
+    other_config = Config.configure_data_node("other", scope=Scope.CYCLE)
 
-    assert not task_config.skippable
+    task_config = Config.configure_task("task1", print, input_config, output_config)
+
     assert list(Config.tasks) == ["default", task_config.id]
+    assert not task_config.skippable
+    assert task_config.id == "task1"
+    assert task_config.function == print
+    assert task_config.input_configs == [input_config]
+    assert task_config.output_configs == [output_config]
+    assert task_config.scope == Scope.SCENARIO
+    assert task_config.properties == {}
 
-    task2 = Config.configure_task("tasks2", print, input_config, output_config, skippable=True)
-    assert task2.skippable
-    assert list(Config.tasks) == ["default", task_config.id, task2.id]
+
+    task_config_2 = Config.configure_task("task2", print, other_config, output_config, skippable=True)
+    assert list(Config.tasks) == ["default", task_config.id, task_config_2.id]
+    assert task_config_2.skippable
+    assert task_config_2.id == "task2"
+    assert task_config_2.function == print
+    assert task_config_2.input_configs == [other_config]
+    assert task_config_2.output_configs == [output_config]
+    assert task_config_2.scope == Scope.CYCLE
+    assert task_config_2.properties == {}
 
 
 def test_task_count():
