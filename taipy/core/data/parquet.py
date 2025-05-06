@@ -161,12 +161,13 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         """Return the storage type of the data node: "parquet"."""
         return cls.__STORAGE_TYPE
 
-    def _write_with_kwargs(self, data: Any, editor_id: Optional[str] = None, **write_kwargs):
+    def _write_to_path(self, path: str, data: Any, editor_id: Optional[str] = None, **write_kwargs):
         """Write the data referenced by this data node.
 
         Keyword arguments here which are also present in the Data Node config will overwrite them.
 
         Arguments:
+            path (str): The path to the Parquet file or directory.
             data (Any): The data to write.
             editor_id (str): An optional identifier of the writer.
             **write_kwargs (dict[str, any]): The keyword arguments passed to the function
@@ -186,7 +187,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
         df.columns = df.columns.astype(str)
-        df.to_parquet(self._path, **kwargs)
+        df.to_parquet(path, **kwargs)
 
     def read_with_kwargs(self, **read_kwargs):
         """Read data from this data node.
@@ -243,7 +244,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return pd.read_parquet(path, **read_kwargs)
 
     def _append(self, data: Any):
-        self._write_with_kwargs(data, engine="fastparquet", append=True)
+        self._write_to_path(self._path, data, engine="fastparquet", append=True)
 
     def _write(self, data: Any):
-        self._write_with_kwargs(data)
+        self._write_to_path(self._path, data)
