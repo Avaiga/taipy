@@ -791,19 +791,20 @@ def test_hard_delete_one_single_sequence_with_cycle_data_nodes():
 
 
 def test_hard_delete_shared_entities():
-    input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    intermediate_dn = Config.configure_data_node("my_inter", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    output_dn = Config.configure_data_node("my_output", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    input_dn = Config.configure_data_node("my_input", "in_memory", default_data="testing")
+    intermediate_dn = Config.configure_data_node("my_inter", "in_memory")
+    output_dn = Config.configure_data_node("my_output", "in_memory")
     task_1 = Config.configure_task("task_1", print, input_dn, intermediate_dn)
     task_2 = Config.configure_task("task_2", print, intermediate_dn, output_dn)
 
-    tasks_scenario_1 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_1")
-    tasks_scenario_2 = _TaskManager._bulk_get_or_create([task_1, task_2], scenario_id="scenario_id_2")
+    scenario_config = Config.configure_scenario("sc", [task_1, task_2])
+    import taipy as tp
 
-    scenario_1 = Scenario("scenario_1", tasks_scenario_1, {}, sequences={"sequence": {"tasks": tasks_scenario_1}})
-    scenario_2 = Scenario("scenario_2", tasks_scenario_2, {}, sequences={"sequence": {"tasks": tasks_scenario_2}})
-    _ScenarioManager._repository._save(scenario_1)
-    _ScenarioManager._repository._save(scenario_2)
+    scenario_1 = tp.create_scenario(scenario_config, name="scenario_1")
+    scenario_1.add_sequence("sequence", [scenario_1.task_1, scenario_1.task_2])
+    scenario_2 = tp.create_scenario(scenario_config, name="scenario_2")
+    scenario_2.add_sequence("sequence", [scenario_2.task_1, scenario_2.task_2])
+
     sequence_1 = scenario_1.sequences["sequence"]
     sequence_2 = scenario_2.sequences["sequence"]
 
@@ -812,14 +813,14 @@ def test_hard_delete_shared_entities():
 
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_SequenceManager._get_all()) == 2
-    assert len(_TaskManager._get_all()) == 3
-    assert len(_DataManager._get_all()) == 4
+    assert len(_TaskManager._get_all()) == 4
+    assert len(_DataManager._get_all()) == 6
     assert len(_JobManager._get_all()) == 4
     _SequenceManager._hard_delete(sequence_1.id)
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_SequenceManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 3
-    assert len(_DataManager._get_all()) == 4
+    assert len(_TaskManager._get_all()) == 4
+    assert len(_DataManager._get_all()) == 6
     assert len(_JobManager._get_all()) == 4
 
 
