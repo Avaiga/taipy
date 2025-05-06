@@ -1103,7 +1103,8 @@
             {
                 "inherits": [
                     "lovComp",
-                    "propagate"
+                    "propagate",
+                    "dndComp"
                 ],
                 "properties": [
                     {
@@ -1930,7 +1931,8 @@
             {
                 "inherits": [
                     "partial",
-                    "shared"
+                    "shared",
+                    "dndComp"
                 ],
                 "properties": [
                     {
