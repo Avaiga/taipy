@@ -439,7 +439,7 @@ describe("Selector Component", () => {
                     <Selector
                         lov={lov2}
                         dropTypes={JSON.stringify(["drop_type", "drag_type"])}
-                        defaultDndParameters={JSON.stringify({ drop: "drop" })}
+                        defaultDndData={JSON.stringify({ drop: "drop" })}
                     />
                 </TaipyContext.Provider>
             );

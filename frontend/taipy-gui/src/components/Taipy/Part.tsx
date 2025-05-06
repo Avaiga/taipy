@@ -62,9 +62,9 @@ const Part = (props: PartProps) => {
 
     const itemRef = useRef<HTMLDivElement>(null);
 
-    const dragParams = useDynamicJsonProperty(
-        props.dndParameters,
-        props.defaultDndParameters || "",
+    const dndData = useDynamicJsonProperty(
+        props.dndData,
+        props.defaultDndData || "",
         undefined as Record<string, unknown> | undefined
     );
     const dropTypes = useMemo(() => {
@@ -100,14 +100,14 @@ const Part = (props: PartProps) => {
                     sourceVarName,
                     targetId: id,
                     targetItemId,
-                    targetParams: dragParams,
+                    targetParams: dndData,
                 })
             );
         },
-        [props.onAction, dispatch, module, id, dragParams]
+        [props.onAction, dispatch, module, id, dndData]
     );
 
-    const [isDragging] = useDrag(itemRef, dragType, dragParams, undefined, undefined, id);
+    const [isDragging] = useDrag(itemRef, dragType, dndData, undefined, undefined, id);
     const [isDraggedOver] = useDrop(itemRef, dropTypes, undefined, dropHandler);
 
     const boxSx = useMemo(

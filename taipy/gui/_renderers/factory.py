@@ -478,7 +478,7 @@ class _Factory:
                 ("drag_type", PropertyType.string),
                 ("drop_types", PropertyType.string_list),
                 ("on_action", PropertyType.function),
-                ("dnd_parameters", PropertyType.dynamic_dict),
+                ("dnd_data", PropertyType.dynamic_dict),
             ]
         ),
         "progress": lambda gui, control_type, attrs: _Builder(
@@ -521,7 +521,7 @@ class _Factory:
                 ("drag_type", PropertyType.string),
                 ("drop_types", PropertyType.string_list),
                 ("on_action", PropertyType.function),
-                ("dnd_parameters", PropertyType.dynamic_dict),
+                ("dnd_data", PropertyType.dynamic_dict),
             ]
         )
         ._set_propagate(),

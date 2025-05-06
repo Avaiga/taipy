@@ -4,7 +4,7 @@ export interface dropHandlerInterface {
     (
         sourceId?: string,
         draggedItemId?: string,
-        draggedParams?: Record<string, unknown>,
+        draggedData?: Record<string, unknown>,
         sourceVarName?: string,
         droppedItemId?: string
     ): void;
@@ -12,8 +12,8 @@ export interface dropHandlerInterface {
 
 export interface DndProps {
     dragType?: string;
-    dndParameters?: string;
-    defaultDndParameters?: string;
+    dndData?: string;
+    defaultDndData?: string;
     dropTypes?: string;
     onAction?: string;
 }
@@ -22,7 +22,7 @@ export interface DndInternalProps {
     dragVarName?: string;
     sourceId?: string;
     onDrop?: dropHandlerInterface;
-    dragParams?: Record<string, unknown>;
+    dragData?: Record<string, unknown>;
     dropTypes?: string[];
 }
 export const draggedSx = { opacity: 0.5 };
@@ -32,7 +32,7 @@ const dndDataType = "application/taipy-dnd";
 export const useDrag = (
     eltRef: RefObject<HTMLElement>,
     dragType?: string,
-    dragParams?: Record<string, unknown>,
+    dragData?: Record<string, unknown>,
     itemId?: string,
     varName?: string,
     sourceId?: string
@@ -47,7 +47,7 @@ export const useDrag = (
             setDragging(true);
             e.dataTransfer?.setData(
                 dndDataType,
-                JSON.stringify({ type: dragType, itemId, varName, sourceId, dragParams })
+                JSON.stringify({ type: dragType, itemId, varName, sourceId, dragData })
             );
         };
         const dragEndHandler = () => {
@@ -61,7 +61,7 @@ export const useDrag = (
             elt.removeEventListener("dragstart", dragStartHandler);
             elt.removeEventListener("dragend", dragEndHandler);
         };
-    }, [dragType, itemId, varName, sourceId, dragParams, eltRef]);
+    }, [dragType, itemId, varName, sourceId, dragData, eltRef]);
     return [isDragging];
 };
 
@@ -97,10 +97,10 @@ export const useDrop = (
             const data = e.dataTransfer?.getData(dndDataType);
             if (data && onDrop && !e.dataTransfer?.getData(dndDataType + "-done")) {
                 try {
-                    const { type, itemId, varName, sourceId, dragParams } = JSON.parse(data);
+                    const { type, itemId, varName, sourceId, dragParams: dragData } = JSON.parse(data);
                     if (dropTypes && dropTypes.includes(type)) {
                         e.dataTransfer?.setData(dndDataType + "-done", "done");
-                        onDrop(sourceId, itemId, dragParams, varName, targetItemId);
+                        onDrop(sourceId, itemId, dragData, varName, targetItemId);
                     }
                 } catch (e) {
                     console.error("Error parsing data: ", e);

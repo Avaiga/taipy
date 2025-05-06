@@ -159,7 +159,7 @@ export const SingleItem = ({
     sourceId,
     dropTypes,
     onDrop,
-    dragParams,
+    dragData: dragParams,
 }: ItemProps) => {
     const itemRef = useRef<HTMLDivElement>(null);
 
