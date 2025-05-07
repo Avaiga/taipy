@@ -14,14 +14,14 @@ from queue import SimpleQueue
 from taipy.common.config import Config
 from taipy.core import taipy as tp
 from taipy.core.common.frequency import Frequency
-from taipy.core.notification.core_event_consumer import CoreEventConsumerBase
+from taipy.core.notification._core_event_consumer import _CoreEventConsumerBase
 from taipy.core.notification.event import Event, EventEntityType, EventOperation
 from taipy.core.notification.notifier import Notifier
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from tests.core.utils import assert_true_after_time
 
 
-class AllCoreEventConsumerProcessor(CoreEventConsumerBase):
+class AllCoreEventConsumerProcessor(_CoreEventConsumerBase):
     def __init__(self, registration_id: str, queue: SimpleQueue):
         self.event_collected = 0
         self.event_entity_type_collected: dict = {}
@@ -36,7 +36,7 @@ class AllCoreEventConsumerProcessor(CoreEventConsumerBase):
         self.event_operation_collected[event.operation] = self.event_operation_collected.get(event.operation, 0) + 1
 
 
-class ScenarioCoreEventConsumerProcessor(CoreEventConsumerBase):
+class ScenarioCoreEventConsumerProcessor(_CoreEventConsumerBase):
     def __init__(self, registration_id: str, queue: SimpleQueue):
         self.scenario_event_collected = 0
         self.event_operation_collected: dict = {}
@@ -47,7 +47,7 @@ class ScenarioCoreEventConsumerProcessor(CoreEventConsumerBase):
         self.event_operation_collected[event.operation] = self.event_operation_collected.get(event.operation, 0) + 1
 
 
-class TaskCreationCoreEventConsumerProcessor(CoreEventConsumerBase):
+class TaskCreationCoreEventConsumerProcessor(_CoreEventConsumerBase):
     def __init__(self, registration_id: str, queue: SimpleQueue):
         self.task_event_collected = 0
         self.creation_event_operation_collected = 0

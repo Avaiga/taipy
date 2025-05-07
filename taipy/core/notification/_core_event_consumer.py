@@ -16,7 +16,7 @@ from queue import Empty, SimpleQueue
 from .event import Event
 
 
-class CoreEventConsumerBase(threading.Thread):
+class _CoreEventConsumerBase(threading.Thread):
     """Abstract base class for implementing a Core event consumer.
 
     This class provides a framework for consuming events from a queue in a separate thread.

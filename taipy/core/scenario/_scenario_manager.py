@@ -372,7 +372,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
 
     @classmethod
     def _tag(cls, scenario: Scenario, tag: str) -> None:
-        tags = scenario.properties.get(cls._AUTHORIZED_TAGS_KEY, set())
+        tags = scenario.properties.get(cls._AUTHORIZED_TAGS_KEY, set())  # type: ignore[var-annotated]
         if len(tags) > 0 and tag not in tags:
             raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`")
         scenario._add_tag(tag)
