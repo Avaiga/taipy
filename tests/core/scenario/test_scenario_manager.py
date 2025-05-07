@@ -52,6 +52,7 @@ from taipy.core.task.task import Task
 from taipy.core.task.task_id import TaskId
 from tests.core.utils.NotifyMock import NotifyMock
 
+
 def some_algo(*entry: str):
     # does nothing!
     return entry
