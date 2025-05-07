@@ -154,7 +154,10 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
             json.dump(file_data, f, indent=4, cls=self._encoder)
 
     def _write(self, data: Any):
-        with open(self._path, "w", encoding=self.properties[self.__ENCODING_KEY]) as f:  # type: ignore
+        self._write_to_path(self._path, data)
+
+    def _write_to_path(self, path: str, data: Any):
+        with open(path, "w", encoding=self.properties[self.__ENCODING_KEY]) as f:  # type: ignore
             json.dump(data, f, indent=4, cls=self._encoder)
 
 

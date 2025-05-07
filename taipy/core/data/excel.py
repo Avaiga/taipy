@@ -126,7 +126,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             editor_id (Optional[str]): An optional identifier of the writer.
         """
         if isinstance(data, Dict) and all(isinstance(x, (pd.DataFrame, np.ndarray)) for x in data.values()):
-            self._write_excel_with_multiple_sheets(data, columns=columns)
+            self._write_excel_with_multiple_sheets(self._path, data, columns=columns)
         else:
             df = pd.DataFrame(data)
             if columns:
@@ -306,19 +306,19 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         else:
             self._append_excel_with_single_sheet(pd.DataFrame(data).to_excel, index=False, header=False)
 
-    def _write_excel_with_single_sheet(self, write_excel_fct, *args, **kwargs):
+    def _write_excel_with_single_sheet(self, write_excel_fct, path, *args, **kwargs):
         if sheet_name := self.properties.get(self.__SHEET_NAME_PROPERTY):
             if not isinstance(sheet_name, str):
                 if len(sheet_name) > 1:
                     raise SheetNameLengthMismatch
                 else:
                     sheet_name = sheet_name[0]
-            write_excel_fct(*args, **kwargs, sheet_name=sheet_name)
+            write_excel_fct(path, *args, **kwargs, sheet_name=sheet_name)
         else:
-            write_excel_fct(*args, **kwargs)
+            write_excel_fct(path, *args, **kwargs)
 
-    def _write_excel_with_multiple_sheets(self, data: Any, columns: List[str] = None):
-        with pd.ExcelWriter(self._path) as writer:
+    def _write_excel_with_multiple_sheets(self, path: str, data: Any, columns: List[str] = None):
+        with pd.ExcelWriter(path) as writer:
             # Each key stands for a sheet name
             properties = self.properties
             for key in data.keys():
@@ -331,7 +331,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     def _write(self, data: Any):
         if isinstance(data, Dict):
-            return self._write_excel_with_multiple_sheets(data)
+            return self._write_excel_with_multiple_sheets(self._path, data)
         else:
             properties = self.properties
             data = self._convert_data_to_dataframe(properties[self._EXPOSED_TYPE_PROPERTY], data)

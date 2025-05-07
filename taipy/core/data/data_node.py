@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import functools
-import os
 import typing
 import uuid
 from abc import abstractmethod
@@ -211,7 +210,11 @@ class DataNode(_Entity, _Labeled):
     @_self_reload(_MANAGER_NAME)
     def last_edit_date(self) -> Optional[datetime]:
         """The date and time of the last modification."""
-        last_modified_datetime = self._get_last_modified_datetime(self._properties.get(self._PATH_KEY, None))
+        if hasattr(self, "_get_last_modified_datetime"):
+            last_modified_datetime = self._get_last_modified_datetime()
+        else:
+            last_modified_datetime = None
+
         if last_modified_datetime and last_modified_datetime > self._last_edit_date:  # type: ignore
             return last_modified_datetime
         else:
@@ -504,7 +507,10 @@ class DataNode(_Entity, _Labeled):
         if comment:
             edit[EDIT_COMMENT_KEY] = comment
         if not timestamp:
-            timestamp = self._get_last_modified_datetime(self._properties.get(self._PATH_KEY)) or datetime.now()
+            if hasattr(self, "_get_last_modified_datetime"):
+                timestamp = self._get_last_modified_datetime() or datetime.now()
+            else:
+                timestamp = datetime.now()
         edit[EDIT_TIMESTAMP_KEY] = timestamp
         self.last_edit_date = edit.get(EDIT_TIMESTAMP_KEY)
         self._edits.append(typing.cast(Edit, edit))
@@ -707,38 +713,20 @@ class DataNode(_Entity, _Labeled):
         """Get user properties."""
         return {key: value for key, value in self.properties.items() if key not in self._TAIPY_PROPERTIES}
 
-    @classmethod
-    def _get_last_modified_datetime(cls, path: Optional[str] = None) -> Optional[datetime]:
-        if path and os.path.isfile(path):
-            return datetime.fromtimestamp(os.path.getmtime(path))
-
-        last_modified_datetime = None
-        if path and os.path.isdir(path):
-            for filename in os.listdir(path):
-                filepath = os.path.join(path, filename)
-                if os.path.isfile(filepath):
-                    file_mtime = datetime.fromtimestamp(os.path.getmtime(filepath))
-
-                    if last_modified_datetime is None or file_mtime > last_modified_datetime:
-                        last_modified_datetime = file_mtime
-
-        return last_modified_datetime
-
     @staticmethod
     def _class_map():
-        def all_subclasses(cls):
-            subclasses = set(cls.__subclasses__())
-            for s in cls.__subclasses__():
-                subclasses.update(all_subclasses(s))
-            return subclasses
-
         class_map = {}
-        for c in all_subclasses(DataNode):
-            try:
-                if c.storage_type() is not None:
-                    class_map[c.storage_type()] = c
-            except NotImplementedError:
-                pass
+        classes_stack = [DataNode]
+        while classes_stack:
+            current_class = classes_stack.pop()
+            for subclass in current_class.__subclasses__():
+                try:
+                    if subclass.storage_type() is not None:
+                        class_map[subclass.storage_type()] = subclass
+                except NotImplementedError:
+                    pass
+
+                classes_stack.append(subclass)
 
         return class_map
 

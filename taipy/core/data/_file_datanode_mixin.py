@@ -196,7 +196,7 @@ class _FileDataNodeMixin:
     def _write_default_data(self, default_value: Any):
         if default_value is not None and not os.path.exists(self._path):
             self._write(default_value)  # type: ignore[attr-defined]
-            self._last_edit_date = DataNode._get_last_modified_datetime(self._path) or datetime.now()
+            self._last_edit_date = self._get_last_modified_datetime() or datetime.now()
             self._edits.append(  # type: ignore[attr-defined]
                 Edit(
                     {
@@ -209,6 +209,22 @@ class _FileDataNodeMixin:
 
         if not self._last_edit_date and isfile(self._path):
             self._last_edit_date = datetime.now()
+
+    def _get_last_modified_datetime(self) -> Optional[datetime]:
+        if self._path and os.path.isfile(self._path):
+            return datetime.fromtimestamp(os.path.getmtime(self._path))
+
+        last_modified_datetime = None
+        if self._path and os.path.isdir(self._path):
+            for filename in os.listdir(self._path):
+                filepath = os.path.join(self._path, filename)
+                if os.path.isfile(filepath):
+                    file_mtime = datetime.fromtimestamp(os.path.getmtime(filepath))
+
+                    if last_modified_datetime is None or file_mtime > last_modified_datetime:
+                        last_modified_datetime = file_mtime
+
+        return last_modified_datetime
 
     def _build_path(self, storage_type) -> str:
         folder = f"{storage_type}s"

@@ -122,7 +122,7 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             columns (Optional[List[str]]): The list of column names to write.
             editor_id (str): An optional identifier of the writer.
         """
-        self._write(data, columns)
+        self._write_to_path(self._path, data, columns)
         self.track_edit(editor_id=editor_id, timestamp=datetime.now())
 
     def _read(self):
@@ -178,6 +178,9 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         data.to_csv(self._path, mode="a", index=False, encoding=properties[self.__ENCODING_KEY], header=False)
 
     def _write(self, data: Any, columns: Optional[List[str]] = None):
+        self._write_to_path(self._path, data, columns)
+
+    def _write_to_path(self, path: str, data: Any, columns: Optional[List[str]] = None):
         properties = self.properties
         exposed_type = properties[self._EXPOSED_TYPE_PROPERTY]
         data = self._convert_data_to_dataframe(exposed_type, data)
@@ -186,7 +189,7 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             data.columns = pd.Index(columns, dtype="object")
 
         data.to_csv(
-            self._path,
+            path,
             index=False,
             encoding=properties[self.__ENCODING_KEY],
             header=properties[self._HAS_HEADER_PROPERTY],
