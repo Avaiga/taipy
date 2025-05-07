@@ -29,6 +29,7 @@ from taipy.core.common.scope import Scope
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions.exceptions import (
     DeletingPrimaryScenario,
@@ -118,7 +119,9 @@ def test_save_and_get_scenario(cycle):
     assert _ScenarioManager._get(scenario_2) is None
 
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
-    _TaskManager._create(task_2)
+    _DataManagerFactory._build_manager()._repository._save(input_dn_2)
+    _DataManagerFactory._build_manager()._repository._save(output_dn_2)
+    _TaskManager._repository._save(task_2)
     _CycleManager._repository._save(cycle)
     _ScenarioManager._repository._save(scenario_2)
     _DataManager._repository._save(additional_dn_2)
@@ -1129,11 +1132,19 @@ def test_submit():
         # scenario, sequence, and tasks do exist.
         # We expect all the tasks to be submitted once,
         # and respecting specific constraints on the order
-        _TaskManager._create(task_1)
-        _TaskManager._create(task_2)
-        _TaskManager._create(task_3)
-        _TaskManager._create(task_4)
-        _TaskManager._create(task_5)
+        _DataManager._repository._save(data_node_1)
+        _DataManager._repository._save(data_node_2)
+        _DataManager._repository._save(data_node_3)
+        _DataManager._repository._save(data_node_4)
+        _DataManager._repository._save(data_node_5)
+        _DataManager._repository._save(data_node_6)
+        _DataManager._repository._save(data_node_7)
+        _DataManager._repository._save(data_node_8)
+        _TaskManager._repository._save(task_1)
+        _TaskManager._repository._save(task_2)
+        _TaskManager._repository._save(task_3)
+        _TaskManager._repository._save(task_4)
+        _TaskManager._repository._save(task_5)
         _ScenarioManager._submit(scenario.id)
         submit_calls = _TaskManager._orchestrator().submit_calls
         assert len(submit_calls) == 5

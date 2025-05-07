@@ -71,8 +71,10 @@ def test_raise_sequence_does_not_belong_to_scenario():
 def __init():
     input_dn = InMemoryDataNode("foo", Scope.SCENARIO)
     output_dn = InMemoryDataNode("foo", Scope.SCENARIO)
+    _DataManager._repository._save(input_dn)
+    _DataManager._repository._save(output_dn)
     task = Task("task", {}, print, [input_dn], [output_dn], TaskId("Task_task_id"))
-    _TaskManager._create(task)
+    _TaskManager._repository._save(task)
     scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._repository._save(scenario)
     return scenario, task
@@ -201,8 +203,9 @@ def test_get_all_on_multiple_versions_environment():
 
 def test_is_submittable():
     dn = InMemoryDataNode("dn", Scope.SCENARIO, properties={"default_data": 10})
+    _DataManager._repository._save(dn)
     task = Task("task", {}, print, [dn])
-    _TaskManager._create(task)
+    _TaskManager._repository._save(task)
     scenario = Scenario("scenario", {task}, {}, set())
     _ScenarioManager._repository._save(scenario)
 
@@ -236,6 +239,13 @@ def test_submit():
     data_node_5 = InMemoryDataNode("quux", Scope.SCENARIO, "s5")
     data_node_6 = InMemoryDataNode("quuz", Scope.SCENARIO, "s6")
     data_node_7 = InMemoryDataNode("corge", Scope.SCENARIO, "s7")
+    _DataManager._repository._save(data_node_1)
+    _DataManager._repository._save(data_node_2)
+    _DataManager._repository._save(data_node_3)
+    _DataManager._repository._save(data_node_4)
+    _DataManager._repository._save(data_node_5)
+    _DataManager._repository._save(data_node_6)
+    _DataManager._repository._save(data_node_7)
     task_1 = Task(
         "grault",
         {},
@@ -247,10 +257,10 @@ def test_submit():
     task_2 = Task("garply", {}, print, [data_node_3], [data_node_5], TaskId("t2"))
     task_3 = Task("waldo", {}, print, [data_node_5, data_node_4], [data_node_6], TaskId("t3"))
     task_4 = Task("fred", {}, print, [data_node_4], [data_node_7], TaskId("t4"))
-    _TaskManager._create(task_1)
-    _TaskManager._create(task_2)
-    _TaskManager._create(task_3)
-    _TaskManager._create(task_4)
+    _TaskManager._repository._save(task_1)
+    _TaskManager._repository._save(task_2)
+    _TaskManager._repository._save(task_3)
+    _TaskManager._repository._save(task_4)
     scenario = Scenario("sce", {task_1, task_2, task_3, task_4}, {})
 
     sequence_name = "sequence"
@@ -281,10 +291,6 @@ def test_submit():
 
         # sequence, and tasks does exist. We expect the tasks to be submitted
         # in a specific order
-        _TaskManager._repository._save(task_1)
-        _TaskManager._repository._save(task_2)
-        _TaskManager._repository._save(task_3)
-        _TaskManager._repository._save(task_4)
         sequence = scenario.sequences[sequence_name]
 
         _SequenceManager._submit(sequence.id)

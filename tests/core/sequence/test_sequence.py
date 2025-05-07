@@ -585,8 +585,8 @@ def test_auto_update_and_reload(task):
     tmp_task = Task("tmp_task_config_id", {}, print, list(task.output.values()), [], TaskId("tmp_task_id"))
     scenario = Scenario("scenario", [task, tmp_task], {}, sequences={"foo": {}})
 
-    _TaskManager._create(task)
-    _TaskManager._create(tmp_task)
+    _TaskManager._repository._save(task)
+    _TaskManager._repository._save(tmp_task)
     _ScenarioManager._repository._save(scenario)
 
     sequence_1 = scenario.sequences["foo"]

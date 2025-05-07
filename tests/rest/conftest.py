@@ -26,6 +26,7 @@ from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.scope import Scope
 from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.task._task_manager import _TaskManager
@@ -170,7 +171,7 @@ def __default_task():
         {"TASK_task_id"},
         properties={"default_data": "In memory Data Source"},
     )
-
+    _DataManagerFactory._build_manager()._repository._save(input_ds)
     output_ds = PickleDataNode(
         "output_ds",
         Scope.SCENARIO,
@@ -179,6 +180,7 @@ def __default_task():
         {"TASK_task_id"},
         properties={"default_data": "In memory Data Source"},
     )
+    _DataManagerFactory._build_manager()._repository._save(output_ds)
     return Task(
         config_id="foo",
         properties={},
@@ -292,7 +294,7 @@ def default_cycle():
 def __create_job():
     task_manager = _TaskManager
     task = __default_task()
-    task_manager._create(task)
+    task_manager._repository._save(task)
     submit_id = f"SUBMISSION_{str(uuid.uuid4())}"
     return Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task, submit_id=submit_id, submit_entity_id=task.id)
 

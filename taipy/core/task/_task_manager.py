@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import itertools
 from typing import Callable, List, Optional, Type, Union, cast
 
 from taipy.common.config import Config
@@ -51,12 +50,6 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         from .._orchestrator._orchestrator_factory import _OrchestratorFactory
 
         return _OrchestratorFactory._build_orchestrator()
-
-    @classmethod
-    def _create(cls, task: Task) -> None:
-        for dn in itertools.chain(task.input.values(), task.output.values()):
-            _DataManagerFactory._build_manager()._repository._save(dn)
-        cls._repository._save(task)
 
     @classmethod
     def _get_owner_id(

@@ -225,7 +225,9 @@ def data_node_model():
 
 @pytest.fixture(scope="function")
 def task(data_node):
+    _DataManagerFactory._build_manager()._repository._save(data_node)
     dn = InMemoryDataNode("dn_config_id", Scope.SCENARIO, version="random_version_number")
+    _DataManagerFactory._build_manager()._repository._save(dn)
     return Task("task_config_id", {}, print, [data_node], [dn], TaskId("TASK_task_id"))
 
 
