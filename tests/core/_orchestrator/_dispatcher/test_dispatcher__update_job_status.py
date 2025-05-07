@@ -14,6 +14,7 @@ from taipy import Job, JobId, Scope, Status, Task
 from taipy.core._orchestrator._dispatcher import _JobDispatcher
 from taipy.core._orchestrator._orchestrator_factory import _OrchestratorFactory
 from taipy.core.data import InMemoryDataNode
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import EDIT_JOB_ID_KEY, EDIT_TIMESTAMP_KEY
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
@@ -29,8 +30,9 @@ def _error():
 
 def test_update_job_status_no_exception():
     output = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
+    _DataManagerFactory._build_manager()._repository._save(output)
     task = Task("config_id", {}, nothing, output=[output])
-    _TaskManagerFactory._build_manager()._create(task)
+    _TaskManagerFactory._build_manager()._repository._save(task)
     job = Job(JobId("id"), task, "s_id", task.id)
     _JobManagerFactory._build_manager()._repository._save(job)
 

@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import itertools
 from typing import Callable, List, Optional, Type, Union, cast
 
 from taipy.common.config import Config
@@ -53,12 +52,6 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return _OrchestratorFactory._build_orchestrator()
 
     @classmethod
-    def _create(cls, task: Task) -> None:
-        for dn in itertools.chain(task.input.values(), task.output.values()):
-            _DataManagerFactory._build_manager()._repository._save(dn)
-        cls._repository._save(task)
-
-    @classmethod
     def _get_owner_id(
         cls, scope, cycle_id, scenario_id
     ) -> Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]:
@@ -80,8 +73,8 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         for task_config in task_configs:
             data_node_configs.update([Config.data_nodes[dnc.id] for dnc in task_config.input_configs])
             data_node_configs.update([Config.data_nodes[dnc.id] for dnc in task_config.output_configs])
-
-        data_nodes = _DataManagerFactory._build_manager()._bulk_get_or_create(
+        _data_manager = _DataManagerFactory._build_manager()
+        data_nodes = _data_manager._bulk_get_or_create(
             list(data_node_configs), cycle_id, scenario_id
         )
         tasks_configs_and_owner_id = []
@@ -102,6 +95,8 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         tasks = []
         for task_config, owner_id in tasks_configs_and_owner_id:
             if task := tasks_by_config.get((task_config, owner_id)):
+                task._parent_ids.add(scenario_id)
+                cls._update(task)
                 tasks.append(task)
             else:
                 version = _VersionManagerFactory._build_manager()._get_latest_version()
@@ -122,13 +117,14 @@ class _TaskManager(_Manager[Task], _VersionMixin):
                     inputs,
                     outputs,
                     owner_id=owner_id,
-                    parent_ids=set(),
+                    parent_ids={scenario_id} if scenario_id else set(),
                     version=version,
                     skippable=skippable,
                 )
                 for dn in set(inputs + outputs):
-                    dn._parent_ids.update([task.id])
-                cls._create(task)
+                    dn._parent_ids.add(task.id)
+                    _data_manager._update(dn)
+                cls._repository._save(task)
                 Notifier.publish(_make_event(task, EventOperation.CREATION))
                 tasks.append(task)
         return tasks

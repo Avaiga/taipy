@@ -81,6 +81,7 @@ with open(gui_pyi_file, "w", encoding="utf-8") as write_file:
 # Generate Page Builder pyi file (gui/builder/__init__.pyi)
 # ##################################################################################################
 # Types that appear in viselements.json
+
 from datetime import datetime  # noqa: E402, F401
 
 from taipy.core import Cycle, DataNode, Job, Scenario  # noqa: E402, F401

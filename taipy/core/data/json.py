@@ -113,7 +113,7 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
     @_self_reload(DataNode._MANAGER_NAME)
     def encoder(self) -> json.JSONEncoder:
         """The JSON encoder that is used to write into the JSON file."""
-        return self._encoder
+        return self._encoder # type: ignore[return-value]
 
     @encoder.setter
     def encoder(self, encoder: json.JSONEncoder) -> None:
@@ -123,7 +123,7 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
     @_self_reload(DataNode._MANAGER_NAME)
     def decoder(self) -> json.JSONDecoder:
         """The JSON decoder that is used to read from the JSON file."""
-        return self._decoder
+        return self._decoder # type: ignore[return-value]
 
     @decoder.setter
     def decoder(self, decoder: json.JSONDecoder) -> None:
@@ -154,7 +154,10 @@ class JSONDataNode(DataNode, _FileDataNodeMixin):
             json.dump(file_data, f, indent=4, cls=self._encoder)
 
     def _write(self, data: Any):
-        with open(self._path, "w", encoding=self.properties[self.__ENCODING_KEY]) as f:  # type: ignore
+        self._write_to_path(self._path, data)
+
+    def _write_to_path(self, path: str, data: Any):
+        with open(path, "w", encoding=self.properties[self.__ENCODING_KEY]) as f:  # type: ignore
             json.dump(data, f, indent=4, cls=self._encoder)
 
 
