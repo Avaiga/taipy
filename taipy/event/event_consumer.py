@@ -11,7 +11,7 @@
 
 from typing import Callable, Dict, List, Optional, Union
 
-from taipy import Gui, SubmissionStatus
+from taipy import DataNode, Gui, Scenario, Submission, SubmissionStatus
 from taipy.common.logger._taipy_logger import _TaipyLogger
 from taipy.core.common._check_dependencies import EnterpriseEditionUtils
 from taipy.core.common._utils import _load_fct
@@ -202,7 +202,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
         operation: Optional[EventOperation] = None,
         attribute_name: Optional[str] = None,
         filter: Optional[Callable[[Event], bool]] = None,
-    ) -> 'GuiEventConsumer':
+    ) -> "GuiEventConsumer":
         """Register a callback to be executed on a specific event.
 
         Arguments:
@@ -252,7 +252,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
         operation: Optional[EventOperation] = None,
         attribute_name: Optional[str] = None,
         filter: Optional[Callable[[Event], bool]] = None,
-    ) -> 'GuiEventConsumer':
+    ) -> "GuiEventConsumer":
         """Register a callback to be broadcast to all states on a specific event.
 
                 Arguments:
@@ -303,7 +303,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
         attribute_name: Optional[str] = None,
         filter: Optional[Callable[[Event], bool]] = None,
         broadcast: bool = False,
-    ) -> 'GuiEventConsumer':
+    ) -> "GuiEventConsumer":
         topic = self.__build_topic(entity_type, entity_id, operation, attribute_name)
         cb = self.__build_callback(callback, callback_args, filter, broadcast)
         self.__register_callback(topic, cb)
@@ -313,7 +313,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                            ) -> 'GuiEventConsumer':
+                            ) -> "GuiEventConsumer":
         """ Register a callback for scenario creation events.
 
         !!! Example:
@@ -382,7 +382,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                                      ) -> 'GuiEventConsumer':
+                                      ) -> "GuiEventConsumer":
         """ Register a callback executed for all states on scenario creation events.
 
         !!! Examples:
@@ -455,14 +455,18 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               scenario_config: Union[str, ScenarioConfig, List, None] = None,
                               broadcast: bool = False,
-                              ) -> 'GuiEventConsumer':
+                              ) -> "GuiEventConsumer":
         scenario_config = self.__format_configs_parameter(ScenarioConfig, scenario_config)
 
         def _filter(event: Event) -> bool:
+            if not event.entity_id:
+                return False
             import taipy as tp
 
             sc = tp.get(event.entity_id)
-            if scenario_config and sc.config_id not in scenario_config:
+            if not isinstance(sc, Scenario):
+                return False
+            if scenario_config and sc.config_id not in scenario_config: # type: ignore[union-attr]
                 return False
             event.metadata["predefined_args"] = [sc]
             return True
@@ -479,7 +483,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                            ) -> 'GuiEventConsumer':
+                            ) -> "GuiEventConsumer":
         """ Register a callback for scenario deletion events.
 
         !!! Example:
@@ -531,7 +535,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                                      ) -> 'GuiEventConsumer':
+                                      ) -> "GuiEventConsumer":
         """ Register a callback executed for all states on scenario deletion events.
 
         !!! Example:
@@ -584,7 +588,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               scenario_config: Union[str, ScenarioConfig, List, None] = None,
                               broadcast: bool = False
-                              ) -> 'GuiEventConsumer':
+                              ) -> "GuiEventConsumer":
         scenario_config = self.__format_configs_parameter(ScenarioConfig, scenario_config)
 
         def _filter(event: Event) -> bool:
@@ -592,7 +596,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 event.metadata["predefined_args"] = [event.entity_id]
                 return True
             for cfg_id in scenario_config:
-                if cfg_id in event.entity_id:
+                if cfg_id in str(event.entity_id):
                     event.metadata["predefined_args"] = [event.entity_id]
                     return True
             return False
@@ -609,7 +613,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                            ) -> 'GuiEventConsumer':
+                            ) -> "GuiEventConsumer":
         """ Register a callback for data node written events.
 
         The callback is triggered when a datanode is written (see methods
@@ -666,7 +670,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                                      ) -> 'GuiEventConsumer':
+                                      ) -> "GuiEventConsumer":
         """ Register a callback for data node written events.
 
         The callback is triggered when a datanode is written (see methods
@@ -722,13 +726,18 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               datanode_config: Union[str, DataNodeConfig, List, None] = None,
                               broadcast: bool = False
-                              ) -> 'GuiEventConsumer':
+                              ) -> "GuiEventConsumer":
         datanode_config = self.__format_configs_parameter(DataNodeConfig, datanode_config)
 
         def _filter(event: Event) -> bool:
+            if not event.entity_id:
+                return False
+
             import taipy as tp
 
             dn = tp.get(event.entity_id)
+            if not isinstance(dn, DataNode):
+                return False
             if datanode_config and dn.config_id not in datanode_config:
                 return False
             event.metadata["predefined_args"] = [dn, dn.read()]
@@ -747,7 +756,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                            ) -> 'GuiEventConsumer':
+                            ) -> "GuiEventConsumer":
         """ Register a callback for data node deletion events.
 
         !!! Example:
@@ -797,7 +806,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                                      ) -> 'GuiEventConsumer':
+                                      ) -> "GuiEventConsumer":
         """ Register a callback for each state on data node deletion events.
 
         !!! Example:
@@ -850,7 +859,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               datanode_config: Union[str, DataNodeConfig, List, None] = None,
                               broadcast: bool = False
-                              ) -> 'GuiEventConsumer':
+                              ) -> "GuiEventConsumer":
         datanode_config = self.__format_configs_parameter(DataNodeConfig, datanode_config)
 
         def _filter(event: Event) -> bool:
@@ -858,7 +867,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 event.metadata["predefined_args"] = [event.entity_id]
                 return True
             for cfg_id in datanode_config:
-                if cfg_id in event.entity_id:
+                if cfg_id in str(event.entity_id):
                     event.metadata["predefined_args"] = [event.entity_id]
                     return True
             return False
@@ -875,7 +884,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                            ) -> 'GuiEventConsumer':
+                            ) -> "GuiEventConsumer":
         """ Register a callback to be executed on data node creation event.
 
         !!! Example:
@@ -925,7 +934,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                                      ) -> 'GuiEventConsumer':
+                                      ) -> "GuiEventConsumer":
         """ Register a callback to be executed for each state on data node creation event.
 
         !!! Examples:
@@ -978,13 +987,17 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               datanode_config: Union[str, DataNodeConfig, List, None] = None,
                               broadcast: bool = False
-                              ) -> 'GuiEventConsumer':
+                              ) -> "GuiEventConsumer":
         datanode_config = self.__format_configs_parameter(DataNodeConfig, datanode_config)
 
         def _filter(event: Event) -> bool:
+            if not event.entity_id:
+                return False
             import taipy as tp
 
             dn = tp.get(event.entity_id)
+            if not isinstance(dn, DataNode):
+                return False
             if datanode_config and dn.config_id not in datanode_config:
                 return False
             event.metadata["predefined_args"] = [dn]
@@ -1002,7 +1015,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                callback: Callable,
                                callback_args: Optional[List] = None,
                                config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
-                               ) -> 'GuiEventConsumer':
+                               ) -> "GuiEventConsumer":
         """Register a callback for submission finished events.
 
         !!! Example:
@@ -1056,7 +1069,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                          callback: Callable,
                                          callback_args: Optional[List] = None,
                                          config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
-                                         ) -> 'GuiEventConsumer':
+                                         ) -> "GuiEventConsumer":
         """Register a callback to be executed for each state on submission finished events.
 
         !!! Example:
@@ -1113,7 +1126,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                  callback_args: Optional[List] = None,
                                  config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
                                  broadcast: bool = False
-                                 ) -> 'GuiEventConsumer':
+                                 ) -> "GuiEventConsumer":
         if isinstance(config_ids, str):
             config_ids = [config_ids]
         if isinstance(config_ids, TaskConfig):
@@ -1133,11 +1146,13 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
         def _filter(event: Event) -> bool:
             finished_statuses = {SubmissionStatus.COMPLETED, SubmissionStatus.FAILED, SubmissionStatus.CANCELED}
-            if not event.attribute_value or event.attribute_value not in finished_statuses:
+            if not event.entity_id or not event.attribute_value or event.attribute_value not in finished_statuses:
                 return False
             import taipy as tp
 
             submission = tp.get(event.entity_id)
+            if not isinstance(submission, Submission):
+                return False
             if config_ids:
                 # We are filtering on a specific config
                 if not submission.entity_config_id:
@@ -1146,7 +1161,8 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 if submission.entity_config_id not in config_ids:
                     # It is a submission for a config that is not in the list
                     return False
-            submittable = tp.get(submission.entity_id)
+
+            submittable = tp.get(submission.entity_id) # type: ignore[arg-type]
             event.metadata["predefined_args"] = [submittable, submission]
             return True
 
