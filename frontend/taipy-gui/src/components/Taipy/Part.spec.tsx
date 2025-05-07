@@ -100,7 +100,7 @@ describe("Part Component", () => {
                     <Part dragType="drag_type">bar</Part>
                     <Part
                         allowedDragTypes={JSON.stringify(["drop_type", "drag_type"])}
-                        defaultDragData={JSON.stringify({ drop: "drop" })}
+                        defaultDropData={JSON.stringify({ drop: "drop" })}
                     >
                         foo
                     </Part>
@@ -132,15 +132,15 @@ describe("Part Component", () => {
                 payload: {
                     args: [],
                     reason: "drop",
-                    sourceId: "sourceId",
-                    sourceItemId: "itemId",
-                    sourceData: {
+                    source_id: "sourceId",
+                    source_item_id: "itemId",
+                    source_data: {
                         par: "par",
                     },
-                    sourceVarName: "varName",
-                    targetId: undefined,
-                    targetItemId: undefined,
-                    targetData: { drop: "drop" },
+                    source_var_name: "varName",
+                    target_id: undefined,
+                    target_item_id: undefined,
+                    target_data: { drop: "drop" },
                 },
                 type: "SEND_ACTION_ACTION",
             });
