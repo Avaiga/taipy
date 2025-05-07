@@ -75,7 +75,7 @@ const MultipleItem = ({
     sourceId,
     onDrop,
     dropTypes,
-    dragData,
+    draggedData: dragData,
 }: ItemProps) => {
     const itemRef = useRef<HTMLDivElement>(null);
     const [isDragging] = useDrag(itemRef, dragType, dragData, value, dragVarName, sourceId);
@@ -199,15 +199,20 @@ const Selector = (props: SelectorProps) => {
     const lovList = useLovListMemo(lov, defaultLov);
     const lovVarName = useMemo(() => getUpdateVar(updateVars, "lov"), [updateVars]);
 
-    const dndData = useDynamicJsonProperty(
-        props.dndData,
-        props.defaultDndData || "",
+    const dragData = useDynamicJsonProperty(
+        props.dragData,
+        props.defaultDragData || "",
+        undefined as Record<string, unknown> | undefined
+    );
+    const dropData = useDynamicJsonProperty(
+        props.dropData,
+        props.defaultDropData || "",
         undefined as Record<string, unknown> | undefined
     );
     const dropTypes = useMemo(() => {
-        if (props.dropTypes) {
+        if (props.allowedDragTypes) {
             try {
-                const drops = JSON.parse(props.dropTypes);
+                const drops = JSON.parse(props.allowedDragTypes);
                 if (Array.isArray(drops) && drops.length) {
                     return drops as string[];
                 }
@@ -216,7 +221,7 @@ const Selector = (props: SelectorProps) => {
             }
         }
         return undefined;
-    }, [props.dropTypes]);
+    }, [props.allowedDragTypes]);
 
     const dropHandler = useCallback(
         (
@@ -229,18 +234,18 @@ const Selector = (props: SelectorProps) => {
             dispatch(
                 createSendActionNameAction(props.onAction, module, {
                     reason: "drop",
-                    sourceId,
-                    sourceItemId,
-                    sourceData,
-                    sourceVarName,
-                    targetId: id,
-                    targetItemId,
-                    targetData: dndData,
-                    targetVarName: lovVarName,
+                    source_id: sourceId,
+                    source_item_id: sourceItemId,
+                    source_data: sourceData,
+                    source_var_name: sourceVarName,
+                    target_id: id,
+                    target_item_id: targetItemId,
+                    target_data: dropData,
+                    target_var_name: lovVarName,
                 })
             );
         },
-        [props.onAction, dispatch, module, id, lovVarName, dndData]
+        [props.onAction, dispatch, module, id, lovVarName, dropData]
     );
 
     const [isDraggedOver] = useDrop(listRef, dropTypes, undefined, dropHandler);
@@ -694,7 +699,7 @@ const Selector = (props: SelectorProps) => {
                                                 dragVarName={lovVarName}
                                                 sourceId={props.id}
                                                 onDrop={dropHandler}
-                                                dragData={dndData}
+                                                draggedData={dragData}
                                             />
                                         ) : (
                                             <SingleItem
@@ -709,7 +714,7 @@ const Selector = (props: SelectorProps) => {
                                                 dragVarName={lovVarName}
                                                 sourceId={props.id}
                                                 onDrop={dropHandler}
-                                                dragData={dndData}
+                                                draggedData={dragData}
                                             />
                                         )
                                     )}

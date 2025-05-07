@@ -2212,19 +2212,24 @@
                         "doc": "The type of source element that the user can drag.<br/>If empty, the element is not draggable."
                     },
                     {
-                        "name": "drop_types",
+                        "name": "allowed_drag_types",
                         "type": "list[str]",
                         "doc": "The list of source elements types supported by this component. ie to allow a dragged source element to be dropped on this drop target.<br/>If empty, the element does not support drops."
                     },
                     {
-                        "name": "dnd_data",
+                        "name": "drag_data",
                         "type": "dynamic[dict[str, Any]]",
-                        "doc": "A dict containing data that will be associated with the drag source or the drop target."
+                        "doc": "A dict containing data that will be associated with the drag source."
+                    },
+                    {
+                        "name": "drop_data",
+                        "type": "dynamic[dict[str, Any]]",
+                        "doc": "A dict containing data that will be associated with the drop target."
                     },
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when a source element is dropped on a target element.<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>payload</i> (dict): a dictionary that contains the following keys \"action\"\"reason\": \"drop\",\"sourceId\",\"sourceItemId\",\"sourceData\",\"sourceVarName\",\"targetId\",\"targetItemId\",\"targetData\",\"targetVarName\".</li></ul>",
+                        "doc": "A function or the name of a function that is triggered when a source element is dropped on a target element.<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>payload</i> (dict): a dictionary that contains the following keys \"action\"\"reason\": \"drop\",\"source_id\",\"source_item_id\",\"source_data\",\"source_var_name\",\"target_id\",\"target_item_id\",\"target_data\",\"target_var_name\".</li></ul>",
                         "signature": [
                             [
                                 "state",

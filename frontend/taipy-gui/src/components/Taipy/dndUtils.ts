@@ -12,9 +12,11 @@ export interface dropHandlerInterface {
 
 export interface DndProps {
     dragType?: string;
-    dndData?: string;
-    defaultDndData?: string;
-    dropTypes?: string;
+    dragData?: string;
+    defaultDragData?: string;
+    dropData?: string;
+    defaultDropData?: string;
+    allowedDragTypes?: string;
     onAction?: string;
 }
 export interface DndInternalProps {
@@ -22,7 +24,8 @@ export interface DndInternalProps {
     dragVarName?: string;
     sourceId?: string;
     onDrop?: dropHandlerInterface;
-    dragData?: Record<string, unknown>;
+    draggedData?: Record<string, unknown>;
+    droppedData?: Record<string, unknown>;
     dropTypes?: string[];
 }
 export const draggedSx = { opacity: 0.5 };

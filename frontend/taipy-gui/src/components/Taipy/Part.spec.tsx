@@ -69,7 +69,7 @@ describe("Part Component", () => {
             const { getByText } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
                     <Part dragType="drag_type">bar</Part>
-                    <Part dropTypes={'"drop_type"'}>foo</Part>
+                    <Part allowedDragTypes={'"drop_type"'}>foo</Part>
                 </TaipyContext.Provider>
             );
             const sourceElt = getByText("bar");
@@ -99,8 +99,8 @@ describe("Part Component", () => {
                 <TaipyContext.Provider value={{ state, dispatch }}>
                     <Part dragType="drag_type">bar</Part>
                     <Part
-                        dropTypes={JSON.stringify(["drop_type", "drag_type"])}
-                        defaultDndData={JSON.stringify({ drop: "drop" })}
+                        allowedDragTypes={JSON.stringify(["drop_type", "drag_type"])}
+                        defaultDragData={JSON.stringify({ drop: "drop" })}
                     >
                         foo
                     </Part>

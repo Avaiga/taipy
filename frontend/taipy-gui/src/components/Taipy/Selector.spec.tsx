@@ -407,7 +407,7 @@ describe("Selector Component", () => {
             const { getByText } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
                     <Selector dragType="drag_type" lov={lov} />
-                    <Selector dropTypes={'"drop_type"'} lov={lov2} />
+                    <Selector allowedDragTypes={'"drop_type"'} lov={lov2} />
                 </TaipyContext.Provider>
             );
             const sourceElt = getByText("Item 1");
@@ -438,8 +438,8 @@ describe("Selector Component", () => {
                     <Selector dragType="drag_type" lov={lov} />
                     <Selector
                         lov={lov2}
-                        dropTypes={JSON.stringify(["drop_type", "drag_type"])}
-                        defaultDndData={JSON.stringify({ drop: "drop" })}
+                        allowedDragTypes={JSON.stringify(["drop_type", "drag_type"])}
+                        defaultDragData={JSON.stringify({ drop: "drop" })}
                     />
                 </TaipyContext.Provider>
             );
@@ -469,16 +469,16 @@ describe("Selector Component", () => {
                 payload: {
                     args: [],
                     reason: "drop",
-                    sourceId: "sourceId",
-                    sourceItemId: "itemId",
-                    sourceData: {
+                    source_id: "sourceId",
+                    source_item_id: "itemId",
+                    source_data: {
                         par: "par",
                     },
-                    sourceVarName: "varName",
-                    targetId: undefined,
-                    targetItemId: "id21",
-                    targetData: { drop: "drop" },
-                    targetVarName: "",
+                    source_var_name: "varName",
+                    target_id: undefined,
+                    target_item_id: "id21",
+                    target_data: { drop: "drop" },
+                    target_var_name: "",
                 },
                 type: "SEND_ACTION_ACTION",
             });

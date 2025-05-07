@@ -62,15 +62,20 @@ const Part = (props: PartProps) => {
 
     const itemRef = useRef<HTMLDivElement>(null);
 
-    const dndData = useDynamicJsonProperty(
-        props.dndData,
-        props.defaultDndData || "",
+    const dragData = useDynamicJsonProperty(
+        props.dragData,
+        props.defaultDragData || "",
+        undefined as Record<string, unknown> | undefined
+    );
+    const dropData = useDynamicJsonProperty(
+        props.dropData,
+        props.defaultDropData || "",
         undefined as Record<string, unknown> | undefined
     );
     const dropTypes = useMemo(() => {
-        if (props.dropTypes) {
+        if (props.allowedDragTypes) {
             try {
-                const drops = JSON.parse(props.dropTypes);
+                const drops = JSON.parse(props.allowedDragTypes);
                 if (Array.isArray(drops) && drops.length) {
                     return drops as string[];
                 }
@@ -82,7 +87,7 @@ const Part = (props: PartProps) => {
             }
         }
         return undefined;
-    }, [props.dropTypes]);
+    }, [props.allowedDragTypes]);
     const dropHandler = useCallback(
         (
             sourceId?: string,
@@ -94,20 +99,20 @@ const Part = (props: PartProps) => {
             dispatch(
                 createSendActionNameAction(props.onAction, module, {
                     reason: "drop",
-                    sourceId,
-                    sourceItemId,
-                    sourceData,
-                    sourceVarName,
-                    targetId: id,
-                    targetItemId,
-                    targetData: dndData,
+                    source_id: sourceId,
+                    source_item_id: sourceItemId,
+                    source_data: sourceData,
+                    source_var_name: sourceVarName,
+                    target_id: id,
+                    target_item_id: targetItemId,
+                    target_data: dropData,
                 })
             );
         },
-        [props.onAction, dispatch, module, id, dndData]
+        [props.onAction, dispatch, module, id, dropData]
     );
 
-    const [isDragging] = useDrag(itemRef, dragType, dndData, undefined, undefined, id);
+    const [isDragging] = useDrag(itemRef, dragType, dragData, undefined, undefined, id);
     const [isDraggedOver] = useDrop(itemRef, dropTypes, undefined, dropHandler);
 
     const boxSx = useMemo(

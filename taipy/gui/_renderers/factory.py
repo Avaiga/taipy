@@ -63,6 +63,14 @@ class _Factory:
         "tree": "value",
     }
 
+    __DRAG_N_DROP_ATTRIBUTES = [
+        ("drag_type", PropertyType.string),
+        ("allowed_drag_types", PropertyType.string_list),
+        ("on_action", PropertyType.function),
+        ("drag_data", PropertyType.dynamic_dict),
+        ("drop_data", PropertyType.dynamic_dict),
+    ]
+
     _TEXT_ATTRIBUTES = ["format", "id", "hover_text", "raw"]
 
     __TEXT_ANCHORS = ["bottom", "top", "left", "right"]
@@ -475,11 +483,8 @@ class _Factory:
                 ("height", PropertyType.dynamic_string),
                 ("content", PropertyType.toHtmlContent),
                 ("width", PropertyType.string_or_number),
-                ("drag_type", PropertyType.string),
-                ("drop_types", PropertyType.string_list),
-                ("on_action", PropertyType.function),
-                ("dnd_data", PropertyType.dynamic_dict),
             ]
+            + _Factory.__DRAG_N_DROP_ATTRIBUTES
         ),
         "progress": lambda gui, control_type, attrs: _Builder(
             gui=gui,
@@ -518,11 +523,8 @@ class _Factory:
                 ("lov", PropertyType.lov),
                 ("selection_message", PropertyType.dynamic_string),
                 ("show_select_all", PropertyType.boolean),
-                ("drag_type", PropertyType.string),
-                ("drop_types", PropertyType.string_list),
-                ("on_action", PropertyType.function),
-                ("dnd_data", PropertyType.dynamic_dict),
             ]
+            + _Factory.__DRAG_N_DROP_ATTRIBUTES
         )
         ._set_propagate(),
         "slider": lambda gui, control_type, attrs: _Builder(
