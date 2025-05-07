@@ -8,6 +8,8 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from abc import abstractmethod
+
 from taipy.core.notification import Event
 
 
@@ -15,6 +17,7 @@ class _AbstractEventProcessor:
     """Abstract base class for implementing an event processor."""
 
     @classmethod
+    @abstractmethod
     def process_event(cls, event_consumer, event: Event):
         raise NotImplementedError("Subclasses must implement this method.")
 

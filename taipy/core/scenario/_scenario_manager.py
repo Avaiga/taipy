@@ -185,11 +185,6 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
             sequences=sequences,
         )
 
-        for task in tasks:
-            if scenario_id not in task._parent_ids:
-                task._parent_ids.update([scenario_id])
-                _task_manager._set(task)
-
         for dn in additional_data_nodes.values():
             if scenario_id not in dn._parent_ids:
                 dn._parent_ids.update([scenario_id])

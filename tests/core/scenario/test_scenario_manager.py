@@ -53,6 +53,10 @@ from taipy.core.task.task_id import TaskId
 from tests.core.utils.NotifyMock import NotifyMock
 
 
+def some_algo(*entry: str):
+    # does nothing!
+    return entry
+
 def test_set_and_get_scenario(cycle):
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, [], scenario_id_1)
@@ -367,6 +371,24 @@ def test_create_and_delete_scenario():
     _ScenarioManager._delete(scenario_1.id)
     assert len(_ScenarioManager._get_all()) == 0
 
+
+def test_task_config_order_for_scenario_creation():
+    # Fix Issue 2597
+    dnc1 = Config.configure_data_node("dn1", scope=Scope.GLOBAL, default_data="Some content")
+    dnc2 = Config.configure_data_node("dn3", scope=Scope.GLOBAL)
+    dnc3 = Config.configure_data_node("dn2", scope=Scope.CYCLE)
+    task_g = Config.configure_task("task_c", some_algo, dnc1, dnc2)
+    task_c = Config.configure_task("task_g", some_algo, dnc1, dnc3)
+
+    scenario_cfg = Config.configure_scenario("my_scenario", [task_c, task_g], frequency=Frequency.DAILY)
+
+    first_date = datetime(2023, 10, 1)
+    second_date = datetime(2023, 10, 2)
+
+    s1 = tp.create_scenario(scenario_cfg, name="sc1_1", creation_date=first_date)
+    tp.create_scenario(scenario_cfg, name="sc2_2", creation_date=second_date)
+
+    assert len(s1.dn1.parent_ids) == 3
 
 def test_can_create():
     dn_config = Config.configure_in_memory_data_node("dn", 10)

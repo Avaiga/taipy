@@ -10,4 +10,4 @@
 # specific language governing permissions and limitations under the License.
 
 from ..core.notification.event import Event, EventEntityType, EventOperation
-from .event_consumer import EventConsumer
+from .event_consumer import GuiEventConsumer
