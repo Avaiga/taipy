@@ -94,7 +94,7 @@ const Part = (props: PartProps) => {
             sourceItemId?: string,
             sourceData?: Record<string, unknown>,
             sourceVarName?: string,
-            targetItemId?: string,
+            targetItemId?: string
         ) => {
             dispatch(
                 createSendActionNameAction(props.onAction, module, {
