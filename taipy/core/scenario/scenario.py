@@ -603,11 +603,18 @@ class Scenario(_Entity, Submittable, _Labeled):
         Arguments:
             name (str): The name of the sequence to remove.
         """
-        seq_id = self.sequences[name].id
-        _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
-        _sequences.pop(name)
-        self.sequences = _sequences  # type: ignore
-        Notifier.publish(Event(EventEntityType.SEQUENCE, EventOperation.DELETION, entity_id=seq_id))
+        if seq := self.sequences.get(name):
+            from taipy.core.task._task_manager_factory import _TaskManagerFactory
+
+            for task in seq.tasks.values():
+                task._parent_ids.discard(seq.id)
+                _TaskManagerFactory._build_manager()._repository._save(task)
+            _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
+            _sequences.pop(name)
+
+            self.sequences = _sequences  # type: ignore
+            Notifier.publish(Event(EventEntityType.SEQUENCE, EventOperation.DELETION, entity_id=seq.id))
+
 
     def remove_sequences(self, sequence_names: List[str]) -> None:
         """Remove multiple sequences from the scenario.

@@ -25,7 +25,6 @@ object) must be instantiated with an associated event queue.
 
 from ._registration import _Registration
 from ._topic import _Topic
-from .core_event_consumer import CoreEventConsumerBase
 from .event import Event, EventEntityType, EventOperation, _make_event
 from .notifier import Notifier, _publish_event
 from .registration_id import RegistrationId

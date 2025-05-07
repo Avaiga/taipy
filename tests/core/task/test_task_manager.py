@@ -329,7 +329,9 @@ def test_is_submittable():
 
 def test_submit_task():
     data_node_1 = InMemoryDataNode("foo", Scope.SCENARIO, "s1")
+    _DataManager._repository._save(data_node_1)
     data_node_2 = InMemoryDataNode("bar", Scope.SCENARIO, "s2")
+    _DataManager._repository._save(data_node_2)
     task_1 = Task(
         "grault",
         {},
@@ -356,7 +358,7 @@ def test_submit_task():
         with pytest.raises(NonExistingTask):
             _TaskManager._submit(task_1.id)
 
-        _TaskManager._create(task_1)
+        _TaskManager._repository._save(task_1)
         _TaskManager._submit(task_1)
         call_ids = [call.id for call in MockOrchestrator.submit_calls]
         assert call_ids == [task_1.id]

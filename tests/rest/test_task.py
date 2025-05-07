@@ -78,7 +78,7 @@ def test_get_all_tasks(client, task_data, default_task_config_list):
 
 
 def test_execute_task(client, default_task):
-    _TaskManagerFactory._build_manager()._create(default_task)
+    _TaskManagerFactory._build_manager()._repository._save(default_task)
 
     # test 404
     user_url = url_for("api.task_submit", task_id="foo")

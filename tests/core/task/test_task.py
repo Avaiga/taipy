@@ -52,7 +52,7 @@ def test_task_equals(task):
     task_manager = _TaskManagerFactory()._build_manager()
 
     task_id = task.id
-    task_manager._create(task)
+    task_manager._repository._save(task)
 
     # To test if instance is same type
     dn = CSVDataNode("foo_bar", Scope.SCENARIO, task_id)
