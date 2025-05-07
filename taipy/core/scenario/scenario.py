@@ -729,7 +729,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         from ..data._data_manager_factory import _DataManagerFactory
 
         additional_data_nodes = {}
-        non_existing_dns = []
+        non_existing_dns: List[str] = []
         data_manager = _DataManagerFactory._build_manager()
 
         for dn_or_id in self._additional_data_nodes:
@@ -750,7 +750,7 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         _tasks = {}
         task_manager = _TaskManagerFactory._build_manager()
-        non_existing_tasks = []
+        non_existing_tasks: List[str] = []
         for task_or_id in self._tasks:
             t = task_manager._get(task_or_id, task_or_id)
 
