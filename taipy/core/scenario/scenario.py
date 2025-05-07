@@ -729,7 +729,7 @@ class Scenario(_Entity, Submittable, _Labeled):
         from ..data._data_manager_factory import _DataManagerFactory
 
         additional_data_nodes = {}
-        non_existing_dns: List[str] = []
+        non_existing_dns: List = []
         data_manager = _DataManagerFactory._build_manager()
 
         for dn_or_id in self._additional_data_nodes:
@@ -742,7 +742,7 @@ class Scenario(_Entity, Submittable, _Labeled):
                 continue
             additional_data_nodes[dn.config_id] = dn
         for dn_id in non_existing_dns:
-            self._additional_data_nodes.discard(dn_id)
+            self._additional_data_nodes.discard(dn_id)  # type: ignore[arg-type]
         return additional_data_nodes
 
     def __get_tasks(self, raise_not_existing: bool=True) -> Dict[str, Task]:
@@ -750,7 +750,7 @@ class Scenario(_Entity, Submittable, _Labeled):
 
         _tasks = {}
         task_manager = _TaskManagerFactory._build_manager()
-        non_existing_tasks: List[str] = []
+        non_existing_tasks: List = []
         for task_or_id in self._tasks:
             t = task_manager._get(task_or_id, task_or_id)
 
@@ -761,7 +761,7 @@ class Scenario(_Entity, Submittable, _Labeled):
                 continue
             _tasks[t.config_id] = t
         for t_id in non_existing_tasks:
-            self._tasks.discard(t_id)
+            self._tasks.discard(t_id)  # type: ignore[arg-type]
         return _tasks
 
 
