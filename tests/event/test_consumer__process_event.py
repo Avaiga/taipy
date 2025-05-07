@@ -14,7 +14,7 @@ from unittest import mock
 from taipy import Gui, Scenario
 from taipy.core.notification import Event, EventEntityType, EventOperation, _Topic
 from taipy.event._event_callback import _Callback
-from taipy.event.event_consumer import EventConsumer
+from taipy.event.event_consumer import GuiEventConsumer
 
 collector: Dict[str, Any] = {"cb_0": 0, "cb_1": 0, "cb_2": 0, "cb_3": 0, "cb_for_state": 0,
             "cb_scenario_creation": 0, "cb_scenario_creation_with_state": 0}
@@ -26,7 +26,7 @@ def init_collector():
             "cb_scenario_creation": 0, "cb_scenario_creation_with_state": 0}, {}
 
 
-def cb_0(gui: Optional[Gui], event: Event, extra:str):
+def cb_0(event: Event, gui: Optional[Gui], extra:str):
     collector["cb_0"]+=1
     if not args_collector.get("cb_0"):
         args_collector["cb_0"] = [extra]
@@ -35,17 +35,17 @@ def cb_0(gui: Optional[Gui], event: Event, extra:str):
     print(f"event created at {event.creation_date} triggered callback cb_0.")  # noqa: T201
 
 
-def cb_1(gui: Optional[Gui], event: Event):
+def cb_1(event: Event, gui: Optional[Gui]):
     collector["cb_1"]+=1
     print(f"event created at {event.creation_date} triggered callback cb_1.")  # noqa: T201
 
 
-def cb_2(gui: Optional[Gui], event: Event):
+def cb_2(event: Event, gui: Gui,):
     collector["cb_2"]+=1
     print(f"event created at {event.creation_date} triggered callback cb_2.")  # noqa: T201
 
 
-def cb_3(gui: Optional[Gui], event: Event):
+def cb_3(event: Event, gui: Gui, ):
     collector["cb_3"]+=1
     print(f"event created at {event.creation_date} triggered callback cb_3.")  # noqa: T201
 
@@ -55,7 +55,7 @@ def cb_for_state(state, event: Event):
     print(f"event created at {event.creation_date} triggered callback cb_for_state.")  # noqa: T201
 
 
-def cb_scenario_creation(gui: Optional[Gui], event: Event, scenario: Scenario, extra_arg: str):
+def cb_scenario_creation(event: Event, scenario: Scenario, gui: Gui, extra_arg: str):
     collector["cb_scenario_creation"]+=1
     print(f"scenario {scenario.id} created at {event.creation_date} with {extra_arg}.")  # noqa: T201
 
@@ -69,7 +69,7 @@ def cb_scenario_creation_with_state(state, event: Event, scenario: Scenario, ext
 def test_process_event(scenario):
     global collector
     global args_collector
-    consumer = EventConsumer()
+    consumer = GuiEventConsumer()
     consumer.on_event(callback=cb_0, callback_args=["foo"])
     consumer.on_event(callback=cb_1, entity_type=EventEntityType.SCENARIO)
     consumer.on_event(callback=cb_2, entity_type=EventEntityType.SCENARIO, entity_id="bar")
@@ -131,8 +131,8 @@ def test_process_event(scenario):
 
 
 def test_process_event_with_state():
-    consumer = EventConsumer(gui=Gui())
-    consumer.on_event(callback=cb_for_state, broadcast=True)
+    consumer = GuiEventConsumer(gui=Gui())
+    consumer.broadcast_on_event(callback=cb_for_state)
 
     event_1 = Event(
         entity_type=EventEntityType.SCENARIO,
@@ -153,13 +153,12 @@ def test_process_event_with_filter():
     def filt(event: Event) -> bool:
         return event.metadata.get("foo") == "bar"
 
-    consumer = EventConsumer()
+    consumer = GuiEventConsumer()
     consumer.on_event(callback=cb_0,
                       callback_args=["foo"],
                       entity_type=EventEntityType.SCENARIO,
                       operation=EventOperation.CREATION,
-                      filter=filt,
-                      broadcast=False)
+                      filter=filt)
 
     topic = _Topic(entity_type=EventEntityType.SCENARIO, operation=EventOperation.CREATION)
     assert len(consumer._topic_callbacks_map) == 1
@@ -190,7 +189,7 @@ def test_process_event_with_filter():
 def test_process_event_with_predefined_args(scenario):
     global collector
     global args_collector
-    consumer = EventConsumer()
+    consumer = GuiEventConsumer()
     consumer.on_event(callback=cb_scenario_creation, callback_args=["foo"])
     collector, args_collector = init_collector()
     event = Event(
@@ -208,8 +207,8 @@ def test_process_event_with_predefined_args(scenario):
 
 
 def test_process_event_with_predefined_args_and_state(scenario):
-    consumer = EventConsumer(Gui())
-    consumer.on_event(callback=cb_scenario_creation_with_state, callback_args=["foo"], broadcast=True)
+    consumer = GuiEventConsumer(Gui())
+    consumer.broadcast_on_event(callback=cb_scenario_creation_with_state, callback_args=["foo"])
     event = Event(
         entity_type=EventEntityType.SCENARIO,
         operation=EventOperation.CREATION,

@@ -14,7 +14,7 @@ from unittest.mock import ANY
 from taipy import Gui, Scenario
 from taipy.core.config import ScenarioConfig
 from taipy.core.notification import Event, EventEntityType, EventOperation
-from taipy.event.event_consumer import EventConsumer
+from taipy.event.event_consumer import GuiEventConsumer
 
 
 def cb_0(event: Event, scenario: Scenario):
@@ -30,8 +30,8 @@ def cb_for_state(state, event: Event, scenario: Scenario):
 
 
 def test_on_scenario_created(scenario):
-    consumer = EventConsumer()
-    with mock.patch("taipy.event.event_consumer.EventConsumer.on_event") as mck:
+    consumer = GuiEventConsumer()
+    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
         consumer.on_scenario_created(callback=cb_0)
         # test the on_scenario_created method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_0,
@@ -54,8 +54,8 @@ def test_on_scenario_created(scenario):
 
 
 def test_on_scenario_created_multiple_configs(scenario):
-    consumer = EventConsumer()
-    with mock.patch("taipy.event.event_consumer.EventConsumer.on_event") as mck:
+    consumer = GuiEventConsumer()
+    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
         consumer.on_scenario_created(callback=cb_0,
                                      scenario_config=[ScenarioConfig("sc_0"), "sc_1", ScenarioConfig("sc_2"), "sc"])
         # test the on_scenario_created method delegates to on_event with the correct parameters
@@ -79,8 +79,8 @@ def test_on_scenario_created_multiple_configs(scenario):
 
 
 def test_on_scenario_created_multiple_configs_no_matching(scenario):
-    consumer = EventConsumer()
-    with mock.patch("taipy.event.event_consumer.EventConsumer.on_event") as mck:
+    consumer = GuiEventConsumer()
+    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
         consumer.on_scenario_created(callback=cb_0,
                                      scenario_config=[ScenarioConfig("sc_0"), "sc_1"])
         # test the on_scenario_created method delegates to on_event with the correct parameters
@@ -105,8 +105,8 @@ def test_on_scenario_created_multiple_configs_no_matching(scenario):
 
 
 def test_on_scenario_created_with_args_and_matching_config(scenario):
-    consumer = EventConsumer()
-    with mock.patch("taipy.event.event_consumer.EventConsumer.on_event") as mck:
+    consumer = GuiEventConsumer()
+    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
         consumer.on_scenario_created(callback=cb_1, callback_args=["foo"], scenario_config="sc")
         # test the on_scenario_created method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_1,
@@ -129,8 +129,8 @@ def test_on_scenario_created_with_args_and_matching_config(scenario):
 
 
 def test_on_scenario_created_with_args_and_not_matching_config(scenario):
-    consumer = EventConsumer()
-    with mock.patch("taipy.event.event_consumer.EventConsumer.on_event") as mck:
+    consumer = GuiEventConsumer()
+    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
         consumer.on_scenario_created(callback=cb_1, callback_args=["foo"], scenario_config="WRONG_CFG")
         # test the on_scenario_created method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_1,
@@ -153,9 +153,9 @@ def test_on_scenario_created_with_args_and_not_matching_config(scenario):
 
 
 def test_on_scenario_created_with_broadcast():
-    consumer = EventConsumer(Gui())
-    with mock.patch("taipy.event.event_consumer.EventConsumer.on_event") as mck:
-        consumer.on_scenario_created(callback=cb_for_state, broadcast=True)
+    consumer = GuiEventConsumer(Gui())
+    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+        consumer.broadcast_on_scenario_created(callback=cb_for_state)
         mck.assert_called_once_with(callback=cb_for_state,
                                     callback_args=None,
                                     entity_type=EventEntityType.SCENARIO,
