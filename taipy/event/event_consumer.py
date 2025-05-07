@@ -12,8 +12,8 @@
 from typing import Callable, Dict, List, Optional, Union
 
 from taipy import DataNode, Gui, Scenario, Submission, SubmissionStatus
-from taipy.common.logger._taipy_logger import _TaipyLogger
 from taipy.common._check_dependencies import EnterpriseEditionUtils
+from taipy.common.logger._taipy_logger import _TaipyLogger
 from taipy.core.common._utils import _load_fct
 from taipy.core.config import DataNodeConfig, ScenarioConfig, TaskConfig
 from taipy.core.notification import (
