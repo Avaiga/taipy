@@ -714,12 +714,12 @@ class Scenario(_Entity, Submittable, _Labeled):
     def _get_set_of_tasks(self) -> Set[Task]:
         return set(self.tasks.values())
 
-    def _get_existing_data_nodes(self, additional:bool=False) -> Dict[str, DataNode]:
+    def _get_existing_data_nodes(self, additional: bool = False) -> Dict[str, DataNode]:
         if additional:
-            return self.__get_additional_data_nodes(False)
+            return self.__get_additional_data_nodes(raise_not_existing=False)
         return self.__get_data_nodes(False)
 
-    def __get_data_nodes(self, raise_not_existing: bool=True) -> Dict[str, DataNode]:
+    def __get_data_nodes(self, raise_not_existing: bool = True) -> Dict[str, DataNode]:
         data_nodes_dict = self.__get_additional_data_nodes(raise_not_existing)
         for _, task in self.__get_tasks(raise_not_existing).items():
             data_nodes_dict.update(task.data_nodes)
@@ -745,7 +745,7 @@ class Scenario(_Entity, Submittable, _Labeled):
             self._additional_data_nodes.discard(dn_id)  # type: ignore[arg-type]
         return additional_data_nodes
 
-    def __get_tasks(self, raise_not_existing: bool=True) -> Dict[str, Task]:
+    def __get_tasks(self, raise_not_existing: bool = True) -> Dict[str, Task]:
         from ..task._task_manager_factory import _TaskManagerFactory
 
         _tasks = {}
@@ -763,7 +763,6 @@ class Scenario(_Entity, Submittable, _Labeled):
         for t_id in non_existing_tasks:
             self._tasks.discard(t_id)  # type: ignore[arg-type]
         return _tasks
-
 
     @staticmethod
     def __check_sequence_tasks_exist_in_scenario_tasks(

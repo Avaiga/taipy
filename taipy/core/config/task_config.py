@@ -92,7 +92,7 @@ class TaskConfig(Section):
     def scope(self) -> Scope:
         """The lowest scope of the task's data nodes.
 
-        The lowest scope of input and output data node configurations or GLOBAL if there are
+        The lowest scope of input and output data node configurations or GLOBAL if there is
         either no input or no output configuration.
         """
         data_node_cfgs = list(self.inputs) + list(self.outputs)
