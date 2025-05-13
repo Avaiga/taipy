@@ -669,6 +669,9 @@ class Scenario(_Entity, Submittable, _Labeled):
             self._additional_data_nodes.discard(dn_id)  # type: ignore[arg-type]
         return additional_data_nodes
 
+    def _get_existing_tasks(self) -> Dict[str, Task]:
+        return self.__get_tasks(raise_not_existing=False)
+
     def __get_tasks(self, raise_not_existing: bool = True) -> Dict[str, Task]:
         from ..task._task_manager_factory import _TaskManagerFactory
 
