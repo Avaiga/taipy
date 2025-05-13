@@ -8,7 +8,7 @@ apispec = {extras = ["yaml"], version = "==6.3"}
 apispec-webframeworks = "==0.5.2"
 cookiecutter = "==2.1.1"
 deepdiff = "==6.7.1"
-flask = "==3.1.0"
+flask = "==3.1.1"
 flask-cors = "==5.0.0"
 flask-socketio = "==5.4.1"
 Flask-RESTful = ">=0.3.9"
