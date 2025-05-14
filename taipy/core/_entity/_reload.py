@@ -23,10 +23,11 @@ class _Reloader:
     _lock = threading.RLock()
 
     def __new__(cls):
-        if not isinstance(cls._instance, cls):
-            cls._instance = super().__new__(cls)
-            cls._instance._no_reload_context = False  # Initialize once
-            cls._instance._context_depth = 0  # Track nested `with` usage
+        with cls._lock:
+            if not isinstance(cls._instance, cls):
+                cls._instance = super().__new__(cls)
+                cls._instance._no_reload_context = False  # Initialize once
+                cls._instance._context_depth = 0  # Track nested `with` usage
         return cls._instance
 
     def _reload(self, manager: str, obj):
