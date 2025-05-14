@@ -20,6 +20,7 @@ class _Reloader:
     """The _Reloader singleton class"""
 
     _instance = None
+    _lock = threading.RLock()
 
     def __new__(cls):
         if not isinstance(cls._instance, cls):
@@ -42,14 +43,16 @@ class _Reloader:
         return entity
 
     def __enter__(self):
-        self._context_depth += 1
-        self._no_reload_context = True
+        with self._lock:
+            self._context_depth += 1
+            self._no_reload_context = True
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        self._context_depth -= 1
-        if self._context_depth == 0:
-            self._no_reload_context = False
+        with self._lock:
+            self._context_depth -= 1
+            if self._context_depth == 0:
+                self._no_reload_context = False
 
 
 def _self_reload(manager: str):
