@@ -62,7 +62,7 @@ def register(state):
 
 
 def send(state, _: str, payload: dict):
-    (_, _, message, sender_id) = payload.get("args", [])
+    (_, _, message, sender_id, image_url) = payload.get("args", [])
     messages.append((f"{len(messages)}", cast(str, message), cast(str, sender_id), cast(str, image_url)))
     state.messages = messages
 
