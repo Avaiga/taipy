@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Avaiga Private Limited
+# Copyright 2021-2025 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import functools
+import threading
 
 from .._manager._manager import _Manager
 from ..notification import EventOperation, Notifier, _make_event
@@ -19,12 +20,14 @@ class _Reloader:
     """The _Reloader singleton class"""
 
     _instance = None
+    _lock = threading.RLock()
 
-    _no_reload_context = False
-
-    def __new__(cls, *args, **kwargs):
-        if not isinstance(cls._instance, cls):
-            cls._instance = object.__new__(cls, *args, **kwargs)
+    def __new__(cls):
+        with cls._lock:
+            if not isinstance(cls._instance, cls):
+                cls._instance = super().__new__(cls)
+                cls._instance._no_reload_context = False  # Initialize once
+                cls._instance._context_depth = 0  # Track nested `with` usage
         return cls._instance
 
     def _reload(self, manager: str, obj):
@@ -41,11 +44,16 @@ class _Reloader:
         return entity
 
     def __enter__(self):
-        self._no_reload_context = True
+        with self._lock:
+            self._context_depth += 1
+            self._no_reload_context = True
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        self._no_reload_context = False
+        with self._lock:
+            self._context_depth -= 1
+            if self._context_depth == 0:
+                self._no_reload_context = False
 
 
 def _self_reload(manager: str):

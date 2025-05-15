@@ -463,9 +463,12 @@ def test_add_rename_and_remove_sequences():
 
 
 def test_update_sequence(data_node):
+    _DataManagerFactory._build_manager()._set(data_node)
     task_1 = Task("foo", {}, print, [data_node], [], TaskId("t1"))
     task_2 = Task("bar", {}, print, [], [data_node], id=TaskId("t2"))
-    scenario = Scenario("baz", {task_1, task_2}, {})
+    scenario = Scenario(config_id="baz",
+                        tasks={task_1, task_2},
+                        properties={})
     scenario.add_sequence("seq_1", [task_1])
 
     assert len(scenario.sequences) == 1

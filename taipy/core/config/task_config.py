@@ -15,6 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, Union, cast
 from taipy.common.config import Config
 from taipy.common.config._config import _Config
 from taipy.common.config.common._template_handler import _TemplateHandler as _tpl
+from taipy.common.config.common.scope import Scope
 from taipy.common.config.section import Section
 
 from .data_node_config import DataNodeConfig
@@ -22,21 +23,6 @@ from .data_node_config import DataNodeConfig
 
 class TaskConfig(Section):
     """Configuration fields needed to instantiate an actual `Task^`."""
-
-    # Attributes:
-    #     inputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of
-    #         `DataNodeConfig^` inputs.<br/>
-    #         The default value is [].
-    #     outputs (Union[DataNodeConfig^, List[DataNodeConfig^]]): The optional list of
-    #         `DataNodeConfig^` outputs.<br/>
-    #         The default value is [].
-    #     skippable (bool): If True, indicates that the task can be skipped if no change has
-    #         been made on inputs.<br/>
-    #         The default value is False.
-    #     function (Callable): User function taking as inputs some parameters compatible with the
-    #         exposed types (*exposed_type* field) of the input data nodes and returning results
-    #         compatible with the exposed types (*exposed_type* field) of the outputs list.<br/>
-    #         The default value is None.
 
     name = "TASK"
 
@@ -98,6 +84,16 @@ class TaskConfig(Section):
     def outputs(self) -> List[DataNodeConfig]:
         """The list of the output data node configurations."""
         return list(self._outputs)
+
+    @property
+    def scope(self) -> Scope:
+        """The lowest scope of the task's data nodes.
+
+        The lowest scope of input and output data node configurations or GLOBAL if there is
+        either no input or no output configuration.
+        """
+        data_node_cfgs = list(self.inputs) + list(self.outputs)
+        return Scope(min(dn.scope for dn in data_node_cfgs)) if len(data_node_cfgs) != 0 else Scope.GLOBAL
 
     @property
     def skippable(self) -> bool:

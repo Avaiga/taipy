@@ -548,11 +548,17 @@ class Scenario(_Entity, Submittable, _Labeled):
         Parameters:
             name (str): The name of the sequence to remove.
         """
-        seq_id = self.sequences[name].id
-        _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
-        _sequences.pop(name)
-        self.sequences = _sequences  # type: ignore
-        Notifier.publish(Event(EventEntityType.SEQUENCE, EventOperation.DELETION, entity_id=seq_id))
+        if seq := self.sequences.get(name):
+            from taipy.core.task._task_manager_factory import _TaskManagerFactory
+
+            for task in seq.tasks.values():
+                task._parent_ids.discard(seq.id)
+                _TaskManagerFactory._build_manager()._repository._save(task)
+            _sequences = _Reloader()._reload(self._MANAGER_NAME, self)._sequences
+            _sequences.pop(name)
+
+            self.sequences = _sequences  # type: ignore
+            Notifier.publish(Event(EventEntityType.SEQUENCE, EventOperation.DELETION, entity_id=seq.id))
 
     def remove_sequences(self, sequence_names: List[str]) -> None:
         """Remove multiple sequences from the scenario.
@@ -632,38 +638,57 @@ class Scenario(_Entity, Submittable, _Labeled):
     def _get_set_of_tasks(self) -> Set[Task]:
         return set(self.tasks.values())
 
-    def __get_data_nodes(self) -> Dict[str, DataNode]:
-        data_nodes_dict = self.__get_additional_data_nodes()
-        for _, task in self.__get_tasks().items():
+    def _get_existing_data_nodes(self, additional: bool = False) -> Dict[str, DataNode]:
+        if additional:
+            return self.__get_additional_data_nodes(raise_not_existing=False)
+        return self.__get_data_nodes(False)
+
+    def __get_data_nodes(self, raise_not_existing: bool = True) -> Dict[str, DataNode]:
+        data_nodes_dict = self.__get_additional_data_nodes(raise_not_existing)
+        for _, task in self.__get_tasks(raise_not_existing).items():
             data_nodes_dict.update(task.data_nodes)
         return data_nodes_dict
 
-    def __get_additional_data_nodes(self):
+    def __get_additional_data_nodes(self, raise_not_existing: bool=True) -> Dict[str, DataNode]:
         from ..data._data_manager_factory import _DataManagerFactory
 
         additional_data_nodes = {}
+        non_existing_dns: List = []
         data_manager = _DataManagerFactory._build_manager()
 
         for dn_or_id in self._additional_data_nodes:
             dn = data_manager._get(dn_or_id, dn_or_id)
 
             if not isinstance(dn, DataNode):
-                raise NonExistingDataNode(dn_or_id)
+                if raise_not_existing:
+                    raise NonExistingDataNode(dn_or_id)
+                non_existing_dns.append(dn_or_id)
+                continue
             additional_data_nodes[dn.config_id] = dn
+        for dn_id in non_existing_dns:
+            self._additional_data_nodes.discard(dn_id)  # type: ignore[arg-type]
         return additional_data_nodes
 
-    def __get_tasks(self) -> Dict[str, Task]:
+    def _get_existing_tasks(self) -> Dict[str, Task]:
+        return self.__get_tasks(raise_not_existing=False)
+
+    def __get_tasks(self, raise_not_existing: bool = True) -> Dict[str, Task]:
         from ..task._task_manager_factory import _TaskManagerFactory
 
         _tasks = {}
         task_manager = _TaskManagerFactory._build_manager()
-
+        non_existing_tasks: List = []
         for task_or_id in self._tasks:
             t = task_manager._get(task_or_id, task_or_id)
 
             if not isinstance(t, Task):
-                raise NonExistingTask(task_or_id)
+                if raise_not_existing:
+                    raise NonExistingTask(task_or_id)
+                non_existing_tasks.append(task_or_id)
+                continue
             _tasks[t.config_id] = t
+        for t_id in non_existing_tasks:
+            self._tasks.discard(t_id)  # type: ignore[arg-type]
         return _tasks
 
     @staticmethod

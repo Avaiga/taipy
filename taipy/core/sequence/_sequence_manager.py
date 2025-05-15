@@ -214,7 +214,7 @@ class _SequenceManager(_Manager[Sequence], _VersionMixin):
         for task in _tasks:
             if sequence_id not in task._parent_ids:
                 task._parent_ids.update([sequence_id])
-                task_manager._set(task)
+                task_manager._repository._save(task)
 
         if not sequence._is_consistent():
             raise InvalidSequence(sequence_id)
