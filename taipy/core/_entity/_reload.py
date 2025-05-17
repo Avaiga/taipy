@@ -10,8 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 import functools
-from typing import Dict, Type
 import threading
+from typing import Dict, Type
 
 from ...common._check_dependencies import EnterpriseEditionUtils
 from .._manager._manager import _Manager
