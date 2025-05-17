@@ -31,9 +31,9 @@ const getActionKeys = (keys?: string): string[] => {
     const ak = (
         keys
             ? keys
-                .split(";")
-                .map((v) => v.trim().toLowerCase())
-                .filter((v) => AUTHORIZED_KEYS.some((k) => k.toLowerCase() === v))
+                  .split(";")
+                  .map((v) => v.trim().toLowerCase())
+                  .filter((v) => AUTHORIZED_KEYS.some((k) => k.toLowerCase() === v))
             : []
     ).map((v) => AUTHORIZED_KEYS.find((k) => k.toLowerCase() == v) as string);
     return ak.length > 0 ? ak : [AUTHORIZED_KEYS[0]];
@@ -52,7 +52,7 @@ const verticalDivStyle: CSSProperties = {
     flexDirection: "column",
     gap: 0,
 };
-const noPaddingYSx = {py: 0};
+const noPaddingYSx = { py: 0 };
 
 const Input = (props: TaipyInputProps) => {
     const {
@@ -88,9 +88,9 @@ const Input = (props: TaipyInputProps) => {
         () =>
             props.width
                 ? {
-                    ...numberSx,
-                    maxWidth: getCssSize(props.width),
-                }
+                      ...numberSx,
+                      maxWidth: getCssSize(props.width),
+                  }
                 : numberSx,
         [props.width]
     );
@@ -143,20 +143,23 @@ const Input = (props: TaipyInputProps) => {
 
     const handleBlur = useCallback(
         (evt: React.FocusEvent<HTMLInputElement>) => {
-            const val = (type === "number")
-                ? Number(evt.currentTarget.querySelector("input")?.value)
-                : (multiline
-                    ? evt.currentTarget.querySelector("textarea")?.value
-                    : evt.currentTarget.querySelector("input")?.value)
-                ;
-            if (delayCall.current > 0) {
+            const val =
+                type === "number"
+                    ? Number(evt.currentTarget.value)
+                    : multiline
+                    ? evt.currentTarget.value
+                    : evt.currentTarget.value;
+            if (delayCall.current > 0 || changeDelay === -1) {
                 if (changeDelay > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
                 }
                 dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
             }
-            onAction && dispatch(createSendActionNameAction(id, module, onAction, "Tab", updateVarName, val));
+            onAction &&
+                Promise.resolve().then(() => {
+                    dispatch(createSendActionNameAction(id, module, onAction, "Tab", updateVarName, val));
+                });
             evt.preventDefault();
         },
         [dispatch, type, updateVarName, module, onChange, propagate, changeDelay, id, multiline, onAction]
@@ -289,53 +292,53 @@ const Input = (props: TaipyInputProps) => {
         () =>
             type == "number"
                 ? {
-                    htmlInput: {
-                        step: step ? step : 1,
-                        min: min,
-                        max: max,
-                    },
-                    input: {
-                        endAdornment: (
-                            <div style={verticalDivStyle}>
-                                <IconButton
-                                    aria-label="Increment value"
-                                    size="small"
-                                    onMouseDown={handleUpStepperMouseDown}
-                                    disabled={!active}
-                                    sx={noPaddingYSx}
-                                >
-                                    <ArrowDropUpIcon fontSize="inherit" />
-                                </IconButton>
-                                <IconButton
-                                    aria-label="Decrement value"
-                                    size="small"
-                                    onMouseDown={handleDownStepperMouseDown}
-                                    disabled={!active}
-                                    sx={noPaddingYSx}
-                                >
-                                    <ArrowDropDownIcon fontSize="inherit" />
-                                </IconButton>
-                            </div>
-                        ),
-                    },
-                }
+                      htmlInput: {
+                          step: step ? step : 1,
+                          min: min,
+                          max: max,
+                      },
+                      input: {
+                          endAdornment: (
+                              <div style={verticalDivStyle}>
+                                  <IconButton
+                                      aria-label="Increment value"
+                                      size="small"
+                                      onMouseDown={handleUpStepperMouseDown}
+                                      disabled={!active}
+                                      sx={noPaddingYSx}
+                                  >
+                                      <ArrowDropUpIcon fontSize="inherit" />
+                                  </IconButton>
+                                  <IconButton
+                                      aria-label="Decrement value"
+                                      size="small"
+                                      onMouseDown={handleDownStepperMouseDown}
+                                      disabled={!active}
+                                      sx={noPaddingYSx}
+                                  >
+                                      <ArrowDropDownIcon fontSize="inherit" />
+                                  </IconButton>
+                              </div>
+                          ),
+                      },
+                  }
                 : type == "password"
-                    ? {
-                        htmlInput: { autoComplete: "current-password" },
-                        input: {
-                            endAdornment: (
-                                <IconButton
-                                    aria-label="toggle password visibility"
-                                    onClick={handleClickShowPassword}
-                                    onMouseDown={handleMouseDownPassword}
-                                    edge="end"
-                                >
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                </IconButton>
-                            ),
-                        },
-                    }
-                    : undefined,
+                ? {
+                      htmlInput: { autoComplete: "current-password" },
+                      input: {
+                          endAdornment: (
+                              <IconButton
+                                  aria-label="toggle password visibility"
+                                  onClick={handleClickShowPassword}
+                                  onMouseDown={handleMouseDownPassword}
+                                  edge="end"
+                              >
+                                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                          ),
+                      },
+                  }
+                : undefined,
         [
             active,
             type,
