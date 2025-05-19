@@ -1528,24 +1528,15 @@ class Gui:
 
         if callable(action_function):
             try:
-                argcount = action_function.__code__.co_argcount
-                if argcount > 0 and ismethod(action_function):
-                    argcount -= 1
-                args = t.cast(list, [None for _ in range(argcount)])
-                if argcount > 0:
-                    args[0] = self.__get_state()
-                if argcount > 1:
-                    try:
-                        args[1] = self._get_real_var_name(id)[0]
-                    except Exception:
-                        args[1] = id
-                if argcount > 2:
-                    args[2] = payload
-                action_function(*args)
-                return True
+                try:
+                    args = [self._get_real_var_name(id)[0], payload]
+                except Exception:
+                    args = [id, payload]
+                self._call_function_with_state(t.cast(t.Callable, action_function), args)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(action_function.__name__, e):
                     _warn(f"on_action(): Exception raised in '{action_function.__name__}()'", e)
+            return True
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[t.List[t.Any]] = None) -> t.Any:
