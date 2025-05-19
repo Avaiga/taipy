@@ -240,7 +240,7 @@ class _Evaluator:
         is_edge_case = False
 
         # The expr_string is placed here in case expr get replaced by edge case
-        expr_string = expr if lambda_expr else 'f"' + expr.replace('"', '\\"') + '"'
+        expr_string = expr if lambda_expr else 'f"""' + expr.replace('"', '\\"') + '"""'
         # simplify expression if it only contains var_name
         m = _Evaluator.__EXPR_IS_EDGE_CASE.match(expr)
         if m and not _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(expr):
