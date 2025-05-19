@@ -16,6 +16,7 @@ import React, {
     CSSProperties,
     HTMLAttributes,
     MouseEvent,
+    ReactNode,
     SyntheticEvent,
     useCallback,
     useEffect,
@@ -23,7 +24,7 @@ import React, {
     useRef,
     useState,
 } from "react";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
@@ -63,6 +64,34 @@ import { Icon } from "../../utils/icon";
 import { LovItem } from "../../utils/lov";
 import { getComponentClassName } from "./TaipyStyle";
 import { draggedSx, droppableSx, useDrag, useDrop } from "./dndUtils";
+
+interface SelectAllProps {
+    multiple: boolean;
+    showSelectAll: boolean;
+    selectedValueLength: number;
+    lovListLength: number;
+    active?: boolean;
+    handleCheckAllChange: (event: SelectChangeEvent<HTMLInputElement>, checked: boolean) => void;
+}
+
+const SelectAll = ({
+    multiple,
+    showSelectAll,
+    selectedValueLength,
+    lovListLength,
+    active,
+    handleCheckAllChange,
+}: SelectAllProps) =>
+    multiple && showSelectAll ? (
+        <Tooltip title={selectedValueLength == lovListLength ? "Deselect All" : "Select All"}>
+            <Checkbox
+                disabled={!active}
+                indeterminate={selectedValueLength > 0 && selectedValueLength < lovListLength}
+                checked={selectedValueLength == lovListLength}
+                onChange={handleCheckAllChange}
+            ></Checkbox>
+        </Tooltip>
+    ) : null;
 
 const MultipleItem = ({
     value,
@@ -124,7 +153,7 @@ const getStyles = (id: string, ids: readonly string[], theme: Theme) => ({
 });
 
 const getOptionLabel = (option: LovItem) => (typeof option.item === "string" ? option.item : option.item?.text) || "";
-const getOptionKey = (option: LovItem) => "" + option.id;
+const getOptionKey = (option: LovItem) => `${option.id}`;
 const isOptionEqualToValue = (option: LovItem, value: LovItem) => option.id == value.id;
 const renderOption = (props: HTMLAttributes<HTMLLIElement>, option: LovItem) => (
     <li {...props} key={option.id}>
@@ -408,7 +437,7 @@ const Selector = (props: SelectorProps) => {
 
     const [autoValue, setAutoValue] = useState<LovItem | LovItem[] | null>(() => (multiple ? [] : null));
     const handleAutoChange = useCallback(
-        (e: SyntheticEvent, sel: LovItem | LovItem[] | null) => {
+        (event: SyntheticEvent, sel: LovItem | LovItem[] | null) => {
             setAutoValue(sel);
             setSelectedValue(Array.isArray(sel) ? sel.map((item) => item.id) : sel ? [sel.id] : []);
             dispatch(
@@ -424,10 +453,56 @@ const Selector = (props: SelectorProps) => {
         },
         [dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
     );
+    const handleCheckAllAutoChange = useCallback(
+        (event: SelectChangeEvent<HTMLInputElement>, checked: boolean) => {
+            const sel = checked ? lovList.slice() : [];
+            const ids = sel.map((elt) => elt.id);
+            setAutoValue(sel);
+            setSelectedValue(ids);
+            dispatch(
+                createSendUpdateAction(
+                    updateVarName,
+                    ids,
+                    module,
+                    props.onChange,
+                    propagate,
+                    valueById ? undefined : lovVarName
+                )
+            );
+        },
+        [lovList, dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
+    );
+    const renderAutoInput = useCallback(
+        (params: AutocompleteRenderInputParams) => {
+            if (params.InputProps) {
+                if (!params.InputProps.startAdornment) {
+                    params.InputProps.startAdornment = [];
+                } else if (!Array.isArray(params.InputProps.startAdornment)) {
+                    params.InputProps.startAdornment = [params.InputProps.startAdornment];
+                }
+                // will need to move to slotProps { input: { startAdornment: (
+                (params.InputProps.startAdornment as Array<ReactNode>).unshift(
+                    <SelectAll
+                        multiple={multiple}
+                        showSelectAll={showSelectAll}
+                        selectedValueLength={selectedValue.length}
+                        lovListLength={lovList.length}
+                        active={active}
+                        handleCheckAllChange={handleCheckAllAutoChange}
+                    />
+                );
+            } else {
+                console.log("selector autocomplete needs to updata params for slotProps.input.startAdornment");
+                console.log("renderAutoInput", params);
+            }
+            return <TextField {...params} label={props.label} margin="dense" />;
+        },
+        [props.label, multiple, showSelectAll, selectedValue.length, lovList.length, active, handleCheckAllAutoChange]
+    );
 
     const handleDelete = useCallback(
-        (e: React.SyntheticEvent) => {
-            const id = e.currentTarget?.parentElement?.getAttribute("data-id");
+        (event: React.SyntheticEvent) => {
+            const id = event.currentTarget?.parentElement?.getAttribute("data-id");
             id &&
                 setSelectedValue((oldKeys) => {
                     const keys = oldKeys.filter((valId) => valId !== id);
@@ -524,7 +599,7 @@ const Selector = (props: SelectorProps) => {
                             isOptionEqualToValue={isOptionEqualToValue}
                             sx={controlSx}
                             className={`${className} ${getComponentClassName(props.children)}`}
-                            renderInput={(params) => <TextField {...params} label={props.label} margin="dense" />}
+                            renderInput={renderAutoInput}
                             renderOption={renderOption}
                         />
                     </Tooltip>
@@ -541,25 +616,14 @@ const Selector = (props: SelectorProps) => {
                                     <OutlinedInput
                                         label={props.label}
                                         startAdornment={
-                                            multiple && showSelectAll ? (
-                                                <Tooltip
-                                                    title={
-                                                        selectedValue.length == lovList.length
-                                                            ? "Deselect All"
-                                                            : "Select All"
-                                                    }
-                                                >
-                                                    <Checkbox
-                                                        disabled={!active}
-                                                        indeterminate={
-                                                            selectedValue.length > 0 &&
-                                                            selectedValue.length < lovList.length
-                                                        }
-                                                        checked={selectedValue.length == lovList.length}
-                                                        onChange={handleCheckAllChange}
-                                                    ></Checkbox>
-                                                </Tooltip>
-                                            ) : null
+                                            <SelectAll
+                                                multiple={multiple}
+                                                showSelectAll={showSelectAll}
+                                                selectedValueLength={selectedValue.length}
+                                                lovListLength={lovList.length}
+                                                active={active}
+                                                handleCheckAllChange={handleCheckAllChange}
+                                            />
                                         }
                                     />
                                 }
