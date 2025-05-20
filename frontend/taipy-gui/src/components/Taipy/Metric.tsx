@@ -56,8 +56,8 @@ const defaultStyle = {
     position: "relative",
     display: "inline-block",
     /*
-    * When updating the width and height, be sure to adjust the corresponding Metric values in the viselements.json file accordingly.
-    * */
+     * When updating the width and height, be sure to adjust the corresponding Metric values in the viselements.json file accordingly.
+     * */
     width: "20vw",
     height: "20vh",
 } as CSSProperties;
@@ -106,17 +106,17 @@ const Metric = (props: MetricProps) => {
         delta !== undefined && mode.push("delta");
         const deltaIncreasing = props.deltaColor
             ? {
-                color: props.deltaColor == "invert" ? "#FF4136" : props.deltaColor,
-            }
+                  color: props.deltaColor == "invert" ? "#FF4136" : props.deltaColor,
+              }
             : undefined;
         const deltaDecreasing =
             props.deltaColor == "invert"
                 ? {
-                    color: "#3D9970",
-                }
+                      color: "#3D9970",
+                  }
                 : props.negativeDeltaColor
-                    ? { color: props.negativeDeltaColor }
-                    : undefined;
+                ? { color: props.negativeDeltaColor }
+                : undefined;
         return [
             {
                 domain: { x: [0, 1], y: [0, 1] },
@@ -191,18 +191,15 @@ const Metric = (props: MetricProps) => {
         }
 
         if (props.title) {
-            layout.title = props.title;
+            if (typeof layout.title === "object") {
+                layout.title = { ...layout.title, text: props.title };
+            } else {
+                layout.title = { text: props.title };
+            }
         }
 
         return layout as Partial<Layout>;
-    }, [
-        props.title,
-        props.template,
-        props.template_Dark_,
-        props.template_Light_,
-        theme.palette.mode,
-        baseLayout,
-    ]);
+    }, [props.title, props.template, props.template_Dark_, props.template_Light_, theme.palette.mode, baseLayout]);
 
     const style = useMemo(() => {
         const width = props.width ? normalizeSize(props.width) : defaultStyle.width;
