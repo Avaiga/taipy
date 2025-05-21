@@ -14,6 +14,7 @@
 import React, {
     ChangeEvent,
     CSSProperties,
+    Fragment,
     HTMLAttributes,
     MouseEvent,
     ReactNode,
@@ -477,8 +478,16 @@ const Selector = (props: SelectorProps) => {
             if (params.InputProps) {
                 if (!params.InputProps.startAdornment) {
                     params.InputProps.startAdornment = [];
-                } else if (!Array.isArray(params.InputProps.startAdornment)) {
-                    params.InputProps.startAdornment = [params.InputProps.startAdornment];
+                } else if (Array.isArray(params.InputProps.startAdornment)) {
+                    if (selectionMessage) {
+                        params.InputProps.startAdornment = [selectionMessage];
+                    }
+                } else {
+                    if (selectionMessage) {
+                        params.InputProps.startAdornment = [selectionMessage];
+                    } else {
+                        params.InputProps.startAdornment = [params.InputProps.startAdornment];
+                    }
                 }
                 // will need to move to slotProps { input: { startAdornment: (
                 (params.InputProps.startAdornment as Array<ReactNode>).unshift(
@@ -497,7 +506,7 @@ const Selector = (props: SelectorProps) => {
             }
             return <TextField {...params} label={props.label} margin="dense" />;
         },
-        [props.label, multiple, showSelectAll, selectedValue.length, lovList.length, active, handleCheckAllAutoChange]
+        [selectionMessage, props.label, multiple, showSelectAll, selectedValue.length, lovList.length, active, handleCheckAllAutoChange]
     );
 
     const handleDelete = useCallback(
