@@ -325,7 +325,7 @@ describe("Selector Component", () => {
             getByRole("listbox");
             const elt = getByText("Item 2");
             await userEvent.click(elt);
-            waitFor(() => getByText("a selection message"));
+            await waitFor(() => getByText("a selection message"), { timeout: 3000 });
         });
         it("renders showSelectAll in dropdown if True", async () => {
             const { getByText, getByRole } = render(
