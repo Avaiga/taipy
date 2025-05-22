@@ -12,10 +12,10 @@
 import inspect
 import json
 from contextlib import nullcontext
-from flask import g
 
 import pandas as pd
 import pytest
+from flask import g
 
 from taipy.gui import Gui
 from taipy.gui.utils import _get_module_name_from_frame, _TaipyContent
