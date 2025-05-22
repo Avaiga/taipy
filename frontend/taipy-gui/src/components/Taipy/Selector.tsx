@@ -477,12 +477,12 @@ const Selector = (props: SelectorProps) => {
         (params: AutocompleteRenderInputParams) => {
             if (params.InputProps) {
                 if (selectionMessage) {
-                    params.InputProps.startAdornment = [<Chip label={selectionMessage}></Chip>];
+                    params.InputProps.startAdornment = [<Chip key="selectionMessage" label={selectionMessage}></Chip>];
                 } else {
                     if (!params.InputProps.startAdornment) {
                         params.InputProps.startAdornment = [];
                     } else if (!Array.isArray(params.InputProps.startAdornment)) {
-                            params.InputProps.startAdornment = [params.InputProps.startAdornment];
+                        params.InputProps.startAdornment = [params.InputProps.startAdornment];
                     }
                 }
                 // will need to move to slotProps { input: { startAdornment: (
@@ -494,6 +494,7 @@ const Selector = (props: SelectorProps) => {
                         lovListLength={lovList.length}
                         active={active}
                         handleCheckAllChange={handleCheckAllAutoChange}
+                        key="selectAll"
                     />
                 );
             } else {
@@ -502,7 +503,16 @@ const Selector = (props: SelectorProps) => {
             }
             return <TextField {...params} label={props.label} margin="dense" />;
         },
-        [selectionMessage, props.label, multiple, showSelectAll, selectedValue.length, lovList.length, active, handleCheckAllAutoChange]
+        [
+            selectionMessage,
+            props.label,
+            multiple,
+            showSelectAll,
+            selectedValue.length,
+            lovList.length,
+            active,
+            handleCheckAllAutoChange,
+        ]
     );
 
     const handleDelete = useCallback(
@@ -635,43 +645,45 @@ const Selector = (props: SelectorProps) => {
                                 disabled={!active}
                                 renderValue={(selected) => (
                                     <Box sx={renderBoxSx}>
-                                        {typeof selectionMessage === "string"
-                                            ? <Chip label={selectionMessage}></Chip>
-                                            : lovList
-                                                  .filter((it) =>
-                                                      Array.isArray(selected)
-                                                          ? selected.includes(it.id)
-                                                          : selected === it.id
-                                                  )
-                                                  .map((item, idx) => {
-                                                      if (multiple) {
-                                                          const chipProps = {} as Record<string, unknown>;
-                                                          if (typeof item.item === "string") {
-                                                              chipProps.label = item.item;
-                                                          } else {
-                                                              chipProps.label = item.item.text || "";
-                                                              chipProps.avatar = <Avatar src={item.item.path} />;
-                                                          }
-                                                          return (
-                                                              <Chip
-                                                                  key={item.id}
-                                                                  {...chipProps}
-                                                                  onDelete={handleDelete}
-                                                                  data-id={item.id}
-                                                                  onMouseDown={doNotPropagateEvent}
-                                                                  disabled={!active}
-                                                              />
-                                                          );
-                                                      } else if (idx === 0) {
-                                                          return typeof item.item === "string" ? (
-                                                              item.item
-                                                          ) : (
-                                                              <LovImage item={item.item} />
-                                                          );
-                                                      } else {
-                                                          return null;
-                                                      }
-                                                  })}
+                                        {typeof selectionMessage === "string" ? (
+                                            <Chip key="selectionMessage" label={selectionMessage}/>
+                                        ) : (
+                                            lovList
+                                                .filter((it) =>
+                                                    Array.isArray(selected)
+                                                        ? selected.includes(it.id)
+                                                        : selected === it.id
+                                                )
+                                                .map((item, idx) => {
+                                                    if (multiple) {
+                                                        const chipProps = {} as Record<string, unknown>;
+                                                        if (typeof item.item === "string") {
+                                                            chipProps.label = item.item;
+                                                        } else {
+                                                            chipProps.label = item.item.text || "";
+                                                            chipProps.avatar = <Avatar src={item.item.path} />;
+                                                        }
+                                                        return (
+                                                            <Chip
+                                                                key={item.id}
+                                                                {...chipProps}
+                                                                onDelete={handleDelete}
+                                                                data-id={item.id}
+                                                                onMouseDown={doNotPropagateEvent}
+                                                                disabled={!active}
+                                                            />
+                                                        );
+                                                    } else if (idx === 0) {
+                                                        return typeof item.item === "string" ? (
+                                                            item.item
+                                                        ) : (
+                                                            <LovImage item={item.item} />
+                                                        );
+                                                    } else {
+                                                        return null;
+                                                    }
+                                                })
+                                        )}
                                     </Box>
                                 )}
                                 MenuProps={getMenuProps(height)}
