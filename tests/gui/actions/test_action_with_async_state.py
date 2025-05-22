@@ -31,10 +31,9 @@ def test_async_notify(gui: Gui, helpers):
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         g.client_id = cid
-        id = notify(_AsyncState(t.cast(_GuiState, gui._Gui__state)), "Info", "Message", id="id_async")  # type: ignore[attr-defined]
-        assert id == "id_async"
+        notify(_AsyncState(t.cast(_GuiState, gui._Gui__state)), "Info", "Message")  # type: ignore[attr-defined]
     received_messages = ws_client.get_received()
     assert len(received_messages) == 1
     helpers.assert_outward_ws_simple_message(
-        received_messages[0], "AL", {"nType": "Info", "message": "Message", "notificationId": "id_async"}
+        received_messages[0], "AL", {"atype": "Info", "message": "Message"}
     )

@@ -1573,9 +1573,9 @@ class Gui:
                 setattr(g, Gui.__ARG_CLIENT_ID, state_id)
                 return method(self, *args)
         except Exception as e:  # pragma: no cover
-            if not self._call_on_exception(method, e):
+            if not self._call_on_exception(method.__name__, e):
                 _warn(
-                    f"Gui._invoke_method(): Exception raised in {_function_name(method)}",
+                    f"Gui._invoke_method(): Exception raised in {method.__name__}()",
                     e,
                 )
         finally:

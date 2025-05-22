@@ -97,7 +97,7 @@ def notify(
     feature.
     """
     if state and isinstance(state._gui, Gui):
-        return state._invoke_on_gui(Gui._notify, notification_type, message, system_notification, duration, id)
+        return state._invoke_on_gui(Gui._notify, notification_type, message, system_notification, duration)
     else:
         _warn("'notify()' must be called in the context of a callback.")
         return None
