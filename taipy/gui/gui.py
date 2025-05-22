@@ -1684,6 +1684,27 @@ class Gui:
     def _set_module_context(self, module_context: t.Optional[str]) -> t.ContextManager[None]:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
 
+    def _invoke_method(self, state_id: str, method: t.Callable, *args):
+        this_sid = None
+        if request:
+            # avoid messing with the client_id => Set(ws id)
+            this_sid = getattr(request, "sid", None)
+            request.sid = None  # type: ignore[attr-defined]
+        try:
+            with self.get_flask_app().app_context():
+                setattr(g, Gui.__ARG_CLIENT_ID, state_id)
+                return method(self, *args)
+        except Exception as e:  # pragma: no cover
+            if not self._call_on_exception(method, e):
+                _warn(
+                    f"Gui._invoke_method(): Exception raised in {_function_name(method)}",
+                    e,
+                )
+        finally:
+            if this_sid:
+                request.sid = this_sid  # type: ignore[attr-defined]
+        return None
+
     def invoke_callback(
         self,
         state_id: str,

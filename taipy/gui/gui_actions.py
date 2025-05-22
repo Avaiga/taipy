@@ -55,7 +55,7 @@ def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action
                   and the second element reflects the server-side URL where the file is located.
     """
     if state and isinstance(state._gui, Gui):
-        state._gui._download(content, name, on_action)  # type: ignore[attr-defined]
+        state._invoke_on_gui(Gui._download, content, name, on_action)
     else:
         _warn("'download()' must be called in the context of a callback.")
 
@@ -100,7 +100,7 @@ def notify(
     displayed, but the in-app notification will still function.
     """
     if state and isinstance(state._gui, Gui):
-        return state._gui._notify(notification_type, message, system_notification, duration, id)  # type: ignore[attr-defined]
+        return state._invoke_on_gui(Gui._notify, notification_type, message, system_notification, duration, id)
     else:
         _warn("'notify()' must be called in the context of a callback.")
         return None
@@ -122,7 +122,7 @@ def close_notification(state: State, id: str) -> None:
     """
     if state and isinstance(state._gui, Gui):
         # Send the close command with the notification_id
-        state._gui._close_notification(id)  # type: ignore[attr-defined]
+        state._invoke_on_gui(Gui._close_notification, id)
     else:
         _warn("'close_notification()' must be called in the context of a callback.")
 
@@ -157,7 +157,7 @@ def hold_control(
         message: The message to show. The default value is the string "Work in Progress...".
     """
     if state and isinstance(state._gui, Gui):
-        state._gui._hold_actions(callback, message)  # type: ignore[attr-defined]
+        state._invoke_on_gui(Gui._hold_actions, callback, message)
     else:
         _warn("'hold_actions()' must be called in the context of a callback.")
 
@@ -172,7 +172,7 @@ def resume_control(state: State):
         state (State^): The current user state as received in any callback.
     """
     if state and isinstance(state._gui, Gui):
-        state._gui._resume_actions()  # type: ignore[attr-defined]
+        state._invoke_on_gui(Gui._resume_actions)
     else:
         _warn("'resume_actions()' must be called in the context of a callback.")
 
@@ -198,7 +198,7 @@ def navigate(
         force: When navigating to a known page, the content is refreshed even it the page is already shown.
     """
     if state and isinstance(state._gui, Gui):
-        state._gui._navigate(to, params, tab, force)  # type: ignore[attr-defined]
+        state._invoke_on_gui(Gui._navigate, to, params, tab, force)
     else:
         _warn("'navigate()' must be called in the context of a callback.")
 
@@ -223,7 +223,7 @@ def get_user_content_url(
         An URL that, when queried, triggers the *on_user_content* callback.
     """
     if state and isinstance(state._gui, Gui):
-        return state._gui._get_user_content_url(path, params)  # type: ignore[attr-defined]
+        return state._invoke_on_gui(Gui._get_user_content_url, path, params)
     _warn("'get_user_content_url()' must be called in the context of a callback.")
     return None
 
@@ -245,7 +245,7 @@ def get_state_id(state: State) -> t.Optional[str]:
             If this value None, it indicates that *state* is not handled by a `Gui^` instance.
     """
     if state and isinstance(state._gui, Gui):
-        return state._gui._get_client_id()  # type: ignore[attr-defined]
+        return state._invoke_on_gui(Gui._get_client_id)
     return None
 
 
@@ -259,7 +259,7 @@ def get_module_context(state: State) -> t.Optional[str]:
         The name of the current module.
     """
     if state and isinstance(state._gui, Gui):
-        return state._gui._get_locals_context()  # type: ignore[attr-defined]
+        return state._invoke_on_gui(Gui._get_locals_context)
     return None
 
 
@@ -289,7 +289,7 @@ def get_module_name_from_state(state: State) -> t.Optional[str]:
             that triggered the callback that was provided the *state* object.
     """
     if state and isinstance(state._gui, Gui):
-        return state._gui._get_locals_context()  # type: ignore[attr-defined]
+        return state._invoke_on_gui(Gui._get_locals_context)
     return None
 
 

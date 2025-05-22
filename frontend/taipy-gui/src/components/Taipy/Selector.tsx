@@ -476,17 +476,13 @@ const Selector = (props: SelectorProps) => {
     const renderAutoInput = useCallback(
         (params: AutocompleteRenderInputParams) => {
             if (params.InputProps) {
-                if (!params.InputProps.startAdornment) {
-                    params.InputProps.startAdornment = [];
-                } else if (Array.isArray(params.InputProps.startAdornment)) {
-                    if (selectionMessage) {
-                        params.InputProps.startAdornment = [selectionMessage];
-                    }
+                if (selectionMessage) {
+                    params.InputProps.startAdornment = [<Chip label={selectionMessage}></Chip>];
                 } else {
-                    if (selectionMessage) {
-                        params.InputProps.startAdornment = [selectionMessage];
-                    } else {
-                        params.InputProps.startAdornment = [params.InputProps.startAdornment];
+                    if (!params.InputProps.startAdornment) {
+                        params.InputProps.startAdornment = [];
+                    } else if (!Array.isArray(params.InputProps.startAdornment)) {
+                            params.InputProps.startAdornment = [params.InputProps.startAdornment];
                     }
                 }
                 // will need to move to slotProps { input: { startAdornment: (
@@ -501,7 +497,7 @@ const Selector = (props: SelectorProps) => {
                     />
                 );
             } else {
-                console.log("selector autocomplete needs to updata params for slotProps.input.startAdornment");
+                console.log("selector autocomplete needs to update params for slotProps.input.startAdornment");
                 console.log("renderAutoInput", params);
             }
             return <TextField {...params} label={props.label} margin="dense" />;
@@ -640,7 +636,7 @@ const Selector = (props: SelectorProps) => {
                                 renderValue={(selected) => (
                                     <Box sx={renderBoxSx}>
                                         {typeof selectionMessage === "string"
-                                            ? selectionMessage
+                                            ? <Chip label={selectionMessage}></Chip>
                                             : lovList
                                                   .filter((it) =>
                                                       Array.isArray(selected)
