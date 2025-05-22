@@ -14,7 +14,6 @@
 import React, {
     ChangeEvent,
     CSSProperties,
-    Fragment,
     HTMLAttributes,
     MouseEvent,
     ReactNode,
@@ -50,7 +49,7 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import { Theme, useTheme } from "@mui/material";
 
-import { doNotPropagateEvent, expandSx, getSuffixedClassNames, getUpdateVar } from "./utils";
+import { doNotPropagateEvent, expandSx, getCssSize, getSuffixedClassNames, getUpdateVar } from "./utils";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { ItemProps, LovImage, paperBaseSx, SelTreeProps, showItem, SingleItem, useLovListMemo } from "./lovUtils";
 import {
@@ -312,7 +311,18 @@ const Selector = (props: SelectorProps) => {
         () => ({
             my: 1,
             mx: 0,
-            width: width,
+            width: getCssSize(width),
+            maxWidth: "unset",
+            "& .MuiInputBase-root": { minHeight: 48, "& input": { minHeight: "unset" } },
+        }),
+        [width]
+    );
+
+    const autoCompleteSx = useMemo(
+        () => ({
+            my: 1,
+            mx: 0,
+            width: getCssSize(width),
             "& .MuiFormControl-root": {
                 maxWidth: "unset",
                 my: 0,
@@ -612,7 +622,7 @@ const Selector = (props: SelectorProps) => {
                             getOptionLabel={getOptionLabel}
                             getOptionKey={getOptionKey}
                             isOptionEqualToValue={isOptionEqualToValue}
-                            sx={controlSx}
+                            sx={autoCompleteSx}
                             className={`${className} ${getComponentClassName(props.children)}`}
                             renderInput={renderAutoInput}
                             renderOption={renderOption}
@@ -646,7 +656,7 @@ const Selector = (props: SelectorProps) => {
                                 renderValue={(selected) => (
                                     <Box sx={renderBoxSx}>
                                         {typeof selectionMessage === "string" ? (
-                                            <Chip key="selectionMessage" label={selectionMessage}/>
+                                            <Chip key="selectionMessage" label={selectionMessage} />
                                         ) : (
                                             lovList
                                                 .filter((it) =>
