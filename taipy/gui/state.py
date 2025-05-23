@@ -150,8 +150,10 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         self._gui.set_favicon(favicon_path, self)
 
     @abstractmethod
-    def __getitem__(self, key: str) -> "State":
-        ...
+    def __getitem__(self, key: str) -> "State": ...
+
+    @abstractmethod
+    def _invoke_on_gui(self, method: t.Callable, *args: t.Any) -> t.Any: ...
 
 
 class _GuiState(State):
@@ -174,6 +176,7 @@ class _GuiState(State):
         "_get_gui_attr",
         "_get_placeholder_attrs",
         "_add_attribute",
+        "_invoke_on_gui",
     )
     __placeholder_attrs = ("_taipy_p1", "_current_context", "__state_id")
     __excluded_attrs = __attrs + __methods + __placeholder_attrs
@@ -280,6 +283,9 @@ class _GuiState(State):
             return gui._bind_var_val(name, default_value)
         return False
 
+    def _invoke_on_gui(self, method: t.Callable, *args):
+        return method(self.get_gui(), *args)
+
 
 class _AsyncState(_GuiState):
     def __init__(self, state: State) -> None:
@@ -303,3 +309,6 @@ class _AsyncState(_GuiState):
         return self.get_gui().invoke_callback(
             t.cast(str, self._get_placeholder("__state_id")), _AsyncState.__get_var_from_state, [var_name]
         )
+
+    def _invoke_on_gui(self, method: t.Callable, *args):
+        return self.get_gui()._invoke_method(t.cast(str, self._get_placeholder("__state_id")), method, *args)

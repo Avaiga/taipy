@@ -141,7 +141,7 @@ def _build_header(filename) -> str:
 
 
 if __name__ == "__main__":
-    header_file = "taipy/common/config/stubs/pyi_header.py"
+    header_file = "tools/config/pyi_header.py"
     base_config = "taipy/common/config/config.py"
     config_init = [Path("taipy/core/config/__init__.py"), Path("taipy/rest/config/__init__.py")]
 

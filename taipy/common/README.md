@@ -54,7 +54,6 @@ Want to be part of the *Taipy Common* community? Check out our [`CODE_OF_CONDUCT
       - `common/`: Shared data structures, types, and functions.
       - `exceptions/`: *taipy-common* exceptions.
       - `global_app/`: `GlobalAppConfig` implementation.
-      - `stubs/`: Helper functions to create the `config.pyi` file.
       - `INSTALLATION.md`: Instructions to install *taipy-common*.
       - `LICENSE`: The Apache 2.0 License.
       - `README.md`: Current file.

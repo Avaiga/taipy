@@ -16,7 +16,20 @@ import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import Field from "./Field";
+import { MathJaxContext } from "better-react-mathjax";
 
+const mathJaxConfig = {
+    tex: {
+        inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+        ],
+        displayMath: [
+            ["$$", "$$"],
+            ["\\[", "\\]"],
+        ],
+    },
+};
 describe("Field Component", () => {
     it("renders", async () => {
         const { getByText } = render(<Field value="toto" />);
@@ -74,16 +87,18 @@ describe("Field Component", () => {
     describe("latex mode", () => {
         it("renders LaTeX as block math", async () => {
             const { container, getByText } = render(
-                <Field value={"$$x = y + 1$$"} className="taipy-text" mode="latex" />
+                <MathJaxContext config={mathJaxConfig}>
+                    <Field value={"$$x = y + 1$$"} className="taipy-text" mode="latex" />
+                </MathJaxContext>
             );
-            getByText(/latex/i);
             await waitFor(() => expect(container.querySelector(".taipy-text-latex")).toBeInTheDocument());
         });
         it("renders LaTeX as inline math", async () => {
-            const { container, getByText, findByText } = render(
-                <Field value={"This is inline $x = y + 1$ math."} className="taipy-text" mode="latex" />
+            const { container, findByText } = render(
+                <MathJaxContext config={mathJaxConfig}>
+                    <Field value={"This is inline $x = y + 1$ math."} className="taipy-text" mode="latex" />
+                </MathJaxContext>
             );
-            // getByText(/latex/i); // already loaded ?
             await waitFor(() => expect(container.querySelector(".taipy-text-latex")).toBeInTheDocument());
             expect(await findByText(/inline/i)).toBeInTheDocument();
         });

@@ -13,11 +13,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Update config.pyi
-        run: python taipy/common/config/stubs/generate_pyi.py
-      - uses: stefanzweifel/git-auto-commit-action@v5
+        run: python tools/config/generate_pyi.py
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update config.pyi"

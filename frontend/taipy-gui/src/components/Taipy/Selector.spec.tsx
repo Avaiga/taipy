@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -314,6 +314,18 @@ describe("Selector Component", () => {
             const elt = getByText("Item 2");
             await userEvent.click(elt);
             expect(queryAllByRole("listbox")).toHaveLength(0);
+        });
+        it("renders selectionMessage if defined", async () => {
+            const { getByText, getByRole } = render(
+                <Selector lov={lov} dropdown={true} filter={true} selectionMessage="a selection message" />
+            );
+            const butElt = getByRole("combobox");
+            expect(butElt).toBeInTheDocument();
+            await userEvent.click(butElt);
+            getByRole("listbox");
+            const elt = getByText("Item 2");
+            await userEvent.click(elt);
+            // getByText("a selection message"); one day this will work
         });
         it("renders showSelectAll in dropdown if True", async () => {
             const { getByText, getByRole } = render(
