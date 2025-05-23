@@ -1121,7 +1121,9 @@ class Gui:
         for _var in modified_vars:
             newvalue = values.get(_var)
             custom_page_filtered_types = _Hooks()._get_resource_handler_data_layer_supported_types()
-            if isinstance(newvalue, (_TaipyData)) or isinstance(newvalue, custom_page_filtered_types):  # type: ignore
+            if isinstance(newvalue, (_TaipyData)) or (
+                custom_page_filtered_types and isinstance(newvalue, custom_page_filtered_types)
+            ):  # type: ignore
                 newvalue = {"__taipy_refresh": True}
             else:
                 if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
@@ -1215,7 +1217,11 @@ class Gui:
         # Use custom attrgetter function to allow value binding for _MapDict
         newvalue = _getscopeattr_drill(self, var_name)  # type: ignore[arg-type]
         custom_page_filtered_types = _Hooks()._get_resource_handler_data_layer_supported_types()
-        if not isinstance(newvalue, _TaipyData) and isinstance(newvalue, custom_page_filtered_types):  # type: ignore
+        if (
+            not isinstance(newvalue, _TaipyData)
+            and custom_page_filtered_types
+            and isinstance(newvalue, custom_page_filtered_types)
+        ):  # type: ignore
             newvalue = _TaipyData(newvalue, "")
         if isinstance(newvalue, _TaipyData):
             ret_payload = None
