@@ -49,6 +49,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_required_properties(data_node_config_id, data_node_config)
             self._check_property_types(data_node_config_id, data_node_config)
             self._check_generic_read_write_fct_and_args(data_node_config_id, data_node_config)
+            self._check_sql_read_write_query(data_node_config_id, data_node_config)
             self._check_exposed_type(data_node_config_id, data_node_config)
         return self._collector
 
@@ -111,8 +112,6 @@ class _DataNodeConfigChecker(_ConfigChecker):
                         required_properties = [
                             DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
                             DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
-                            DataNodeConfig._REQUIRED_READ_QUERY_SQL_PROPERTY,
-                            DataNodeConfig._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY,
                         ]
                     else:
                         required_properties = [
@@ -120,8 +119,6 @@ class _DataNodeConfigChecker(_ConfigChecker):
                             DataNodeConfig._OPTIONAL_DB_PASSWORD_SQL_PROPERTY,
                             DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
                             DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
-                            DataNodeConfig._REQUIRED_READ_QUERY_SQL_PROPERTY,
-                            DataNodeConfig._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY,
                         ]
                     return required_properties
         if storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_SQL_TABLE:
@@ -144,7 +141,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
                     return required_properties
         return []
 
-    def __storage_type_specific_required_properties(self, storage_type: str, dn_config_properties: Dict) -> List:
+    def __storage_type_specific_required_properties(self, storage_type: str, dn_config_properties) -> List:
         if storage_type in (DataNodeConfig._STORAGE_TYPE_VALUE_SQL_TABLE, DataNodeConfig._STORAGE_TYPE_VALUE_SQL):
             return self.__get_sql_required_properties(storage_type, dn_config_properties)
         return []
@@ -210,6 +207,28 @@ class _DataNodeConfigChecker(_ConfigChecker):
                     f"Either `{DataNodeConfig._OPTIONAL_READ_FUNCTION_GENERIC_PROPERTY}` field or "
                     f"`{DataNodeConfig._OPTIONAL_WRITE_FUNCTION_GENERIC_PROPERTY}` field of "
                     f"DataNodeConfig `{data_node_config_id}` must be populated with a Callable function.",
+                )
+
+    def _check_sql_read_write_query(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+        if data_node_config.storage_type != DataNodeConfig._STORAGE_TYPE_VALUE_SQL:
+            return
+
+        if data_node_config_id != DataNodeConfig._DEFAULT_KEY:
+            properties_to_check_at_least_one = [
+                DataNodeConfig._OPTIONAL_READ_QUERY_SQL_PROPERTY,
+                DataNodeConfig._OPTIONAL_WRITE_QUERY_BUILDER_SQL_PROPERTY,
+            ]
+            has_at_least_one = False
+            for prop_key in properties_to_check_at_least_one:
+                if data_node_config.properties and prop_key in data_node_config.properties:
+                    has_at_least_one = True
+            if not has_at_least_one:
+                self._error(
+                    ", ".join(properties_to_check_at_least_one),
+                    None,
+                    f"Either `{DataNodeConfig._OPTIONAL_READ_QUERY_SQL_PROPERTY}` (str) or "
+                    f"`{DataNodeConfig._OPTIONAL_WRITE_QUERY_BUILDER_SQL_PROPERTY}` (Callable) of "
+                    f"DataNodeConfig `{data_node_config_id}` must be provided.",
                 )
 
     def _check_property_types(self, data_node_config_id: str, data_node_config: DataNodeConfig):

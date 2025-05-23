@@ -120,8 +120,8 @@ class DataNodeConfig(Section):
     # SQL_TABLE
     _REQUIRED_TABLE_NAME_SQL_TABLE_PROPERTY = "table_name"
     # SQL
-    _REQUIRED_READ_QUERY_SQL_PROPERTY = "read_query"
-    _REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY = "write_query_builder"
+    _OPTIONAL_READ_QUERY_SQL_PROPERTY = "read_query"
+    _OPTIONAL_WRITE_QUERY_BUILDER_SQL_PROPERTY = "write_query_builder"
     _OPTIONAL_APPEND_QUERY_BUILDER_SQL_PROPERTY = "append_query_builder"
     # MONGO
     _REQUIRED_DB_NAME_MONGO_PROPERTY = "db_name"
@@ -167,8 +167,8 @@ class DataNodeConfig(Section):
         _STORAGE_TYPE_VALUE_SQL: {
             _REQUIRED_DB_NAME_SQL_PROPERTY: str,
             _REQUIRED_DB_ENGINE_SQL_PROPERTY: str,
-            _REQUIRED_READ_QUERY_SQL_PROPERTY: str,
-            _REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY: Callable,
+            _OPTIONAL_READ_QUERY_SQL_PROPERTY: str,
+            _OPTIONAL_WRITE_QUERY_BUILDER_SQL_PROPERTY: Callable,
             _OPTIONAL_APPEND_QUERY_BUILDER_SQL_PROPERTY: Callable,
             _OPTIONAL_DB_USERNAME_SQL_PROPERTY: str,
             _OPTIONAL_DB_PASSWORD_SQL_PROPERTY: str,
@@ -260,8 +260,6 @@ class DataNodeConfig(Section):
         _STORAGE_TYPE_VALUE_SQL: [
             _REQUIRED_DB_NAME_SQL_PROPERTY,
             _REQUIRED_DB_ENGINE_SQL_PROPERTY,
-            _REQUIRED_READ_QUERY_SQL_PROPERTY,
-            _REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY,
         ],
         _STORAGE_TYPE_VALUE_MONGO_COLLECTION: [
             _REQUIRED_DB_NAME_MONGO_PROPERTY,
@@ -1088,11 +1086,13 @@ class DataNodeConfig(Section):
             {
                 cls._REQUIRED_DB_NAME_SQL_PROPERTY: db_name,
                 cls._REQUIRED_DB_ENGINE_SQL_PROPERTY: db_engine,
-                cls._REQUIRED_READ_QUERY_SQL_PROPERTY: read_query,
-                cls._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY: write_query_builder,
             }
         )
 
+        if read_query is not None:
+            properties[cls._OPTIONAL_READ_QUERY_SQL_PROPERTY] = read_query
+        if write_query_builder is not None:
+            properties[cls._OPTIONAL_WRITE_QUERY_BUILDER_SQL_PROPERTY] = write_query_builder
         if append_query_builder is not None:
             properties[cls._OPTIONAL_APPEND_QUERY_BUILDER_SQL_PROPERTY] = append_query_builder
         if db_username is not None:

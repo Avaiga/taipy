@@ -192,12 +192,11 @@ class TestDataNodeConfigChecker:
         with pytest.raises(SystemExit):
             Config._collector = IssueCollector()
             Config.check()
-        assert len(Config._collector.errors) == 4
+        assert len(Config._collector.errors) == 3
         expected_error_messages = [
             "DataNodeConfig `new` is missing the required property `db_name` for type `sql`.",
             "DataNodeConfig `new` is missing the required property `db_engine` for type `sql`.",
-            "DataNodeConfig `new` is missing the required property `read_query` for type `sql`.",
-            "DataNodeConfig `new` is missing the required property `write_query_builder` for type `sql`.",
+            "Either `read_query` (str) or `write_query_builder` (Callable) of DataNodeConfig `new` must be provided.",
         ]
         assert all(message in caplog.text for message in expected_error_messages)
 
@@ -395,7 +394,43 @@ class TestDataNodeConfigChecker:
             "db_password": "foo",
             "db_name": "foo",
             "db_engine": "foo",
+        }
+        with pytest.raises(SystemExit):
+            Config._collector = IssueCollector()
+            Config.check()
+        assert len(Config._collector.errors) == 1
+
+        config._sections[DataNodeConfig.name]["new"].storage_type = "sql"
+        config._sections[DataNodeConfig.name]["new"].properties = {
+            "db_username": "foo",
+            "db_password": "foo",
+            "db_name": "foo",
+            "db_engine": "foo",
             "read_query": "foo",
+            "write_query_builder": print,
+        }
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        config._sections[DataNodeConfig.name]["new"].storage_type = "sql"
+        config._sections[DataNodeConfig.name]["new"].properties = {
+            "db_username": "foo",
+            "db_password": "foo",
+            "db_name": "foo",
+            "db_engine": "foo",
+            "read_query": "foo",
+        }
+        Config._collector = IssueCollector()
+        Config.check()
+        assert len(Config._collector.errors) == 0
+
+        config._sections[DataNodeConfig.name]["new"].storage_type = "sql"
+        config._sections[DataNodeConfig.name]["new"].properties = {
+            "db_username": "foo",
+            "db_password": "foo",
+            "db_name": "foo",
+            "db_engine": "foo",
             "write_query_builder": print,
         }
         Config._collector = IssueCollector()
@@ -725,7 +760,7 @@ class TestDataNodeConfigChecker:
         Config.check()
         assert len(Config._collector.errors) == 0
 
-        config._sections[DataNodeConfig.name]["default"].properties = {"default_data": 1.}
+        config._sections[DataNodeConfig.name]["default"].properties = {"default_data": 1.0}
         Config._collector = IssueCollector()
         Config.check()
         assert len(Config._collector.errors) == 0

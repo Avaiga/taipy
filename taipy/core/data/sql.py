@@ -16,7 +16,7 @@ from sqlalchemy import text
 
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common.scope import Scope
-from ..exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty
+from ..exceptions.exceptions import MissingAppendQueryBuilder, MissingReadQuery, MissingWriteQueryBuilder
 from ._abstract_sql import _AbstractSQLDataNode
 from .data_node_id import DataNodeId, Edit
 
@@ -31,13 +31,6 @@ class SQLDataNode(_AbstractSQLDataNode):
     - *db_name* (`str`): The database name, or the name of the SQLite database file.
     - *db_engine* (`str`): The database engine. Possible values are *sqlite*, *mssql*,
         *mysql*, or *postgresql*.
-    - *read_query* (`str`): The SQL query string used to read the data from the database.
-    - *write_query_builder* `(Callable)`: A callback function that takes the data as an input
-        parameter and returns a list of SQL queries to be executed when writing data to the data
-        node.
-    - *append_query_builder* (`Callable`): A callback function that takes the data as an input
-        parameter and returns a list of SQL queries to be executed when appending data to the
-        data node.
     - *db_username* (`str`): The database username.
     - *db_password* (`str`): The database password.
     - *db_host* (`str`): The database host. The default value is *localhost*.
@@ -46,6 +39,11 @@ class SQLDataNode(_AbstractSQLDataNode):
 
     The *properties* attribute can also contain the following optional entries:
 
+    - *read_query* (`str`): The SQL query string used to read the data from the database.
+    - *write_query_builder* `(Callable)`: A callback function that takes the data as an input parameter
+        and returns a list of SQL queries to be executed when writing data to the data node.
+    - *append_query_builder* (`Callable`): A callback function that takes the data as an input parameter
+        and returns a list of SQL queries to be executed when appending data to the data node.
     - *sqlite_folder_path* (str): The path to the folder that contains SQLite file. The default value
         is the current working folder.
     - *sqlite_file_extension* (str): The filename extension of the SQLite file. The default value is ".db".
@@ -76,10 +74,6 @@ class SQLDataNode(_AbstractSQLDataNode):
     ) -> None:
         if properties is None:
             properties = {}
-        if properties.get(self.__READ_QUERY_KEY) is None:
-            raise MissingRequiredProperty(f"Property {self.__READ_QUERY_KEY} is not informed and is required.")
-        if properties.get(self._WRITE_QUERY_BUILDER_KEY) is None:
-            raise MissingRequiredProperty(f"Property {self._WRITE_QUERY_BUILDER_KEY} is not informed and is required.")
 
         super().__init__(
             config_id,
@@ -111,7 +105,11 @@ class SQLDataNode(_AbstractSQLDataNode):
         return cls.__STORAGE_TYPE
 
     def _get_base_read_query(self) -> str:
-        return self.properties.get(self.__READ_QUERY_KEY)
+        read_query = self.properties.get(self.__READ_QUERY_KEY)
+        if not read_query:
+            raise MissingReadQuery
+
+        return read_query
 
     def _do_append(self, data, engine, connection) -> None:
         append_query_builder_fct = self.properties.get(self._APPEND_QUERY_BUILDER_KEY)
@@ -122,7 +120,11 @@ class SQLDataNode(_AbstractSQLDataNode):
         self.__execute_queries(queries, connection)
 
     def _do_write(self, data, engine, connection) -> None:
-        queries = self.properties.get(self._WRITE_QUERY_BUILDER_KEY)(data)
+        write_query_builder_fct = self.properties.get(self._WRITE_QUERY_BUILDER_KEY)
+        if not write_query_builder_fct:
+            raise MissingWriteQueryBuilder
+
+        queries = write_query_builder_fct(data)
         self.__execute_queries(queries, connection)
 
     def __execute_queries(self, queries, connection) -> None:

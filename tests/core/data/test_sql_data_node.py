@@ -23,7 +23,13 @@ from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node_id import DataNodeId
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.data.sql import SQLDataNode
-from taipy.core.exceptions.exceptions import MissingAppendQueryBuilder, MissingRequiredProperty, UnknownDatabaseEngine
+from taipy.core.exceptions.exceptions import (
+    MissingAppendQueryBuilder,
+    MissingReadQuery,
+    MissingRequiredProperty,
+    MissingWriteQueryBuilder,
+    UnknownDatabaseEngine,
+)
 
 
 class MyCustomObject:
@@ -223,6 +229,22 @@ class TestSQLDataNode:
             assert len(engine_mock.mock_calls[4].args) == 1
             assert engine_mock.mock_calls[4].args[0].text == "DELETE FROM example"
 
+    @pytest.mark.parametrize("properties", __sql_properties)
+    def test_write_only_datanode(self, properties):
+        custom_properties = properties.copy()
+        custom_properties.pop("read_query")
+        dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
+        _DataManagerFactory._build_manager()._repository._save(dn)
+
+        with patch("sqlalchemy.engine.Engine.connect"):
+            dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
+
+        with pytest.raises(MissingReadQuery):
+            dn.read()
+
+        with pytest.raises(MissingAppendQueryBuilder):
+            dn.append(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
+
     @pytest.mark.parametrize(
         "tmp_sqlite_path",
         [
@@ -245,6 +267,22 @@ class TestSQLDataNode:
         dn = SQLDataNode("sqlite_dn", Scope.SCENARIO, properties=properties)
         data = dn.read()
         assert data.equals(pd.DataFrame([{"foo": 1, "bar": 2}, {"foo": 3, "bar": 4}]))
+
+    @pytest.mark.parametrize("properties", __sql_properties)
+    def test_read_only_datanode(self, properties):
+        custom_properties = properties.copy()
+        custom_properties.pop("write_query_builder")
+        dn = SQLDataNode("foo_bar", Scope.SCENARIO, properties=custom_properties)
+        _DataManagerFactory._build_manager()._repository._save(dn)
+
+        with patch("sqlalchemy.engine.Engine.connect"):
+            dn.read()
+
+        with pytest.raises(MissingWriteQueryBuilder):
+            dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
+
+        with pytest.raises(MissingAppendQueryBuilder):
+            dn.append(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
 
     def test_sqlite_append_pandas(self, tmp_sqlite_sqlite3_file_path):
         folder_path, db_name, file_extension = tmp_sqlite_sqlite3_file_path

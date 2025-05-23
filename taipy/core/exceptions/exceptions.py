@@ -75,12 +75,20 @@ class UnknownDatabaseEngine(Exception):
     """Raised if the database engine is not known when creating a connection with a SQLDataNode."""
 
 
+class MissingReadQuery(Exception):
+    """Raised if read_query attribute is not provided when reading data from a SQLDataNode."""
+
+
+class MissingWriteQueryBuilder(Exception):
+    """Raised if write_query_builder attribute is not provided when writing data to a SQLDataNode."""
+
+
 class MissingAppendQueryBuilder(Exception):
-    """Raised if no append query build is provided when appending data to a SQLDataNode."""
+    """Raised if append_query_builder attribute is not provided when appending data to a SQLDataNode."""
 
 
 class UnknownParquetEngine(Exception):
-    """Raised if the parquet engine is not known or not supported when create a ParquetDataNode."""
+    """Raised if the parquet engine is not known or not supported when creating a ParquetDataNode."""
 
 
 class UnknownCompressionAlgorithm(Exception):
