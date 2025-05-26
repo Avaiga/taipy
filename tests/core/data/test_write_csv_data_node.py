@@ -90,6 +90,8 @@ def test_append_with_different_separator():
         csv_dn.read(),
         pd.concat([original_content, pd.DataFrame(content, columns=["id", "integer", "text"])]).reset_index(drop=True),
     )
+    # Reset the file to its original content
+    csv_dn.write(original_content)
 
 
 def test_write_with_header_pandas(tmp_csv_file):

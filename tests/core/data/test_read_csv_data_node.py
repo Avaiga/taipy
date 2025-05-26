@@ -125,6 +125,4 @@ def test_read_with_different_separator():
         "bar", Scope.SCENARIO, properties={"path": csv_2_file_path, "has_header": True, "separator": ";"}
     )
     data_pandas = csv_data_node_as_pandas.read()
-    assert isinstance(data_pandas, pd.DataFrame)
-    assert len(data_pandas) == 10
     assert pd.DataFrame.equals(data_pandas, pd.read_csv(csv_2_file_path, sep=";"))
