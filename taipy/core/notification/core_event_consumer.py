@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Avaiga Private Limited
+# Copyright 2021-2025 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -24,7 +24,7 @@ class CoreEventConsumerBase(_CoreEventConsumerBase):
         _warn_deprecated(deprecated="CoreEventConsumerBase",
                          suggest="The 'taipy.event.event_consumer.GuiEventConsumer' class")
         self.__logger.warning(
-            "The `CoreEventConsumerBase` class is deprecated since taipy 4.1.0."
-            "Please use the `GuiEventConsumer` class instead. "
+            "The `CoreEventConsumerBase` class is deprecated since taipy 4.1.0. "
+            "Please use the `GuiEventConsumer` class instead."
         )
         super().__init__(registration_id, queue)
