@@ -218,11 +218,10 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 DataNodeConfig._OPTIONAL_READ_QUERY_SQL_PROPERTY,
                 DataNodeConfig._OPTIONAL_WRITE_QUERY_BUILDER_SQL_PROPERTY,
             ]
-            has_at_least_one = False
-            for prop_key in properties_to_check_at_least_one:
-                if data_node_config.properties and prop_key in data_node_config.properties:
-                    has_at_least_one = True
-            if not has_at_least_one:
+            if not any(
+                data_node_config.properties and prop_key in data_node_config.properties
+                for prop_key in properties_to_check_at_least_one
+            ):
                 self._error(
                     ", ".join(properties_to_check_at_least_one),
                     None,
