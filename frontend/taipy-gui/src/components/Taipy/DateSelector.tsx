@@ -28,11 +28,21 @@ import { ErrorBoundary } from "react-error-boundary";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps, DateProps, getProps, getCssSize } from "./utils";
 import { dateToString, getDateTime, getTimeZonedDate } from "../../utils";
-import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule } from "../../utils/hooks";
+import { useClassNames, useDispatch, useDynamicProperty, useFormatConfig, useModule, useDynamicJsonProperty } from "../../utils/hooks";
 import Field from "./Field";
 import ErrorFallback from "../../utils/ErrorBoundary";
 import { getComponentClassName } from "./TaipyStyle";
 
+interface DisableDateConfig {
+    disableWeekdays?: boolean;
+    disableWeekends?: boolean;
+    disablePastDays?: boolean;
+    disableFutureDays?: boolean;
+    dayOfWeek?: number;
+    interval?: number;
+    oddInterval?:boolean;
+    occurrence?: number;
+}
 interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
     format?: string;
@@ -46,7 +56,9 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     editable?: boolean;
     label?: string;
     width?: string | number;
-    analogic? :boolean;
+    analogic?: boolean;
+    disableDateConfig?: string;
+    defaultDisableDateConfig?: string;
 }
 
 const boxSx = { display: "inline-block" };
@@ -74,6 +86,8 @@ const DateSelector = (props: DateSelectorProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const min = useDynamicProperty(props.min, props.defaultMin, undefined);
     const max = useDynamicProperty(props.max, props.defaultMax, undefined);
+    const emptyDateConfig = {} as Partial<DisableDateConfig>;
+    const disableDateConfig = useDynamicJsonProperty(props.disableDateConfig, props.defaultDisableDateConfig || "", emptyDateConfig);
 
     const dateSx = useMemo(() => (props.width ? { maxWidth: getCssSize(props.width) } : undefined), [props.width]);
 
@@ -115,6 +129,56 @@ const DateSelector = (props: DateSelectorProps) => {
         }
     }, [props.date, tz, withTime, max, min]);
 
+
+    const getWeekNumberInMonth = (date: Date) => {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const firstDayOfMonth = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+
+        const weekNo: number = Math.ceil(((d.getTime() - firstDayOfMonth.getTime()) / 86400000 + 1) / 7);
+        return weekNo;
+    }
+    const isDisabledDate = (date: Date) => {
+        if (disableDateConfig) {
+            if (disableDateConfig.disableWeekdays && (date.getDay() == 0 || date.getDay() == 6)) {
+                return true;
+            }
+            if (disableDateConfig.disableWeekdays && (date.getDay() != 0 || date.getDay() != 6)) {
+                return true;
+            }
+            if (disableDateConfig.disablePastDays && (date < new Date())) {
+                return true
+            }
+            if (disableDateConfig.disableFutureDays && (date > new Date())) {
+                return true;
+            }
+
+            if (disableDateConfig.dayOfWeek) {
+                const isCorrectDay = date.getDay() === disableDateConfig.dayOfWeek;
+                const weekNumberInMonth = getWeekNumberInMonth(date);
+                const intervalCheck=disableDateConfig.oddInterval?1:0;
+                if (isCorrectDay && !disableDateConfig.interval && !disableDateConfig.occurrence) {
+                    return true;
+                } 
+                if (isCorrectDay && disableDateConfig.interval) {   
+                    if (weekNumberInMonth % disableDateConfig.interval === intervalCheck) {
+                        return true;
+                    }
+                }
+                if (isCorrectDay && disableDateConfig.occurrence) {
+                    const dayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+                    const dayDifference = (disableDateConfig.dayOfWeek - dayOfMonth.getDay() + 7) % 7;
+                    const occurrenceDate = new Date(date.getFullYear(), date.getMonth(), 1 + dayDifference + (7 * (disableDateConfig.occurrence-1)));
+                    if(occurrenceDate.getDate()==date.getDate()){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false
+
+    };
+
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <Tooltip title={hover || ""}>
@@ -122,18 +186,19 @@ const DateSelector = (props: DateSelectorProps) => {
                     {editable ? (
                         withTime ? (
                             <DateTimePicker
-                                    {...(startProps as DateTimePickerProps<Date>)}
-                                    {...(endProps as DateTimePickerProps<Date>)}
-                                    value={value}
-                                    onChange={handleChange}
-                                    className={getSuffixedClassNames(className, "-picker")}
-                                    disabled={!active}
-                                    slotProps={textFieldProps}
-                                    label={props.label}
-                                    format={props.format}
-                                    sx={dateSx}
-                                    viewRenderers={ analogic ? analogicRenderers : undefined }
-                                />
+                                {...(startProps as DateTimePickerProps<Date>)}
+                                {...(endProps as DateTimePickerProps<Date>)}
+                                value={value}
+                                onChange={handleChange}
+                                className={getSuffixedClassNames(className, "-picker")}
+                                disabled={!active}
+                                slotProps={textFieldProps}
+                                label={props.label}
+                                format={props.format}
+                                sx={dateSx}
+                                viewRenderers={analogic ? analogicRenderers : undefined}
+                                shouldDisableDate={isDisabledDate}
+                            />
                         ) : (
                             <DatePicker
                                 {...(startProps as DatePickerProps<Date>)}
@@ -146,6 +211,7 @@ const DateSelector = (props: DateSelectorProps) => {
                                 label={props.label}
                                 format={props.format}
                                 sx={dateSx}
+                                shouldDisableDate={isDisabledDate}
                             />
                         )
                     ) : (

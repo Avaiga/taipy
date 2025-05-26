@@ -180,6 +180,7 @@ class _Factory:
                 ("on_change", PropertyType.function),
                 ("format",),
                 ("width", PropertyType.string_or_number),
+                ("disable_date_config",PropertyType.dict)
             ]
         )
         ._set_propagate(),
