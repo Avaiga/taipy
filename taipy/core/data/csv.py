@@ -42,7 +42,9 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     __STORAGE_TYPE = "csv"
     _ENCODING_KEY = "encoding"
+    _DEFAULT_ENCODING_VALUE = "utf-8"
     _SEPARATOR_KEY = "separator"
+    _DEFAULT_SEPARATOR_VALUE = ","
 
     _REQUIRED_PROPERTIES: List[str] = []
 
@@ -68,13 +70,13 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             properties = {}
 
         if self._ENCODING_KEY not in properties.keys():
-            properties[self._ENCODING_KEY] = "utf-8"
+            properties[self._ENCODING_KEY] = self._DEFAULT_ENCODING_VALUE
 
         if self._HAS_HEADER_PROPERTY not in properties.keys():
             properties[self._HAS_HEADER_PROPERTY] = True
 
         if self._SEPARATOR_KEY not in properties.keys():
-            properties[self._SEPARATOR_KEY] = ","
+            properties[self._SEPARATOR_KEY] = self._DEFAULT_SEPARATOR_VALUE
 
         properties[self._EXPOSED_TYPE_PROPERTY] = _TabularDataNodeMixin._get_valid_exposed_type(properties)
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
