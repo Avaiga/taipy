@@ -24,7 +24,7 @@ class CoreEventConsumerBase(_CoreEventConsumerBase):
         _warn_deprecated(deprecated="CoreEventConsumerBase",
                          suggest="The 'taipy.event.event_consumer.GuiEventConsumer' class")
         self.__logger.warning(
-            "The `CoreEventConsumerBase` class is deprecated since taipy 4.1.0."
-            "Please use the `GuiEventConsumer` class instead. "
+            "The `CoreEventConsumerBase` class is deprecated since taipy 4.1.0. "
+            "Please use the `GuiEventConsumer` class instead."
         )
         super().__init__(registration_id, queue)
