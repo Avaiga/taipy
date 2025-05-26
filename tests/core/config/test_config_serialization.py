@@ -135,6 +135,7 @@ path = "./test.csv"
 exposed_type = "tests.core.config.test_config_serialization.CustomClass:class"
 encoding = "utf-8"
 has_header = "True:bool"
+separator = ","
 
 [DATA_NODE.test_json_dn]
 storage_type = "json"
@@ -305,7 +306,8 @@ def test_read_write_json_configuration_file():
 "path": "./test.csv",
 "exposed_type": "tests.core.config.test_config_serialization.CustomClass:class",
 "encoding": "utf-8",
-"has_header": "True:bool"
+"has_header": "True:bool",
+"separator": ","
 },
 "test_json_dn": {
 "storage_type": "json",
