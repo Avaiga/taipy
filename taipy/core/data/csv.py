@@ -41,6 +41,7 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
     __STORAGE_TYPE = "csv"
     __ENCODING_KEY = "encoding"
+    __SEPARATOR_KEY = "separator"
 
     _REQUIRED_PROPERTIES: List[str] = []
 
@@ -70,6 +71,9 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         if self._HAS_HEADER_PROPERTY not in properties.keys():
             properties[self._HAS_HEADER_PROPERTY] = True
+
+        if self.__SEPARATOR_KEY not in properties.keys():
+            properties[self.__SEPARATOR_KEY] = ","
 
         properties[self._EXPOSED_TYPE_PROPERTY] = _TabularDataNodeMixin._get_valid_exposed_type(properties)
         self._check_exposed_type(properties[self._EXPOSED_TYPE_PROPERTY])
@@ -107,6 +111,7 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                 self._HAS_HEADER_PROPERTY,
                 self._EXPOSED_TYPE_PROPERTY,
                 self.__ENCODING_KEY,
+                self.__SEPARATOR_KEY,
             }
         )
 
@@ -143,10 +148,10 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         properties = self.properties
         with open(path, encoding=properties[self.__ENCODING_KEY]) as csvFile:
             if properties[self._HAS_HEADER_PROPERTY]:
-                reader_with_header = csv.DictReader(csvFile)
+                reader_with_header = csv.DictReader(csvFile, delimiter=properties[self.__SEPARATOR_KEY])
                 return [self._decoder(line) for line in reader_with_header]
 
-            reader_without_header = csv.reader(csvFile)
+            reader_without_header = csv.reader(csvFile, delimiter=properties[self.__SEPARATOR_KEY])
             return [self._decoder(line) for line in reader_without_header]
 
     def _read_as_numpy(self, path: str) -> np.ndarray:
@@ -162,12 +167,22 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             properties = self.properties
             if properties[self._HAS_HEADER_PROPERTY]:
                 if column_names:
-                    return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY])[column_names]
-                return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY])
+                    return pd.read_csv(
+                        path, encoding=properties[self.__ENCODING_KEY], sep=properties[self.__SEPARATOR_KEY]
+                    )[column_names]
+                return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY], sep=properties[self.__SEPARATOR_KEY])
             else:
                 if usecols:
-                    return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY], header=None, usecols=usecols)
-                return pd.read_csv(path, encoding=properties[self.__ENCODING_KEY], header=None)
+                    return pd.read_csv(
+                        path,
+                        encoding=properties[self.__ENCODING_KEY],
+                        sep=properties[self.__SEPARATOR_KEY],
+                        header=None,
+                        usecols=usecols,
+                    )
+                return pd.read_csv(
+                    path, encoding=properties[self.__ENCODING_KEY], header=None, sep=properties[self.__SEPARATOR_KEY]
+                )
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
@@ -175,7 +190,14 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         properties = self.properties
         exposed_type = properties[self._EXPOSED_TYPE_PROPERTY]
         data = self._convert_data_to_dataframe(exposed_type, data)
-        data.to_csv(self._path, mode="a", index=False, encoding=properties[self.__ENCODING_KEY], header=False)
+        data.to_csv(
+            self._path,
+            mode="a",
+            index=False,
+            encoding=properties[self.__ENCODING_KEY],
+            sep=properties[self.__SEPARATOR_KEY],
+            header=False,
+        )
 
     def _write(self, data: Any, columns: Optional[List[str]] = None):
         self._write_to_path(self._path, data, columns)
@@ -192,5 +214,6 @@ class CSVDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
             path,
             index=False,
             encoding=properties[self.__ENCODING_KEY],
+            sep=properties[self.__SEPARATOR_KEY],
             header=properties[self._HAS_HEADER_PROPERTY],
         )

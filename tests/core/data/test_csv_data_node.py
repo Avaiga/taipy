@@ -54,7 +54,7 @@ class TestCSVDataNode:
     def test_create(self):
         default_path = "data/node/path"
         csv_dn_config = Config.configure_csv_data_node(
-            id="foo_bar", default_path=default_path, has_header=False, name="super name"
+            id="foo_bar", default_path=default_path, has_header=False, name="super name", separator=";"
         )
         dn = _DataManagerFactory._build_manager()._create(csv_dn_config, None, None)
         assert isinstance(dn, CSVDataNode)
@@ -70,6 +70,7 @@ class TestCSVDataNode:
         assert dn.path == default_path
         assert dn.properties["has_header"] is False
         assert dn.properties["exposed_type"] == "pandas"
+        assert dn.properties["separator"] == ";"
 
         csv_dn_config = Config.configure_csv_data_node(
             id="foo", default_path=default_path, has_header=True, exposed_type=MyCustomObject
@@ -79,6 +80,7 @@ class TestCSVDataNode:
         assert dn.config_id == "foo"
         assert dn.properties["has_header"] is True
         assert dn.properties["exposed_type"] == MyCustomObject
+        assert dn.properties["separator"] == ","
 
         with pytest.raises(InvalidConfigurationId):
             CSVDataNode(

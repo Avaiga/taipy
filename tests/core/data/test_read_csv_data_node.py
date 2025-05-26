@@ -23,6 +23,7 @@ from taipy.core.data.csv import CSVDataNode
 from taipy.core.exceptions.exceptions import NoData
 
 csv_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+csv_2_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example_2.csv")
 
 
 @dataclasses.dataclass
@@ -117,3 +118,13 @@ def test_read_without_header_custom_exposed_type():
         assert row_pandas[0] == row_custom.id
         assert str(row_pandas[1]) == row_custom.integer
         assert row_pandas[2] == row_custom.text
+
+
+def test_read_with_different_separator():
+    csv_data_node_as_pandas = CSVDataNode(
+        "bar", Scope.SCENARIO, properties={"path": csv_2_file_path, "has_header": True, "separator": ";"}
+    )
+    data_pandas = csv_data_node_as_pandas.read()
+    assert isinstance(data_pandas, pd.DataFrame)
+    assert len(data_pandas) == 10
+    assert pd.DataFrame.equals(data_pandas, pd.read_csv(csv_2_file_path, sep=";"))

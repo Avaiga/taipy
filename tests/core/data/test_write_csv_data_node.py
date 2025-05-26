@@ -71,6 +71,27 @@ def test_append(csv_file, default_data_frame, content):
     )
 
 
+def test_append_with_different_separator():
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example_2.csv")
+
+    original_content = pd.read_csv(path, sep=";")
+    content = pd.DataFrame(
+        [
+            {"id": "jEn4a", "integer": 1001, "text": "1st appended line"},
+            {"id": "4ajeQ", "integer": 1002, "text": "2nd appended line"},
+        ],
+    )
+
+    csv_dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": path, "separator": ";"})
+    _DataManagerFactory._build_manager()._repository._save(csv_dn)
+
+    csv_dn.append(content)
+    assert_frame_equal(
+        csv_dn.read(),
+        pd.concat([original_content, pd.DataFrame(content, columns=["id", "integer", "text"])]).reset_index(drop=True),
+    )
+
+
 def test_write_with_header_pandas(tmp_csv_file):
     csv_dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": tmp_csv_file})
     _DataManagerFactory._build_manager()._repository._save(csv_dn)
@@ -195,6 +216,17 @@ def test_write_with_column_names(tmp_csv_file):
     columns = ["e", "f", "g"]
 
     csv_dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": tmp_csv_file})
+    _DataManagerFactory._build_manager()._repository._save(csv_dn)
+    csv_dn.write_with_column_names(data, columns)
+    df = pd.DataFrame(data, columns=columns)
+    assert pd.DataFrame.equals(df, csv_dn.read())
+
+
+def test_write_with_different_separator(tmp_csv_file):
+    data = [[11, 22, 33], [44, 55, 66]]
+    columns = ["e", "f", "g"]
+
+    csv_dn = CSVDataNode("foo", Scope.SCENARIO, properties={"path": tmp_csv_file, "separator": ";"})
     _DataManagerFactory._build_manager()._repository._save(csv_dn)
     csv_dn.write_with_column_names(data, columns)
     df = pd.DataFrame(data, columns=columns)

@@ -109,10 +109,11 @@ class TestDataManager:
         assert not _DataManager._get(csv_dn.id).is_ready_for_reading
         assert _DataManager._get(csv_dn.id).is_ready_for_reading == csv_dn.is_ready_for_reading
         assert (
-            len(_DataManager._get(csv_dn.id).properties) == 5
-        )  # path, encoding, has_header, exposed_type, is_generated
+            len(_DataManager._get(csv_dn.id).properties) == 6
+        )  # path, encoding, separator, has_header, exposed_type, is_generated
         assert _DataManager._get(csv_dn.id).properties.get("path") == "bar"
         assert _DataManager._get(csv_dn.id).properties.get("encoding") == "utf-8"
+        assert _DataManager._get(csv_dn.id).properties.get("separator") == ","
         assert _DataManager._get(csv_dn.id).properties.get("has_header") is True
         assert _DataManager._get(csv_dn.id).properties.get("exposed_type") == "pandas"
         assert _DataManager._get(csv_dn.id).properties.get("is_generated") is False
@@ -137,7 +138,7 @@ class TestDataManager:
         assert _DataManager._get(csv_dn).job_ids == csv_dn.job_ids
         assert not _DataManager._get(csv_dn).is_ready_for_reading
         assert _DataManager._get(csv_dn).is_ready_for_reading == csv_dn.is_ready_for_reading
-        assert len(_DataManager._get(csv_dn).properties) == 5  # path, encoding, has_header, exposed_type, is_generated
+        assert len(_DataManager._get(csv_dn).properties) == 6
         assert _DataManager._get(csv_dn).properties.get("path") == "bar"
         assert _DataManager._get(csv_dn).properties.get("encoding") == "utf-8"
         assert _DataManager._get(csv_dn).properties.get("has_header") is True
