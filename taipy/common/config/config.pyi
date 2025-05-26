@@ -424,6 +424,7 @@ class Config:
         default_path: Optional[str] = None,
         encoding: Optional[str] = None,
         has_header: Optional[bool] = None,
+        separator: Optional[str] = None,
         exposed_type: Optional[str] = None,
         scope: Optional[Scope] = None,
         validity_period: Optional[timedelta] = None,
@@ -436,6 +437,7 @@ class Config:
             default_path (Optional[str]): The default path of the CSV file.
             encoding (Optional[str]): The encoding of the CSV file.
             has_header (Optional[bool]): If True, indicates that the CSV file has a header.
+            separator (Optional[str]): The character used to separate values in the CSV file.
             exposed_type (Optional[str]): The exposed type of the data read from CSV file.<br/>
                 The default value is `pandas`.
             scope (Optional[Scope^]): The scope of the CSV data node configuration.<br/>
