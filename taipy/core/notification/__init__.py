@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Avaiga Private Limited
+# Copyright 2021-2025 Avaiga Private Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
 # the License. You may obtain a copy of the License at
@@ -19,8 +19,8 @@ To subscribe, a consumer needs to invoke the `Notifier.register()^` method.
 This call will yield a `RegistrationId` and a dedicated event queue for
 receiving notifications.
 
-To handle notifications, an event consumer (e.g., the `CoreEventConsumerBase^`
-object) must be instantiated with an associated event queue.
+To handle notifications, an event consumer can be instantiated with an associated
+event queue. See (`GuiEventConsumer^` for more details).
 """
 
 from ._registration import _Registration
