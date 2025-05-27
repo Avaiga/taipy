@@ -39,6 +39,7 @@ def _check_dependency_is_installed(
 
 
 class EnterpriseEditionUtils:
+    """NOT DOCUMENTED"""
     _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
     _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
     _TAIPY_ENTERPRISE_EVENT_PACKAGE = _TAIPY_ENTERPRISE_MODULE + ".event"
