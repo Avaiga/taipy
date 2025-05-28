@@ -18,12 +18,12 @@ class _AbstractEventProcessor:
 
     @classmethod
     @abstractmethod
-    def process_event(cls, event_consumer, event: Event):
+    def process_event(cls, event_processor, event: Event):
         raise NotImplementedError("Subclasses must implement this method.")
 
 class _EventProcessor(_AbstractEventProcessor):
 
     @classmethod
-    def process_event(cls, event_consumer, event: Event):
-        event_consumer._process_event(event)
+    def process_event(cls, event_processor, event: Event):
+        event_processor._process_event(event)
 

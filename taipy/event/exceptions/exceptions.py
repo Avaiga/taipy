@@ -9,8 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-"""Exceptions raised by taipy package functionalities."""
-
-class NoGuiDefinedInEventConsumer(Exception):
+class NoGuiDefinedInEventProcessor(Exception):
     """Raised when an on event callback is registered to be broadcast to all states,
     but no GUI is defined in the event consumer."""

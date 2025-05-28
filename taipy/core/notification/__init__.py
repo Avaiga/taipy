@@ -19,8 +19,8 @@ To subscribe, a consumer needs to invoke the `Notifier.register()^` method.
 This call will yield a `RegistrationId` and a dedicated event queue for
 receiving notifications.
 
-To handle notifications, an event consumer (e.g., the `CoreEventConsumerBase^`
-object) must be instantiated with an associated event queue.
+To handle notifications, an event processor can be instantiated with an associated
+event queue. See (`EventProcessor^` for more details).
 """
 
 from ._registration import _Registration

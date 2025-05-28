@@ -15,7 +15,7 @@ from unittest.mock import ANY
 from taipy import DataNode, Gui
 from taipy.core.config import DataNodeConfig
 from taipy.core.notification import Event, EventEntityType, EventOperation
-from taipy.event.event_consumer import GuiEventConsumer
+from taipy.event.event_processor import EventProcessor
 
 
 def cb_0(event: Event, datanode: DataNode, data: Any):
@@ -31,8 +31,8 @@ def cb_for_state(state, event: Event, datanode: DataNode, data: Any):
 
 
 def test_on_datanode_written(data_node):
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_datanode_written(callback=cb_0)
         # test the on_datanode_written method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_0,
@@ -59,8 +59,8 @@ def test_on_datanode_written(data_node):
 
 
 def test_on_datanode_written_multiple_configs(data_node):
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_datanode_written(callback=cb_0,
                                      datanode_config=[DataNodeConfig("dn0"), "dn1", DataNodeConfig("dn2"), "data_node"])
         # test the on_datanode_written method delegates to on_event with the correct parameters
@@ -88,8 +88,8 @@ def test_on_datanode_written_multiple_configs(data_node):
 
 
 def test_on_datanode_written_multiple_configs_no_matching(data_node):
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_datanode_written(callback=cb_0,
                                      datanode_config=[DataNodeConfig("dn0"), "dn1"])
         # test the on_datanode_written method delegates to on_event with the correct parameters
@@ -117,8 +117,8 @@ def test_on_datanode_written_multiple_configs_no_matching(data_node):
 
 
 def test_on_datanode_written_with_args_and_matching_config(data_node):
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_datanode_written(callback=cb_1, callback_args=["foo"], datanode_config="data_node")
         # test the on_datanode_written method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_1,
@@ -145,8 +145,8 @@ def test_on_datanode_written_with_args_and_matching_config(data_node):
 
 
 def test_on_datanode_written_with_args_and_not_matching_config(data_node):
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_datanode_written(callback=cb_1, callback_args=["foo"], datanode_config="WRONG_CFG")
         # test the on_datanode_written method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_1,
@@ -173,8 +173,8 @@ def test_on_datanode_written_with_args_and_not_matching_config(data_node):
 
 
 def test_on_datanode_written_with_broadcast(data_node):
-    consumer = GuiEventConsumer(Gui())
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor(Gui())
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.broadcast_on_datanode_written(callback=cb_for_state)
         mck.assert_called_once_with(callback=cb_for_state,
                                     callback_args=None,

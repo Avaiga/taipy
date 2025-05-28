@@ -27,12 +27,11 @@ from taipy.core.notification import (
 from taipy.core.notification._core_event_consumer import _CoreEventConsumerBase
 from taipy.event._event_callback import _Callback
 from taipy.event._event_processor import _AbstractEventProcessor, _EventProcessor
-from taipy.exceptions import NoGuiDefinedInEventConsumer
+from taipy.event.exceptions.exceptions import NoGuiDefinedInEventProcessor
 
 
-class GuiEventConsumer(_CoreEventConsumerBase):
-    """
-    The Taipy event consumer service.
+class EventProcessor(_CoreEventConsumerBase):
+    """The Taipy event processor service.
 
     This service listens for events in a Taipy application and triggers callback
     executions when events matching specific topics are produced. The service handle
@@ -41,7 +40,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
     The main method to use is `on_event()`, that registers a callback to a topic.
 
-    Before starting the event consumer service, register each callback to a topic.
+    Before starting the event processor service, register each callback to a topic.
     The topics are defined by the entity type, the entity id, the operation, and the
     attribute name of the events. If an event matching the provided topic is produced,
     the callback execution is triggered.
@@ -75,21 +74,21 @@ class GuiEventConsumer(_CoreEventConsumerBase):
         === "One callback to match all events"
 
             ```python
-            from taipy import Event, GuiEventConsumer, Gui
+            from taipy import Event, EventProcessor, Gui
 
             def event_received(gui: Gui, event: Event):
                 print(f"Received event created at : {event.creation_date}")
 
             if __name__ == "__main__":
-                event_consumer = GuiEventConsumer()
-                event_consumer.on_event(callback=event_received)
-                event_consumer.start()
+                event_processor = EventProcessor()
+                event_processor.on_event(callback=event_received)
+                event_processor.start()
             ```
 
         === "Two callbacks to match different topics"
 
             ```python
-            from taipy import Event, GuiEventConsumer, Gui
+            from taipy import Event, EventProcessor, Gui
 
             def on_entity_creation(event: Event, gui: Gui):
                 print(f" {event.entity_type} entity created at {event.creation_date}")
@@ -98,17 +97,17 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 print(f"Scenario '{event.entity_id}' processed for a '{event.operation}' operation.")
 
             if __name__ == "__main__":
-                event_consumer = GuiEventConsumer()
-                event_consumer.on_event(callback=on_entity_creation, operation=EventOperation.CREATION)
-                event_consumer.on_event(callback=scenario_event, entity_type=EventEntityType.SCENARIO)
-                event_consumer.start()
+                event_processor = EventProcessor()
+                event_processor.on_event(callback=on_entity_creation, operation=EventOperation.CREATION)
+                event_processor.on_event(callback=scenario_event, entity_type=EventEntityType.SCENARIO)
+                event_processor.start()
             ```
 
         === "Callbacks to be broadcast to all states"
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui
+            from taipy import Event, EventProcessor, Gui
 
             def event_received(state, event: Event):
                 scenario = tp.get(event.entity_id)
@@ -116,9 +115,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.broadcast_on_event(callback=event_received)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.broadcast_on_event(callback=event_received)
+                event_processor.start()
                 taipy.run(gui)
             ```
 
@@ -126,7 +125,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def print_scenario_created(event: Event, scenario: Scenario, gui: Gui):
                 print(f"Scenario '{scenario.name}' created at '{event.creation_date}'.")
@@ -137,10 +136,10 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.on_scenario_created(callback=print_scenario_created)
-                event_consumer.broadcast_on_scenario_created(callback=store_latest_scenario)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.on_scenario_created(callback=print_scenario_created)
+                event_processor.broadcast_on_scenario_created(callback=store_latest_scenario)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -149,7 +148,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui
+            from taipy import Event, EventProcessor, Gui
 
             def cycle_filter(event: Event, gui: Gui):
                 scenario = tp.get(event.entity_id)
@@ -162,12 +161,12 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.broadcast_on_event(
+                event_processor = EventProcessor(gui)
+                event_processor.broadcast_on_event(
                     callback=event_received,
                     entity_type=EventEntityType.SCENARIO,
                     filter=cycle_filter)
-                event_consumer.start()
+                event_processor.start()
                 taipy.run(gui)
             ```
 
@@ -177,7 +176,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
     """
 
     def __init__(self, gui: Optional[Gui] = None) -> None:
-        """Initialize the Gui Event Consumer service.
+        """Initialize the Event Processor service.
 
         Arguments:
             gui (Gui): The Gui instance used to broadcast the callbacks to all states.
@@ -202,7 +201,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
         operation: Optional[EventOperation] = None,
         attribute_name: Optional[str] = None,
         filter: Optional[Callable[[Event], bool]] = None,
-    ) -> "GuiEventConsumer":
+    ) -> "EventProcessor":
         """Register a callback to be executed on a specific event.
 
         Arguments:
@@ -230,7 +229,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 as the only argument and return a boolean. If the filter returns False, the
                 callback is not triggered.
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_event(
             callback=callback,
@@ -252,7 +251,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
         operation: Optional[EventOperation] = None,
         attribute_name: Optional[str] = None,
         filter: Optional[Callable[[Event], bool]] = None,
-    ) -> "GuiEventConsumer":
+    ) -> "EventProcessor":
         """Register a callback to be broadcast to all states on a specific event.
 
                 Arguments:
@@ -280,7 +279,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                         as the only argument and return a boolean. If the filter returns False, the
                         callback is not triggered.
                 Returns:
-                    GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+                    EventProcessor: The current instance of the `EventProcessor` service.
                 """
         return self.__on_event(
             callback=callback,
@@ -303,7 +302,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
         attribute_name: Optional[str] = None,
         filter: Optional[Callable[[Event], bool]] = None,
         broadcast: bool = False,
-    ) -> "GuiEventConsumer":
+    ) -> "EventProcessor":
         topic = self.__build_topic(entity_type, entity_id, operation, attribute_name)
         cb = self.__build_callback(callback, callback_args, filter, broadcast)
         self.__register_callback(topic, cb)
@@ -313,7 +312,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                            ) -> "GuiEventConsumer":
+                            ) -> "EventProcessor":
         """ Register a callback for scenario creation events.
 
         !!! example:
@@ -322,16 +321,16 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def print_scenario_created(event: Event, scenario: Scenario, gui: Gui):
                 print(f"Scenario '{scenario.name}' created at '{event.creation_date}'.")
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.on_scenario_created(callback=print_scenario_created)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.on_scenario_created(callback=print_scenario_created)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -340,15 +339,15 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui
+            from taipy import Event, EventProcessor, Gui
 
             def print_scenario_created(event: Event, scenario: Scenario, gui: Gui):
                 print(f"Scenario '{scenario.name}' created at '{event.creation_date}'.")
 
             if __name__ == "__main__":
-                event_consumer = GuiEventConsumer()
-                event_consumer.on_scenario_created(callback=print_scenario_created, scenario_config="my_cfg")
-                event_consumer.start()
+                event_processor = EventProcessor()
+                event_processor.on_scenario_created(callback=print_scenario_created, scenario_config="my_cfg")
+                event_processor.start()
                 ...
             ```
 
@@ -369,7 +368,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all scenario configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_scenario_created(
             callback=callback,
@@ -382,7 +381,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                                      ) -> "GuiEventConsumer":
+                                      ) -> "EventProcessor":
         """ Register a callback executed for all states on scenario creation events.
 
         !!! example:
@@ -391,7 +390,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
                 ```python
                 import taipy as tp
-                from taipy import Event, GuiEventConsumer, Gui, State
+                from taipy import Event, EventProcessor, Gui, State
 
                 def store_latest_scenario(state: State, event: Event, scenario: Scenario):
                     print(f"Scenario '{scenario.name}' created at '{event.creation_date}'.")
@@ -399,9 +398,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
                 if __name__ == "__main__":
                     gui = Gui()
-                    event_consumer = GuiEventConsumer(gui)
-                    event_consumer.broadcast_on_scenario_created(callback=store_latest_scenario)
-                    event_consumer.start()
+                    event_processor = EventProcessor(gui)
+                    event_processor.broadcast_on_scenario_created(callback=store_latest_scenario)
+                    event_processor.start()
                     ...
                     taipy.run(gui)
                 ```
@@ -410,16 +409,16 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
                 ```python
                 import taipy as tp
-                from taipy import Event, GuiEventConsumer, Gui
+                from taipy import Event, EventProcessor, Gui
 
                 def scenario_created(state, event: Event, scenario: Scenario):
                     print(f"Scenario '{scenario.name}' created at '{event.creation_date}'.")
                     state.latest_scenario = scenario
 
                 if __name__ == "__main__":
-                    event_consumer = GuiEventConsumer()
-                    event_consumer.broadcast_on_scenario_created(callback=scenario_created, scenario_config="my_cfg")
-                    event_consumer.start()
+                    event_processor = EventProcessor()
+                    event_processor.broadcast_on_scenario_created(callback=scenario_created, scenario_config="my_cfg")
+                    event_processor.start()
                     ...
                 ```
 
@@ -441,7 +440,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all scenario configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_scenario_created(
             callback=callback,
@@ -455,7 +454,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               scenario_config: Union[str, ScenarioConfig, List, None] = None,
                               broadcast: bool = False,
-                              ) -> "GuiEventConsumer":
+                              ) -> "EventProcessor":
         scenario_config = self.__format_configs_parameter(ScenarioConfig, scenario_config)
 
         def _filter(event: Event) -> bool:
@@ -483,24 +482,24 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                            ) -> "GuiEventConsumer":
+                            ) -> "EventProcessor":
         """ Register a callback for scenario deletion events.
 
         !!! example:
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def print_scenario_deleted(event: Event, scenario_id: str, gui: Gui):
                 print(f"A scenario has been deleted at '{event.creation_date}'.")
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.on_scenario_deleted(callback=print_scenario_)
-                event_consumer.on_scenario_deleted(callback=print_scenario_deleted)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.on_scenario_deleted(callback=print_scenario_)
+                event_processor.on_scenario_deleted(callback=print_scenario_deleted)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -522,7 +521,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all scenario configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_scenario_deleted(
             callback=callback,
@@ -535,14 +534,14 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                                      ) -> "GuiEventConsumer":
+                                      ) -> "EventProcessor":
         """ Register a callback executed for all states on scenario deletion events.
 
         !!! example:
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
             from taipy.gui import notify
 
             def on_scenario_deleted(state: State, event: Event, scenario_id: str):
@@ -550,9 +549,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.broadcast_on_scenario_deleted(callback=on_scenario_deleted)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.broadcast_on_scenario_deleted(callback=on_scenario_deleted)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -574,7 +573,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all scenario configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_scenario_deleted(
             callback=callback,
@@ -588,7 +587,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               scenario_config: Union[str, ScenarioConfig, List, None] = None,
                               broadcast: bool = False
-                              ) -> "GuiEventConsumer":
+                              ) -> "EventProcessor":
         scenario_config = self.__format_configs_parameter(ScenarioConfig, scenario_config)
 
         def _filter(event: Event) -> bool:
@@ -613,7 +612,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                            ) -> "GuiEventConsumer":
+                            ) -> "EventProcessor":
         """ Register a callback for data node written events.
 
         The callback is triggered when a datanode is written (see methods
@@ -623,7 +622,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def last_data_edition(event: Event, datanode: DataNode, data: Any, gui: Gui):
                 print(f"Datanode written at '{event.creation_date}'.")
@@ -631,9 +630,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.on_datanode_written(callback=last_data_edition, broadcast=True)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.on_datanode_written(callback=last_data_edition, broadcast=True)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -658,7 +657,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all datanode configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_datanode_written(
             callback=callback,
@@ -671,7 +670,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                                      ) -> "GuiEventConsumer":
+                                      ) -> "EventProcessor":
         """ Register a callback for data node written events.
 
         The callback is triggered when a datanode is written (see methods
@@ -681,7 +680,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def last_data_edition(state: State, event: Event, datanode: DataNode, data: Any):
                 print(f"Datanode written at '{event.creation_date}'.")
@@ -689,9 +688,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.broadcast_on_datanode_written(callback=last_data_edition)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.broadcast_on_datanode_written(callback=last_data_edition)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -714,7 +713,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all datanode configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_datanode_written(
             callback=callback,
@@ -728,7 +727,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               datanode_config: Union[str, DataNodeConfig, List, None] = None,
                               broadcast: bool = False
-                              ) -> "GuiEventConsumer":
+                              ) -> "EventProcessor":
         datanode_config = self.__format_configs_parameter(DataNodeConfig, datanode_config)
 
         def _filter(event: Event) -> bool:
@@ -758,23 +757,23 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                            ) -> "GuiEventConsumer":
+                            ) -> "EventProcessor":
         """ Register a callback for data node deletion events.
 
         !!! example:
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def on_deletions(event: Event, datanode_id: str, gui: Gui):
                 print(f"Datanode deleted at '{event.creation_date}'.")
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.on_datanode_deleted(callback=record_deletions)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.on_datanode_deleted(callback=record_deletions)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -796,7 +795,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all datanode configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_datanode_deleted(
             callback=callback,
@@ -809,14 +808,14 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                                      ) -> "GuiEventConsumer":
+                                      ) -> "EventProcessor":
         """ Register a callback for each state on data node deletion events.
 
         !!! example:
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def record_deletions(state: State, event: Event, datanode_id: str):
                 print(f"Datanode deleted at '{event.creation_date}'.")
@@ -824,9 +823,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.broadcast_on_datanode_deleted(callback=record_deletions)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.broadcast_on_datanode_deleted(callback=record_deletions)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -849,7 +848,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all datanode configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_datanode_deleted(
             callback=callback,
@@ -863,7 +862,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               datanode_config: Union[str, DataNodeConfig, List, None] = None,
                               broadcast: bool = False
-                              ) -> "GuiEventConsumer":
+                              ) -> "EventProcessor":
         datanode_config = self.__format_configs_parameter(DataNodeConfig, datanode_config)
 
         def _filter(event: Event) -> bool:
@@ -888,23 +887,23 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                             callback: Callable,
                             callback_args: Optional[List] = None,
                             datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                            ) -> "GuiEventConsumer":
+                            ) -> "EventProcessor":
         """ Register a callback to be executed on data node creation event.
 
         !!! example:
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def on_datanode_creations(event: Event, datanode: DataNode, gui: Gui):
                 print(f"Datanode created at '{event.creation_date}'.")
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.on_datanode_created(callback=record_creations)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.on_datanode_created(callback=record_creations)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -926,7 +925,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all datanode configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_datanode_created(
             callback=callback,
@@ -939,14 +938,14 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                       callback: Callable,
                                       callback_args: Optional[List] = None,
                                       datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                                      ) -> "GuiEventConsumer":
+                                      ) -> "EventProcessor":
         """ Register a callback to be executed for each state on data node creation event.
 
         !!! example:
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
             from taipy.gui import notify
 
             def on_datanode_creations(state: State, event: Event, datanode: DataNode):
@@ -955,9 +954,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.broadcast_on_datanode_created(callback=record_creations)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.broadcast_on_datanode_created(callback=record_creations)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -979,7 +978,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 for all datanode configurations.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_datanode_created(
             callback=callback,
@@ -993,7 +992,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                               callback_args: Optional[List] = None,
                               datanode_config: Union[str, DataNodeConfig, List, None] = None,
                               broadcast: bool = False
-                              ) -> "GuiEventConsumer":
+                              ) -> "EventProcessor":
         datanode_config = self.__format_configs_parameter(DataNodeConfig, datanode_config)
 
         def _filter(event: Event) -> bool:
@@ -1021,14 +1020,14 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                callback: Callable,
                                callback_args: Optional[List] = None,
                                config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
-                               ) -> "GuiEventConsumer":
+                               ) -> "EventProcessor":
         """Register a callback for submission finished events.
 
         !!! example:
 
             ```python
             import taipy as tp
-            from taipy import Event, GuiEventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def record_submissions(event: Event, submittable: Submittable, submission: Submission, gui: Gui):
                 if submission.submission_status == SubmissionStatus.COMPLETED:
@@ -1038,9 +1037,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.on_submission_finished(callback=record_submissions)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.on_submission_finished(callback=record_submissions)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -1063,7 +1062,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 If None, the callback is registered for any submittable.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_submission_finished(
             callback=callback,
@@ -1076,14 +1075,14 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                          callback: Callable,
                                          callback_args: Optional[List] = None,
                                          config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
-                                         ) -> "GuiEventConsumer":
+                                         ) -> "EventProcessor":
         """Register a callback to be executed for each state on submission finished events.
 
         !!! example
 :
             ```python
             import taipy as tp
-            from taipy import Event, EventConsumer, Gui, State
+            from taipy import Event, EventProcessor, Gui, State
 
             def record_submissions(state: State, event: Event, submittable: Submittable, submission: Submission):
                 print(f"Submission finished at '{event.creation_date}'. Status: '{submission.submission_status}'")
@@ -1094,9 +1093,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
 
             if __name__ == "__main__":
                 gui = Gui()
-                event_consumer = GuiEventConsumer(gui)
-                event_consumer.on_submission_finished(callback=record_submissions, broadcast=True)
-                event_consumer.start()
+                event_processor = EventProcessor(gui)
+                event_processor.on_submission_finished(callback=record_submissions, broadcast=True)
+                event_processor.start()
                 ...
                 taipy.run(gui)
             ```
@@ -1120,7 +1119,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                 If None, the callback is registered for any submittable.
 
         Returns:
-            GuiEventConsumer: The current instance of the `GuiEventConsumer` service.
+            EventProcessor: The current instance of the `EventProcessor` service.
         """
         return self.__on_submission_finished(
             callback=callback,
@@ -1134,7 +1133,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
                                  callback_args: Optional[List] = None,
                                  config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
                                  broadcast: bool = False
-                                 ) -> "GuiEventConsumer":
+                                 ) -> "EventProcessor":
         if isinstance(config_ids, str):
             config_ids = [config_ids]
         if isinstance(config_ids, TaskConfig):
@@ -1194,12 +1193,12 @@ class GuiEventConsumer(_CoreEventConsumerBase):
         self.event_processor.process_event(self, event)
 
     def start(self):
-        """Start the event consumer thread."""
+        """Start the event processor thread."""
         Notifier._register_from_registration(self._registration)
         super().start()
 
     def stop(self):
-        """Stop the event consumer thread."""
+        """Stop the event processor thread."""
         super().stop()
         Notifier.unregister(self._registration.registration_id)
 
@@ -1227,9 +1226,9 @@ class GuiEventConsumer(_CoreEventConsumerBase):
         if broadcast and self._gui is None:
             _TaipyLogger._get_logger().error(
                 "A callback is set to be broadcast to all states of "
-                "the GUI but no GUI is provided to the event consumer."
+                "the GUI but no GUI is provided to the event processor."
             )
-            raise NoGuiDefinedInEventConsumer()
+            raise NoGuiDefinedInEventProcessor()
         if callback_args is None:
             callback_args = []
         cb = _Callback(callback, args=callback_args, broadcast=broadcast, filter=filter)
@@ -1253,7 +1252,7 @@ class GuiEventConsumer(_CoreEventConsumerBase):
             if not self._gui:
                 _TaipyLogger._get_logger().error(
                     "A callback is set to be broadcast to all states of "
-                    "the GUI but no GUI is provided to the event consumer."
+                    "the GUI but no GUI is provided to the event processor."
                 )
                 return
             self._gui.broadcast_callback(cb.callback, [event, *predefined_args, *cb.args])

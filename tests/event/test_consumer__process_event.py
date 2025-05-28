@@ -14,7 +14,7 @@ from unittest import mock
 from taipy import Gui, Scenario
 from taipy.core.notification import Event, EventEntityType, EventOperation, _Topic
 from taipy.event._event_callback import _Callback
-from taipy.event.event_consumer import GuiEventConsumer
+from taipy.event.event_processor import EventProcessor
 
 collector: Dict[str, Any] = {"cb_0": 0, "cb_1": 0, "cb_2": 0, "cb_3": 0, "cb_for_state": 0,
             "cb_scenario_creation": 0, "cb_scenario_creation_with_state": 0}
@@ -69,7 +69,7 @@ def cb_scenario_creation_with_state(state, event: Event, scenario: Scenario, ext
 def test_process_event(scenario):
     global collector
     global args_collector
-    consumer = GuiEventConsumer()
+    consumer = EventProcessor()
     consumer.on_event(callback=cb_0, callback_args=["foo"])
     consumer.on_event(callback=cb_1, entity_type=EventEntityType.SCENARIO)
     consumer.on_event(callback=cb_2, entity_type=EventEntityType.SCENARIO, entity_id="bar")
@@ -131,7 +131,7 @@ def test_process_event(scenario):
 
 
 def test_process_event_with_state():
-    consumer = GuiEventConsumer(gui=Gui())
+    consumer = EventProcessor(gui=Gui())
     consumer.broadcast_on_event(callback=cb_for_state)
 
     event_1 = Event(
@@ -153,7 +153,7 @@ def test_process_event_with_filter():
     def filt(event: Event) -> bool:
         return event.metadata.get("foo") == "bar"
 
-    consumer = GuiEventConsumer()
+    consumer = EventProcessor()
     consumer.on_event(callback=cb_0,
                       callback_args=["foo"],
                       entity_type=EventEntityType.SCENARIO,
@@ -189,7 +189,7 @@ def test_process_event_with_filter():
 def test_process_event_with_predefined_args(scenario):
     global collector
     global args_collector
-    consumer = GuiEventConsumer()
+    consumer = EventProcessor()
     consumer.on_event(callback=cb_scenario_creation, callback_args=["foo"])
     collector, args_collector = init_collector()
     event = Event(
@@ -207,7 +207,7 @@ def test_process_event_with_predefined_args(scenario):
 
 
 def test_process_event_with_predefined_args_and_state(scenario):
-    consumer = GuiEventConsumer(Gui())
+    consumer = EventProcessor(Gui())
     consumer.broadcast_on_event(callback=cb_scenario_creation_with_state, callback_args=["foo"])
     event = Event(
         entity_type=EventEntityType.SCENARIO,

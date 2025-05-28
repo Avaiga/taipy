@@ -13,7 +13,7 @@ from unittest.mock import ANY
 
 from taipy import Gui, Scenario, Submission, SubmissionStatus
 from taipy.core.notification import Event, EventEntityType, EventOperation
-from taipy.event.event_consumer import GuiEventConsumer
+from taipy.event.event_processor import EventProcessor
 
 
 def cb_0(event: Event, submittable: Scenario, submission: Submission):
@@ -30,8 +30,8 @@ def cb_for_state(state, event: Event, submittable: Scenario, submission: Submiss
 
 def test_on_scenario_submission_finished(scenario, submission):
     submission._entity_id = scenario.id
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_submission_finished(callback=cb_0)
         # test the on_submission_finished method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_0,
@@ -87,8 +87,8 @@ def test_on_scenario_submission_finished(scenario, submission):
 
 def test_filter_false__wrong_status(scenario, submission):
     submission._entity_id = scenario.id
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_submission_finished(callback=cb_0)
         # test the on_submission_finished method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_0,
@@ -127,8 +127,8 @@ def test_filter_false__wrong_status(scenario, submission):
 
 def test_filter_false__config_ids_and_sequence(scenario, sequence, submission):
     submission._entity_id = sequence.id
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_submission_finished(callback=cb_0, config_ids=scenario.config_id)
         # test the on_submission_finished method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_0,
@@ -160,8 +160,8 @@ def test_filter_false__config_ids_and_sequence(scenario, sequence, submission):
 def test_filter_false__not_matching_config_ids(scenario, submission):
     submission._entity_id = scenario.id
     submission._entity_config_id = scenario.config_id
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_submission_finished(callback=cb_0, config_ids=["NOT_MATCHING_CONFIG_ID"])
         # test the on_submission_finished method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_0,
@@ -194,8 +194,8 @@ def test_filter_false__not_matching_config_ids(scenario, submission):
 def test_filter_true__with_config(scenario, submission):
     submission._entity_id = scenario.id
     submission._entity_config_id = scenario.config_id
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_submission_finished(callback=cb_0, config_ids=["scenario_cfg", scenario.config_id])
         # test the on_submission_finished method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_0,
@@ -226,8 +226,8 @@ def test_filter_true__with_config(scenario, submission):
 
 def test_filter_true__without_config(scenario, submission):
     submission._entity_id = scenario.id
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_submission_finished(callback=cb_0)
         # test the on_submission_finished method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_0,
@@ -257,8 +257,8 @@ def test_filter_true__without_config(scenario, submission):
 
 
 def test_on_scenario_submission_finished_with_args():
-    consumer = GuiEventConsumer()
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor()
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.on_submission_finished(callback=cb_1, callback_args=["extra"])
         # test the on_submission_finished method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_1,
@@ -271,8 +271,8 @@ def test_on_scenario_submission_finished_with_args():
 
 
 def test_on_scenario_submission_finished_with_args_and_state():
-    consumer = GuiEventConsumer(gui=Gui())
-    with mock.patch("taipy.event.event_consumer.GuiEventConsumer._GuiEventConsumer__on_event") as mck:
+    consumer = EventProcessor(gui=Gui())
+    with mock.patch("taipy.event.event_processor.EventProcessor._EventProcessor__on_event") as mck:
         consumer.broadcast_on_submission_finished(callback=cb_for_state, callback_args=["extra"])
         # test the on_submission_finished method delegates to on_event with the correct parameters
         mck.assert_called_once_with(callback=cb_for_state,

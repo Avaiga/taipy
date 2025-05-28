@@ -14,8 +14,8 @@ import pytest
 from taipy import Gui
 from taipy.core.notification import Event, EventEntityType, EventOperation, _Topic
 from taipy.event._event_callback import _Callback
-from taipy.event.event_consumer import GuiEventConsumer
-from taipy.exceptions import NoGuiDefinedInEventConsumer
+from taipy.event.event_processor import EventProcessor
+from taipy.event.exceptions.exceptions import NoGuiDefinedInEventProcessor
 
 
 def cb_0(event: Event, extra:str):
@@ -35,7 +35,7 @@ def cb_for_state(state, event: Event):
 
 
 def test_on_event():
-    consumer = GuiEventConsumer()
+    consumer = EventProcessor()
     consumer.on_event(callback=cb_0, callback_args=["foo"])
     consumer.on_event(callback=cb_1, entity_type=EventEntityType.SCENARIO)
     consumer.on_event(callback=cb_2, entity_type=EventEntityType.SCENARIO, entity_id="bar")
@@ -76,7 +76,7 @@ def test_on_event():
 
 
 def test_on_event_for_state():
-    consumer = GuiEventConsumer(gui=Gui())
+    consumer = EventProcessor(gui=Gui())
     consumer.broadcast_on_event(callback=cb_for_state)
 
     assert consumer._gui is not None
@@ -87,7 +87,7 @@ def test_on_event_for_state():
 
 
 def test_on_event_missing_gui():
-    consumer = GuiEventConsumer()
-    with pytest.raises(NoGuiDefinedInEventConsumer):
+    consumer = EventProcessor()
+    with pytest.raises(NoGuiDefinedInEventProcessor):
         consumer.broadcast_on_event(callback=cb_for_state)
     assert len(consumer._topic_callbacks_map) == 0
