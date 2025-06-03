@@ -1738,7 +1738,7 @@
                     {
                         "name": "allow_send_images",
                         "type": "bool",
-                        "default_value": "True",
+                        "default_value": "False",
                         "doc": "TODO if True, an upload image icon is shown."
                     }
                 ]

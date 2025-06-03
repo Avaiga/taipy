@@ -232,7 +232,7 @@ const Chat = (props: ChatProps) => {
         maxFileSize = 0.8 * 1024 * 1024, // 0.8 MB
         pageSize = 50,
         showSender = false,
-        allowSendImages = true,
+        allowSendImages = false,
     } = props;
     const dispatch = useDispatch();
     const module = useModule();
@@ -279,6 +279,21 @@ const Chat = (props: ChatProps) => {
     const sendAction = useCallback(
         (elt: HTMLInputElement | null | undefined, reason: string) => {
             if (elt && (elt?.value || imagePreview)) {
+                if (!allowSendImages) {
+                        dispatch(
+                            createSendActionNameAction(
+                                id,
+                                module,
+                                onAction,
+                                reason,
+                                updateVarName,
+                                elt?.value,
+                                senderId,
+                            )
+                        );
+                        elt.value = "";
+                    return;
+                }
                 toDataUrl(imagePreview)
                     .then((dataUrl) => {
                         dispatch(
@@ -304,7 +319,7 @@ const Chat = (props: ChatProps) => {
                     .catch(console.log);
             }
         },
-        [imagePreview, updateVarName, onAction, senderId, id, dispatch, module]
+        [allowSendImages, imagePreview, updateVarName, onAction, senderId, id, dispatch, module]
     );
 
     const handleAction = useCallback(
