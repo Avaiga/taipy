@@ -2379,7 +2379,7 @@
                     {
                         "name": "style",
                         "type": "dict",
-                        "doc": "A dict representing a css description."
+                        "doc": "TODO: A dict representing a css description."
                     }
                 ]
             }
