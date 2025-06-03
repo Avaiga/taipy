@@ -19,3 +19,10 @@ def test_part_builder_1(gui: Gui, helpers):
             tgb.text(value="This is a part")  # type: ignore[attr-defined]
     expected_list = ["<Part", "This is a part"]
     helpers.test_control_builder(gui, page, expected_list)
+
+def test_part_builder_with_style(gui: Gui, helpers):
+    with tgb.Page(frame=None) as page:
+        with tgb.part(class_name="class1", style={"background": "red"}):  # type: ignore[attr-defined]
+            tgb.text(value="This is a part")  # type: ignore[attr-defined]
+    expected_list = ["<Part", "This is a part", '<TaipyStyle className="tpcss-']
+    helpers.test_control_builder(gui, page, expected_list)

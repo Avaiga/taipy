@@ -1200,4 +1200,5 @@ class _Builder:
         el_str = el_str.replace("<?xml version='1.0' encoding='utf8'?>\n", "")
         el_str = el_str.replace("/>", ">")
         el_str = el_str.replace(">style</TaipyStyle>", "/>")
+        el_str = el_str.replace(f"</{self.__element_name}>", "")
         return el_str, self.__element_name
