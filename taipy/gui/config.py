@@ -26,7 +26,7 @@ from ._hook import _Hooks
 from ._page import _Page
 from ._warnings import _warn
 from .partial import Partial
-from .utils import _is_in_notebook
+from .utils import _is_in_notebook, _is_true
 
 ConfigParameter = t.Literal[
     "allow_unsafe_werkzeug",
@@ -266,9 +266,12 @@ class _Config(object):
                 if value is not None and key in config:
                     try:
                         if key == "port" and str(value).strip() == "auto":
-                            config["port"] = "auto"
+                            config[key] = "auto"
                         else:
-                            config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore[reportCallIssue]
+                            if isinstance(config[key], bool):
+                                config[key] = _is_true(value)
+                            else:
+                                config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore[reportCallIssue]
                     except Exception as e:
                         _warn(
                             f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",  # noqa: E501

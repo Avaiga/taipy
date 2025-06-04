@@ -2375,6 +2375,11 @@
                         "name": "hover_text",
                         "type": "dynamic(str)",
                         "doc": "The text that is displayed when the user hovers over the element."
+                    },
+                    {
+                        "name": "style",
+                        "type": "dict",
+                        "doc": "TODO: A dict representing a css description."
                     }
                 ]
             }
