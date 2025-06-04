@@ -73,3 +73,8 @@
   background: var(--color-background);
   opacity: var(--table-stripe-opacity, 0.5);
 }
+
+/* Override stripe opacity when row is selected */
+.taipy-table:where(:not(.rows-similar)) tbody tr.selected:nth-child(odd)::after {
+  opacity: 1;
+}
