@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 from taipy import Scope
 from taipy.core import DataNode, Scenario
 from taipy.core.data.pickle import PickleDataNode
-from taipy.gui.mock.mock_state import MockState
+from taipy.gui.test.mock_state import MockState
 from taipy.gui_core._context import _GuiCoreContext
 
 scenario_a = Scenario("scenario_a_config_id", None, {"a_prop": "a"})
@@ -35,8 +35,10 @@ def mock_core_get(entity_id):
         return datanode_b
     return None
 
+
 def mock_is_true(entity_id):
     return True
+
 
 class TestGuiCoreContext_crud_scenario:
     def test_crud_scenario_delete(self):
@@ -48,7 +50,7 @@ class TestGuiCoreContext_crud_scenario:
         with (
             patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
             patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_true),
-            patch("taipy.gui_core._context.core_delete", side_effect=mock_core_delete)
+            patch("taipy.gui_core._context.core_delete", side_effect=mock_core_delete),
         ):
             gui_core_context.crud_scenario(
                 state,

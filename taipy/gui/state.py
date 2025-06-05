@@ -311,4 +311,4 @@ class _AsyncState(_GuiState):
         )
 
     def _invoke_on_gui(self, method: t.Callable, *args):
-        return self.get_gui()._invoke_method(t.cast(str, self._get_placeholder("__state_id")), method, *args)
+        return self.get_gui()._invoke_method(t.cast(str, self._get_placeholder("__state_id")), method, *args)  # type: ignore[reportAttributeAccessIssue]
