@@ -12,7 +12,7 @@
 from unittest.mock import Mock
 
 from taipy.gui import Gui, State
-from taipy.gui.mock.mock_state import MockState
+from taipy.gui.test.mock_state import MockState
 from taipy.gui.utils import _MapDict
 
 
@@ -46,6 +46,7 @@ def test_write_attr():
     ms.a += 1
     assert ms.a == 3
 
+
 def test_dict():
     ms = MockState(Gui(""))
     a_dict = {"a": 1}
@@ -61,12 +62,14 @@ def test_write_context():
     ms["page"].b = 3
     assert ms["page"].b == 3
 
+
 def test_assign():
     ms = MockState(Gui(""), a=1)
     ms.assign("a", 2)
     assert ms.a == 2
     ms.assign("b", 1)
     assert ms.b == 1
+
 
 def test_refresh():
     ms = MockState(Gui(""), a=1)
@@ -76,15 +79,18 @@ def test_refresh():
     ms.refresh("a")
     assert ms.a == 2
 
+
 def test_context_manager():
     with MockState(Gui(""), a=1) as ms:
         assert ms is not None
         ms.a = 2
     assert ms.a == 2
 
+
 def test_broadcast():
     ms = MockState(Gui(""), a=1)
     ms.broadcast("a", 2)
+
 
 def test_set_favicon():
     gui = Gui("")
@@ -93,6 +99,7 @@ def test_set_favicon():
     ms.set_favicon("a_path")
     gui.set_favicon.assert_called_once()
 
+
 def test_callback():
     def on_action(state: State):
         state.assign("a", 2)
@@ -100,6 +107,7 @@ def test_callback():
     ms = MockState(Gui(""), a=1)
     on_action(ms)
     assert ms.a == 2
+
 
 def test_false():
     ms = MockState(Gui(""), a=False)
