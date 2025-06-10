@@ -76,7 +76,7 @@ version = "==4.2.13"
 "deepdiff" = {version="==8.5.0"}
 "flask-restful" = {version="==0.3.10"}
 "passlib" = {version="==1.7.4"}
-"marshmallow" = {version="==4.0.0"}
+"marshmallow" = {version="==3.23.2"}
 "apispec" = {version="==6.8.2", extras=["yaml"]}
 "apispec-webframeworks" = {version="==1.2.0"}
 "watchdog" = {version="==6.0.0"}
