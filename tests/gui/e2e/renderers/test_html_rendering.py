@@ -22,7 +22,6 @@ if util.find_spec("playwright"):
     from playwright._impl._page import Page
 
 from taipy.gui import Gui, Html
-from taipy.gui.servers.fastapi import _FastAPIServer
 from taipy.gui.servers.flask import _FlaskServer
 
 
@@ -110,6 +109,8 @@ def test_html_render_path_mapping(page: "Page", gui: Gui, helpers, e2e_base_url,
             async_mode="gevent",
         )
     else:
+        from taipy.enterprise.gui.servers.fastapi import _FastAPIServer
+
         gui._server = _FastAPIServer(
             gui,
             path_mapping={

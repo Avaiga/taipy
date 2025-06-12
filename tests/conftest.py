@@ -44,7 +44,7 @@ def e2e_port(request: pytest.FixtureRequest) -> str:
     return request.config.getoption("--e2e-port")
 
 
-@pytest.fixture(params=["flask", "fastapi"])
+@pytest.fixture(params=["flask"])
 def gui_server(request):
     return request.param
 
