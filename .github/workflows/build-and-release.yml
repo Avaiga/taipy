@@ -290,7 +290,6 @@ jobs:
 
       # Ensure the latest 'taipy' production release, if there is one, is marked as *latest* no matter what
       - name: Force latest 'taipy' production release
-        if: ${{ github.event.inputs.release_type == 'dev' }}
         run: |
           if [ "${{ needs.setup-versions.outputs.LATEST_TAIPY_VERSION }}" != "0.0.0" ]; then
             gh release edit ${{ needs.setup-versions.outputs.LATEST_TAIPY_VERSION }} --latest
