@@ -12,7 +12,7 @@
 from functools import lru_cache
 from typing import Type
 
-from ...common._check_dependencies import EnterpriseEditionUtils
+from ...common._modules import EnterpriseEdition
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._submission_fs_repository import _SubmissionFSRepository
@@ -24,23 +24,23 @@ class _SubmissionManagerFactory(_ManagerFactory):
 
     @classmethod
     @lru_cache
-    def _build_manager(cls) -> Type[_SubmissionManager]:
-        if EnterpriseEditionUtils._using_enterprise():
+    def _build_manager(cls) -> Type[_SubmissionManager]:  # type: ignore[reportIncompatibleMethodOverride]
+        if EnterpriseEdition._is_installed():
             submission_manager = _load_fct(
-                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".submission._submission_manager",
+                EnterpriseEdition._CORE_MODULE_PATH + ".submission._submission_manager",
                 "_SubmissionManager",
             )
             build_repository = _load_fct(
-                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".submission._submission_manager_factory",
+                EnterpriseEdition._CORE_MODULE_PATH + ".submission._submission_manager_factory",
                 "_SubmissionManagerFactory",
-            )._build_repository  # type: ignore
+            )._build_repository  # type: ignore[reportFunctionMemberAccess]
         else:
             submission_manager = _SubmissionManager
             build_repository = cls._build_repository
-        submission_manager._repository = build_repository()  # type: ignore
-        return submission_manager  # type: ignore
+        submission_manager._repository = build_repository()  # type: ignore[reportFunctionMemberAccess]
+        return submission_manager  # type: ignore[return-value]
 
     @classmethod
     @lru_cache
-    def _build_repository(cls):
-        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()
+    def _build_repository(cls):  # type: ignore[reportIncompatibleMethodOverride]
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()  # type: ignore[reportOptionalCall]

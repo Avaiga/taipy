@@ -10,3 +10,5 @@
 # specific language governing permissions and limitations under the License.
 
 """Common functionalities for the taipy package."""
+
+from ._modules import _module_exists

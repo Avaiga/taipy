@@ -19,10 +19,11 @@ from taipy.gui import Gui
 
 @contextlib.contextmanager
 def get_state(gui: Gui, state_id: str):
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         client_id = gui._bindings()._get_or_create_scope(state_id)[0]
         gui._Gui__set_client_id_in_context(client_id)  # type: ignore[attr-defined]
         yield gui._Gui__state  # type: ignore[attr-defined]
+
 
 def test_multiple_scopes(gui: Gui):
     var = 1  # noqa: F841
@@ -77,6 +78,7 @@ def test_broadcast_change(gui: Gui):
         assert state2.v1 == "none"
         assert state2.v2 == 2
 
+
 def test_broadcast_changes(gui: Gui):
     # Bind test variables
     v1 = "none"  # noqa: F841
@@ -87,7 +89,7 @@ def test_broadcast_changes(gui: Gui):
     s1, _ = gui._bindings()._get_or_create_scope("s1")
     s2, _ = gui._bindings()._get_or_create_scope("s2")
 
-    changes = { "v1": "some", "v2": 2}
+    changes = {"v1": "some", "v2": 2}
     gui.broadcast_changes(changes)
     with get_state(gui, s1) as state1:
         assert state1.v1 == "some"
@@ -104,7 +106,7 @@ def test_broadcast_changes(gui: Gui):
         assert state2.v1 == "more"
         assert state2.v2 == 3
 
-    gui.broadcast_changes({ "v1": "more yet"}, v2=4)
+    gui.broadcast_changes({"v1": "more yet"}, v2=4)
     with get_state(gui, s1) as state1:
         assert state1.v1 == "more yet"
         assert state1.v2 == 4

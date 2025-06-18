@@ -26,16 +26,16 @@ class MyLibrary(ElementLibrary):
 
 def test_extension_no_config(gui: Gui, helpers):
     gui.run(run_server=False, single_client=True)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     with pytest.warns(UserWarning):
-        ret = flask_client.get("/taipy-extension/toto/titi")
+        ret = server_test_client.get("/taipy-extension/toto/titi")
         assert ret.status_code == 404
 
 
 def test_extension_config_wrong_path(gui: Gui, helpers):
     Gui.add_library(MyLibrary())
     gui.run(run_server=False, single_client=True)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     with pytest.warns(UserWarning):
-        ret = flask_client.get("/taipy-extension/taipy_extension_example/titi")
+        ret = server_test_client.get("/taipy-extension/taipy_extension_example/titi")
         assert ret.status_code == 404

@@ -17,8 +17,6 @@ from operator import attrgetter
 from pathlib import Path
 from types import FrameType, SimpleNamespace
 
-from flask import has_app_context
-
 from .utils import _get_module_name_from_frame, _is_in_notebook
 from .utils._attributes import _attrsetter
 
@@ -258,7 +256,7 @@ class _GuiState(State):
         return nullcontext()
 
     def _notebook_context(self, gui: "Gui"):
-        return gui.get_flask_app().app_context() if not has_app_context() and _is_in_notebook() else nullcontext()
+        return gui.get_app_context() if not gui._server.has_server_context() and _is_in_notebook() else nullcontext()
 
     def _get_placeholder(self, name: str):
         if name in _GuiState.__placeholder_attrs:
@@ -311,4 +309,4 @@ class _AsyncState(_GuiState):
         )
 
     def _invoke_on_gui(self, method: t.Callable, *args):
-        return self.get_gui()._invoke_method(t.cast(str, self._get_placeholder("__state_id")), method, *args)
+        return self.get_gui()._invoke_method(t.cast(str, self._get_placeholder("__state_id")), method, *args)  # type: ignore[reportAttributeAccessIssue]

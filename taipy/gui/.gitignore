@@ -48,9 +48,6 @@ demo*/
 docker-compose-dev*.yml
 Dockerfile.dev
 
-# Ignore jupyter notebook files except the simple_gui.ipynb
-!simple_gui.ipynb
-
 # GUI generation
 taipy_webapp/
 

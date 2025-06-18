@@ -24,7 +24,7 @@ def test_state(gui: Gui):
     gui.add_page("page1", md_page1)
     gui.run(run_server=False, single_client=True)
     state = gui._Gui__state  # type: ignore[attr-defined]
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         assert state.a == 10
         assert state["page1"].a == 20
         assert state["tests.gui.gui_specific.state_asset.page1"].a == 20
@@ -51,11 +51,7 @@ def test_state(gui: Gui):
 
         assert state._get_placeholder("_taipy_p1") == 10
 
-        assert state._get_placeholder_attrs() == (
-            "_taipy_p1",
-            "_current_context",
-            "__state_id"
-        )
+        assert state._get_placeholder_attrs() == ("_taipy_p1", "_current_context", "__state_id")
 
         assert get_a(state) == 20
 

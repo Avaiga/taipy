@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-import json
 
 from taipy.gui import Gui, Markdown
 
@@ -24,12 +23,12 @@ def test_actions(gui: Gui, helpers):
 
     gui.add_page("test", Markdown("<|action button|button|on_action={an_action}|>"))
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    response = flask_client.get(f"/taipy-jsx/test?client_id={cid}")
+    response = server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
     assert response.status_code == 200, f"response.status_code {response.status_code} != 200"
-    response_data = json.loads(response.get_data().decode("utf-8", "ignore"))
+    response_data = helpers.get_response_data(response, gui)
     assert isinstance(response_data, dict), "response_data is not Dict"
     assert "jsx" in response_data, "jsx not in response_data"
     jsx = response_data["jsx"]

@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
 import platform
 import subprocess
 import sys
@@ -23,9 +24,19 @@ def build_gui(root_path: Path):
     if already_exists:
         print(f'Found taipy-gui frontend bundle in {root_path  / "taipy" / "gui" / "webapp"}.')  # noqa: T201
     else:
-        subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui" / "dom", check=True, shell=with_shell)
-        subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=with_shell)
-        subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=with_shell)
+        my_env = os.environ.copy()
+        if my_env.get("NODE_OPTIONS") is None:
+            print("Setting NODE_OPTIONS to --max-old-space-size=16384")  # noqa: T201
+            my_env["NODE_OPTIONS"] = "--max-old-space-size=16384"
+        subprocess.run(
+            ["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui" / "dom", check=True, shell=with_shell, env=my_env
+        )
+        subprocess.run(
+            ["npm", "ci"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=with_shell, env=my_env
+        )
+        subprocess.run(
+            ["npm", "run", "build"], cwd=root_path / "frontend" / "taipy-gui", check=True, shell=with_shell, env=my_env
+        )
 
 
 def build_taipy(root_path: Path):
@@ -39,8 +50,14 @@ def build_taipy(root_path: Path):
         if not env_file_path.exists():
             with open(env_file_path, "w") as env_file:
                 env_file.write(f"TAIPY_DIR={root_path}\n")
-        subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy", check=True, shell=with_shell)
-        subprocess.run(["npm", "run", "build"], cwd=root_path / "frontend" / "taipy", check=True, shell=with_shell)
+        my_env = os.environ.copy()
+        if my_env.get("NODE_OPTIONS") is None:
+            print("Setting NODE_OPTIONS to --max-old-space-size=16384") # noqa: T201
+            my_env["NODE_OPTIONS"] = "--max-old-space-size=16384"
+        subprocess.run(["npm", "ci"], cwd=root_path / "frontend" / "taipy", check=True, shell=with_shell, env=my_env)
+        subprocess.run(
+            ["npm", "run", "build"], cwd=root_path / "frontend" / "taipy", check=True, shell=with_shell, env=my_env
+        )
 
 
 if __name__ == "__main__":

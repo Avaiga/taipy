@@ -24,12 +24,12 @@ def ws_u_assert_template(gui: Gui, helpers, value_before_update, value_after_upd
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page("test", Markdown("<|{var}|>"))
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     # WS client and emit
-    ws_client = gui._server._ws.test_client(gui._server.get_flask())
+    ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
-    flask_client.get(f"/taipy-jsx/test?client_id={sid}")
+    server_test_client.get(f"/taipy-jsx/test?client_id={sid}")
     assert gui._bindings()._get_all_scopes()[sid].var == value_before_update
     ws_client.emit("message", {"client_id": sid, "type": "U", "name": "tpec_TpExPr_var_TPMDL_0", "payload": payload})
     assert gui._bindings()._get_all_scopes()[sid].var == value_after_update
@@ -39,7 +39,35 @@ def ws_u_assert_template(gui: Gui, helpers, value_before_update, value_after_upd
     helpers.assert_outward_ws_message(received_message[0], "MU", "tpec_TpExPr_var_TPMDL_0", value_after_update)
 
 
-def test_ws_u_string(gui: Gui, helpers):
+def ws_u_assert_template_fastapi(gui: Gui, helpers, value_before_update, value_after_update, payload):
+    # Bind test variable
+    var = value_before_update  # noqa: F841
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
+    # Bind a page so that the variable will be evaluated as expression
+    gui.add_page("test", Markdown("<|{var}|>"))
+    helpers.run_e2e_multi_client(gui)
+    ws_client = helpers.get_socketio_test_client()
+    sid = helpers.create_scope_and_get_sid(gui)
+    gui._server.request.set_sid(ws_client.get_sid())
+    ws_client.get(f"/taipy-jsx/test?client_id={sid}")
+    try:
+        assert gui._bindings()._get_all_scopes()[sid].var == value_before_update
+        ws_client.emit(
+            "message", {"client_id": sid, "type": "U", "name": "tpec_TpExPr_var_TPMDL_0", "payload": payload}
+        )
+        assert gui._bindings()._get_all_scopes()[sid].var == value_after_update
+        # assert for received message (message that would be sent to the front-end client)
+        received_message = ws_client.get_received()
+        assert len(received_message)
+        helpers.assert_outward_ws_message(received_message[0], "MU", "tpec_TpExPr_var_TPMDL_0", value_after_update)
+    finally:
+        ws_client.disconnect()
+
+
+def test_ws_u_string(gui: Gui, helpers, gui_server):
     value_before_update = "a random string"
     value_after_update = "a random string is added"
     payload = {"value": value_after_update}
@@ -47,10 +75,13 @@ def test_ws_u_string(gui: Gui, helpers):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)
+    if gui_server == "flask":
+        ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)
+    elif gui_server == "fastapi":
+        ws_u_assert_template_fastapi(gui, helpers, value_before_update, value_after_update, payload)
 
 
-def test_ws_u_number(gui: Gui, helpers):
+def test_ws_u_number(gui: Gui, helpers, gui_server):
     value_before_update = 10
     value_after_update = "11"
     payload = {"value": value_after_update}
@@ -58,4 +89,7 @@ def test_ws_u_number(gui: Gui, helpers):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)
+    if gui_server == "flask":
+        ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)
+    elif gui_server == "fastapi":
+        ws_u_assert_template_fastapi(gui, helpers, value_before_update, value_after_update, payload)

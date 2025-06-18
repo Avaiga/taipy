@@ -12,12 +12,10 @@
 import os
 import re
 import typing as t
-from importlib.util import find_spec
 
 import pytz
 import tzlocal
 from dotenv import dotenv_values
-from werkzeug.serving import is_running_from_reloader
 
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
@@ -27,6 +25,9 @@ from ._page import _Page
 from ._warnings import _warn
 from .partial import Partial
 from .utils import _is_in_notebook, _is_true
+
+if t.TYPE_CHECKING:
+    from .gui import Gui
 
 ConfigParameter = t.Literal[
     "allow_unsafe_werkzeug",
@@ -41,7 +42,7 @@ ConfigParameter = t.Literal[
     "debug",
     "extended_status",
     "favicon",
-    "flask_log",
+    "server_log",
     "host",
     "light_theme",
     "margin",
@@ -115,7 +116,7 @@ Config = t.TypedDict(
         "debug": bool,
         "extended_status": bool,
         "favicon": t.Optional[str],
-        "flask_log": bool,
+        "server_log": bool,
         "host": str,
         "light_theme": t.Optional[t.Dict[str, t.Any]],
         "margin": t.Optional[str],
@@ -151,13 +152,14 @@ class _Config(object):
         r"^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
     )
 
-    def __init__(self) -> None:
+    def __init__(self, gui: "Gui") -> None:
         self.pages: t.List[_Page] = []
         self.root_page: t.Optional[_Page] = None
         self.routes: t.List[str] = []
         self.partials: t.List[Partial] = []
         self.partial_routes: t.List[str] = []
         self.config: Config = {}
+        self._gui = gui
 
     def _load(self, config: Config) -> None:
         self.config.update(config)
@@ -279,20 +281,23 @@ class _Config(object):
                         )
 
         # Taipy-config
-        if find_spec("taipy") and find_spec("taipy.common.config"):
-            from taipy.common.config import Config as TaipyConfig
+        from taipy.common.config import Config as TaipyConfig
 
-            try:
-                section = TaipyConfig.unique_sections["gui"]
-                self.config.update(section._to_dict())
-            except KeyError:
-                _warn("taipy-common section for taipy-gui is not initialized.")
+        try:
+            section = TaipyConfig.unique_sections["gui"]
+            self.config.update(section._to_dict())
+        except KeyError:
+            _warn("taipy-common section for taipy-gui is not initialized.")
 
         # Load from system arguments
         self._handle_argparse()
 
     def __log_outside_reloader(self, logger, msg):
-        if not is_running_from_reloader():
+        if (
+            hasattr(self._gui, "_server")
+            and self._gui._server is not None
+            and not self._gui._server.is_running_from_reloader()
+        ):
             logger.info(msg)
 
     def resolve(self):

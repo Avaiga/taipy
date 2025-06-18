@@ -14,7 +14,7 @@ from importlib import util
 from inspect import isclass
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from ...common._check_dependencies import _check_dependency_is_installed
+from ...common._modules import _assert_module_installation
 from .._version._version_manager_factory import _VersionManagerFactory
 from ..common.scope import Scope
 
@@ -76,15 +76,15 @@ class MongoCollectionDataNode(DataNode):
         owner_id: Optional[str] = None,
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
-        edits: List[Edit] = None,
-        version: str = None,
+        edits: Optional[List[Edit]] = None,
+        version: Optional[str] = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
-        properties: Dict = None,
+        properties: Optional[Dict] = None,
     ) -> None:
-        _check_dependency_is_installed("Mongo Data Node", "pymongo", "mongo")
+        _assert_module_installation("Mongo Data Node", "pymongo", "mongo")
         if properties is None:
             properties = {}
         required = self._REQUIRED_PROPERTIES
@@ -111,7 +111,7 @@ class MongoCollectionDataNode(DataNode):
             **properties,
         )
 
-        mongo_client = _connect_mongodb(
+        mongo_client = _connect_mongodb(  # type: ignore[reportPossiblyUnboundVariable]
             db_host=properties.get(self.__DB_HOST_KEY, self.__DB_HOST_DEFAULT),
             db_port=properties.get(self.__DB_PORT_KEY, self.__DB_PORT_DEFAULT),
             db_username=properties.get(self.__DB_USERNAME_KEY, ""),
@@ -135,7 +135,7 @@ class MongoCollectionDataNode(DataNode):
         if callable(custom_encoder):
             self._encoder = custom_encoder
 
-        if not self._last_edit_date:  # type: ignore
+        if not self._last_edit_date:
             self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(
@@ -209,7 +209,7 @@ class MongoCollectionDataNode(DataNode):
         if isinstance(data[0], dict):
             self._insert_dicts(data)
         else:
-            self._insert_dicts([self._encoder(row) for row in data])
+            self._insert_dicts([self._encoder(row) for row in data])  # type: ignore[reportArgumentType]
 
     def _write(self, data) -> None:
         """Check data against a collection of types to handle insertion on the database.
@@ -227,7 +227,7 @@ class MongoCollectionDataNode(DataNode):
         if isinstance(data[0], dict):
             self._insert_dicts(data, drop=True)
         else:
-            self._insert_dicts([self._encoder(row) for row in data], drop=True)
+            self._insert_dicts([self._encoder(row) for row in data], drop=True)  # type: ignore[reportArgumentType]
 
     def _insert_dicts(self, data: List[Dict], drop=False) -> None:
         """

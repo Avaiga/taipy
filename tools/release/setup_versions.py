@@ -184,8 +184,13 @@ This value is extracted from the current branch by default.
     if next_versions:
         for p, v in next_versions.items():
             print(f"NEXT_{p}_VERSION={v}")  # noqa: T201
-    # Print out the latest 'taipy' version that has no extension
-    print(f"LATEST_TAIPY_VERSION={fetch_latest_github_taipy_releases(all_releases)}")  # noqa: T201
+
+    # Print out the 'taipy' version that should be tagged latest at the end of the workflow
+    latest_release = fetch_latest_github_taipy_releases(all_releases)
+    if args.release_type == "production":
+        if target_versions.get("taipy", Version.UNKNOWN) >= latest_release:
+            latest_release = target_versions["taipy"]
+    print(f"LATEST_TAIPY_VERSION={latest_release}")  # noqa: T201
 
 
 if __name__ == "__main__":

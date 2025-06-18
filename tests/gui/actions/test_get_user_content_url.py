@@ -12,8 +12,6 @@
 import inspect
 import warnings
 
-from flask import g
-
 from taipy.gui import Gui, Markdown, get_user_content_url
 
 
@@ -23,12 +21,12 @@ def test_get_content_url(gui: Gui, helpers):
 
     gui.add_page("test", Markdown("<|Hello|button|>"))
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     # WS client and emit
     cid = helpers.create_scope_and_get_sid(gui)
-    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
-        g.client_id = cid
+    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        gui._server.request.get_request_meta().client_id = cid
         url = get_user_content_url(gui._Gui__state, "path")  # type: ignore[attr-defined]
         assert url == "/taipy-user-content/path?client_id=test"
 

@@ -18,7 +18,7 @@ jobs:
     uses: ./.github/workflows/partial-tests.yml
 
   coverage:
-    timeout-minutes: 50
+    timeout-minutes: 60
     runs-on: ubuntu-latest
 
     if: github.event_name == 'pull_request' && github.event.pull_request.base.repo.full_name == github.event.pull_request.head.repo.full_name

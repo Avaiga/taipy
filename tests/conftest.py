@@ -44,6 +44,11 @@ def e2e_port(request: pytest.FixtureRequest) -> str:
     return request.config.getoption("--e2e-port")
 
 
+@pytest.fixture(params=["flask"])
+def gui_server(request):
+    return request.param
+
+
 def remove_subparser(name: str) -> None:
     """Remove a subparser from argparse."""
     _TaipyParser._sub_taipyparsers.pop(name, None)
@@ -161,6 +166,7 @@ def inject_core_sections() -> t.Callable:
         )
 
     return _inject_core_sections
+
 
 @pytest.fixture
 def inject_rest_sections() -> t.Callable:

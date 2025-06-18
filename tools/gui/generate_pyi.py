@@ -110,9 +110,9 @@ with open("./taipy/gui/viselements.json", "r", encoding="utf-8") as file:
     undocumented[""] = viselements.get("undocumented", [])
 with open("./taipy/gui_core/viselements.json", "r", encoding="utf-8") as file:
     core_viselements: Dict[str, List] = json.load(file)
-    controls['if find_spec("taipy.core"):'] = core_viselements.get("controls", [])
-    blocks['if find_spec("taipy.core"):'] = core_viselements.get("blocks", [])
-    undocumented['if find_spec("taipy.core"):'] = core_viselements.get("undocumented", [])
+    controls["core"] = core_viselements.get("controls", [])
+    blocks["core"] = core_viselements.get("blocks", [])
+    undocumented["core"] = core_viselements.get("undocumented", [])
 
 os.system(f"pipenv run stubgen {builder_py_file} --no-import --parse-only --export-less -o ./")
 
@@ -189,7 +189,7 @@ def format_as_parameter(property: Dict[str, str], element_name: str):
         elif hasattr(type_desc, "__name__") and type_desc.__name__ not in ["str", "Any"]:
             type = f"Union[{type}, str]"
     except NameError:
-        print(f"WARNING - Couldn't parse type '{type}' in {element_name}.{name}") # noqa: T201
+        print(f"WARNING - Couldn't parse type '{type}' in {element_name}.{name}")  # noqa: T201
 
     if default_value is None or default_value == "None":
         default_value = " = None"
@@ -214,13 +214,19 @@ def format_as_parameter(property: Dict[str, str], element_name: str):
     return f"{name}{type}{default_value}"
 
 
-
 def replace_ref_xref(match: re.Match) -> str:
     if package := classes_xrefs.get(match[1]):
-        return ("<a href=\"" + reference_url + "/".join([f"pkg_{p}" for p in package.split(".")])
-                + f"/{match[1]}/\">" + match[1] + "</a>")
+        return (
+            '<a href="'
+            + reference_url
+            + "/".join([f"pkg_{p}" for p in package.split(".")])
+            + f'/{match[1]}/">'
+            + match[1]
+            + "</a>"
+        )
     else:
         return match[0]
+
 
 def build_doc(name: str, desc: Dict[str, Any]):
     if "doc" not in desc:
@@ -299,8 +305,10 @@ def generate_elements(elements_by_prefix: Dict[str, List], base_class: str):
             # Sort properties by indices
             properties_decl = [properties_decl[idx] for idx in property_indices]
             if name == "text":
-                properties_doc += ("inline\n  If True, the text is created next to "
-                                 + "the previous element and not on a new line.\n\n")
+                properties_doc += (
+                    "inline\n  If True, the text is created next to "
+                    + "the previous element and not on a new line.\n\n"
+                )
                 # Manually add the 'inline' property for the text control
                 properties_decl.append("inline: bool = False")
             if len(properties_decl) > 1:

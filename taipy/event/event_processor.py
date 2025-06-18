@@ -12,7 +12,7 @@
 from typing import Callable, Dict, List, Optional, Union
 
 from taipy import DataNode, Gui, Scenario, Submission, SubmissionStatus
-from taipy.common._check_dependencies import EnterpriseEditionUtils
+from taipy.common._modules import EnterpriseEdition
 from taipy.common.logger._taipy_logger import _TaipyLogger
 from taipy.core.common._utils import _load_fct
 from taipy.core.config import DataNodeConfig, ScenarioConfig, TaskConfig
@@ -185,9 +185,9 @@ class EventProcessor(_CoreEventConsumerBase):
         self._topic_callbacks_map: Dict[_Topic, List[_Callback]] = {}
         self._gui = gui
         self.event_processor: _AbstractEventProcessor = _EventProcessor()
-        if EnterpriseEditionUtils._using_enterprise():
+        if EnterpriseEdition._is_installed():
             self.event_processor = _load_fct(
-                EnterpriseEditionUtils._TAIPY_ENTERPRISE_EVENT_PACKAGE + "._event_processor",
+                EnterpriseEdition._EVENT_MODULE_PATH + "._event_processor",
                 "_AuthorizedEventProcessor",
             )()
         super().__init__(self._registration.registration_id, self._registration.queue)
@@ -308,12 +308,13 @@ class EventProcessor(_CoreEventConsumerBase):
         self.__register_callback(topic, cb)
         return self
 
-    def on_scenario_created(self,
-                            callback: Callable,
-                            callback_args: Optional[List] = None,
-                            scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                            ) -> "EventProcessor":
-        """ Register a callback for scenario creation events.
+    def on_scenario_created(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        scenario_config: Union[str, ScenarioConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback for scenario creation events.
 
         !!! example
 
@@ -377,12 +378,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=False,
         )
 
-    def broadcast_on_scenario_created(self,
-                                      callback: Callable,
-                                      callback_args: Optional[List] = None,
-                                      scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                                      ) -> "EventProcessor":
-        """ Register a callback executed for all states on scenario creation events.
+    def broadcast_on_scenario_created(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        scenario_config: Union[str, ScenarioConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback executed for all states on scenario creation events.
 
         !!! example
 
@@ -449,12 +451,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=True,
         )
 
-    def __on_scenario_created(self,
-                              callback: Callable,
-                              callback_args: Optional[List] = None,
-                              scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                              broadcast: bool = False,
-                              ) -> "EventProcessor":
+    def __on_scenario_created(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        scenario_config: Union[str, ScenarioConfig, List, None] = None,
+        broadcast: bool = False,
+    ) -> "EventProcessor":
         scenario_config = self.__format_configs_parameter(ScenarioConfig, scenario_config)
 
         def _filter(event: Event) -> bool:
@@ -465,25 +468,28 @@ class EventProcessor(_CoreEventConsumerBase):
             sc = tp.get(event.entity_id)
             if not isinstance(sc, Scenario):
                 return False
-            if scenario_config and sc.config_id not in scenario_config: # type: ignore[union-attr]
+            if scenario_config and sc.config_id not in scenario_config:  # type: ignore[union-attr]
                 return False
             event.metadata["predefined_args"] = [sc]
             return True
 
-        self.__on_event(callback=callback,
-                        callback_args=callback_args,
-                        entity_type=EventEntityType.SCENARIO,
-                        operation=EventOperation.CREATION,
-                        filter=_filter,
-                        broadcast=broadcast)
+        self.__on_event(
+            callback=callback,
+            callback_args=callback_args,
+            entity_type=EventEntityType.SCENARIO,
+            operation=EventOperation.CREATION,
+            filter=_filter,
+            broadcast=broadcast,
+        )
         return self
 
-    def on_scenario_deleted(self,
-                            callback: Callable,
-                            callback_args: Optional[List] = None,
-                            scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                            ) -> "EventProcessor":
-        """ Register a callback for scenario deletion events.
+    def on_scenario_deleted(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        scenario_config: Union[str, ScenarioConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback for scenario deletion events.
 
         !!! example
 
@@ -530,12 +536,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=False,
         )
 
-    def broadcast_on_scenario_deleted(self,
-                                      callback: Callable,
-                                      callback_args: Optional[List] = None,
-                                      scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                                      ) -> "EventProcessor":
-        """ Register a callback executed for all states on scenario deletion events.
+    def broadcast_on_scenario_deleted(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        scenario_config: Union[str, ScenarioConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback executed for all states on scenario deletion events.
 
         !!! example
 
@@ -582,12 +589,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=True,
         )
 
-    def __on_scenario_deleted(self,
-                              callback: Callable,
-                              callback_args: Optional[List] = None,
-                              scenario_config: Union[str, ScenarioConfig, List, None] = None,
-                              broadcast: bool = False
-                              ) -> "EventProcessor":
+    def __on_scenario_deleted(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        scenario_config: Union[str, ScenarioConfig, List, None] = None,
+        broadcast: bool = False,
+    ) -> "EventProcessor":
         scenario_config = self.__format_configs_parameter(ScenarioConfig, scenario_config)
 
         def _filter(event: Event) -> bool:
@@ -600,20 +608,23 @@ class EventProcessor(_CoreEventConsumerBase):
                     return True
             return False
 
-        self.__on_event(callback=callback,
-                        callback_args=callback_args,
-                        entity_type=EventEntityType.SCENARIO,
-                        operation=EventOperation.DELETION,
-                        filter=_filter,
-                        broadcast=broadcast)
+        self.__on_event(
+            callback=callback,
+            callback_args=callback_args,
+            entity_type=EventEntityType.SCENARIO,
+            operation=EventOperation.DELETION,
+            filter=_filter,
+            broadcast=broadcast,
+        )
         return self
 
-    def on_datanode_written(self,
-                            callback: Callable,
-                            callback_args: Optional[List] = None,
-                            datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                            ) -> "EventProcessor":
-        """ Register a callback for data node written events.
+    def on_datanode_written(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        datanode_config: Union[str, DataNodeConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback for data node written events.
 
         The callback is triggered when a datanode is written (see methods
         `DataNode.write()^` or `DataNode.append()^`).
@@ -666,12 +677,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=False,
         )
 
-    def broadcast_on_datanode_written(self,
-                                      callback: Callable,
-                                      callback_args: Optional[List] = None,
-                                      datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                                      ) -> "EventProcessor":
-        """ Register a callback for data node written events.
+    def broadcast_on_datanode_written(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        datanode_config: Union[str, DataNodeConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback for data node written events.
 
         The callback is triggered when a datanode is written (see methods
         `DataNode.write()^` or `DataNode.append()^`).
@@ -722,12 +734,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=True,
         )
 
-    def __on_datanode_written(self,
-                              callback: Callable,
-                              callback_args: Optional[List] = None,
-                              datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                              broadcast: bool = False
-                              ) -> "EventProcessor":
+    def __on_datanode_written(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        datanode_config: Union[str, DataNodeConfig, List, None] = None,
+        broadcast: bool = False,
+    ) -> "EventProcessor":
         datanode_config = self.__format_configs_parameter(DataNodeConfig, datanode_config)
 
         def _filter(event: Event) -> bool:
@@ -744,21 +757,24 @@ class EventProcessor(_CoreEventConsumerBase):
             event.metadata["predefined_args"] = [dn, dn.read()]
             return True
 
-        self.__on_event(callback=callback,
-                        callback_args=callback_args,
-                        entity_type=EventEntityType.DATA_NODE,
-                        operation=EventOperation.UPDATE,
-                        attribute_name="last_edit_date",
-                        filter=_filter,
-                        broadcast=broadcast)
+        self.__on_event(
+            callback=callback,
+            callback_args=callback_args,
+            entity_type=EventEntityType.DATA_NODE,
+            operation=EventOperation.UPDATE,
+            attribute_name="last_edit_date",
+            filter=_filter,
+            broadcast=broadcast,
+        )
         return self
 
-    def on_datanode_deleted(self,
-                            callback: Callable,
-                            callback_args: Optional[List] = None,
-                            datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                            ) -> "EventProcessor":
-        """ Register a callback for data node deletion events.
+    def on_datanode_deleted(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        datanode_config: Union[str, DataNodeConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback for data node deletion events.
 
         !!! example
 
@@ -804,12 +820,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=False,
         )
 
-    def broadcast_on_datanode_deleted(self,
-                                      callback: Callable,
-                                      callback_args: Optional[List] = None,
-                                      datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                                      ) -> "EventProcessor":
-        """ Register a callback for each state on data node deletion events.
+    def broadcast_on_datanode_deleted(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        datanode_config: Union[str, DataNodeConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback for each state on data node deletion events.
 
         !!! example
 
@@ -857,12 +874,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=True,
         )
 
-    def __on_datanode_deleted(self,
-                              callback: Callable,
-                              callback_args: Optional[List] = None,
-                              datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                              broadcast: bool = False
-                              ) -> "EventProcessor":
+    def __on_datanode_deleted(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        datanode_config: Union[str, DataNodeConfig, List, None] = None,
+        broadcast: bool = False,
+    ) -> "EventProcessor":
         datanode_config = self.__format_configs_parameter(DataNodeConfig, datanode_config)
 
         def _filter(event: Event) -> bool:
@@ -875,20 +893,23 @@ class EventProcessor(_CoreEventConsumerBase):
                     return True
             return False
 
-        self.__on_event(callback=callback,
-                        callback_args=callback_args,
-                        entity_type=EventEntityType.DATA_NODE,
-                        operation=EventOperation.DELETION,
-                        filter=_filter,
-                        broadcast=broadcast)
+        self.__on_event(
+            callback=callback,
+            callback_args=callback_args,
+            entity_type=EventEntityType.DATA_NODE,
+            operation=EventOperation.DELETION,
+            filter=_filter,
+            broadcast=broadcast,
+        )
         return self
 
-    def on_datanode_created(self,
-                            callback: Callable,
-                            callback_args: Optional[List] = None,
-                            datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                            ) -> "EventProcessor":
-        """ Register a callback to be executed on data node creation event.
+    def on_datanode_created(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        datanode_config: Union[str, DataNodeConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback to be executed on data node creation event.
 
         !!! example
 
@@ -934,12 +955,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=False,
         )
 
-    def broadcast_on_datanode_created(self,
-                                      callback: Callable,
-                                      callback_args: Optional[List] = None,
-                                      datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                                      ) -> "EventProcessor":
-        """ Register a callback to be executed for each state on data node creation event.
+    def broadcast_on_datanode_created(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        datanode_config: Union[str, DataNodeConfig, List, None] = None,
+    ) -> "EventProcessor":
+        """Register a callback to be executed for each state on data node creation event.
 
         !!! example
 
@@ -987,12 +1009,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=True,
         )
 
-    def __on_datanode_created(self,
-                              callback: Callable,
-                              callback_args: Optional[List] = None,
-                              datanode_config: Union[str, DataNodeConfig, List, None] = None,
-                              broadcast: bool = False
-                              ) -> "EventProcessor":
+    def __on_datanode_created(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        datanode_config: Union[str, DataNodeConfig, List, None] = None,
+        broadcast: bool = False,
+    ) -> "EventProcessor":
         datanode_config = self.__format_configs_parameter(DataNodeConfig, datanode_config)
 
         def _filter(event: Event) -> bool:
@@ -1008,19 +1031,22 @@ class EventProcessor(_CoreEventConsumerBase):
             event.metadata["predefined_args"] = [dn]
             return True
 
-        self.__on_event(callback=callback,
-                        callback_args=callback_args,
-                        entity_type=EventEntityType.DATA_NODE,
-                        operation=EventOperation.CREATION,
-                        filter=_filter,
-                        broadcast=broadcast)
+        self.__on_event(
+            callback=callback,
+            callback_args=callback_args,
+            entity_type=EventEntityType.DATA_NODE,
+            operation=EventOperation.CREATION,
+            filter=_filter,
+            broadcast=broadcast,
+        )
         return self
 
-    def on_submission_finished(self,
-                               callback: Callable,
-                               callback_args: Optional[List] = None,
-                               config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
-                               ) -> "EventProcessor":
+    def on_submission_finished(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
+    ) -> "EventProcessor":
         """Register a callback for submission finished events.
 
         !!! example
@@ -1071,11 +1097,12 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=False,
         )
 
-    def broadcast_on_submission_finished(self,
-                                         callback: Callable,
-                                         callback_args: Optional[List] = None,
-                                         config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
-                                         ) -> "EventProcessor":
+    def broadcast_on_submission_finished(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
+    ) -> "EventProcessor":
         """Register a callback to be executed for each state on submission finished events.
 
         !!! example
@@ -1128,12 +1155,13 @@ class EventProcessor(_CoreEventConsumerBase):
             broadcast=True,
         )
 
-    def __on_submission_finished(self,
-                                 callback: Callable,
-                                 callback_args: Optional[List] = None,
-                                 config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
-                                 broadcast: bool = False
-                                 ) -> "EventProcessor":
+    def __on_submission_finished(
+        self,
+        callback: Callable,
+        callback_args: Optional[List] = None,
+        config_ids: Union[str, ScenarioConfig, TaskConfig, List, None] = None,
+        broadcast: bool = False,
+    ) -> "EventProcessor":
         if isinstance(config_ids, str):
             config_ids = [config_ids]
         if isinstance(config_ids, TaskConfig):
@@ -1169,17 +1197,19 @@ class EventProcessor(_CoreEventConsumerBase):
                     # It is a submission for a config that is not in the list
                     return False
 
-            submittable = tp.get(submission.entity_id) # type: ignore[arg-type]
+            submittable = tp.get(submission.entity_id)  # type: ignore[arg-type]
             event.metadata["predefined_args"] = [submittable, submission]
             return True
 
-        self.__on_event(callback=callback,
-                        callback_args=callback_args,
-                        entity_type=EventEntityType.SUBMISSION,
-                        operation=EventOperation.UPDATE,
-                        attribute_name="submission_status",
-                        filter=_filter,
-                        broadcast=broadcast)
+        self.__on_event(
+            callback=callback,
+            callback_args=callback_args,
+            entity_type=EventEntityType.SUBMISSION,
+            operation=EventOperation.UPDATE,
+            attribute_name="submission_status",
+            filter=_filter,
+            broadcast=broadcast,
+        )
         return self
 
     def process_event(self, event: Event) -> None:
@@ -1218,7 +1248,7 @@ class EventProcessor(_CoreEventConsumerBase):
             entity_type=topic.entity_type,
             entity_id=topic.entity_id,
             operation=topic.operation,
-            attribute_name=topic.attribute_name
+            attribute_name=topic.attribute_name,
         )
         return topic
 

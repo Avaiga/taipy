@@ -22,7 +22,7 @@ jobs:
 
   tests:
     needs: linter
-    timeout-minutes: 50
+    timeout-minutes: 70
     strategy:
       fail-fast: false
       matrix:

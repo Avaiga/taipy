@@ -12,8 +12,6 @@
 import inspect
 import warnings
 
-from flask import g
-
 from taipy.gui import Gui
 from taipy.gui.utils.types import _TaipyNumber
 
@@ -21,7 +19,7 @@ from taipy.gui.utils.types import _TaipyNumber
 def test_unbind_variable_in_expression(gui: Gui, helpers):
     gui.run(run_server=False, single_client=True)
     with warnings.catch_warnings(record=True) as records:
-        with gui.get_flask_app().app_context():
+        with gui.get_app_context():
             gui._evaluate_expr("{x}")
             warns = helpers.get_taipy_warnings(records)
             assert len(warns) == 3
@@ -35,7 +33,7 @@ def test_evaluate_same_expression_multiple_times(gui: Gui):
     x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         s1 = gui._evaluate_expr("x + 10 = {x + 10}")
         s2 = gui._evaluate_expr("x + 10 = {x + 10}")
         assert s1 == s2
@@ -45,7 +43,7 @@ def test_evaluate_expressions_same_variable(gui: Gui):
     x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         s1 = gui._evaluate_expr("x + 10 = {x + 10}")
         s2 = gui._evaluate_expr("x = {x}")
         assert "tp_TpExPr_x" in s1 and "tp_TpExPr_x" in s2
@@ -56,7 +54,7 @@ def test_evaluate_holder(gui: Gui):
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
     with warnings.catch_warnings(record=True):
-        with gui.get_flask_app().app_context():
+        with gui.get_app_context():
             gui._evaluate_expr("{x + 10}")
             hash = gui._evaluate_bind_holder(_TaipyNumber, "TpExPr_x + 10_TPMDL_0")
             assert "_TpN_tp_TpExPr_x_10_TPMDL_0_0" in hash
@@ -70,7 +68,7 @@ def test_evaluate_holder(gui: Gui):
 
 def test_evaluate_not_expression_type(gui: Gui):
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         assert "x + 10" == gui._evaluate_expr("x + 10")
 
 
@@ -79,11 +77,11 @@ def test_evaluate_expression_2_clients(gui: Gui):
     y = 20  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         gui._bindings()._get_or_create_scope("A")
         gui._bindings()._get_or_create_scope("B")
-        g.client_id = "A"
+        gui._server.request.get_request_meta().client_id = "A"
         gui._evaluate_expr("x + y = {x + y}")
-        g.client_id = "B"
+        gui._server.request.get_request_meta().client_id = "B"
         gui._evaluate_expr("x")
         gui._re_evaluate_expr("x")

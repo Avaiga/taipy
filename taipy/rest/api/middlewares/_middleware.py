@@ -10,24 +10,20 @@
 # specific language governing permissions and limitations under the License.
 
 from functools import wraps
-from importlib import util
 
+from taipy.common._modules import EnterpriseEdition
 from taipy.core.common._utils import _load_fct
 
 
 def _middleware(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if _using_enterprise():
+        if EnterpriseEdition._is_installed():
             return _enterprise_middleware()(f)(*args, **kwargs)
         else:
             return f(*args, **kwargs)
 
     return wrapper
-
-
-def _using_enterprise():
-    return util.find_spec("taipy.enterprise") is not None
 
 
 def _enterprise_middleware():

@@ -18,9 +18,9 @@ from taipy.gui import Gui
 
 def test_user_content_without_callback(gui: Gui, helpers):
     gui.run(run_server=False, single_client=True)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     with pytest.warns(UserWarning):
-        ret = flask_client.get(gui._get_user_content_url("path"))
+        ret = server_test_client.get(gui._get_user_content_url("path"))
         assert ret.status_code == 404
 
 
@@ -31,9 +31,9 @@ def test_user_content_with_wrong_callback(gui: Gui, helpers):
     on_user_content = on_user_content_cb  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     with pytest.warns(UserWarning):
-        ret = flask_client.get(gui._get_user_content_url("path", {"a": "b"}))
+        ret = server_test_client.get(gui._get_user_content_url("path", {"a": "b"}))
         assert ret.status_code == 404
 
 
@@ -44,6 +44,6 @@ def test_user_content_with_callback(gui: Gui, helpers):
     on_user_content = on_user_content_cb  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
-    flask_client = gui._server.test_client()
-    ret = flask_client.get(gui._get_user_content_url("path"))
+    server_test_client = gui._server.test_client()
+    ret = server_test_client.get(gui._get_user_content_url("path"))
     assert ret.status_code == 200

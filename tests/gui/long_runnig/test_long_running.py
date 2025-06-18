@@ -35,7 +35,7 @@ def test_long_callback(gui: Gui):
     gui.run(run_server=False, single_client=True)
     state = gui._Gui__state  # type: ignore[attr-defined]
 
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         assert state.status is None
         invoke_long_callback(state, heavy_function)
         invoke_long_callback(state, heavy_function_with_exception)

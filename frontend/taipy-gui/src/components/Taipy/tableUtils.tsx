@@ -193,6 +193,8 @@ export const iconsWrapperSx = { gridColumnStart: 2, display: "flex", alignItems:
 const CellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
 const TableFontSx = { fontSize: "body2.fontSize" };
 const ButtonSx = { minHeight: "unset", mb: "unset", padding: "unset", lineHeight: "unset" };
+const Width100pSx = { width: "100%" };
+const CellBox100pSx = {...CellBoxSx, ...Width100pSx};
 export interface OnCellValidation {
     (value: RowValue, rowIndex: number, colName: string, userValue: string, tz?: string): void;
 }
@@ -606,7 +608,12 @@ export const EditableCell = (props: EditableCellProps) => {
             component={colDesc.multi !== undefined ? "th" : undefined}
             rowSpan={rowSpan}
         >
-            <Badge color="primary" variant="dot" invisible={comp === undefined || comp === null}>
+            <Badge
+                color="primary"
+                variant="dot"
+                invisible={comp === undefined || comp === null}
+                sx={edit && colDesc.lov ? Width100pSx : undefined}
+            >
                 {edit ? (
                     colDesc.type?.startsWith("bool") ? (
                         <Box sx={CellBoxSx}>
@@ -671,7 +678,7 @@ export const EditableCell = (props: EditableCellProps) => {
                             </Box>
                         </Box>
                     ) : colDesc.lov ? (
-                        <Box sx={CellBoxSx}>
+                        <Box sx={CellBox100pSx}>
                             <Autocomplete
                                 autoComplete={true}
                                 fullWidth

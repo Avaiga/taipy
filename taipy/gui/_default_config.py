@@ -52,7 +52,7 @@ default_config: Config = {
     "debug": False,
     "extended_status": False,
     "favicon": None,
-    "flask_log": False,
+    "server_log": False,
     "host": "127.0.0.1",
     "light_theme": None,
     "margin": "1em",

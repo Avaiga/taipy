@@ -68,7 +68,7 @@ class _TaipyReverseProxyResource(Resource):
         )
 
     def _get_port(self):
-        return self._gui._server._port
+        return self._gui._server.get_port()
 
     def render(self, request):
         port = self._get_port()

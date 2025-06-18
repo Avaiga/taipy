@@ -34,10 +34,10 @@ def small_dataframe():
 
 
 @pytest.fixture(scope="function")
-def gui(helpers):
+def gui(helpers, gui_server):
     from taipy.gui import Gui
 
-    gui = Gui()
+    gui = Gui(server=gui_server)
     yield gui
     # Delete Gui instance and state of some classes after each test
     gui.stop()
@@ -52,18 +52,28 @@ def helpers():
 
 
 @pytest.fixture
-def test_client():
-    flask_app = Flask("Test App")
+def test_client(gui_server):
+    if gui_server == "flask":
+        flask_app = Flask("Test App")
 
-    # Create a test client using the Flask application configured for testing
-    with flask_app.test_client() as testing_client:
-        # Establish an application context
-        with flask_app.app_context():
-            g.client_id = "test client id"
-            yield testing_client  # this is where the testing happens!
+        # Create a test client using the Flask application configured for testing
+        with flask_app.test_client() as testing_client:
+            # Establish an application context
+            with flask_app.app_context():
+                g.client_id = "test client id"
+                yield testing_client  # this is where the testing happens!
+    else:
+        yield None
 
 
 @pytest.fixture(scope="function", autouse=True)
 def patch_cli_args():
     with patch("sys.argv", ["prog"]):
         yield
+
+
+@pytest.fixture(autouse=True)
+def skip_if_gui_server_is_not(request, gui_server):
+    skip_marker = request.node.get_closest_marker("skip_if_not_server")
+    if skip_marker and skip_marker.args[0] != gui_server:
+        pytest.skip(f"Skipped because gui_server is not {gui_server}")

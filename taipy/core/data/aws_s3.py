@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from importlib import util
 from typing import Any, Dict, List, Optional, Set
 
-from ...common._check_dependencies import _check_dependency_is_installed
+from ...common._modules import _assert_module_installation
 
 if util.find_spec("boto3"):
     import boto3
@@ -85,14 +85,14 @@ class S3ObjectDataNode(DataNode):
         parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
         edits: Optional[List[Edit]] = None,
-        version: str = None,
+        version: Optional[str] = None,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
         editor_id: Optional[str] = None,
         editor_expiration_date: Optional[datetime] = None,
         properties: Optional[Dict] = None,
     ) -> None:
-        _check_dependency_is_installed("S3 Data Node", "boto3", "s3")
+        _assert_module_installation("S3 Data Node", "boto3", "s3")
         if properties is None:
             properties = {}
         required = self._REQUIRED_PROPERTIES
@@ -116,7 +116,7 @@ class S3ObjectDataNode(DataNode):
             **properties,
         )
 
-        self._s3_client = boto3.client(
+        self._s3_client = boto3.client(  # type: ignore[reportPossiblyUnboundVariable]
             "s3",
             aws_access_key_id=properties.get(self.__AWS_ACCESS_KEY_ID),
             aws_secret_access_key=properties.get(self.__AWS_SECRET_ACCESS_KEY),
@@ -124,7 +124,7 @@ class S3ObjectDataNode(DataNode):
             **properties.get(self.__AWS_S3_CLIENT_PARAMETERS, {}),
         )
 
-        if not self._last_edit_date:  # type: ignore
+        if not self._last_edit_date:
             self._last_edit_date = datetime.now()
 
         self._TAIPY_PROPERTIES.update(

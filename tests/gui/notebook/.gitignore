@@ -1,0 +1,3 @@
+# Ignore jupyter notebook files except the simple_gui.ipynb
+!simple_gui_fastapi.ipynb
+!simple_gui.ipynb

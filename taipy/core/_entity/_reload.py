@@ -13,7 +13,7 @@ import functools
 import threading
 from typing import Dict, Type
 
-from ...common._check_dependencies import EnterpriseEditionUtils
+from ...common._modules import EnterpriseEdition
 from .._manager._manager import _Manager
 from ..common._utils import _load_fct
 from ..notification import EventOperation, Notifier, _make_event
@@ -81,9 +81,9 @@ class _Reloader:
             "submission": _SubmissionManagerFactory._build_manager(),
         }
 
-        if EnterpriseEditionUtils._using_enterprise():
+        if EnterpriseEdition._is_installed():
             _build_enterprise_managers = _load_fct(
-                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + "._entity.utils", "_build_enterprise_managers"
+                EnterpriseEdition._CORE_MODULE_PATH + "._entity.utils", "_build_enterprise_managers"
             )
             managers.update(_build_enterprise_managers())
 

@@ -76,7 +76,7 @@ def test_gui_service_arguments_hierarchy():
     assert not service_config["debug"]
     assert not service_config["extended_status"]
     assert service_config["favicon"] is None
-    assert not service_config["flask_log"]
+    assert not service_config["server_log"]
     assert service_config["host"] == "127.0.0.1"
     assert service_config["light_theme"] is None
     assert service_config["margin"] is None

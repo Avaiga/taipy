@@ -11,10 +11,13 @@
 
 import inspect
 
+import pytest
+
 from taipy.gui import Gui, Markdown
 from taipy.gui.data.data_scope import _DataScopes
 
 
+@pytest.mark.skip_if_not_server("flask")
 def test_sending_messages_in_group(gui: Gui, helpers):
     name = "World!"  # noqa: F841
     btn_id = "button1"  # noqa: F841
@@ -24,22 +27,55 @@ def test_sending_messages_in_group(gui: Gui, helpers):
 
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
     gui.run(run_server=False, single_client=True)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     # WS client and emit
-    ws_client = gui._server._ws.test_client(gui._server.get_flask())
+    ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     cid = _DataScopes._GLOBAL_ID
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
+    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
     assert gui._bindings()._get_all_scopes()[cid].name == "World!"  # type: ignore
     assert gui._bindings()._get_all_scopes()[cid].btn_id == "button1"  # type: ignore
 
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         with gui as aGui:
             aGui._Gui__state.name = "Monde!"
             aGui._Gui__state.btn_id = "button2"
 
-    assert gui._bindings()._get_all_scopes()[cid].name == "Monde!"
     assert gui._bindings()._get_all_scopes()[cid].btn_id == "button2"  # type: ignore
+    assert gui._bindings()._get_all_scopes()[cid].name == "Monde!"
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_multiple_message(received_messages[0], "MS", 2)
+
+
+@pytest.mark.skip_if_not_server("fastapi")
+@pytest.mark.teste2e
+def test_sending_messages_in_group_fastapi(gui: Gui, helpers):
+    name = "World!"  # noqa: F841
+    btn_id = "button1"  # noqa: F841
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
+    gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
+    helpers.run_e2e(gui)
+    ws_client = helpers.get_socketio_test_client()
+    gui._server.request.set_sid(ws_client.get_sid())
+    cid = _DataScopes._GLOBAL_ID
+    ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+    try:
+        assert gui._bindings()._get_all_scopes()[cid].name == "World!"  # type: ignore
+        assert gui._bindings()._get_all_scopes()[cid].btn_id == "button1"  # type: ignore
+
+        with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+            with gui as aGui:
+                aGui._Gui__state.name = "Monde!"
+                aGui._Gui__state.btn_id = "button2"
+
+        assert gui._bindings()._get_all_scopes()[cid].btn_id == "button2"  # type: ignore
+        assert gui._bindings()._get_all_scopes()[cid].name == "Monde!"
+
+        received_messages = ws_client.get_received()
+        helpers.assert_outward_ws_multiple_message(received_messages[0], "MS", 2)
+    finally:
+        ws_client.disconnect()

@@ -112,7 +112,7 @@ def test_map_dict_set(gui: Gui, test_client):
     gui._set_frame(inspect.currentframe())
 
     gui.run(run_server=False, single_client=True)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         assert isinstance(gui._Gui__state.d, _MapDict)  # type: ignore[attr-defined]
         gui._Gui__state.d = {"b": 2}  # type: ignore[attr-defined]
         assert isinstance(gui._Gui__state.d, _MapDict)  # type: ignore[attr-defined]

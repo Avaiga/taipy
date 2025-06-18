@@ -23,13 +23,13 @@ def mock_enterprise_middleware(f):
     return wrapper
 
 
-@patch("taipy.rest.api.middlewares._middleware._using_enterprise")
+@patch("taipy.common._modules.EnterpriseEdition._is_installed")
 @patch("taipy.rest.api.middlewares._middleware._enterprise_middleware")
 def test_enterprise_middleware_applied_when_enterprise_is_installed(
-    enterprise_middleware: MagicMock, using_enterprise: MagicMock
+    enterprise_middleware: MagicMock, is_enterprise_installed: MagicMock
 ):
     enterprise_middleware.return_value = mock_enterprise_middleware
-    using_enterprise.return_value = True
+    is_enterprise_installed.return_value = True
 
     @_middleware
     def f():
@@ -37,17 +37,17 @@ def test_enterprise_middleware_applied_when_enterprise_is_installed(
 
     rv = f()
     assert rv == "f"
-    using_enterprise.assert_called_once()
+    is_enterprise_installed.assert_called_once()
     enterprise_middleware.assert_called_once()
 
 
-@patch("taipy.rest.api.middlewares._middleware._using_enterprise")
+@patch("taipy.common._modules.EnterpriseEdition._is_installed")
 @patch("taipy.rest.api.middlewares._middleware._enterprise_middleware")
 def test_enterprise_middleware_not_applied_when_enterprise_is_not_installed(
-    enterprise_middleware: MagicMock, using_enterprise: MagicMock
+    enterprise_middleware: MagicMock, is_enterprise_installed: MagicMock
 ):
     enterprise_middleware.return_value = mock_enterprise_middleware
-    using_enterprise.return_value = False
+    is_enterprise_installed.return_value = False
 
     @_middleware
     def f():
@@ -55,5 +55,5 @@ def test_enterprise_middleware_not_applied_when_enterprise_is_not_installed(
 
     rv = f()
     assert rv == "f"
-    using_enterprise.assert_called_once()
+    is_enterprise_installed.assert_called_once()
     enterprise_middleware.assert_not_called()

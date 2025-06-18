@@ -19,7 +19,6 @@ from unittest.mock import Mock
 import numpy
 import pandas
 import pytest
-from flask import g
 
 from taipy.gui import Gui
 from taipy.gui.data.data_format import _DataFormat
@@ -32,10 +31,12 @@ class MockDataFormat:
     LIST = Mock(value="list")
     CSV = Mock(value="csv")
 
+
 @pytest.fixture
 def pandas_accessor():
     gui = Mock()
     return _PandasDataAccessor(gui=gui)
+
 
 @pytest.fixture
 def sample_df():
@@ -43,9 +44,10 @@ def sample_df():
         "StringCol": ["Apple", "Banana", "Cherry", "apple"],
         "NumberCol": [10, 20, 30, 40],
         "BoolCol": [True, False, True, False],
-        "DateCol": pandas.to_datetime(["2020-01-01", "2021-06-15", "2022-08-22", "2023-03-05"])
+        "DateCol": pandas.to_datetime(["2020-01-01", "2021-06-15", "2022-08-22", "2023-03-05"]),
     }
     return pandas.DataFrame(data)
+
 
 def test_simple_data(gui: Gui, helpers, small_dataframe):
     accessor = _PandasDataAccessor(gui)
@@ -101,8 +103,8 @@ def test_style(gui: Gui, helpers, small_dataframe):
     pd = pandas.DataFrame(data=small_dataframe)
     gui.run(run_server=False)
     cid = helpers.create_scope_and_get_sid(gui)
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
-        g.client_id = cid
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        gui._server.request.get_request_meta().client_id = cid
         value = accessor.get_data("x", pd, {"start": 0, "end": 1, "styles": {"st": "test_style"}}, _DataFormat.JSON)[
             "value"
         ]
@@ -120,10 +122,10 @@ def test_tooltip(gui: Gui, helpers, small_dataframe):
     pd = pandas.DataFrame(data=small_dataframe)
     gui.run(run_server=False)
     cid = helpers.create_scope_and_get_sid(gui)
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         gui._bind_var_val("tt", tt)
         gui._get_locals_bind_from_context(None)["tt"] = tt
-        g.client_id = cid
+        gui._server.request.get_request_meta().client_id = cid
         value = accessor.get_data("x", pd, {"start": 0, "end": 1, "tooltips": {"tt": "tt"}}, _DataFormat.JSON)["value"]
         assert value["rowcount"] == 3
         data = value["data"]
@@ -139,10 +141,10 @@ def test_format_fn(gui: Gui, helpers, small_dataframe):
     pd = pandas.DataFrame(data=small_dataframe)
     gui.run(run_server=False)
     cid = helpers.create_scope_and_get_sid(gui)
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
         gui._bind_var_val("ff", ff)
         gui._get_locals_bind_from_context(None)["ff"] = ff
-        g.client_id = cid
+        gui._server.request.get_request_meta().client_id = cid
         value = accessor.get_data("x", pd, {"start": 0, "end": 1, "formats": {"ff": "ff"}}, _DataFormat.JSON)["value"]
         assert value["rowcount"] == 3
         data = value["data"]
@@ -279,58 +281,54 @@ def test_filter_by_date(gui: Gui, helpers, small_dataframe):
     value = accessor.get_data("x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 1
 
+
 def test_contains_case_sensitive(pandas_accessor, sample_df):
-    payload = {
-        "filters": [{"col": "StringCol", "value": "Apple", "action": "contains", "matchCase": True}]
-    }
+    payload = {"filters": [{"col": "StringCol", "value": "Apple", "action": "contains", "matchCase": True}]}
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pandas.DataFrame(result["value"]['data'])
+    filtered_data = pandas.DataFrame(result["value"]["data"])
 
     assert len(filtered_data) == 1
-    assert filtered_data.iloc[0]['StringCol'] == 'Apple'
+    assert filtered_data.iloc[0]["StringCol"] == "Apple"
+
 
 def test_contains_case_insensitive(pandas_accessor, sample_df):
-    payload = {
-        "filters": [{"col": "StringCol", "value": "apple", "action": "contains", "matchCase": False}]
-    }
+    payload = {"filters": [{"col": "StringCol", "value": "apple", "action": "contains", "matchCase": False}]}
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pandas.DataFrame(result["value"]['data'])
+    filtered_data = pandas.DataFrame(result["value"]["data"])
 
     assert len(filtered_data) == 2
-    assert 'Apple' in filtered_data['StringCol'].values
-    assert 'apple' in filtered_data['StringCol'].values
+    assert "Apple" in filtered_data["StringCol"].values
+    assert "apple" in filtered_data["StringCol"].values
+
 
 def test_equals_case_sensitive(pandas_accessor, sample_df):
-    payload = {
-        "filters": [{"col": "StringCol", "value": "Apple", "action": "==", "matchCase": True}]
-    }
+    payload = {"filters": [{"col": "StringCol", "value": "Apple", "action": "==", "matchCase": True}]}
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pandas.DataFrame(result["value"]['data'])
+    filtered_data = pandas.DataFrame(result["value"]["data"])
 
     assert len(filtered_data) == 1
-    assert filtered_data.iloc[0]['StringCol'] == 'Apple'
+    assert filtered_data.iloc[0]["StringCol"] == "Apple"
+
 
 def test_equals_case_insensitive(pandas_accessor, sample_df):
-    payload = {
-        "filters": [{"col": "StringCol", "value": "apple", "action": "==", "matchCase": False}]
-    }
+    payload = {"filters": [{"col": "StringCol", "value": "apple", "action": "==", "matchCase": False}]}
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pandas.DataFrame(result["value"]['data'])
+    filtered_data = pandas.DataFrame(result["value"]["data"])
 
     assert len(filtered_data) == 2
-    assert 'Apple' in filtered_data['StringCol'].values
-    assert 'apple' in filtered_data['StringCol'].values
+    assert "Apple" in filtered_data["StringCol"].values
+    assert "apple" in filtered_data["StringCol"].values
+
 
 def test_not_equals_case_insensitive(pandas_accessor, sample_df):
-    payload = {
-        "filters": [{"col": "StringCol", "value": "apple", "action": "!=", "matchCase": False}]
-    }
+    payload = {"filters": [{"col": "StringCol", "value": "apple", "action": "!=", "matchCase": False}]}
     result = pandas_accessor.get_data("test_var", sample_df, payload, MockDataFormat.LIST)
-    filtered_data = pandas.DataFrame(result["value"]['data'])
+    filtered_data = pandas.DataFrame(result["value"]["data"])
 
     assert len(filtered_data) == 2
-    assert 'Banana' in filtered_data['StringCol'].values
-    assert 'Cherry' in filtered_data['StringCol'].values
+    assert "Banana" in filtered_data["StringCol"].values
+    assert "Cherry" in filtered_data["StringCol"].values
+
 
 def test_decimator(gui: Gui, helpers, small_dataframe):
     a_decimator = ScatterDecimator(threshold=1)  # noqa: F841
@@ -343,13 +341,13 @@ def test_decimator(gui: Gui, helpers, small_dataframe):
 
     gui.add_page("test", "<|Hello {a_decimator}|button|>")
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
 
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
-        g.client_id = cid
+    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        gui._server.request.get_request_meta().client_id = cid
 
         ret_data = accessor.get_data(
             "x",
@@ -431,6 +429,7 @@ def test_csv(gui, small_dataframe):
     assert path is not None
     assert os.path.getsize(path) > 0
 
+
 def test_multi_index(gui):
     pandas_accessor = _PandasDataAccessor(gui)
 
@@ -442,6 +441,7 @@ def test_multi_index(gui):
         result = pandas_accessor.get_data("test_var", df, {}, MockDataFormat.LIST)
         assert result.get("error") is None
         assert result["value"] is not None
+
 
 def test_multi_index_columns(gui):
     pandas_accessor = _PandasDataAccessor(gui)

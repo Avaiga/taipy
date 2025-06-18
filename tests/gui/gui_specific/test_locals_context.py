@@ -17,9 +17,9 @@ from taipy.gui.utils._locals_context import _LocalsContext
 
 
 def test_locals_context(gui: Gui):
-    lc = _LocalsContext()
+    lc = _LocalsContext(gui)
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         with pytest.raises(KeyError):
             lc.get_default()
         current_locals = locals()

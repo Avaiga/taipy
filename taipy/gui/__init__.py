@@ -70,8 +70,10 @@ application.
 
 """
 
-from importlib.util import find_spec
+from taipy.common.config import _inject_section
 
+from ._default_config import default_config
+from ._gui_section import _GuiSection
 from ._init import *
 from ._renderers import Html, Markdown
 from ._renderers.json import JsonAdapter
@@ -97,16 +99,10 @@ from .partial import Partial
 from .state import State
 from .utils import is_debugging
 
-if find_spec("taipy") and find_spec("taipy.common.config"):
-    from taipy.common.config import _inject_section
-
-    from ._default_config import default_config
-    from ._gui_section import _GuiSection
-
-    _inject_section(
-        _GuiSection,
-        "gui_config",
-        _GuiSection(property_list=list(default_config)),
-        [("configure_gui", _GuiSection._configure)],
-        add_to_unconflicted_sections=True,
-    )
+_inject_section(
+    _GuiSection,
+    "gui_config",
+    _GuiSection(property_list=list(default_config)),
+    [("configure_gui", _GuiSection._configure)],
+    add_to_unconflicted_sections=True,
+)

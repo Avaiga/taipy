@@ -15,14 +15,17 @@ from ..utils import _MapDict
 
 
 class MockState(State):
-    """A Mock implementation for `State`.
-    TODO
-    example of use:
-    ```py
+    """A mock version of the `State^` class that enables isolated testing of state updates.
+
+    This class can be used with the *unittest* or *pytest* Python test frameworks to test side
+    effects of changing the values of a state:
+
+    Ex:
+    ```python
     def test_callback():
-        ms = MockState(Gui(""), a = 1)
-        on_action(ms) # function to test
-        assert ms.a == 2
+        mock_state = MockState(Gui(""), a = 1)
+        on_action(mock_state)  # function to test
+        assert mock_state.a == 2
     ```
     """
 
@@ -60,3 +63,6 @@ class MockState(State):
 
     def broadcast(self, name: str, value: t.Any):
         pass
+
+    def _invoke_on_gui(self, method: t.Callable, *args):
+        return method(self.get_gui(), *args)

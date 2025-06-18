@@ -23,7 +23,6 @@ import time
 import typing as t
 import warnings
 from importlib import metadata, util
-from importlib.util import find_spec
 from inspect import currentframe, getabsfile, iscoroutinefunction, ismethod, ismodule
 from pathlib import Path
 from threading import Thread, Timer
@@ -32,18 +31,10 @@ from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
 import tzlocal
-from flask import (
-    Blueprint,
-    Flask,
-    g,
-    jsonify,
-    request,
-    send_file,
-    send_from_directory,
-)
 from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
+from taipy.common import _module_exists
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
 if util.find_spec("pyngrok"):
@@ -68,7 +59,11 @@ from .data.data_scope import _DataScopes
 from .extension.library import Element, ElementLibrary
 from .page import Page
 from .partial import Partial
-from .server import _Server
+from .servers import (
+    _Server,
+    get_server_request_accessor,
+)
+from .servers.flask import _FlaskServer
 from .state import State, _AsyncState, _GuiState
 from .types import _WsType
 from .utils import (
@@ -132,12 +127,12 @@ class Gui:
     __MESSAGE_GROUPING_NAME = "TaipyMessageGrouping"
     __ON_INIT_NAME = "TaipyOnInit"
     __ARG_CLIENT_ID = "client_id"
-    __INIT_URL = "taipy-init"
-    __JSX_URL = "taipy-jsx"
-    __CONTENT_ROOT = "taipy-content"
-    __UPLOAD_URL = "taipy-uploads"
+    _INIT_URL = "taipy-init"
+    _JSX_URL = "taipy-jsx"
+    _CONTENT_ROOT = "taipy-content"
+    _UPLOAD_URL = "taipy-uploads"
     _EXTENSION_ROOT = "taipy-extension"
-    __USER_CONTENT_URL = "taipy-user-content"
+    _USER_CONTENT_URL = "taipy-user-content"
     __BROADCAST_G_ID = "taipy_broadcasting"
     __BRDCST_CALLBACK_G_ID = "taipy_brdcst_callback"
     __SELF_VAR = "__gui"
@@ -147,7 +142,7 @@ class Gui:
     __ROBOTO_FONT = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
     __DOWNLOAD_ACTION = "__Taipy__download_csv"
     __DOWNLOAD_DELETE_ACTION = "__Taipy__download_delete_csv"
-    __DEFAULT_FAVICON_URL = "https://raw.githubusercontent.com/Avaiga/taipy-assets/develop/favicon.png"
+    _DEFAULT_FAVICON_URL = "https://raw.githubusercontent.com/Avaiga/taipy-assets/develop/favicon.png"
 
     __RE_HTML = re.compile(r"(.*?)\.html$")
     __RE_MD = re.compile(r"(.*?)\.md$")
@@ -155,12 +150,12 @@ class Gui:
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
     __reserved_routes: t.List[str] = [
-        __INIT_URL,
-        __JSX_URL,
-        __CONTENT_ROOT,
-        __UPLOAD_URL,
+        _INIT_URL,
+        _JSX_URL,
+        _CONTENT_ROOT,
+        _UPLOAD_URL,
         _EXTENSION_ROOT,
-        __USER_CONTENT_URL,
+        _USER_CONTENT_URL,
     ]
 
     __LOCAL_TZ = str(tzlocal.get_localzone())
@@ -182,8 +177,8 @@ class Gui:
         path_mapping: t.Optional[dict] = None,
         env_filename: t.Optional[str] = None,
         libraries: t.Optional[t.List[ElementLibrary]] = None,
-        flask: t.Optional[Flask] = None,
         script_paths: t.Union[str, Path, t.List[t.Union[str, Path]], None] = None,
+        server: t.Union[str, t.Any] = "flask",
     ):
         """Initialize a new Gui instance.
 
@@ -224,13 +219,12 @@ class Gui:
                 instances that pages can reference.<br/>
                 Using this argument is equivalent to calling `(Gui.)add_library()^` for each
                 list's elements.
-            flask (Optional[Flask]): An optional instance of a Flask application object.<br/>
-                If this argument is set, this `Gui` instance will use the value of this argument
-                as the underlying server. If omitted or set to None, this `Gui` will create its
-                own Flask application instance and use it to serve the pages.
             script_paths (Union[str, Path, List[Union[str, Path]], None]):
                 Specifies the path(s) to the JavaScript files or external resources used by the application.
                 It can be a single URL or path, or a list containing multiple URLs and/or paths.
+            server (Union[str, Any]): The server to use for the application.<br/>
+                It can be a string representing the type of the server or a server instance.<br/>
+                The default value is `flask`.<br/>
         """
         # store suspected local containing frame
         self.__frame = t.cast(FrameType, t.cast(FrameType, currentframe()).f_back)
@@ -245,14 +239,32 @@ class Gui:
         if path_mapping is None:
             path_mapping = {}
         self._path_mapping = path_mapping
-        self._flask = flask
 
-        self._config = _Config()
+        # Server config
+        self._server_instance: t.Any = None
+        _additional_supported_server: t.List[t.Type[_Server]] = _Hooks()._get_additional_supported_server() or []
+        _supported_server: t.List[t.Type[_Server]] = [
+            _FlaskServer,
+        ] + _additional_supported_server
+        _server_class: t.Optional[t.Type[_Server]] = None
+        for server_class in _supported_server:
+            if isinstance(server, str) and server == server_class.type:
+                _server_class = server_class
+                break
+            if isinstance(server, server_class.server_base_class):  # type: ignore
+                _server_class = server_class
+                self._server_instance = server
+                break
+        if _server_class is None:
+            raise ValueError("Invalid 'server' option")
+        self._server_class = _server_class
+
+        self._config = _Config(self)
         self.__content_accessor = None
         self.__accessors: t.Optional[_DataAccessors] = None
         self.__state: t.Optional[State] = None
         self.__bindings = _Bindings(self)  # type: ignore[arg-type]
-        self.__locals_context = _LocalsContext()
+        self.__locals_context = _LocalsContext(self)
         self.__var_dir = _VariableDirectory(self.__locals_context)
 
         self.__evaluator: _Evaluator = None  # type: ignore[assignment]
@@ -371,7 +383,6 @@ class Gui:
         self.__client_id_2_sid: t.Dict[str, t.Set[str]] = {}
 
         # Load default config
-        self._flask_blueprint: t.List[Blueprint] = []
         self._config._load(default_config)
 
         # get taipy version
@@ -502,7 +513,7 @@ class Gui:
             provider_fn = Gui.__content_providers.get(type(content))
             if provider_fn is None:
                 # try plotly
-                if find_spec("plotly") and find_spec("plotly.graph_objs"):
+                if _module_exists("plotly.graph_objs"):
                     from plotly.graph_objs import Figure as PlotlyFigure  # type: ignore[reportMissingImports]
 
                     if isinstance(content, PlotlyFigure):
@@ -514,7 +525,7 @@ class Gui:
                         provider_fn = get_plotly_content
             if provider_fn is None:
                 # try matplotlib
-                if find_spec("matplotlib") and find_spec("matplotlib.figure"):
+                if _module_exists("matplotlib.figure"):
                     from matplotlib.figure import Figure as MatplotlibFigure
 
                     if isinstance(content, MatplotlibFigure):
@@ -622,35 +633,43 @@ class Gui:
         return (
             _DataScopes._GLOBAL_ID
             if self._bindings()._is_single_client()
-            else getattr(g, Gui.__ARG_CLIENT_ID, "unknown id")
+            else getattr(get_server_request_accessor(self).get_request_meta(), Gui.__ARG_CLIENT_ID, "unknown id")
         )
 
     def __set_client_id_in_context(self, client_id: t.Optional[str] = None, force=False):
-        if not client_id and request:
-            client_id = request.args.get(Gui.__ARG_CLIENT_ID, "")
-        if not client_id and (ws_client_id := getattr(g, "ws_client_id", None)):
+        if not client_id and get_server_request_accessor(self).get_request():
+            client_id = get_server_request_accessor(self).arg(Gui.__ARG_CLIENT_ID, "")
+        if not client_id and (
+            ws_client_id := getattr(get_server_request_accessor(self).get_request_meta(), "ws_client_id", None)
+        ):
             client_id = ws_client_id
         if not client_id and force:
             res = self._bindings()._get_or_create_scope("")
             client_id = res[0] if res[1] else None
-        if client_id and request:
-            if sid := getattr(request, "sid", None):
+        if client_id:
+            if sid := get_server_request_accessor(self).sid():
                 sids = self.__client_id_2_sid.get(client_id, None)
                 if sids is None:
                     sids = set()
                     self.__client_id_2_sid[client_id] = sids
                 sids.add(sid)
-        g.client_id = client_id
+        get_server_request_accessor(self).get_request_meta().client_id = client_id
 
     def __is_var_modified_in_context(self, var_name: str, derived_vars: t.Set[str]) -> bool:
-        modified_vars: t.Optional[t.Set[str]] = getattr(g, "modified_vars", None)
-        der_vars: t.Optional[t.Set[str]] = getattr(g, "derived_vars", None)
-        setattr(g, "update_count", getattr(g, "update_count", 0) + 1)  # noqa: B010
+        modified_vars: t.Optional[t.Set[str]] = getattr(
+            get_server_request_accessor(self).get_request_meta(), "modified_vars", None
+        )
+        der_vars: t.Optional[t.Set[str]] = getattr(
+            get_server_request_accessor(self).get_request_meta(), "derived_vars", None
+        )
+        get_server_request_accessor(self).get_request_meta().update_count = (
+            getattr(get_server_request_accessor(self).get_request_meta(), "update_count", 0) + 1
+        )  # noqa: B010
         if modified_vars is None:
             modified_vars = set()
-            g.modified_vars = modified_vars
+            get_server_request_accessor(self).get_request_meta().modified_vars = modified_vars
         if der_vars is None:
-            g.derived_vars = derived_vars
+            get_server_request_accessor(self).get_request_meta().derived_vars = derived_vars
         else:
             der_vars.update(derived_vars)
         if var_name in modified_vars:
@@ -659,15 +678,17 @@ class Gui:
         return False
 
     def __clean_vars_on_exit(self) -> t.Optional[t.Set[str]]:
-        update_count = getattr(g, "update_count", 0) - 1
+        update_count = getattr(get_server_request_accessor(self).get_request_meta(), "update_count", 0) - 1
         if update_count < 1:
-            derived_vars: t.Set[str] = getattr(g, "derived_vars", set())
-            delattr(g, "update_count")
-            delattr(g, "modified_vars")
-            delattr(g, "derived_vars")
+            derived_vars: t.Set[str] = getattr(
+                get_server_request_accessor(self).get_request_meta(), "derived_vars", set()
+            )
+            delattr(get_server_request_accessor(self).get_request_meta(), "update_count")
+            delattr(get_server_request_accessor(self).get_request_meta(), "modified_vars")
+            delattr(get_server_request_accessor(self).get_request_meta(), "derived_vars")
             return derived_vars
         else:
-            setattr(g, "update_count", update_count)  # noqa: B010
+            setattr(get_server_request_accessor(self).get_request_meta(), "update_count", update_count)  # noqa: B010
             return None
 
     def _handle_connect(self):
@@ -675,7 +696,9 @@ class Gui:
 
     def _handle_disconnect(self):
         _Hooks()._handle_disconnect(self)
-        if (sid := getattr(request, "sid", None)) and (st_to := self._get_config("state_retention_period", 0)) > 0:
+        if (sid := get_server_request_accessor(self).sid()) and (
+            st_to := self._get_config("state_retention_period", 0)
+        ) > 0:
             for cl_id, sids in self.__client_id_2_sid.items():
                 if sid in sids:
                     if len(sids) == 1:
@@ -692,7 +715,7 @@ class Gui:
             except Exception as e:
                 _warn(f"Unexpected error removing state {client_id}", e)
 
-    def _manage_message(self, msg_type: _WsType, message: dict) -> None:
+    def _manage_ws_message(self, msg_type: _WsType, message: dict) -> None:
         try:
             client_id = None
             if msg_type == _WsType.CLIENT_ID.value:
@@ -706,7 +729,7 @@ class Gui:
                     self.__handle_ws_gui_addr({"name": message.get("name"), "payload": front_gui_addr})
             expected_client_id = client_id or message.get(Gui.__ARG_CLIENT_ID)
             self.__set_client_id_in_context(expected_client_id)
-            g.ws_client_id = expected_client_id
+            get_server_request_accessor(self).get_request_meta().ws_client_id = expected_client_id
             with self._set_locals_context(message.get("module_context") or None):
                 with self._get_authorization():
                     payload = message.get("payload", {})
@@ -885,31 +908,31 @@ class Gui:
 
     def _get_content(self, var_name: str, value: t.Any, image: bool) -> t.Any:
         ret_value = self.__get_content_accessor().get_info(var_name, value, image)
-        return f"/{Gui.__CONTENT_ROOT}/{ret_value[0]}" if isinstance(ret_value, tuple) else ret_value
+        return f"/{Gui._CONTENT_ROOT}/{ret_value[0]}" if isinstance(ret_value, tuple) else ret_value
 
-    def __serve_content(self, path: str) -> t.Any:
+    def _serve_content(self, path: str) -> t.Any:
         self.__set_client_id_in_context()
         parts = path.split("/")
         if len(parts) > 1:
             file_name = parts[-1]
             (dir_path, as_attachment) = self.__get_content_accessor().get_content_path(
-                path[: -len(file_name) - 1], file_name, request.args.get("bypass")
+                path[: -len(file_name) - 1], file_name, get_server_request_accessor(self).arg("bypass")
             )
             if dir_path:
-                return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
-        return ("", 404)
+                return self._server.send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
+        return self._server.create_http_response("", 404)
 
     def _get_user_content_url(
         self, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None
     ) -> t.Optional[str]:
         q_args = query_args or {}
         q_args.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
-        return f"/{Gui.__USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(q_args)}"
+        return f"/{Gui._USER_CONTENT_URL}/{path or 'TaIpY'}?{urlencode(q_args)}"
 
-    def __serve_user_content(self, path: str) -> t.Any:
+    def _serve_user_content(self, path: str) -> t.Any:
         self.__set_client_id_in_context()
         q_args: t.Dict[str, str] = {}
-        q_args.update(request.args)
+        q_args.update(get_server_request_accessor(self).args(True))
         q_args.pop(Gui.__ARG_CLIENT_ID, None)
         cb_function: t.Union[t.Callable, str, None] = None
         cb_function_name = None
@@ -950,13 +973,13 @@ class Gui:
                 if ret is None:
                     _warn(f"{cb_function_name}() callback function must return a value.")
                 else:
-                    return (ret, 200)
+                    return self._server.create_http_response(ret, 200)
             except Exception as e:  # pragma: no cover
                 if not self._call_on_exception(cb_function_name, e):
                     _warn(f"{cb_function_name}() callback function raised an exception", e)
-        return ("", 404)
+        return self._server.create_http_response("", 404)
 
-    def __serve_extension(self, path: str) -> t.Any:
+    def _serve_extension(self, path: str) -> t.Any:
         parts = path.split("/")
         last_error = ""
         resource_name = None
@@ -966,13 +989,13 @@ class Gui:
                 try:
                     resource_name = library.get_resource("/".join(parts[1:]))
                     if resource_name:
-                        return send_file(resource_name)
+                        return self._server.send_file(resource_name)
                 except Exception as e:
                     last_error = f"\n{e}"  # Check if the resource is served by another library with the same name
         _warn(f"Resource '{resource_name or path}' not accessible for library '{parts[0]}'{last_error}")
-        return ("", 404)
+        return self._server.create_http_response("", 404)
 
-    def __get_version(self) -> str:
+    def _get_version(self) -> str:
         return f"{self.__version.get('major', 0)}.{self.__version.get('minor', 0)}.{self.__version.get('patch', 0)}"
 
     def __append_libraries_to_status(self, status: t.Dict[str, t.Any]):
@@ -1004,7 +1027,7 @@ class Gui:
             base_json.update(
                 {
                     "flask_version": str(metadata.version("flask") or ""),
-                    "backend_version": self.__get_version(),
+                    "backend_version": self._get_version(),
                     "host": f"{self._get_config('host', 'localhost')}:{self._get_config('port', 'default')}",
                     "python_version": sys.version,
                 }
@@ -1016,38 +1039,41 @@ class Gui:
                 _warn(f"Exception raised reading JSON in '{template}'", e)
         return {"gui": base_json}
 
-    def __upload_files(self):
+    def _upload_files(self):
         self.__set_client_id_in_context()
-        on_upload_action = request.form.get("on_action", None)
-        var_name = t.cast(str, request.form.get("var_name", None))
+        on_upload_action = get_server_request_accessor(self).form().get("on_action", None)
+        var_name = t.cast(str, get_server_request_accessor(self).form().get("var_name", None))
         if not var_name and not on_upload_action:
             _warn("upload files: No var name")
-            return ("upload files: No var name", 400)
-        context = request.form.get("context", None)
-        upload_data = request.form.get("upload_data", None)
-        multiple = "multiple" in request.form and request.form["multiple"] == "True"
+            return self._server.create_http_response("upload files: No var name", 400)
+        context = get_server_request_accessor(self).form().get("context", None)
+        upload_data = get_server_request_accessor(self).form().get("upload_data", None)
+        multiple = (
+            "multiple" in get_server_request_accessor(self).form()
+            and get_server_request_accessor(self).form()["multiple"] == "True"
+        )
 
         # File parsing and checks
-        file = request.files.get("blob", None)
+        file = get_server_request_accessor(self).files().get("blob", None)
         if not file:
             _warn("upload files: No file part")
-            return ("upload files: No file part", 400)
+            return self._server.create_http_response("upload files: No file part", 400)
         # If the user does not select a file, the browser submits an
         # empty file without a filename.
         if file.filename == "":
             _warn("upload files: No selected file")
-            return ("upload files: No selected file", 400)
+            return self._server.create_http_response("upload files: No selected file", 400)
 
         # Path parsing and checks
-        path = request.form.get("path", "")
+        path = get_server_request_accessor(self).form().get("path", "")
         suffix = ""
         complete = True
         part = 0
 
-        if "total" in request.form:
-            total = int(request.form["total"])
-            if total > 1 and "part" in request.form:
-                part = int(request.form["part"])
+        if "total" in get_server_request_accessor(self).form():
+            total = int(get_server_request_accessor(self).form()["total"])
+            if total > 1 and "part" in get_server_request_accessor(self).form():
+                part = int(get_server_request_accessor(self).form()["part"])
                 suffix = f".part.{part}"
                 complete = part == total - 1
 
@@ -1059,10 +1085,10 @@ class Gui:
             os.makedirs(upload_path, exist_ok=True)
             # Save file into upload_path directory
             file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
-            file.save(os.path.join(upload_path, (file_path.name + suffix)))
+            self._server.save_uploaded_file(file, os.path.join(upload_path, (file_path.name + suffix)))
         else:
             _warn(f"upload files: Path {path} points outside of upload root.")
-            return ("upload files: Path part points outside of upload root.", 400)
+            return self._server.create_http_response("upload files: Path part points outside of upload root.", 400)
 
         if complete:
             if part > 0:
@@ -1076,7 +1102,9 @@ class Gui:
                             part_file_path.unlink()
                 except EnvironmentError as ee:  # pragma: no cover
                     _warn(f"Cannot group file after chunk upload for {file.filename}", ee)
-                    return (f"Cannot group file after chunk upload for {file.filename}", 500)
+                    return self._server.create_http_response(
+                        f"Cannot group file after chunk upload for {file.filename}", 500
+                    )
             # Notify when file is uploaded
             newvalue = str(file_path)
             if multiple and var_name:
@@ -1101,7 +1129,7 @@ class Gui:
                         self._call_function_with_state(t.cast(t.Callable, file_fn), ["file_upload", {"args": [data]}])
                 else:
                     setattr(self._bindings(), var_name, newvalue)
-        return ("", 200)
+        return self._server.create_http_response("", 200)
 
     def __send_var_list_update(  # noqa C901
         self,
@@ -1131,7 +1159,7 @@ class Gui:
                         t.cast(str, front_var), newvalue.get(), isinstance(newvalue, _TaipyContentImage)
                     )
                     if isinstance(ret_value, tuple):
-                        newvalue = f"/{Gui.__CONTENT_ROOT}/{ret_value[0]}"
+                        newvalue = f"/{Gui._CONTENT_ROOT}/{ret_value[0]}"
                     else:
                         newvalue = ret_value
                 elif isinstance(newvalue, _TaipyContentHtml):
@@ -1306,9 +1334,8 @@ class Gui:
         grouping_message = self.__get_message_grouping() if allow_grouping else None
         if grouping_message is None:
             try:
-                self._server._ws.emit(
-                    "message",
-                    payload,
+                self._server.send_ws_message(
+                    data=payload,
                     to=t.cast(str, self.__get_ws_receiver(send_back_only)),
                 )
                 time.sleep(0.001)
@@ -1320,7 +1347,7 @@ class Gui:
     def __broadcast_ws(self, payload: dict, client_id: t.Optional[str] = None):
         try:
             to = list(self.__get_sids(client_id)) if client_id else []
-            self._server._ws.emit("message", payload, to=t.cast(str, to) if to else None, include_self=True)
+            self._server.send_ws_message(data=payload, to=t.cast(str, to) if to else None, include_self=True)
             time.sleep(0.001)
         except Exception as e:  # pragma: no cover
             _warn(f"Exception raised in WebSocket communication in '{self.__frame.f_code.co_name}'", e)
@@ -1328,9 +1355,8 @@ class Gui:
     def __send_ack(self, ack_id: t.Optional[str]) -> None:
         if ack_id:
             try:
-                self._server._ws.emit(
-                    "message",
-                    {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id},
+                self._server.send_ws_message(
+                    data={"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id},
                     to=t.cast(str, self.__get_ws_receiver(True)),
                 )
                 time.sleep(0.001)
@@ -1440,7 +1466,7 @@ class Gui:
     def __get_ws_receiver(self, send_back_only=False) -> t.Union[t.List[str], t.Any, None]:
         if self._bindings()._is_single_client():
             return None
-        sid = getattr(request, "sid", None) if request else None
+        sid = get_server_request_accessor(self).sid()
         sids = self.__get_sids(self._get_client_id())
         if sid:
             sids.add(sid)
@@ -1588,13 +1614,13 @@ class Gui:
 
     def _invoke_method(self, state_id: str, method: t.Callable, *args):
         this_sid = None
-        if request:
+        if get_server_request_accessor(self).get_request():
             # avoid messing with the client_id => Set(ws id)
-            this_sid = getattr(request, "sid", None)
-            request.sid = None  # type: ignore[attr-defined]
+            this_sid = getattr(get_server_request_accessor(self).get_request(), "sid", None)
+            get_server_request_accessor(self).set_sid(None)  # type: ignore[attr-defined]
         try:
-            with self.get_flask_app().app_context():
-                setattr(g, Gui.__ARG_CLIENT_ID, state_id)
+            with self.get_app_context():
+                setattr(get_server_request_accessor(self).get_request_meta(), Gui.__ARG_CLIENT_ID, state_id)
                 return method(self, *args)
         except Exception as e:  # pragma: no cover
             if not self._call_on_exception(method, e):
@@ -1604,7 +1630,7 @@ class Gui:
                 )
         finally:
             if this_sid:
-                request.sid = this_sid  # type: ignore[attr-defined]
+                get_server_request_accessor(self).set_sid(this_sid)  # type: ignore[attr-defined]
         return None
 
     def invoke_callback(
@@ -1626,14 +1652,13 @@ class Gui:
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
             module_context (Optional[str]): The name of the module that will be used.
         """  # noqa: E501
-        this_sid = None
-        if request:
+        this_sid = get_server_request_accessor(self).sid()
+        if this_sid:
             # avoid messing with the client_id => Set(ws id)
-            this_sid = getattr(request, "sid", None)
-            request.sid = None  # type: ignore[attr-defined]
+            get_server_request_accessor(self).set_sid(None)
         try:
-            with self.get_flask_app().app_context():
-                setattr(g, Gui.__ARG_CLIENT_ID, state_id)
+            with self.get_app_context():
+                setattr(get_server_request_accessor(self).get_request_meta(), Gui.__ARG_CLIENT_ID, state_id)
                 with self._set_module_context(module_context):
                     if not _is_function(callback):
                         callback = self._get_user_function(t.cast(str, callback))
@@ -1649,7 +1674,7 @@ class Gui:
                 )
         finally:
             if this_sid:
-                request.sid = this_sid  # type: ignore[attr-defined]
+                get_server_request_accessor(self).set_sid(this_sid)  # type: ignore[attr-defined]
         return None
 
     def broadcast_callback(
@@ -1720,7 +1745,7 @@ class Gui:
 
     def _is_in_brdcst_callback(self):
         try:
-            return getattr(g, Gui.__BRDCST_CALLBACK_G_ID, False)
+            return getattr(get_server_request_accessor(self).get_request_meta(), Gui.__BRDCST_CALLBACK_G_ID, False)
         except RuntimeError:
             return False
 
@@ -1991,8 +2016,14 @@ class Gui:
     def _get_root_page_name():
         return Gui.__root_page_name
 
-    def _set_flask(self, flask: Flask):
-        self._flask = flask
+    # Deprecated
+    def _set_flask(self, flask):
+        raise RuntimeError(
+            "'_set_flask()' is deprecated. Use '_set_web_server()' instead as multiple web frameworks has been supported."  # noqa: E501
+        )
+
+    def _set_web_server(self, server: t.Any):
+        self._server_instance = server
 
     def _get_default_module_name(self):
         return self.__default_module_name
@@ -2300,11 +2331,11 @@ class Gui:
 
     def _set_broadcast(self, broadcast: bool = True):
         with contextlib.suppress(RuntimeError):
-            setattr(g, Gui.__BROADCAST_G_ID, broadcast)
+            setattr(get_server_request_accessor(self).get_request_meta(), Gui.__BROADCAST_G_ID, broadcast)
 
     def _is_broadcasting(self) -> bool:
         try:
-            return getattr(g, Gui.__BROADCAST_G_ID, False)
+            return getattr(get_server_request_accessor(self).get_request_meta(), Gui.__BROADCAST_G_ID, False)
         except RuntimeError:
             return False
 
@@ -2408,7 +2439,7 @@ class Gui:
                     if not self._call_on_exception(f"{name}.on_user_init", e):
                         _warn(f"Exception raised in {name}.on_user_init()", e)
 
-    def __init_route(self):
+    def _init_route(self):
         self.__set_client_id_in_context(force=True)
         if not _hasscopeattr(self, Gui.__ON_INIT_NAME):  # type: ignore[arg-type]
             _setscopeattr(self, Gui.__ON_INIT_NAME, True)  # type: ignore[arg-type]
@@ -2479,7 +2510,14 @@ class Gui:
         nav_page = page_name
         if hasattr(self, "on_navigate") and _is_function(self.on_navigate):
             try:
-                params = request.args.to_dict() if hasattr(request, "args") else {}
+                params = (
+                    get_server_request_accessor(self).args(True)
+                    if (
+                        hasattr(get_server_request_accessor(self).get_request(), "args")
+                        or hasattr(get_server_request_accessor(self).get_request(), "query_params")
+                    )
+                    else {}
+                )
                 params.pop("client_id", None)
                 params.pop("v", None)
                 nav_page = self._call_function_with_state(
@@ -2491,7 +2529,9 @@ class Gui:
                 if nav_page != page_name:
                     if isinstance(nav_page, str):
                         if self._navigate(nav_page):
-                            return ("Root page cannot be re-routed by on_navigate().", 302)
+                            return self._server.create_http_response(
+                                "Root page cannot be re-routed by on_navigate().", 302
+                            )
                     else:
                         _warn(f"on_navigate() returned an invalid page name '{nav_page}'.")
                     nav_page = page_name
@@ -2515,7 +2555,7 @@ class Gui:
     def _get_page(self, page_name: str):
         return next((page_i for page_i in self._config.pages if page_i._route == page_name), None)
 
-    def __render_page(self, page_name: str) -> t.Any:
+    def _render_page(self, page_name: str) -> t.Any:
         self.__set_client_id_in_context()
         nav_page = self._get_navigated_page(page_name)
         if not isinstance(nav_page, str):
@@ -2526,8 +2566,8 @@ class Gui:
             page = self._get_partial(nav_page)
         # Make sure that there is a page instance found
         if page is None:
-            return (
-                jsonify({"error": f"Page '{nav_page}' doesn't exist."}),
+            return self._server.create_http_response(
+                self._server.direct_render_json({"error": f"Page '{nav_page}' doesn't exist."}),
                 400,
                 {"Content-Type": "application/json; charset=utf-8"},
             )
@@ -2550,7 +2590,7 @@ class Gui:
         if page._rendered_jsx is not None:
             with self._set_locals_context(context):
                 self._call_on_page_load(nav_page)
-            return self._server._render(
+            return self._server.render(
                 page._rendered_jsx,
                 page._script_paths if page._script_paths is not None else [],
                 page._style if page._style is not None else "",
@@ -2558,10 +2598,10 @@ class Gui:
                 context,  # noqa: E501
             )
         else:
-            return ("No page template", 404)
+            return self._server.create_http_response("No page template", 404)
 
     def _render_route(self) -> t.Any:
-        return self._server._direct_render_json(
+        return self._server.direct_render_json(
             {
                 "locations": {
                     "/" if route == Gui.__root_page_name else f"/{route}": f"/{route}" for route in self._config.routes
@@ -2570,17 +2610,25 @@ class Gui:
             }
         )
 
-    def get_flask_app(self) -> Flask:
-        """Get the internal Flask application.
+    def get_flask_app(self):
+        raise RuntimeError("'get_flask_app()' is deprecated. Use 'get_server_instance()' instead.")
+
+    def get_server_instance(self):
+        """Get the internal server application.
 
         This method must be called **after** `(Gui.)run()^` was invoked.
 
         Returns:
-            The Flask instance used.
+            The server instance used.
         """
         if hasattr(self, "_server"):
-            return t.cast(Flask, self._server.get_flask())
-        raise RuntimeError("get_flask_app() cannot be invoked before run() has been called.")
+            return self._server.get_server_instance()
+        raise RuntimeError("get_server_instance() cannot be invoked before run() has been called.")
+
+    def get_app_context(self):
+        if hasattr(self, "_server"):
+            return self._server.get_app_context()
+        return contextlib.nullcontext()
 
     def _get_port(self) -> int:
         return self._server.get_port()
@@ -2623,7 +2671,7 @@ class Gui:
                 )
         return _webapp_path
 
-    def __get_client_config(self) -> t.Dict[str, t.Any]:
+    def _get_client_config(self) -> t.Dict[str, t.Any]:
         config = {
             "timeZone": self._config.get_time_zone(),
             "darkMode": self._get_config("dark_mode", True),
@@ -2644,7 +2692,7 @@ class Gui:
             config["stylekit"] = {_to_camel_case(k): v for k, v in stylekit.items()}
         return config
 
-    def __get_css_vars(self) -> str:
+    def _get_css_vars(self) -> str:
         css_vars = []
         if stylekit := self._get_config("stylekit", _default_stylekit):
             for k, v in stylekit.items():
@@ -2655,10 +2703,10 @@ class Gui:
         app_config = self._config.config
         # Init server if there is no server
         if not hasattr(self, "_server"):
-            self._server = _Server(
+            self._server = self._server_class(
                 self,  # type: ignore[arg-type]
                 path_mapping=self._path_mapping,
-                flask=self._flask,
+                server=self._server_instance,
                 async_mode=app_config.get("async_mode"),
                 allow_upgrades=not app_config.get("notebook_proxy"),
                 server_config=app_config.get("server_config"),
@@ -2667,11 +2715,10 @@ class Gui:
         # Stop and reinitialize the server if it is still running as a thread
         if (_is_in_notebook() or app_config.get("run_in_thread")) and hasattr(self._server, "_thread"):
             self.stop()
-            self._flask_blueprint = []
-            self._server = _Server(
+            self._server = self._server_class(
                 self,  # type: ignore[arg-type]
                 path_mapping=self._path_mapping,
-                flask=self._flask,
+                server=self._server_instance,
                 async_mode=app_config.get("async_mode"),
                 allow_upgrades=not app_config.get("notebook_proxy"),
                 server_config=app_config.get("server_config"),
@@ -2695,7 +2742,7 @@ class Gui:
             _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
 
     def __bind_default_function(self):
-        with self.get_flask_app().app_context():
+        with self.get_app_context():
             if additional_pages := _Hooks()._get_additional_pages():
                 # add page context for additional pages so that they can be managed by the variable directory
                 for page in additional_pages:
@@ -2723,27 +2770,6 @@ class Gui:
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 
-        pages_bp = Blueprint("taipy_pages", __name__)
-        self._flask_blueprint.append(pages_bp)
-
-        # server URL Rule for taipy images
-        images_bp = Blueprint("taipy_images", __name__)
-        images_bp.add_url_rule(f"/{Gui.__CONTENT_ROOT}/<path:path>", view_func=self.__serve_content)
-        self._flask_blueprint.append(images_bp)
-
-        # server URL for uploaded files
-        upload_bp = Blueprint("taipy_upload", __name__)
-        upload_bp.add_url_rule(f"/{Gui.__UPLOAD_URL}", view_func=self.__upload_files, methods=["POST"])
-        self._flask_blueprint.append(upload_bp)
-
-        # server URL for user content
-        user_content_bp = Blueprint("taipy_user_content", __name__)
-        user_content_bp.add_url_rule(f"/{Gui.__USER_CONTENT_URL}/<path:path>", view_func=self.__serve_user_content)
-        self._flask_blueprint.append(user_content_bp)
-
-        # server URL for extension resources
-        extension_bp = Blueprint("taipy_extensions", __name__)
-        extension_bp.add_url_rule(f"/{Gui._EXTENSION_ROOT}/<path:path>", view_func=self.__serve_extension)
         scripts = [
             s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
             for name, libs in Gui.__extensions.items()
@@ -2766,38 +2792,7 @@ class Gui:
         if self.__script_files:
             scripts.extend(self.__script_files)
 
-        self._flask_blueprint.append(extension_bp)
-
-        _webapp_path = self._get_webapp_path()
-
-        self._flask_blueprint.append(
-            self._server._get_default_blueprint(
-                static_folder=_webapp_path,
-                template_folder=_webapp_path,
-                title=self._get_config("title", "Taipy App"),
-                favicon=self._get_config("favicon", Gui.__DEFAULT_FAVICON_URL),
-                root_margin=self._get_config("margin", None),
-                scripts=scripts,
-                styles=styles,
-                version=self.__get_version(),
-                client_config=self.__get_client_config(),
-                watermark=self._get_config("watermark", None),
-                css_vars=self.__get_css_vars(),
-                base_url=self._get_config("base_url", "/"),
-            )
-        )
-
-        # Run parse markdown to force variables binding at runtime
-        pages_bp.add_url_rule(f"/{Gui.__JSX_URL}/<path:page_name>", view_func=self.__render_page)
-
-        # server URL Rule for flask rendered react-router
-        pages_bp.add_url_rule(f"/{Gui.__INIT_URL}", view_func=self.__init_route)
-
-        _Hooks()._add_external_blueprint(self, __name__)
-
-        # Register Flask Blueprint if available
-        for bp in self._flask_blueprint:
-            t.cast(Flask, self._server.get_flask()).register_blueprint(bp)
+        self._server.register_routes(styles, scripts)
 
     def _get_accessor(self):
         if self.__accessors is None:
@@ -2810,7 +2805,7 @@ class Gui:
         run_in_thread: bool = False,
         async_mode: str = "gevent",
         **kwargs,
-    ) -> t.Optional[Flask]:
+    ) -> t.Union[None, t.Any]:
         """Start the server that delivers pages to web clients.
 
         Once you enter `run()`, users can run web browsers and point to the web server
@@ -2962,17 +2957,18 @@ class Gui:
         # Use multi user or not
         self._bindings()._set_single_client(bool(app_config.get("single_client")))
 
-        # Start Flask Server
+        # Return server instance if run_server is False
         if not run_server:
-            return self.get_flask_app()
+            return self.get_server_instance()
 
+        # Run server
         return self._server.run(
             host=app_config.get("host"),
             port=app_config.get("port"),
             client_url=app_config.get("client_url"),
             debug=app_config.get("debug"),
             use_reloader=app_config.get("use_reloader"),
-            flask_log=app_config.get("flask_log"),
+            server_log=app_config.get("server_log"),
             run_in_thread=app_config.get("run_in_thread"),
             allow_unsafe_werkzeug=app_config.get("allow_unsafe_werkzeug"),
             notebook_proxy=app_config.get("notebook_proxy"),
@@ -2987,7 +2983,7 @@ class Gui:
         `(Gui.)run^` method was set to True, or you are running in an IPython notebook
         context.
         """
-        if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server._is_running:
+        if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server.is_running():
             self._server.stop_thread()
             self.run(**self.__run_kwargs, _reload=True)
             _TaipyLogger._get_logger().info("Gui server has been reloaded.")
@@ -3000,7 +2996,7 @@ class Gui:
         `(Gui.)run()^` method was set to True, or you are running in an IPython notebook
         context.
         """
-        if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server._is_running:
+        if hasattr(self, "_server") and hasattr(self._server, "_thread") and self._server.is_running():
             self._server.stop_thread()
             _TaipyLogger._get_logger().info("Gui server has been stopped.")
 
@@ -3058,17 +3054,16 @@ class Gui:
     def __do_fire_event(
         self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
     ):
-        this_sid = None
-        if request:
+        this_sid = get_server_request_accessor(self).sid()
+        if this_sid:
             # avoid messing with the client_id => Set(ws id)
-            this_sid = getattr(request, "sid", None)
-            request.sid = None  # type: ignore[attr-defined]
+            get_server_request_accessor(self).set_sid(None)
 
         try:
-            with self.get_flask_app().app_context(), self.__event_manager:
+            with self.get_app_context(), self.__event_manager:
                 if client_id:
-                    setattr(g, Gui.__ARG_CLIENT_ID, client_id)
+                    setattr(get_server_request_accessor(self).get_request_meta(), Gui.__ARG_CLIENT_ID, client_id)
                 _Hooks()._fire_event(event_name, client_id, payload)
         finally:
             if this_sid:
-                request.sid = this_sid  # type: ignore[attr-defined]
+                get_server_request_accessor(self).set_sid(this_sid)

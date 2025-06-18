@@ -12,25 +12,47 @@
 import inspect
 import typing as t
 
-from flask import g
+import pytest
 
 from taipy.gui import Gui, Markdown, notify
 from taipy.gui.state import _AsyncState, _GuiState
 
 
+@pytest.mark.skip_if_not_server("flask")
 def test_async_notify(gui: Gui, helpers):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
     gui.add_page("test", Markdown("<|Hello|button|>"))
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     # WS client and emit
-    ws_client = gui._server._ws.test_client(gui._server.get_flask())  # type: ignore[arg-type]
+    ws_client = gui._server._ws.test_client(gui._server.get_server_instance())  # type: ignore[arg-type]
     cid = helpers.create_scope_and_get_sid(gui)
-    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
-        g.client_id = cid
+    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        gui._server.request.get_request_meta().client_id = cid
+        id = notify(_AsyncState(t.cast(_GuiState, gui._Gui__state)), "Info", "Message", id="id_async")  # type: ignore[attr-defined]
+        assert id == "id_async"
+    received_messages = ws_client.get_received()
+    assert len(received_messages) == 1
+    helpers.assert_outward_ws_simple_message(
+        received_messages[0], "AL", {"nType": "Info", "message": "Message", "notificationId": "id_async"}
+    )
+
+
+@pytest.mark.skip_if_not_server("fastapi")
+def test_async_notify_fastapi(gui: Gui, helpers):
+    gui._set_frame(inspect.currentframe())
+
+    gui.add_page("test", Markdown("<|Hello|button|>"))
+    helpers.run_e2e_multi_client(gui)
+    ws_client = helpers.get_socketio_test_client()
+    cid = helpers.create_scope_and_get_sid(gui)
+    gui._server.request.set_sid(ws_client.get_sid())
+    ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        gui._server.request.get_request_meta().client_id = cid
         id = notify(_AsyncState(t.cast(_GuiState, gui._Gui__state)), "Info", "Message", id="id_async")  # type: ignore[attr-defined]
         assert id == "id_async"
     received_messages = ws_client.get_received()

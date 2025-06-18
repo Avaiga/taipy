@@ -12,7 +12,7 @@
 from functools import lru_cache
 from typing import Type
 
-from ...common._check_dependencies import EnterpriseEditionUtils
+from ...common._modules import EnterpriseEdition
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._scenario_fs_repository import _ScenarioFSRepository
@@ -24,22 +24,22 @@ class _ScenarioManagerFactory(_ManagerFactory):
 
     @classmethod
     @lru_cache
-    def _build_manager(cls) -> Type[_ScenarioManager]:
-        if EnterpriseEditionUtils._using_enterprise():
+    def _build_manager(cls) -> Type[_ScenarioManager]:  # type: ignore[reportIncompatibleMethodOverride]
+        if EnterpriseEdition._is_installed():
             scenario_manager = _load_fct(
-                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager", "_ScenarioManager"
+                EnterpriseEdition._CORE_MODULE_PATH + ".scenario._scenario_manager", "_ScenarioManager"
             )
             build_repository = _load_fct(
-                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_manager_factory",
+                EnterpriseEdition._CORE_MODULE_PATH + ".scenario._scenario_manager_factory",
                 "_ScenarioManagerFactory",
-            )._build_repository  # type: ignore
+            )._build_repository  # type: ignore[reportFunctionMemberAccess]
         else:
             scenario_manager = _ScenarioManager
             build_repository = cls._build_repository
-        scenario_manager._repository = build_repository()  # type: ignore
-        return scenario_manager  # type: ignore
+        scenario_manager._repository = build_repository()  # type: ignore[reportFunctionMemberAccess]
+        return scenario_manager  # type: ignore[return-value]
 
     @classmethod
     @lru_cache
-    def _build_repository(cls):
-        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()
+    def _build_repository(cls):  # type: ignore[reportIncompatibleMethodOverride]
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()  # type: ignore[reportOptionalCall]

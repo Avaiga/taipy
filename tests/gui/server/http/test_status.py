@@ -15,28 +15,38 @@ from os import path
 from taipy.gui import Gui
 
 
-def test_get_status(gui: Gui):
+def test_get_status(gui: Gui, helpers, gui_server):
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
-    ret = flask_client.get("/taipy.status.json")
+    server_test_client = gui._server.test_client()
+    ret = server_test_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
-    assert ret.mimetype == "application/json", f"mimetype => {ret.mimetype} != application/json"
-    assert ret.json, "json is not defined"
-    assert "gui" in ret.json, "json has no key gui"
-    gui = ret.json.get("gui")
+    if gui_server == "flask":
+        assert ret.mimetype == "application/json", f"mimetype => {ret.mimetype} != application/json"
+    elif gui_server == "fastapi":
+        mimetype = ret.headers["content-type"]
+        assert mimetype == "application/json", f"mimetype => {mimetype} != application/json"
+    ret_json = helpers.get_response_data(ret, gui)
+    assert ret_json, "json is not defined"
+    assert "gui" in ret_json, "json has no key gui"
+    gui = ret_json.get("gui")
     assert isinstance(gui, dict), "json.gui is not a dict"
     assert "user_status" in gui, "json.gui has no key user_status"
     assert gui.get("user_status") == "", "json.gui.user_status is not empty"
 
 
-def test_get_extended_status(gui: Gui):
+def test_get_extended_status(gui: Gui, helpers, gui_server):
     gui.run(run_server=False, extended_status=True)
-    flask_client = gui._server.test_client()
-    ret = flask_client.get("/taipy.status.json")
+    server_test_client = gui._server.test_client()
+    ret = server_test_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
-    assert ret.mimetype == "application/json", f"mimetype => {ret.mimetype} != application/json"
-    assert ret.json, "json is not defined"
-    gui_json = ret.json.get("gui")
+    if gui_server == "flask":
+        assert ret.mimetype == "application/json", f"mimetype => {ret.mimetype} != application/json"
+    elif gui_server == "fastapi":
+        mimetype = ret.headers["content-type"]
+        assert mimetype == "application/json", f"mimetype => {mimetype} != application/json"
+    ret_json = helpers.get_response_data(ret, gui)
+    assert ret_json, "json is not defined"
+    gui_json = ret_json.get("gui")
     assert "backend_version" in gui_json, "json.gui has no key backend_version"
     assert "flask_version" in gui_json, "json.gui has no key flask_version"
     if path.exists(gui._get_webapp_path()):
@@ -47,7 +57,7 @@ def test_get_extended_status(gui: Gui):
     assert gui_json.get("user_status") == "", "json.gui.user_status is not empty"
 
 
-def test_get_status_with_user_status(gui: Gui):
+def test_get_status_with_user_status(gui: Gui, helpers):
     user_status = "user_status"
 
     def on_status(state):
@@ -56,11 +66,12 @@ def test_get_status_with_user_status(gui: Gui):
     gui._set_frame(inspect.currentframe())
 
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
-    ret = flask_client.get("/taipy.status.json")
+    server_test_client = gui._server.test_client()
+    ret = server_test_client.get("/taipy.status.json")
+    ret_json = helpers.get_response_data(ret, gui)
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
-    assert ret.json, "json is not defined"
-    gui_ret = ret.json.get("gui")
+    assert ret_json, "json is not defined"
+    gui_ret = ret_json.get("gui")
     assert "user_status" in gui_ret, "json.gui has no key user_status"
     assert gui_ret.get("user_status") == user_status
-    assert f'json.gui.user_status => {gui_ret.get("user_status")} != {user_status}'
+    assert f"json.gui.user_status => {gui_ret.get('user_status')} != {user_status}"

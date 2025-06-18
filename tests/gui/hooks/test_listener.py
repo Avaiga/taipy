@@ -27,6 +27,7 @@ def test_empty_listener(gui: Gui):
 
     listener.assert_not_called()
 
+
 def test_listener(gui: Gui):
     class ListenerHook(_Hook):
         method_names = ["_add_event_listener", "_fire_event"]
@@ -59,8 +60,10 @@ def test_listener(gui: Gui):
 
     gui._add_event_listener(event, listener)
 
-    with gui._Gui__event_manager: # type: ignore[attr-defined]
+    with gui._Gui__event_manager:  # type: ignore[attr-defined]
         gui._fire_event(event, None, payload)
 
     time.sleep(0.3)
     listener.assert_called_once_with(event, None, payload)
+
+    _Hooks()._Hooks__hooks.clear()

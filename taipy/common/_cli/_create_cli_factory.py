@@ -15,15 +15,15 @@ from typing import Type
 
 from taipy.common._cli._base_cli._abstract_cli import _AbstractCLI
 
-from .._check_dependencies import EnterpriseEditionUtils
+from .._modules import EnterpriseEdition
 from ._create_cli import _CreateCLI
 
 
 class _CreateCLIFactory:
     @staticmethod
     def _build_cli() -> Type[_AbstractCLI]:
-        if EnterpriseEditionUtils._using_enterprise():
-            module = import_module(EnterpriseEditionUtils._TAIPY_ENTERPRISE_MODULE + ".templates._create_cli")
+        if EnterpriseEdition._is_installed():
+            module = import_module(EnterpriseEdition._MODULE_PATH + ".templates._create_cli")
             create_cli = attrgetter("_CreateCLI")(module)
         else:
             create_cli = _CreateCLI

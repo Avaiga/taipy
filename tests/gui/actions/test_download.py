@@ -10,14 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-import typing as t
 import warnings
 
-from flask import Flask, g
+import pytest
 
 from taipy.gui import Gui, Markdown, State, download
 
 
+@pytest.mark.skip_if_not_server("flask")
 def test_download(gui: Gui, helpers):
     def on_download_action(state: State):
         pass
@@ -27,13 +27,13 @@ def test_download(gui: Gui, helpers):
 
     gui.add_page("test", Markdown("<|Hello|button|>"))
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     # WS client and emit
-    ws_client = gui._server._ws.test_client(t.cast(Flask, gui._server.get_flask()))
+    ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     cid = helpers.create_scope_and_get_sid(gui)
-    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
-        g.client_id = cid
+    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        gui._server.request.get_request_meta().client_id = cid
         download(gui._Gui__state, "some text", "filename.txt", "on_download_action")  # type: ignore[attr-defined]
 
     received_messages = ws_client.get_received()
@@ -42,6 +42,7 @@ def test_download(gui: Gui, helpers):
     )
 
 
+@pytest.mark.skip_if_not_server("flask")
 def test_download_fn(gui: Gui, helpers):
     def on_download_action(state: State):
         pass
@@ -51,13 +52,13 @@ def test_download_fn(gui: Gui, helpers):
 
     gui.add_page("test", Markdown("<|Hello|button|>"))
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     # WS client and emit
-    ws_client = gui._server._ws.test_client(t.cast(Flask, gui._server.get_flask()))
+    ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     cid = helpers.create_scope_and_get_sid(gui)
-    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
-        g.client_id = cid
+    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        gui._server.request.get_request_meta().client_id = cid
         download(gui._Gui__state, "some text", "filename.txt", on_download_action)  # type: ignore[attr-defined]
 
     received_messages = ws_client.get_received()
@@ -66,7 +67,68 @@ def test_download_fn(gui: Gui, helpers):
         "DF",
         {"name": "filename.txt", "context": "test_download"},
     )
-    assert "onAction" in received_messages[0]["args"] # inner function is treated as lambda
+    assert "onAction" in received_messages[0]["args"]  # inner function is treated as lambda
+
+
+@pytest.mark.skip_if_not_server("fastapi")
+@pytest.mark.teste2e
+def test_download_fastapi(gui: Gui, helpers):
+    def on_download_action(state: State):
+        pass
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
+    gui.add_page("test", Markdown("<|Hello|button|>"))
+    helpers.run_e2e_multi_client(gui)
+    ws_client = helpers.get_socketio_test_client()
+    cid = helpers.create_scope_and_get_sid(gui)
+    sid = ws_client.get_sid()
+    ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui.get_app_context():
+        gui._server.request.set_sid(sid)
+        gui._server.request.get_request_meta().client_id = cid
+        download(gui._Gui__state, "some text", "filename.txt", "on_download_action")  # type: ignore[attr-defined]
+
+    received_messages = ws_client.get_received()
+    try:
+        helpers.assert_outward_ws_simple_message(
+            received_messages[0], "DF", {"name": "filename.txt", "onAction": "on_download_action"}
+        )
+    finally:
+        ws_client.disconnect()
+
+
+@pytest.mark.skip_if_not_server("fastapi")
+@pytest.mark.teste2e
+def test_download_fn_fastapi(gui: Gui, helpers):
+    def on_download_action(state: State):
+        pass
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
+    gui.add_page("test", Markdown("<|Hello|button|>"))
+    helpers.run_e2e_multi_client(gui)
+    ws_client = helpers.get_socketio_test_client()
+    cid = helpers.create_scope_and_get_sid(gui)
+    sid = ws_client.get_sid()
+    ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui.get_app_context():
+        gui._server.request.set_sid(sid)
+        gui._server.request.get_request_meta().client_id = cid
+        download(gui._Gui__state, "some text", "filename.txt", on_download_action)  # type: ignore[attr-defined]
+
+    received_messages = ws_client.get_received()
+    try:
+        helpers.assert_outward_ws_simple_message(
+            received_messages[0],
+            "DF",
+            {"name": "filename.txt", "context": "test_download"},
+        )
+        assert "onAction" in received_messages[0]["args"]  # inner function is treated as lambda
+    finally:
+        ws_client.disconnect()
 
 
 def test_bad_download(gui: Gui, helpers):

@@ -12,7 +12,7 @@
 from functools import lru_cache
 from typing import Type
 
-from ...common._check_dependencies import EnterpriseEditionUtils
+from ...common._modules import EnterpriseEdition
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
 from ._task_fs_repository import _TaskFSRepository
@@ -24,22 +24,20 @@ class _TaskManagerFactory(_ManagerFactory):
 
     @classmethod
     @lru_cache
-    def _build_manager(cls) -> Type[_TaskManager]:
-        if EnterpriseEditionUtils._using_enterprise():
-            task_manager = _load_fct(
-                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager", "_TaskManager"
-            )  # type: ignore
+    def _build_manager(cls) -> Type[_TaskManager]:  # type: ignore[reportIncompatibleMethodOverride]
+        if EnterpriseEdition._is_installed():
+            task_manager = _load_fct(EnterpriseEdition._CORE_MODULE_PATH + ".task._task_manager", "_TaskManager")
             build_repository = _load_fct(
-                EnterpriseEditionUtils._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_manager_factory",
+                EnterpriseEdition._CORE_MODULE_PATH + ".task._task_manager_factory",
                 "_TaskManagerFactory",
-            )._build_repository  # type: ignore
+            )._build_repository  # type: ignore[reportFunctionMemberAccess]
         else:
             task_manager = _TaskManager
             build_repository = cls._build_repository
-        task_manager._repository = build_repository()  # type: ignore
-        return task_manager  # type: ignore
+        task_manager._repository = build_repository()  # type: ignore[reportFunctionMemberAccess]
+        return task_manager  # type: ignore[return-value]
 
     @classmethod
     @lru_cache
-    def _build_repository(cls):
-        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()
+    def _build_repository(cls):  # type: ignore[reportIncompatibleMethodOverride]
+        return cls._get_repository_with_repo_map(cls.__REPOSITORY_MAP)()  # type: ignore[reportOptionalCall]

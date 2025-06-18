@@ -9,11 +9,23 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from importlib import util
+from importlib.util import find_spec
 from typing import Optional
 
 
-def _check_dependency_is_installed(
+def _module_exists(module_path: str) -> bool:
+    """
+    Check if a module or submodule (e.g. 'azure.storage.blob') exists.
+    Returns True if it can be found, False otherwise.
+    """
+    parts = module_path.split(".")
+    for i in range(1, len(parts) + 1):
+        if find_spec(".".join(parts[:i])) is None:
+            return False
+    return True
+
+
+def _assert_module_installation(
     module_name: str, package_name: str, extra_taipy_package_name: str, taipy_sublibrary: Optional[str] = None
 ) -> None:
     """
@@ -31,19 +43,20 @@ def _check_dependency_is_installed(
     if taipy_sublibrary is None:
         taipy_sublibrary = "taipy"
 
-    if not util.find_spec(package_name):
+    if not _module_exists(package_name):
         raise RuntimeError(
             f"Cannot use {module_name} as {package_name} package is not installed. Please install it "
             f"using `pip install {taipy_sublibrary}[{extra_taipy_package_name}]`."
         )
 
 
-class EnterpriseEditionUtils:
+class EnterpriseEdition:
     """NOT DOCUMENTED"""
-    _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
-    _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
-    _TAIPY_ENTERPRISE_EVENT_PACKAGE = _TAIPY_ENTERPRISE_MODULE + ".event"
+
+    _MODULE_PATH = "taipy.enterprise"
+    _CORE_MODULE_PATH = _MODULE_PATH + ".core"
+    _EVENT_MODULE_PATH = _MODULE_PATH + ".event"
 
     @classmethod
-    def _using_enterprise(cls) -> bool:
-        return util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None
+    def _is_installed(cls) -> bool:
+        return _module_exists(cls._MODULE_PATH)

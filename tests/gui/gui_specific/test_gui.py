@@ -29,7 +29,7 @@ def test__get_real_var_name(gui: Gui):
     assert res[1] == ""
 
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         with gui._set_locals_context(_get_module_name_from_frame(frame)) if frame else nullcontext():
             with pytest.raises(NameError):
                 res = gui._get_real_var_name(f"{_TaipyContent.get_hash()}_var")
@@ -37,13 +37,13 @@ def test__get_real_var_name(gui: Gui):
 
 def test__get_user_instance(gui: Gui):
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         gui._get_user_instance("", type(None))
 
 
 def test__refresh_expr(gui: Gui):
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         res = gui._refresh_expr("var", None)
         assert res is None
 
@@ -51,7 +51,7 @@ def test__refresh_expr(gui: Gui):
 def test__tbl_cols(gui: Gui):
     data = pd.DataFrame({"col1": [0, 1, 2], "col2": [True, True, False]})
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         res = gui._tbl_cols(True, None, json.dumps({}), json.dumps({"data": "data"}), data=data)
         assert isinstance(res, str)
 
@@ -66,7 +66,7 @@ def test__tbl_cols(gui: Gui):
 def test__chart_conf(gui: Gui):
     data = pd.DataFrame({"col1": [0, 1, 2], "col2": [True, True, False]})
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         res = gui._chart_conf(True, None, json.dumps({}), json.dumps({"data": "data"}), data=data)
         assert isinstance(res, str)
 
@@ -84,20 +84,23 @@ def test__chart_conf(gui: Gui):
 
 def test__get_valid_adapter_result(gui: Gui):
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
+    with gui.get_app_context():
         res = gui._get_valid_adapter_result(("id", "label"))
         assert isinstance(res, tuple)
         assert res[0] == "id"
 
-def test_on_action_call(gui:Gui):
+
+def test_on_action_call(gui: Gui):
     an_id = "my_id"
 
     a_non_action_payload = {"a": "b"}
+
     def on_action(state, id, payload):
         assert id == an_id
         assert payload is a_non_action_payload
 
     an_action_payload = {"action": "on_an_action"}
+
     def on_an_action(state, id, payload):
         assert id == an_id
         assert payload is an_action_payload
@@ -106,6 +109,6 @@ def test_on_action_call(gui:Gui):
     gui._set_frame(inspect.currentframe())
 
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
-        gui._Gui__on_action(an_id, a_non_action_payload) # type: ignore[attr-defined]
-        gui._Gui__on_action(an_id, an_action_payload) # type: ignore[attr-defined]
+    with gui.get_app_context():
+        gui._Gui__on_action(an_id, a_non_action_payload)  # type: ignore[attr-defined]
+        gui._Gui__on_action(an_id, an_action_payload)  # type: ignore[attr-defined]

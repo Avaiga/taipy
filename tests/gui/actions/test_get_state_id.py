@@ -12,8 +12,6 @@
 import inspect
 import warnings
 
-from flask import g
-
 from taipy.gui import Gui, Markdown, get_state_id
 
 
@@ -23,11 +21,11 @@ def test_get_state_id(gui: Gui, helpers):
 
     gui.add_page("test", Markdown("<|Hello|button|>"))
     gui.run(run_server=False)
-    flask_client = gui._server.test_client()
+    server_test_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
-    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui.get_flask_app().app_context():
-        g.client_id = cid
+    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui.get_app_context():
+        gui._server.request.get_request_meta().client_id = cid
         assert cid == get_state_id(gui._Gui__state)  # type: ignore[attr-defined]
 
 

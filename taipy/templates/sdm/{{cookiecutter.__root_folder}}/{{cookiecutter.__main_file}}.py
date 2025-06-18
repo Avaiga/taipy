@@ -17,8 +17,7 @@ import taipy as tp
 from taipy import Gui, Orchestrator
 
 
-def on_init(state):
-    ...
+def on_init(state): ...
 
 
 def on_change(state, var, val):

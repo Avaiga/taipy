@@ -17,10 +17,10 @@ from .state_asset.page1 import md_page1
 from .state_asset.page2 import md_page2
 
 
-def test_variable_directory_dyanmic_process(gui: Gui):
+def test_variable_directory_dynamic_process(gui: Gui):
     gui.run(run_server=False)
-    with gui.get_flask_app().app_context():
-        locals_context = _LocalsContext()
+    with gui.get_app_context():
+        locals_context = _LocalsContext(gui)
         variable_directory = _VariableDirectory(locals_context)
         page1_module = str(md_page1._get_module_name())
         page2_module = str(md_page2._get_module_name())

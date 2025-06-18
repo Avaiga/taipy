@@ -12,9 +12,12 @@
 import inspect
 import warnings
 
+import pytest
+
 from taipy.gui import Gui, Markdown, State, navigate
 
 
+@pytest.mark.skip_if_not_server("flask")
 def test_navigate(gui: Gui, helpers):
     def navigate_to(state: State):
         navigate(state, "test")
@@ -25,7 +28,7 @@ def test_navigate(gui: Gui, helpers):
         gui.run(run_server=False)
         client = gui._server.test_client()
         # WS client and emit
-        ws_client = gui._server._ws.test_client(gui._server.get_flask())
+        ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
         # Get the jsx once so that the page will be evaluated -> variable will be registered
         sid = helpers.create_scope_and_get_sid(gui)
         client.get(f"/taipy-jsx/test/?client_id={sid}")
@@ -34,6 +37,26 @@ def test_navigate(gui: Gui, helpers):
         assert ws_client.get_received()
 
 
+@pytest.mark.skip_if_not_server("fastapi")
+@pytest.mark.teste2e
+def test_navigate_fastapi(gui: Gui, helpers):
+    def navigate_to(state: State):
+        navigate(state, "test")
+
+    with warnings.catch_warnings(record=True):
+        gui._set_frame(inspect.currentframe())
+        gui.add_page("test", Markdown("#This is a page"))
+        helpers.run_e2e_multi_client(gui)
+        ws_client = helpers.get_socketio_test_client()
+        cid = helpers.create_scope_and_get_sid(gui)
+        sid = ws_client.get_sid()
+        ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+        ws_client.emit("message", {"client_id": sid, "type": "A", "name": "my_button", "payload": "navigate_to"})
+        # assert for received message (message that would be sent to the front-end client)
+        assert ws_client.get_received()
+
+
+@pytest.mark.skip_if_not_server("flask")
 def test_navigate_to_no_route(gui: Gui, helpers):
     def navigate_to(state: State):
         navigate(state, "toto")
@@ -44,10 +67,29 @@ def test_navigate_to_no_route(gui: Gui, helpers):
         gui.run(run_server=False)
         client = gui._server.test_client()
         # WS client and emit
-        ws_client = gui._server._ws.test_client(gui._server.get_flask())
+        ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
         # Get the jsx once so that the page will be evaluated -> variable will be registered
         sid = helpers.create_scope_and_get_sid(gui)
         client.get(f"/taipy-jsx/test/?client_id={sid}")
+        ws_client.emit("message", {"client_id": sid, "type": "A", "name": "my_button", "payload": "navigate_to"})
+        # assert for received message (message that would be sent to the front-end client)
+        assert not ws_client.get_received()
+
+
+@pytest.mark.skip_if_not_server("fastapi")
+@pytest.mark.teste2e
+def test_navigate_to_no_route_fastapi(gui: Gui, helpers):
+    def navigate_to(state: State):
+        navigate(state, "toto")
+
+    with warnings.catch_warnings(record=True):
+        gui._set_frame(inspect.currentframe())
+        gui.add_page("test", Markdown("#This is a page"))
+        helpers.run_e2e_multi_client(gui)
+        ws_client = helpers.get_socketio_test_client()
+        cid = helpers.create_scope_and_get_sid(gui)
+        sid = ws_client.get_sid()
+        ws_client.get(f"/taipy-jsx/test?client_id={cid}")
         ws_client.emit("message", {"client_id": sid, "type": "A", "name": "my_button", "payload": "navigate_to"})
         # assert for received message (message that would be sent to the front-end client)
         assert not ws_client.get_received()

@@ -22,7 +22,7 @@ if util.find_spec("playwright"):
     from playwright._impl._page import Page
 
 from taipy.gui import Gui, Html
-from taipy.gui.server import _Server
+from taipy.gui.servers.flask import _FlaskServer
 
 
 @pytest.mark.teste2e
@@ -98,16 +98,29 @@ def test_html_render_bind_assets(page: "Page", gui: Gui, helpers, e2e_base_url, 
 
 
 @pytest.mark.teste2e
-def test_html_render_path_mapping(page: "Page", gui: Gui, helpers, e2e_base_url, e2e_port):
-    gui._server = _Server(
-        gui,
-        path_mapping={"style": f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets{os.path.sep}style"},
-        flask=gui._flask,
-        async_mode="gevent",
-    )
+def test_html_render_path_mapping(page: "Page", gui: Gui, helpers, e2e_base_url, e2e_port, gui_server):
+    if gui_server == "flask":
+        gui._server = _FlaskServer(
+            gui,
+            path_mapping={
+                "style": f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets{os.path.sep}style"
+            },
+            server=gui._server_instance,
+            async_mode="gevent",
+        )
+    else:
+        from taipy.enterprise.gui.servers.fastapi import _FastAPIServer
+
+        gui._server = _FastAPIServer(
+            gui,
+            path_mapping={
+                "style": f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets{os.path.sep}style"
+            },
+            server=gui._server_instance,
+        )
     gui.add_page("page1", Html(f"{Path(Path(__file__).parent.resolve())}{os.path.sep}page1.html"))
     helpers.run_e2e(gui)
-    assert ".taipy-text" in urlopen(f"http://127.0.0.1:{e2e_port}{e2e_base_url}/style/style.css").read().decode("utf-8")
+    assert ".taipy-text" in urlopen(f"http://127.0.0.1:{e2e_port}{e2e_base_url}style/style.css").read().decode("utf-8")
     page.goto("./page1")
     page.expect_websocket()
     page.wait_for_selector("#text1")

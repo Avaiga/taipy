@@ -10,13 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-import json
 import warnings
 
 from taipy.gui import Gui
 
 
-def test_render_route(gui: Gui):
+def test_render_route(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page("page1", "# first page")
     gui.add_page("page2", "# second page")
@@ -24,7 +23,7 @@ def test_render_route(gui: Gui):
     with warnings.catch_warnings(record=True):
         client = gui._server.test_client()
         response = client.get("/taipy-init")
-        response_data = json.loads(response.get_data().decode("utf-8", "ignore"))
+        response_data = helpers.get_response_data(response, gui)
         assert response.status_code == 200
         assert isinstance(response_data, dict)
         assert isinstance(response_data["locations"], dict)

@@ -10,13 +10,31 @@
 # specific language governing permissions and limitations under the License.
 
 import contextlib
+import sys
 import time
+from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 import pytest
 from testbook import testbook
 
 
+def wait_for_content(url, expected_text, timeout=10):
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            response = urlopen(url)
+            content = response.read().decode("utf-8")
+            if expected_text in content:
+                return True
+        except (HTTPError, URLError):
+            pass
+        time.sleep(0.5)
+    return False
+
+
+@pytest.mark.skip_if_not_server("flask")
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="Test skipped on Windows")
 @pytest.mark.filterwarnings("ignore::RuntimeWarning")
 @pytest.mark.teste2e
 @testbook("tests/gui/notebook/simple_gui.ipynb")
@@ -27,7 +45,7 @@ def test_notebook_simple_gui(tb, helpers):
     tb.execute_cell("gui_run")
     while not helpers.port_check():
         time.sleep(0.1)
-    assert ">Hello</h1>" in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
     assert 'defaultValue=\\"10\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
     # Test state manipulation within notebook
     tb.execute_cell("get_variable")
@@ -47,14 +65,58 @@ def test_notebook_simple_gui(tb, helpers):
         with contextlib.suppress(Exception):
             urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
             break
-    assert ">Hello</h1>" in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
     tb.execute_cell("gui_reload")
     while True:
         with contextlib.suppress(Exception):
             urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
             break
-    assert ">Hello</h1>" in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
     tb.execute_cell("gui_re_stop")
     with pytest.raises(Exception) as exc_info:
         urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
     assert "501: Gateway error" in str(exc_info.value)
+
+
+@pytest.mark.skip_if_not_server("fastapi")
+@pytest.mark.filterwarnings("ignore::RuntimeWarning")
+@pytest.mark.teste2e
+@testbook("tests/gui/notebook/simple_gui_fastapi.ipynb")
+def test_notebook_simple_gui_fastapi(tb, helpers):
+    tb.execute_cell("import")
+    tb.execute_cell("page_declaration")
+    tb.execute_cell("gui_init")
+    tb.execute_cell("gui_run")
+    while not helpers.port_check():
+        time.sleep(0.1)
+    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
+    assert 'defaultValue=\\"10\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    # Test state manipulation within notebook
+    tb.execute_cell("get_variable")
+    assert "10" in tb.cell_output_text("get_variable")
+    assert 'defaultValue=\\"10\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    tb.execute_cell("set_variable")
+    assert 'defaultValue=\\"20\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    tb.execute_cell("re_get_variable")
+    assert "20" in tb.cell_output_text("re_get_variable")
+    # Test page reload
+    tb.execute_cell("gui_stop")
+    with pytest.raises(Exception) as exc_info:
+        urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+    assert "refused" in str(exc_info.value)
+    tb.execute_cell("gui_re_run")
+    while True:
+        with contextlib.suppress(Exception):
+            urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+            break
+    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
+    tb.execute_cell("gui_reload")
+    while True:
+        with contextlib.suppress(Exception):
+            urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+            break
+    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
+    tb.execute_cell("gui_re_stop")
+    with pytest.raises(Exception) as exc_info:
+        urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+    assert "refused" in str(exc_info.value)

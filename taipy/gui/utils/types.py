@@ -14,7 +14,8 @@ import json
 import typing as t
 from abc import ABC, abstractmethod
 from datetime import datetime
-from importlib.util import find_spec
+
+from taipy.common import _module_exists
 
 from .._warnings import _warn
 from . import _date_to_string, _MapDict, _string_to_date, _variable_decode
@@ -197,6 +198,7 @@ class _TaipyDict(_TaipyBase):
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Di"
 
+
 class _TaipyTime(_TaipyBase):
     def get(self):
         val = super().get()
@@ -208,20 +210,21 @@ class _TaipyTime(_TaipyBase):
 
     def cast_value(self, value: t.Any):
         if isinstance(value, str):
-            return datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+            return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
         return super().cast_value(value)
 
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Tm"
 
+
 class _TaipyToJson(_TaipyBase):
     def get(self):
         val = super().get()
         if not val:
             return None
-        if find_spec("plotly") and find_spec("plotly.graph_objs"):
-            from plotly.graph_objs import Figure as PlotlyFigure
+        if _module_exists("plotly.graph_objs"):
+            from plotly.graph_objs import Figure as PlotlyFigure  # type: ignore[reportMissingImports]
 
             if isinstance(val, PlotlyFigure):
                 try:
