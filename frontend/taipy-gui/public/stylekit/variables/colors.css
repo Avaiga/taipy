@@ -17,10 +17,16 @@
   --color-contrast-light: rgba(0, 0, 0, 0.87);
   --color-contrast-dark: rgba(255, 255, 255, 0.87);
   --color-contrast: var(--color-contrast-light);
+  --color-table-hover-light: rgba(0, 0, 0, 0.08);
+  --color-table-hover-dark: rgba(255, 255, 255, 0.08);
+  --table-hover-background: var(--color-table-hover-light);
+  --table-selected-background: rgba(255, 96, 73, 0.3);
+  --table-selected-hover-background: rgba(255, 96, 73, 0.5);
 }
 
 .taipy-dark {
   --color-background: var(--color-background-dark);
   --color-paper: var(--color-paper-dark);
   --color-contrast: var(--color-contrast-dark);
+  --table-hover-background: var(--color-table-hover-dark);
 }

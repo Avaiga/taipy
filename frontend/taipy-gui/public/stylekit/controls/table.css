@@ -73,3 +73,24 @@
   background: var(--color-background);
   opacity: var(--table-stripe-opacity, 0.5);
 }
+
+
+/*************************************************
+ *       HOVER & SELECTION STYLES
+ **************************************************/
+
+/* Base style for selected rows */
+html body .taipy-table tbody tr.Mui-selected {
+    background-color: var(--table-selected-background);
+}
+
+/* Hover effect for all non-selected rows */
+html body .taipy-table tbody tr:not(.Mui-selected):hover {
+    background-color: var(--table-hover-background);
+    cursor: pointer;
+}
+
+/* Hover effect for already-selected rows */
+html body .taipy-table tbody tr:hover {
+    background-color: var(--table-hover-selected-background);
+}
