@@ -549,6 +549,31 @@ const Selector = (props: SelectorProps) => {
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
 
+    // Handle Enter key in filter input: select all filtered options in multi-select mode
+    const handleFilterInputKeyDown = useCallback(
+        (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === "Enter" && multiple && filter) {
+                // Find filtered items
+                const filtered = lovList.filter((elt) => showItem(elt, searchValue));
+                const filteredIds = filtered.map((elt) => elt.id);
+                setSelectedValue(filteredIds);
+                dispatch(
+                    createSendUpdateAction(
+                        updateVarName,
+                        filteredIds,
+                        module,
+                        props.onChange,
+                        propagate,
+                        valueById ? undefined : lovVarName
+                    )
+                );
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        },
+        [multiple, filter, lovList, searchValue, setSelectedValue, dispatch, updateVarName, module, props.onChange, propagate, valueById, lovVarName]
+    );
+
     const dropdownValue = ((dropdown || isRadio) &&
         (multiple ? selectedValue : selectedValue.length ? selectedValue[0] : "")) as string[];
 
@@ -732,6 +757,7 @@ const Selector = (props: SelectorProps) => {
                                         placeholder="Search field"
                                         value={searchValue}
                                         onChange={handleInput}
+                                        onKeyDown={handleFilterInputKeyDown}
                                         disabled={!active}
                                         startAdornment={
                                             multiple && showSelectAll ? (
