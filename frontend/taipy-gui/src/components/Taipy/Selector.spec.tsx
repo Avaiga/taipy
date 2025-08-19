@@ -176,7 +176,41 @@ describe("Selector Component", () => {
             await userEvent.clear(search);
             expect(queryAllByText(/Item /)).toHaveLength(4);
         });
-    });
+        it("selects all filtered items on Enter in multi-select mode", async () => {
+            const user = userEvent.setup();
+            const dispatch = jest.fn();
+            const state = INITIAL_STATE;
+            const { getByPlaceholderText, queryAllByText } = render(
+                <TaipyContext.Provider value={{ state, dispatch }}>
+                    <Selector lov={lov} filter={true} multiple={true} updateVarName="varname" />
+                </TaipyContext.Provider>
+            );
+            const search = getByPlaceholderText("Search field");
+            // Filter to items containing 'Item 2' or 'Item 3'
+            await user.type(search, "2");
+            expect(queryAllByText(/Item /)).toHaveLength(1);
+            // Press Enter
+            await user.keyboard("{Enter}");
+            // Should dispatch with filtered id
+            expect(dispatch).toHaveBeenLastCalledWith({
+                name: "varname",
+                payload: { value: ["id2"] },
+                propagate: true,
+                type: "SEND_UPDATE_ACTION",
+            });
+            // Now clear and filter for 'Item'
+            await user.clear(search);
+            await user.type(search, "Item");
+            expect(queryAllByText(/Item /)).toHaveLength(4);
+            await user.keyboard("{Enter}");
+            expect(dispatch).toHaveBeenLastCalledWith({
+                name: "varname",
+                payload: { value: ["id1", "id2", "id3", "id4"] },
+                propagate: true,
+                type: "SEND_UPDATE_ACTION",
+            });
+        });
+    }); 
     describe("Selector Component with dropdown", () => {
         //dropdown
         it("displays as an empty control with arrow", async () => {
