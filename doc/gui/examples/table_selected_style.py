@@ -22,7 +22,7 @@ data = {"a": [1, 2, 3, 4, 8], "b": [5, 4, 3, 2, 1]}
 selected = [0]
 
 
-def num_on_action(state, var_name, payload):
+def select_row(state, var_name, payload):
     index = payload.get("index")
     if index in state.selected:
         state.selected = list(set(state.selected) - {index})
@@ -33,12 +33,11 @@ def num_on_action(state, var_name, payload):
 with tgb.Page() as page:
     tgb.toggle(theme=True)
 
-    tgb.table("{data}", selected="{selected}", on_action=num_on_action)
+    tgb.table("{data}", selected="{selected}", on_action=select_row)
 
-    tgb.table("{data}", selected="{selected}", on_action=num_on_action, class_name="rows-similar rows-bordered")
+    tgb.table("{data}", selected="{selected}", on_action=select_row, class_name="rows-similar rows-bordered")
 
 
 if __name__ == "__main__":
     gui = Gui(page=page)
-    gui.run(run_browser=False, use_reloader=True, title= "Tables - Styling (default and reset with classes)")
-        
+    gui.run(run_browser=False, use_reloader=True, title= "Tables - Row Selection")
