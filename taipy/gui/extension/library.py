@@ -235,19 +235,6 @@ class ElementLibrary(ABC):
     """
 
     @abstractmethod
-    def get_elements(self) -> t.Dict[str, Element]:
-        """
-        Return the dictionary holding all visual element declarations.
-
-        The key for each of this dictionary's entry is the name of the element,
-        and the value is an instance of `Element^`.
-
-        The default implementation returns an empty dictionary, indicating that this library
-        contains no custom visual elements.
-        """
-        pass
-
-    @abstractmethod
     def get_name(self) -> str:
         """
         Return the library name.
@@ -274,6 +261,19 @@ class ElementLibrary(ABC):
             In this situation, you will have to implement `(ElementLibrary.)get_js_module_name()^`
             because each JavaScript module will have to have a unique name.
 
+        You must implement this method in every extension library.
+        """
+        pass
+
+    @abstractmethod
+    def get_elements(self) -> t.Dict[str, Element]:
+        """
+        Return the dictionary holding all visual element declarations.
+
+        The key for each of this dictionary's entry is the name of the element,
+        and the value is an instance of `Element^`.
+
+        You must implement this method in every extension library.
         """
         pass
 
