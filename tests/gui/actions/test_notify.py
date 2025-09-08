@@ -28,8 +28,8 @@ def test_notify(gui: Gui, helpers):
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_server_instance())  # type: ignore[arg-type]
     cid = helpers.create_scope_and_get_sid(gui)
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
+    with gui._server.test_request_context(f"/{Gui._JSX_URL}/test/?client_id={cid}", data={"client_id": cid}):
         gui._server.request.get_request_meta().client_id = cid
         notify_id = notify(gui._Gui__state, "Info", "Message", id="id")  # type: ignore[attr-defined]
         assert notify_id == "id"
@@ -51,7 +51,7 @@ def test_notify_fastapi(gui: Gui, helpers):
     ws_client = helpers.get_socketio_test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     sid = ws_client.get_sid()
-    ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+    ws_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     with gui.get_app_context():
         gui._server.request.set_sid(sid)
         gui._server.request.get_request_meta().client_id = cid
@@ -85,8 +85,8 @@ def test_close_notification(gui: Gui, helpers):
     ws_client = gui._server._ws.test_client(gui._server.get_server_instance())  # type: ignore[arg-type]
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
+    with gui._server.test_request_context(f"/{Gui._JSX_URL}/test/?client_id={cid}", data={"client_id": cid}):
         gui._server.request.get_request_meta().client_id = cid
         notify_id = notify(gui._Gui__state, "Info", "Message", id="id")  # type: ignore[attr-defined]
         close_notification(gui._Gui__state, notify_id)  # type: ignore[attr-defined, arg-type]
@@ -109,7 +109,7 @@ def test_close_notification_fastapi(gui: Gui, helpers):
     ws_client = helpers.get_socketio_test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     sid = ws_client.get_sid()
-    ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+    ws_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     with gui.get_app_context():
         gui._server.request.set_sid(sid)
         gui._server.request.get_request_meta().client_id = cid

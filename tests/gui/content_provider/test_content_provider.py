@@ -62,7 +62,7 @@ def test_process_content_provider(gui: Gui, helpers):
     server_test_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     # my content provider
     result = server_test_client.get(
         f"/taipy-user-content/test?client_id={cid}&__taipy_html_content=true&variable_name=an_instance"
@@ -81,7 +81,7 @@ def test_process_content_provider_invalid(gui: Gui, helpers):
     server_test_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     # no content provider
     result = server_test_client.get(
         f"/taipy-user-content/test?client_id={cid}&__taipy_html_content=true&variable_name=v_name"
@@ -101,7 +101,7 @@ def test__serve_user_content(gui: Gui, helpers):
     server_test_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     # no content provider
     result = server_test_client.get(f"/taipy-user-content/test?client_id={cid}&custom_user_content_cb=user_content")
     assert "taipy.gui.state._GuiState" in helpers.get_response_raw_data(result, gui)
@@ -116,7 +116,7 @@ def test__serve_user_content_bad(gui: Gui, helpers):
     server_test_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     # no content provider
     with warnings.catch_warnings(record=True) as records:
         server_test_client.get(f"/taipy-user-content/test?client_id={cid}&custom_user_content_cb=bad_user_content")

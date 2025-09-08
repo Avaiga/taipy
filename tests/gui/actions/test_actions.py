@@ -26,7 +26,7 @@ def test_actions(gui: Gui, helpers):
     server_test_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    response = server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    response = server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     assert response.status_code == 200, f"response.status_code {response.status_code} != 200"
     response_data = helpers.get_response_data(response, gui)
     assert isinstance(response_data, dict), "response_data is not Dict"

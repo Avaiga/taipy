@@ -31,8 +31,8 @@ def test_download(gui: Gui, helpers):
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     cid = helpers.create_scope_and_get_sid(gui)
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
+    with gui._server.test_request_context(f"/{Gui._JSX_URL}/test/?client_id={cid}", data={"client_id": cid}):
         gui._server.request.get_request_meta().client_id = cid
         download(gui._Gui__state, "some text", "filename.txt", "on_download_action")  # type: ignore[attr-defined]
 
@@ -56,8 +56,8 @@ def test_download_fn(gui: Gui, helpers):
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     cid = helpers.create_scope_and_get_sid(gui)
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
+    with gui._server.test_request_context(f"/{Gui._JSX_URL}/test/?client_id={cid}", data={"client_id": cid}):
         gui._server.request.get_request_meta().client_id = cid
         download(gui._Gui__state, "some text", "filename.txt", on_download_action)  # type: ignore[attr-defined]
 
@@ -84,7 +84,7 @@ def test_download_fastapi(gui: Gui, helpers):
     ws_client = helpers.get_socketio_test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     sid = ws_client.get_sid()
-    ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+    ws_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     with gui.get_app_context():
         gui._server.request.set_sid(sid)
         gui._server.request.get_request_meta().client_id = cid
@@ -113,7 +113,7 @@ def test_download_fn_fastapi(gui: Gui, helpers):
     ws_client = helpers.get_socketio_test_client()
     cid = helpers.create_scope_and_get_sid(gui)
     sid = ws_client.get_sid()
-    ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+    ws_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     with gui.get_app_context():
         gui._server.request.set_sid(sid)
         gui._server.request.get_request_meta().client_id = cid

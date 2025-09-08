@@ -120,7 +120,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     sid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    server_test_client.get(f"/taipy-jsx/test?client_id={sid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={sid}")
     ws_client.emit(
         "message",
         {
@@ -164,7 +164,7 @@ def test_du_table_data_fetched_fastapi(gui: Gui, helpers, csvdata):
     ws_client = helpers.get_socketio_test_client()
     sid = helpers.create_scope_and_get_sid(gui)
     gui._server.request.set_sid(ws_client.get_sid())
-    ws_client.get(f"/taipy-jsx/test?client_id={sid}")
+    ws_client.get(f"/{Gui._JSX_URL}/test?client_id={sid}")
     ws_client.emit(
         "message",
         {

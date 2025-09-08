@@ -32,11 +32,11 @@ def test_sending_messages_in_group(gui: Gui, helpers):
     ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     cid = _DataScopes._GLOBAL_ID
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     assert gui._bindings()._get_all_scopes()[cid].name == "World!"  # type: ignore
     assert gui._bindings()._get_all_scopes()[cid].btn_id == "button1"  # type: ignore
 
-    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+    with gui._server.test_request_context(f"/{Gui._JSX_URL}/test/?client_id={cid}", data={"client_id": cid}):
         with gui as aGui:
             aGui._Gui__state.name = "Monde!"
             aGui._Gui__state.btn_id = "button2"
@@ -62,12 +62,12 @@ def test_sending_messages_in_group_fastapi(gui: Gui, helpers):
     ws_client = helpers.get_socketio_test_client()
     gui._server.request.set_sid(ws_client.get_sid())
     cid = _DataScopes._GLOBAL_ID
-    ws_client.get(f"/taipy-jsx/test?client_id={cid}")
+    ws_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     try:
         assert gui._bindings()._get_all_scopes()[cid].name == "World!"  # type: ignore
         assert gui._bindings()._get_all_scopes()[cid].btn_id == "button1"  # type: ignore
 
-        with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        with gui._server.test_request_context(f"/{Gui._JSX_URL}/test/?client_id={cid}", data={"client_id": cid}):
             with gui as aGui:
                 aGui._Gui__state.name = "Monde!"
                 aGui._Gui__state.btn_id = "button2"

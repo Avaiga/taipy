@@ -97,7 +97,8 @@ const Part = (props: PartProps) => {
             targetItemId?: string
         ) => {
             dispatch(
-                createSendActionNameAction(props.onAction, module, {
+                createSendActionNameAction(id, module, {
+                    action: props.onAction,
                     reason: "drop",
                     source_id: sourceId,
                     source_item_id: sourceItemId,

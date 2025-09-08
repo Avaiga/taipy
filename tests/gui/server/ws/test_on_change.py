@@ -35,7 +35,7 @@ def test_default_on_change(gui: Gui, helpers):
     ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
-    server_test_client.get(f"/taipy-jsx/test?client_id={sid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={sid}")
     # fake var update
     ws_client.emit("message", {"client_id": sid, "type": "U", "name": "x", "payload": {"value": "20"}})
     assert ws_client.get_received()
@@ -64,7 +64,7 @@ def test_specific_on_change(gui: Gui, helpers):
     ws_client = gui._server._ws.test_client(gui._server.get_server_instance())
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
-    server_test_client.get(f"/taipy-jsx/test?client_id={sid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={sid}")
     # fake var update
     ws_client.emit(
         "message",
@@ -93,7 +93,7 @@ def test_default_on_change_fastapi(gui: Gui, helpers):
     ws_client = helpers.get_socketio_test_client()
     sid = helpers.create_scope_and_get_sid(gui)
     gui._server.request.set_sid(ws_client.get_sid())
-    ws_client.get(f"/taipy-jsx/test?client_id={sid}")
+    ws_client.get(f"/{Gui._JSX_URL}/test?client_id={sid}")
     # fake var update
     ws_client.emit("message", {"client_id": sid, "type": "U", "name": "x", "payload": {"value": "20"}})
     try:
@@ -124,7 +124,7 @@ def test_specific_on_change_fastapi(gui: Gui, helpers):
     ws_client = helpers.get_socketio_test_client()
     sid = helpers.create_scope_and_get_sid(gui)
     gui._server.request.set_sid(ws_client.get_sid())
-    ws_client.get(f"/taipy-jsx/test?client_id={sid}")
+    ws_client.get(f"/{Gui._JSX_URL}/test?client_id={sid}")
     ws_client.emit(
         "message",
         {"client_id": sid, "type": "U", "name": "x", "payload": {"value": "20", "on_change": "on_input_change"}},

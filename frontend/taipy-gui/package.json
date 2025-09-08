@@ -94,7 +94,7 @@
     "add-asset-html-webpack-plugin": "^6.0.0",
     "autoprefixer": "^10.4.0",
     "copy-webpack-plugin": "^13.0.0",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.0.0",
     "css-loader": "^7.1.0",
     "css-mediaquery": "^0.1.2",
     "dotenv-webpack": "^8.0.0",

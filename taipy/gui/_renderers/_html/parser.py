@@ -33,7 +33,7 @@ class _TaipyHTMLParser(HTMLParser):
         self._tag_stack = []
 
     # @override
-    def handle_starttag(self, tag, props) -> None: # type: ignore[misc]
+    def handle_starttag(self, tag, props) -> None: # type: ignore[override]
         self._tag_stack.append((tag, self._line_count))
         if tag == "html":
             return
@@ -72,7 +72,9 @@ class _TaipyHTMLParser(HTMLParser):
             opening_tag, opening_tag_line = self._tag_stack.pop()
             if opening_tag != tag:
                 _warn(
-                    f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag '{tag}' at line {self._line_count}."  # noqa: E501
+                    f"Opening tag '{opening_tag}' "
+                    f"at line {opening_tag_line} has no matching closing tag '{tag}' "
+                    f"at line {self._line_count}."
                 )
         if tag in ["head", "body", "html"]:
             return
@@ -91,9 +93,9 @@ class _TaipyHTMLParser(HTMLParser):
             self.body += data
 
     def parse_taipy_tag(self) -> None:
-        tp_string, tp_element_name = self.taipy_tag.parse(self._gui)  # type: ignore[misc]
+        tp_string, tp_element_name = self.taipy_tag.parse(self._gui)  # type: ignore[reportOptionalMemberAccess]
         self.append_data(tp_string)
-        self.tag_mapping[f"{self.taipy_tag.namespace}:{self.taipy_tag.control_type}"] = tp_element_name  # type: ignore[misc]
+        self.tag_mapping[f"{self.taipy_tag.namespace}:{self.taipy_tag.control_type}"] = tp_element_name  # type: ignore[reportOptionalMemberAccess]
         self.taipy_tag = None
 
     def get_jsx(self) -> str:

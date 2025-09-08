@@ -38,7 +38,7 @@ def test_invoke_callback(gui: Gui, helpers):
     # client id
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
 
     gui.invoke_callback(cid, user_callback, [])
     with get_state(gui, cid) as state:
@@ -62,7 +62,7 @@ def test_invoke_callback_sid(gui: Gui, helpers):
     base_sid, _ = gui._bindings()._get_or_create_scope("base sid")
 
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     with gui.get_app_context():
         gui._server.request.get_request_meta().client_id = base_sid
         assert gui._server.request.get_request_meta().client_id == base_sid

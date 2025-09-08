@@ -1214,7 +1214,7 @@ class Gui:
                 if isinstance(newvalue, (dict, _MapDict)) and not _Hooks()._is_in_custom_page_context():
                     continue
                 if _is_plotly_figure(newvalue):
-                        continue
+                    continue
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
