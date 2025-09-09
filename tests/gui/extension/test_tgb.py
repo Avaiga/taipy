@@ -21,12 +21,27 @@ class TgbLibrary(ElementLibrary):
         "e1": Element(
             "s1",
             {
-                "b1": ElementProperty(PropertyType.boolean, doc_string="e1.b1 doc"),
-                "b2": ElementProperty(PropertyType.dynamic_boolean),
-                "s1": ElementProperty(PropertyType.string),
-                "s2": ElementProperty(PropertyType.dynamic_string),
-                "d1": ElementProperty(PropertyType.dict),
-                "d2": ElementProperty(PropertyType.dynamic_dict),
+                "b1": ElementProperty(PropertyType.boolean),
+                "b2": ElementProperty(PropertyType.dynamic_boolean, doc_string=""),
+                "s1": ElementProperty(PropertyType.string, doc_string="e1.s1 doc"),
+                "s2": ElementProperty(
+                    PropertyType.dynamic_string,
+                    doc_string="""e1.s2 doc
+                                      More e1.s2 doc""",
+                ),
+                "d1": ElementProperty(
+                    PropertyType.dict,
+                    doc_string="""
+                    e1.d1 doc
+                    More e1.d1 doc""",
+                ),
+                "d2": ElementProperty(
+                    PropertyType.dynamic_dict,
+                    doc_string="""
+                    e1.d2 doc
+
+                    More e1.d2 doc""",
+                ),
             },
             "E1",
             doc_string="e1 doc",
@@ -64,6 +79,12 @@ def test_tgb_generation(gui: Gui, test_client, helpers):
     assert re.search(r"d1:\s*t.Optional\[t.Union\[dict", api), "Incorrect property type for d1"
     assert re.search(r"d2:\s*t.Optional\[t.Union\[dict", api), "Incorrect property type for d2"
     assert "e1 doc" in api, "Missing doc for e1"
+    assert "`b1`: ..." in api, "Doc for e1.b1 should be empty"
+    assert "`b2`: ..." in api, "Doc for e1.b1 should be empty"
+    assert "`s1`: e1.s1 doc" in api, "Doc for e1.s1 is wrong"
+    assert "`s2`: e1.s2 doc\n        More e1.s2 doc" in api, "Doc for e1.s2 is wrong"
+    assert "`d1`: e1.d1 doc\n        More e1.d1 doc" in api, "Doc for e1.d1 is wrong"
+    assert "`d2`: e1.d2 doc\n\n        More e1.d2 doc" in api, "Doc for e1.d2 is wrong"
     assert "def e2(" in api, "Missing element e2"
     assert re.search(r"\(\s*p1\s*:", api), "Wrong default property in e2"
     assert re.search(r"p3:\s*t\.Union", api), "Wrong type hint for property p3 in e2"
