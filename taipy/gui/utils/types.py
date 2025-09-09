@@ -14,10 +14,9 @@ import json
 import typing as t
 from abc import ABC, abstractmethod
 from datetime import datetime
-from importlib.util import find_spec
 
 from .._warnings import _warn
-from . import _date_to_string, _MapDict, _string_to_date, _variable_decode
+from . import _date_to_string, _is_plotly_figure, _MapDict, _string_to_date, _variable_decode
 
 
 class _DoNotUpdate:
@@ -203,15 +202,12 @@ class _TaipyToJson(_TaipyBase):
         val = super().get()
         if not val:
             return None
-        if find_spec("plotly") and find_spec("plotly.graph_objs"):
-            from plotly.graph_objs import Figure as PlotlyFigure
-
-            if isinstance(val, PlotlyFigure):
-                try:
-                    return [json.loads(val.to_json())]
-                except Exception as e:
-                    _warn("Issue while serializing Plotly Figure", e)
-                    return None
+        if _is_plotly_figure(val):
+            try:
+                return [json.loads(t.cast(str, val.to_json()))]
+            except Exception as e:
+                _warn("Issue while serializing Plotly Figure", e)
+                return None
         _warn("'figure' property value must be a plotly.graph_objects.Figure.")
         return None
 

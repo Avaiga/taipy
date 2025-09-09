@@ -89,6 +89,7 @@ from .utils import (
     _getscopeattr_drill,
     _hasscopeattr,
     _is_in_notebook,
+    _is_plotly_figure,
     _is_unnamed_function,
     _LocalsContext,
     _MapDict,
@@ -101,6 +102,7 @@ from .utils import (
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
+    _TaipyToJson,
     _to_camel_case,
     _variable_decode,
     is_debugging,
@@ -785,6 +787,7 @@ class Gui:
             if derived_modified is not None:
                 self.__send_var_list_update(list(derived_modified), var_name)
 
+
     def _get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
         if not var_name:
             return (var_name, var_name)
@@ -1078,6 +1081,7 @@ class Gui:
             if isinstance(newvalue, (_TaipyData)) or isinstance(newvalue, custom_page_filtered_types):
                 newvalue = {"__taipy_refresh": True}
             else:
+                is_json = False
                 if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
                     ret_value = self.__get_content_accessor().get_info(
                         t.cast(str, front_var), newvalue.get(), isinstance(newvalue, _TaipyContentImage)
@@ -1095,14 +1099,17 @@ class Gui:
                         newvalue.get_name(), newvalue.get(), id_only=isinstance(newvalue, _TaipyLovValue)
                     )
                 elif isinstance(newvalue, _TaipyBase):
+                    is_json = isinstance(newvalue, _TaipyToJson)
                     newvalue = newvalue.get()
                 # Skip in taipy-gui, available in custom frontend
                 if isinstance(newvalue, (dict, _MapDict)) and not is_in_custom_page_context():
                     continue
+                if _is_plotly_figure(newvalue):
+                        continue
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
-                if newvalue is not None and not isinstance(newvalue, str):
+                if newvalue is not None and not isinstance(newvalue, str) and not is_json:
                     debug_warnings: t.List[warnings.WarningMessage] = []
                     with warnings.catch_warnings(record=True) as warns:
                         warnings.resetwarnings()
