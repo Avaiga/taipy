@@ -18,6 +18,8 @@ from urllib.request import urlopen
 import pytest
 from testbook import testbook
 
+from taipy.gui import Gui
+
 
 def wait_for_content(url, expected_text, timeout=10):
     start = time.time()
