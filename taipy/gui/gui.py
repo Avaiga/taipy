@@ -85,7 +85,6 @@ from .utils import (
     _hasscopeattr,
     _is_function,
     _is_in_notebook,
-    _is_plotly_figure,
     _is_unnamed_function,
     _LocalsContext,
     _MapDict,
@@ -1219,8 +1218,6 @@ class Gui:
                     newvalue = newvalue.get()
                 # Skip in taipy-gui, available in custom frontend
                 if isinstance(newvalue, (dict, _MapDict)) and not in_custom_page_context:
-                    continue
-                if _is_plotly_figure(newvalue):
                     continue
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
