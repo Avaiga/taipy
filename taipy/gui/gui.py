@@ -1185,12 +1185,13 @@ class Gui:
                 modified_vars.remove(v.get_name())
             elif isinstance(v, _DoNotUpdate):
                 modified_vars.remove(k)
+        custom_page_filtered_types = _Hooks()._get_resource_handler_data_layer_supported_types()
+        in_custom_page_context = _Hooks()._is_in_custom_page_context()
         for _var in modified_vars:
-            if not self.__is_front_end_variable(_var):
+            if not self.__is_front_end_variable(_var) and not in_custom_page_context:
                 _TaipyLogger._get_logger().debug(f"Skipping variable '{_var}' not in front-end.")
                 continue
             newvalue = values.get(_var)
-            custom_page_filtered_types = _Hooks()._get_resource_handler_data_layer_supported_types()
             if isinstance(newvalue, (_TaipyData)) or (
                 custom_page_filtered_types and isinstance(newvalue, custom_page_filtered_types)
             ):  # type: ignore
@@ -1217,7 +1218,7 @@ class Gui:
                     is_json = isinstance(newvalue, _TaipyToJson)
                     newvalue = newvalue.get()
                 # Skip in taipy-gui, available in custom frontend
-                if isinstance(newvalue, (dict, _MapDict)) and not _Hooks()._is_in_custom_page_context():
+                if isinstance(newvalue, (dict, _MapDict)) and not in_custom_page_context:
                     continue
                 if _is_plotly_figure(newvalue):
                     continue
