@@ -467,8 +467,8 @@ class _Builder:
     ):
         if is_var and isinstance(value, str):
             self.__gui._add_front_end_variable(value)
-        if is_var and isinstance(value, str) and client_var_name:
-            value = _get_client_var_name(value)
+            if client_var_name:
+                value = _get_client_var_name(value)
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
     @staticmethod
@@ -669,10 +669,7 @@ class _Builder:
             self.__set_json_attribute("defaultColumns", col_dict)
         if cmp_hash:
             hash_name = self.__get_typed_hash_name(cmp_hash, PropertyType.data)
-            self.__set_react_attribute(
-                _to_camel_case("data"),
-                hash_name, client_var_name=True
-            )
+            self.__set_react_attribute(_to_camel_case("data"), hash_name, client_var_name=True)
             self.__set_update_var_name(hash_name)
             self.__set_boolean_attribute("compare", True)
             self.__set_string_attribute("on_compare")
@@ -810,7 +807,6 @@ class _Builder:
             self.__update_vars.append(f"{react_name}={hash_name}")
         return self
 
-
     def __set_class_names(self):
         self.set_attribute("libClassName", self.__lib_name + "-" + self.__control_type.replace("_", "-"))
         if (private_css := self.__prop_values.get("style")) and isinstance(private_css, (dict, _MapDict)):
@@ -844,10 +840,7 @@ class _Builder:
         if hash_name:
             hash_name = self.__get_typed_hash_name(hash_name, PropertyType.image if image else PropertyType.content)
         if hash_name:
-            self.__set_react_attribute(
-                var_name,
-                hash_name, client_var_name=True
-            )
+            self.__set_react_attribute(var_name, hash_name, client_var_name=True)
         return self.set_attribute(_to_camel_case(f"default_{var_name}"), value)
 
     def __set_default_value(
@@ -921,10 +914,7 @@ class _Builder:
             return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])
         if hash_name := self.__hashes.get(var_name):
             hash_name = self.__get_typed_hash_name(hash_name, var_type)
-            self.__set_react_attribute(
-                _to_camel_case(var_name),
-                hash_name, client_var_name=True
-            )
+            self.__set_react_attribute(_to_camel_case(var_name), hash_name, client_var_name=True)
             if with_update:
                 self.__set_update_var_name(hash_name)
             if with_default:
