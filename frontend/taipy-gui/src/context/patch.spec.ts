@@ -53,16 +53,16 @@ describe("patchValue", () => {
         });
 
         it("should update object in array", () => {
-            const obj = { a: { b: [{c: 1}, {c: 2}, {c: 3}] } };
-            const newObj = patchValue(obj, { a: { b: { 2: {c: -1} } } });
+            const obj = { a: { b: [{ c: 1 }, { c: 2 }, { c: 3 }] } };
+            const newObj = patchValue(obj, { a: { b: { 2: { c: -1 } } } });
             expect(newObj.a.b.length).toBe(3);
             expect(newObj.a.b[0].c).toBe(1);
             expect(newObj.a.b[2].c).toBe(-1);
         });
 
         it("should update an array of objects", () => {
-            const obj = { a: { b: [{c: 1}, {c: 2, d: 3}, {c: 4}] } };
-            const newObj = patchValue(obj, { a: { b: { 1: [{c: -1}] as unknown as number } } });
+            const obj = { a: { b: [{ c: 1 }, { c: 2, d: 3 }, { c: 4 }] } };
+            const newObj = patchValue(obj, { a: { b: { 1: [{ c: -1 }] as unknown as number } } });
             expect(newObj.a.b[1].c).toBe(-1);
             expect(newObj.a.b[1].d).toBe(3);
         });
@@ -100,10 +100,12 @@ describe("patchValue", () => {
             const newObj = patchValue(obj, undefined, { a: { b: { d: null } } });
             expect(newObj).toStrictEqual(obj);
         });
-        it("should not modify the original object if the value to remove is not null", () => {
-            const obj = { a: { b: { c: 1 } } };
+        it("should modify the original object if the value to remove is not null", () => {
+            const obj = { a: { b: { c: 1, d: 2 } } };
             const newObj = patchValue(obj, undefined, { a: { b: { c: 2 as unknown as null } } });
-            expect(newObj).toStrictEqual(obj);
+            expect(newObj.a.b.c).toBeUndefined;
+            expect(newObj.a.b.c).toBeUndefined;
+            expect(newObj.a.b.d).toBe(2);
         });
     });
 });

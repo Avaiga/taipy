@@ -111,34 +111,38 @@ export const patchValue = <T>(toBePatched: T, change?: PatchChange, remove?: Pat
             const idx = Number(k);
             if (ONLY_DIGITS.test(k) && Array.isArray(toBePatched) && toBePatched.length > idx) {
                 const oldValue = (toBePatched as Array<unknown>)[idx];
-                if (v === null) {
-                    if (patchedValue === toBePatched) {
-                        patchedValue = [...toBePatched] as T;
-                    }
-                    (patchedValue as Array<unknown>).splice(idx, 1);
-                } else if (typeof v === "object" && !Array.isArray(v)) {
-                    const newValue = patchValue(oldValue, undefined, v);
-                    if (newValue !== oldValue) {
+                if (oldValue !== undefined) {
+                    if (v !== null && typeof v === "object" && !Array.isArray(v)) {
+                        const newValue = patchValue(oldValue, undefined, v);
+                        if (newValue !== oldValue) {
+                            if (patchedValue === toBePatched) {
+                                patchedValue = [...toBePatched] as T;
+                            }
+                            (patchedValue as Array<unknown>)[idx] = newValue;
+                        }
+                    } else {
                         if (patchedValue === toBePatched) {
                             patchedValue = [...toBePatched] as T;
                         }
-                        (patchedValue as Array<unknown>)[idx] = newValue;
+                        (patchedValue as Array<unknown>).splice(idx, 1);
                     }
                 }
             } else if (toBePatched && typeof toBePatched === "object" && !Array.isArray(toBePatched)) {
                 const oldValue = (toBePatched as Record<string, unknown>)[k];
-                if (v === null) {
-                    if (patchedValue === toBePatched) {
-                        patchedValue = { ...toBePatched };
-                    }
-                    delete (patchedValue as Record<string, unknown>)[k];
-                } else if (typeof v === "object" && !Array.isArray(v)) {
-                    const newValue = patchValue(oldValue, undefined, v);
-                    if (newValue !== oldValue) {
+                if (oldValue !== undefined) {
+                    if (v !== null && typeof v === "object" && !Array.isArray(v)) {
+                        const newValue = patchValue(oldValue, undefined, v);
+                        if (newValue !== oldValue) {
+                            if (patchedValue === toBePatched) {
+                                patchedValue = { ...toBePatched };
+                            }
+                            (patchedValue as Record<string, unknown>)[k] = newValue;
+                        }
+                    } else {
                         if (patchedValue === toBePatched) {
                             patchedValue = { ...toBePatched };
                         }
-                        (patchedValue as Record<string, unknown>)[k] = newValue;
+                        delete (patchedValue as Record<string, unknown>)[k];
                     }
                 }
             }
