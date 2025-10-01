@@ -55,14 +55,22 @@ def _get_non_existent_file_path(dir_path: Path, file_name: str) -> Path:
 
 def _secure_filename_unicode(filename: str) -> str:
     """Modified version that preserves Unicode characters"""
-    filename = unicodedata.normalize("NFKD", filename)
+    filename = unicodedata.normalize("NFC", filename)
 
     for sep in os.sep, os.path.altsep:
         if sep:
             filename = filename.replace(sep, " ")
 
-    filename = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", filename)
-    filename = "_".join(filename.split()).strip("._")
+    filename = re.sub(r'[<>:"/\\|?*\x00-\x1f\x7f]', "", filename)
+
+    # Replace all whitespace (including newlines, tabs) with spaces
+    filename = re.sub(r"\s+", " ", filename)
+
+    # Convert spaces to underscores and clean up multiple underscores
+    filename = re.sub(r"_+", "_", filename.replace(" ", "_"))
+
+    # Remove leading/trailing dots and underscores
+    filename = filename.strip("._")
 
     # Windows device file check
     if os.name == "nt" and filename and filename.split(".")[0].upper() in _WINDOWS_DEVICE_FILES:
