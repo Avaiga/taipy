@@ -1,4 +1,4 @@
-[![GettingStartedBook_link](assets/GettingStartedBook.png)](https://links.taipy.io/bookgithub)
+[![Getting Started book announcement](https://taipy.io/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2F12yo38rb%2Fproduction%2Ff1ffeaabe94c5605d20321f0f417fef69b8d48f8-1860x600.png)](https://links.taipy.io/bookgithub)
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
   <picture>
