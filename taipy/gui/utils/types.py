@@ -228,7 +228,7 @@ class _TaipyToJson(_TaipyBase):
                 return val.to_json()
             except Exception as e:
                 _warn("Issue while serializing 'JsonProperty'.", e)
-        elif method:= getattr(val, "to_json", None):
+        elif method := getattr(val, "to_json", None):
             if ismethod(method) and len(signature(method).parameters) == 0:
                 try:
                     return method()
