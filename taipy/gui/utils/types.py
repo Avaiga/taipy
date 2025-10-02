@@ -235,7 +235,7 @@ class _TaipyToJson(_TaipyBase):
                 except Exception as e:
                     _warn("Issue while serializing object.", e)
             else:
-                _warn(f"'{self._get_readable_name()}.to_json' is not valid method.")
+                _warn(f"'{self._get_readable_name()}.to_json' is not a valid method.")
         else:
             _warn(f"'{self._get_readable_name()}.to_json()' must be defined.")
         return None
