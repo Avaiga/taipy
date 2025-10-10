@@ -3,9 +3,7 @@
         [
             "text",
             {
-                "inherits": [
-                    "shared"
-                ],
+                "inherits": ["shared"],
                 "properties": [
                     {
                         "name": "value",
@@ -42,10 +40,7 @@
         [
             "button",
             {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["active", "shared"],
                 "properties": [
                     {
                         "name": "label",
@@ -71,19 +66,16 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when the button is pressed.<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the button it it has one.</li><li><i>payload</i> (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
+                    },
+                    {
+                        "name": "auto_repeat",
+                        "type": "int",
+                        "default_value": "None",
+                        "doc": "The period, in milliseconds, between automatic repeats when the button is pressed for a long time.<br/>If set to None or 0, auto-repeat is disabled."
                     },
                     {
                         "name": "width",
@@ -97,11 +89,7 @@
         [
             "input",
             {
-                "inherits": [
-                    "sharedInput",
-                    "on_change",
-                    "propagate"
-                ],
+                "inherits": ["sharedInput", "on_change", "propagate"],
                 "properties": [
                     {
                         "name": "value",
@@ -158,11 +146,7 @@
         [
             "number",
             {
-                "inherits": [
-                    "sharedInput",
-                    "on_change",
-                    "propagate"
-                ],
+                "inherits": ["sharedInput", "on_change", "propagate"],
                 "properties": [
                     {
                         "name": "value",
@@ -210,10 +194,7 @@
         [
             "slider",
             {
-                "inherits": [
-                    "lovComp",
-                    "propagate"
-                ],
+                "inherits": ["lovComp", "propagate"],
                 "properties": [
                     {
                         "name": "value",
@@ -285,10 +266,7 @@
         [
             "toggle",
             {
-                "inherits": [
-                    "lovComp",
-                    "propagate"
-                ],
+                "inherits": ["lovComp", "propagate"],
                 "properties": [
                     {
                         "name": "value",
@@ -328,10 +306,7 @@
         [
             "date",
             {
-                "inherits": [
-                    "on_change",
-                    "propagate"
-                ],
+                "inherits": ["on_change", "propagate"],
                 "properties": [
                     {
                         "name": "date",
@@ -389,10 +364,7 @@
         [
             "time",
             {
-                "inherits": [
-                    "on_change",
-                    "propagate"
-                ],
+                "inherits": ["on_change", "propagate"],
                 "properties": [
                     {
                         "name": "analogic",
@@ -434,10 +406,7 @@
         [
             "date_range",
             {
-                "inherits": [
-                    "on_change",
-                    "propagate"
-                ],
+                "inherits": ["on_change", "propagate"],
                 "properties": [
                     {
                         "name": "dates",
@@ -490,10 +459,7 @@
         [
             "chart",
             {
-                "inherits": [
-                    "on_change",
-                    "propagate"
-                ],
+                "inherits": ["on_change", "propagate"],
                 "properties": [
                     {
                         "name": "data",
@@ -625,18 +591,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when the visible part of the x axis changes.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the chart control if it has one.</li><li><i>payload</i> (dict[str, Any]): the full details on this callback's invocation, as emitted by <a href=\"https://plotly.com/javascript/plotlyjs-events/#update-data\">Plotly</a>.</li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -767,18 +724,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when the user clicks in the chart background.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the chart control if it has one.</li><li><i>payload</i> (dict[str, Any]): a dictionary containing the <i>x</i> and <i>y</i> coordinates of the click <b>or</b> <i>latitude</i> and <i>longitude</i> in the case of a map. This feature relies on non-public Plotly structured information.</li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     }
                 ]
@@ -787,10 +735,7 @@
         [
             "table",
             {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["active", "shared"],
                 "properties": [
                     {
                         "name": "data",
@@ -893,26 +838,11 @@
                         "type": "Union[str, Callable]",
                         "doc": "Defines custom formatting for table cells. This property must be a function or the name of a function that returns a formatted string for each cell.<br/>The function is invoked when the cells in the specified column (<i>column_name</i>) are rendered. It should return a string that represents the cell value to provide the best user experience.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li>  <li><i>value</i> (Any): the value of the cell.</li>  <li><i>index</i> (int): the index of the row.</li>  <li><i>row</i> (Any): the entire row. The type depends on the type of <i>data</i>.</li>  <li><i>column_name</i> (str): the name of the column.</li></ul>By default, no custom formatting is applied to the column.<br/>For more details, see the <a href=\"#cell-formats\">section</a>.",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "value",
-                                "Any"
-                            ],
-                            [
-                                "index",
-                                "int"
-                            ],
-                            [
-                                "row",
-                                "Any"
-                            ],
-                            [
-                                "column_name",
-                                "str"
-                            ]
+                            ["state", "State"],
+                            ["value", "Any"],
+                            ["index", "int"],
+                            ["row", "Any"],
+                            ["column_name", "str"]
                         ]
                     },
                     {
@@ -969,18 +899,9 @@
                         "default_value": "<i>default implementation</i>",
                         "doc": "A function or the name of a function triggered when an edited cell is validated.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): a dictionary containing details about the callback invocation, with the following keys:<ul><li><i>index</i> (int): the row index.</li><li><i>col</i> (str): the column name.</li><li><i>value</i> (Any): the new cell value, cast to the column's data type.</li><li><i>user_value</i> (str): the new cell value, as entered by the user.</li><li><i>tz</i> (str): the timezone, if the column type is <code>date</code>.</li></ul></li></ul>If this property is set to False, the table does not provide the cell editing functionality.<br/>If this property is not set, the table will use the default implementation for editing cells.",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "var_name",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["var_name", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -988,18 +909,9 @@
                         "type": "Union[bool, Callable]",
                         "doc": "A function or the name of a function that is triggered when the user requests a row to be added to the table.<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following key:\n<ul><li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for adding a new row<br/>If this property is set to False, you cannot add new rows.",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "var_name",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["var_name", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -1008,18 +920,9 @@
                         "default_value": "<i>default implementation</i>",
                         "doc": "A function or the name of a function triggered when a row is deleted.<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the tabular data variable.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has one key:\n<ul><li><i>index</i> (int): the row index.</li></ul></li></ul><br/>If this property is not set, the table uses the default implementation for deleting rows.",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "var_name",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["var_name", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -1027,18 +930,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when the user selects a row.<br/>This function is invoked with the following parameters:\n<ul><li>state (<code>State^</code>): the state instance.</li><li>var_name (str): the name of the tabular data variable.</li><li>payload (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul><li>action: the name of the action that triggered this callback.</li><li>index (int): the row index.</li><li>col (str): the column name.</li><li>reason (str): the origin of the action: \"click\", or \"button\" if the cell contains a Markdown link syntax.</li><li>value (str): the <i>link value</i> indicated in the cell when using a Markdown link syntax (that is, <i>reason</i> is set to \"button\").</li></ul></li></ul>.",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "var_name",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["var_name", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -1069,18 +963,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that compares data. This function should return a structure that identifies the differences between the different data passed as name. The default implementation compares the default data with the data[1] value.",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "main_data_name",
-                                "str"
-                            ],
-                            [
-                                "compare_data_names",
-                                "list[str]"
-                            ]
+                            ["state", "State"],
+                            ["main_data_name", "str"],
+                            ["compare_data_names", "list[str]"]
                         ]
                     },
                     {
@@ -1101,11 +986,7 @@
         [
             "selector",
             {
-                "inherits": [
-                    "lovComp",
-                    "propagate",
-                    "dndComp"
-                ],
+                "inherits": ["lovComp", "propagate", "dndComp"],
                 "properties": [
                     {
                         "name": "label",
@@ -1164,10 +1045,7 @@
         [
             "file_download",
             {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["active", "shared"],
                 "properties": [
                     {
                         "name": "content",
@@ -1185,18 +1063,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the button if it has one.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul><li><i><i>action:</i>: the name of the action that triggered this callback.</li><li><i>args</i>: a list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li></ul></li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -1234,10 +1103,7 @@
         [
             "file_selector",
             {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["active", "shared"],
                 "properties": [
                     {
                         "name": "content",
@@ -1255,18 +1121,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that will be triggered.<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the button if it has one.</li><li><i>payload</i> (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -1311,10 +1168,7 @@
         [
             "image",
             {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["active", "shared"],
                 "properties": [
                     {
                         "name": "content",
@@ -1332,18 +1186,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when the user clicks on the image.<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the button if it has one.</li><li><i>payload</i> (dict): a dictionary that contains the key \"action\" set to the name of the action that triggered this callback.</li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -1363,9 +1208,7 @@
         [
             "metric",
             {
-                "inherits": [
-                    "shared"
-                ],
+                "inherits": ["shared"],
                 "properties": [
                     {
                         "name": "value",
@@ -1530,9 +1373,7 @@
         [
             "indicator",
             {
-                "inherits": [
-                    "shared"
-                ],
+                "inherits": ["shared"],
                 "properties": [
                     {
                         "name": "display",
@@ -1591,9 +1432,7 @@
         [
             "menu",
             {
-                "inherits": [
-                    "active"
-                ],
+                "inherits": ["active"],
                 "properties": [
                     {
                         "name": "lov",
@@ -1611,18 +1450,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when a menu option is selected.<br/><br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the button, if it has one.</li><li><i>payload</i> (dict): a dictionary containing details about the callback invocation, with the following keys:<ul><li><i>action:</i>: the name of the action that triggered this callback.</li><li><i>args</i>: a list where the first element contains the identifier of the selected option.</li></ul></li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -1661,8 +1491,8 @@
                     },
                     {
                         "name": "expanded",
-                        "type":"bool",
-                        "default_value":"False",
+                        "type": "bool",
+                        "default_value": "False",
                         "doc": "Defines whether the menu starts expanded or folded"
                     }
                 ]
@@ -1671,10 +1501,7 @@
         [
             "navbar",
             {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["active", "shared"],
                 "properties": [
                     {
                         "name": "lov",
@@ -1688,9 +1515,7 @@
         [
             "alert",
             {
-                "inherits": [
-                    "shared"
-                ],
+                "inherits": ["shared"],
                 "properties": [
                     {
                         "name": "message",
@@ -1723,9 +1548,7 @@
         [
             "status",
             {
-                "inherits": [
-                    "shared"
-                ],
+                "inherits": ["shared"],
                 "properties": [
                     {
                         "name": "value",
@@ -1751,9 +1574,7 @@
         [
             "login",
             {
-                "inherits": [
-                    "shared"
-                ],
+                "inherits": ["shared"],
                 "properties": [
                     {
                         "name": "title",
@@ -1767,18 +1588,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when the dialog button is pressed.<br/><br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the button if it has one.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul><li><i>action:</i>: the name of the action that triggered this callback.</li><li><i>args:</i>: a list with three elements:\n<ul><li>The first element is the username</li><li>The second element is the password</li><li>The third element is the current page name</li></ul></li></li></ul></li></ul><br/>When the button is pressed, and if this property is not set, Taipy will try to find a callback function called <i>on_login()</i> and invoke it with the parameters listed above.",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -1797,10 +1609,7 @@
         [
             "chat",
             {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["active", "shared"],
                 "properties": [
                     {
                         "name": "messages",
@@ -1831,18 +1640,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when the user enters a new message.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the name of the variable bound to the <i>messages</i> property.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul><li><i>action</i>: the name of the action that triggered this callback.</li><li><i>args</i> (list): a list composed of a reason (\"click\" or \"Enter\"), the variable name, the message, and the user identifier of the sender.</li></ul></li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "var_name",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["var_name", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -1886,9 +1686,7 @@
         [
             "tree",
             {
-                "inherits": [
-                    "selector"
-                ],
+                "inherits": ["selector"],
                 "properties": [
                     {
                         "name": "expanded",
@@ -1929,11 +1727,7 @@
         [
             "part",
             {
-                "inherits": [
-                    "partial",
-                    "shared",
-                    "dndComp"
-                ],
+                "inherits": ["partial", "shared", "dndComp"],
                 "properties": [
                     {
                         "name": "render",
@@ -1968,11 +1762,7 @@
         [
             "expandable",
             {
-                "inherits": [
-                    "partial",
-                    "shared",
-                    "on_change"
-                ],
+                "inherits": ["partial", "shared", "on_change"],
                 "properties": [
                     {
                         "name": "title",
@@ -1992,11 +1782,7 @@
         [
             "dialog",
             {
-                "inherits": [
-                    "partial",
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["partial", "active", "shared"],
                 "properties": [
                     {
                         "name": "open",
@@ -2010,18 +1796,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function triggered when a button is pressed.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the dialog if it has one.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul><li><i>action:</i>: the name of the action that triggered this callback.</li><li><i>args:</i>: a list where the first element contains the index of the selected label.</li></ul></li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {
@@ -2046,19 +1823,17 @@
                         "doc": "The height of the dialog, in CSS units."
                     },
                     {
-			"name": "ref_id",
-			"type": "dynamic(str)",
-			"doc": "The id of an HTML element or a query selector that identifies the reference element serving as the anchor for the dialog."
-		    }
+                        "name": "ref_id",
+                        "type": "dynamic(str)",
+                        "doc": "The id of an HTML element or a query selector that identifies the reference element serving as the anchor for the dialog."
+                    }
                 ]
             }
         ],
         [
             "layout",
             {
-                "inherits": [
-                    "shared"
-                ],
+                "inherits": ["shared"],
                 "properties": [
                     {
                         "name": "columns",
@@ -2085,12 +1860,7 @@
         [
             "pane",
             {
-                "inherits": [
-                    "partial",
-                    "on_change",
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["partial", "on_change", "active", "shared"],
                 "properties": [
                     {
                         "name": "open",
@@ -2104,14 +1874,8 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (Optional[str]): the identifier of the <i>close</i> button if it has one.</li></ul><br/>If this property is not set, no function is called when this pane is closed.",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"]
                         ]
                     },
                     {
@@ -2165,9 +1929,7 @@
         [
             "lovComp",
             {
-                "inherits": [
-                    "on_change"
-                ],
+                "inherits": ["on_change"],
                 "properties": [
                     {
                         "name": "value",
@@ -2231,18 +1993,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when a source element is dropped on a target element.<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>payload</i> (dict): a dictionary that contains the following keys <ul><li>action</li><li>reason: \"drop\"</li><li>source_id,</li><li>source_item_id</li><li>source_data</li><li>source_var_name</li><li>target_id</li><li>target_item_id</li><li>target_data</li><li>target_var_name</li></ul>.</li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     }
                 ]
@@ -2257,18 +2010,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when the value changes.<br/>The callback function receives the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>var_name</i> (str): the bound variable name.</li><li><i>value</i> (Any): the updated value.</li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "var_name",
-                                "str"
-                            ],
-                            [
-                                "value",
-                                ""
-                            ]
+                            ["state", "State"],
+                            ["var_name", "str"],
+                            ["value", ""]
                         ]
                     }
                 ]
@@ -2294,10 +2038,7 @@
         [
             "propagate",
             {
-                "inherits": [
-                    "active",
-                    "shared"
-                ],
+                "inherits": ["active", "shared"],
                 "properties": [
                     {
                         "name": "propagate",
@@ -2323,18 +2064,9 @@
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function that is triggered when a specific key is pressed.<br/>The callback function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the control if it has one.</li><li><i>payload</i> (dict): the callback details<br/>This dictionary has the following keys:\n<ul><li><i>action:</i>: the name of the action that triggered this callback.</li><li><i>args</i> (list):\n<ul><li><i>[0]</i>: The key name pressed.</li><li><i>[1]</i>: The variable name.</li><li><i>[2]</i>: The current value of the variable.</li></ul></li></ul></li></ul>",
                         "signature": [
-                            [
-                                "state",
-                                "State"
-                            ],
-                            [
-                                "id",
-                                "str"
-                            ],
-                            [
-                                "payload",
-                                "dict"
-                            ]
+                            ["state", "State"],
+                            ["id", "str"],
+                            ["payload", "dict"]
                         ]
                     },
                     {

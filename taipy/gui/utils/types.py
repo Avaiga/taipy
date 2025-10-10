@@ -243,3 +243,6 @@ class _TaipyToJson(_TaipyBase):
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Tj"
+
+
+class _TaipyToDynamicJson(_TaipyToJson): ...

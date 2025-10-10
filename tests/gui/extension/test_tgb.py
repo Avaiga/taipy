@@ -49,9 +49,9 @@ class TgbLibrary(ElementLibrary):
         "e2": Element(
             "x",
             {
-                "p1": ElementProperty(PropertyType.any),
-                "p2": ElementProperty(PropertyType.any),
-                "p3": ElementProperty(PropertyType.any, type_hint="Union[bool,str]"),
+                "p1": ElementProperty(PropertyType.boolean),
+                "p2": ElementProperty(PropertyType.boolean),
+                "p3": ElementProperty(PropertyType.boolean, type_hint="Union[bool,str]"),
             },
             "E2",
         ),

@@ -211,22 +211,6 @@ class _Builder:
     def __set_json_attribute(self, name, value):
         return self.set_attribute(name, json.dumps(value, cls=_TaipyJsonEncoder))
 
-    def __set_any_attribute(self, name: str, default_value: t.Optional[str] = None):
-        value = self.__prop_values.get(name, default_value)
-        return self.__set_json_attribute(_to_camel_case(name), value)
-
-    def __set_dynamic_any_attribute(self, name: str, default_value: t.Optional[str] = None):
-        value = self.__prop_values.get(name, default_value)
-        self.__set_json_attribute(_to_camel_case(f"default_{name}"), value)
-
-        if hash := self.__hashes.get(name):
-            if isinstance(value, (dict, _MapDict)):
-                hash = self.__get_typed_hash_name(hash, PropertyType.dynamic_dict)
-            react_name = _to_camel_case(name)
-            self.__update_vars.append(f"{react_name}={hash}")
-            self.__set_react_attribute(react_name, hash)
-        return self
-
     def __get_boolean_attribute(self, name: str, default_value=False):
         bool_attr = self.__prop_values.get(name, default_value)
         return _is_true(bool_attr) if isinstance(bool_attr, str) else bool(bool_attr)
@@ -466,7 +450,7 @@ class _Builder:
         self, name: str, value: t.Any, is_var: t.Optional[bool] = True, client_var_name: t.Optional[bool] = False
     ):
         if is_var and isinstance(value, str):
-            self.__gui._add_front_end_variable(value)
+            self.__gui._add_front_end_variable(value)  # type: ignore[attr-defined]
             if client_var_name:
                 value = _get_client_var_name(value)
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
@@ -911,7 +895,7 @@ class _Builder:
                 )
                 native_type = True
         if var_type == PropertyType.dynamic_boolean:
-            return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])
+            return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])  # type: ignore
         if hash_name := self.__hashes.get(var_name):
             hash_name = self.__get_typed_hash_name(hash_name, var_type)
             self.__set_react_attribute(_to_camel_case(var_name), hash_name, client_var_name=True)
@@ -926,6 +910,9 @@ class _Builder:
                     self.__set_default_value(var_name, val, native_type=native_type)
                 else:
                     self.__set_default_value(var_name, var_type=var_type)
+        elif var_type == PropertyType.json:
+            # TODO - refactor with set_attributes
+            ...
         else:
             if var_type == PropertyType.data and (self.__control_type != "chart" or "figure" not in self.__prop_values):
                 _warn(f"{self.__control_type}.{var_name} property should be bound.")
@@ -1066,13 +1053,13 @@ class _Builder:
             if not isinstance(attr, tuple):
                 attr = (attr,)
             var_type = _get_tuple_val(attr, 1, PropertyType.string)
-            if var_type == PropertyType.to_json:
+            is_dynamic_json = False
+            if var_type == PropertyType.json:
                 var_type = _TaipyToJson
-            if var_type == PropertyType.any:
-                self.__set_any_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == PropertyType.dynamic_any:
-                self.__set_dynamic_any_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == PropertyType.boolean:
+            elif var_type == PropertyType.dynamic_json:
+                var_type = _TaipyToJson
+                is_dynamic_json = True
+            if var_type == PropertyType.boolean:
                 def_val = _get_tuple_val(attr, 2, False)
                 if isinstance(def_val, bool) or self.__prop_values.get(attr[0], None) is not None:
                     val = self.__get_boolean_attribute(attr[0], def_val)
@@ -1161,6 +1148,17 @@ class _Builder:
                     hash_name = self.__gui._evaluate_bind_holder(var_type, expr)  # type: ignore[attr-defined]
                     self.__update_vars.append(f"{prop_name}={hash_name}")
                     self.__set_react_attribute(prop_name, hash_name)
+                    if is_dynamic_json:
+                        val = self.__prop_values.get(attr[0])
+                        if val:
+                            json_val = var_type(val, "").get()  # type: ignore
+                            self.set_attribute(
+                                _to_camel_case(f"default_{prop_name}"),
+                                json.dumps(json_val),
+                            )
+                        else:
+                            # val is None
+                            ...
                 else:
                     val = self.__prop_values.get(attr[0])
                     self.set_attribute(

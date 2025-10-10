@@ -1217,7 +1217,7 @@ class Gui:
                     is_json = isinstance(newvalue, _TaipyToJson)
                     newvalue = newvalue.get()
                 # Skip in taipy-gui, available in custom frontend
-                if isinstance(newvalue, (dict, _MapDict)) and not in_custom_page_context:
+                if isinstance(newvalue, (dict, _MapDict)) and not in_custom_page_context and not is_json:
                     continue
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)

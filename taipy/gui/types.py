@@ -29,6 +29,7 @@ from .utils import (
     _TaipyLovValue,
     _TaipyNumber,
     _TaipyTime,
+    _TaipyToDynamicJson,
     _TaipyToJson,
 )
 
@@ -70,14 +71,6 @@ class PropertyType(Enum):
     See `ElementProperty^` for more details.
     """
 
-    any = "any"
-    """
-    The property holds a value of any serializable type.
-    """
-    dynamic_any = "dynamicany"
-    """
-    The property is dynamic and holds a value of any serializable type.
-    """
     boolean = "boolean"
     """
     The property holds a Boolean value.
@@ -129,7 +122,14 @@ class PropertyType(Enum):
     The property holds a reference to a function.
     """
     image = _TaipyContentImage
-    json = "json"
+    json = _TaipyToJson
+    """
+    The property is JSON serializable.
+    """
+    dynamic_json = _TaipyToDynamicJson
+    """
+    The property is JSON serializable and dynamic.
+    """
     single_lov = "singlelov"
     lov = _TaipyLov
     lov_no_default = "lovnodefault"
@@ -165,7 +165,6 @@ class PropertyType(Enum):
     The property holds an inner attributes that is defined by a library and cannot be overridden by the user.
     """
     inner = "inner"
-    to_json = _TaipyToJson
 
 
 @t.overload  # noqa: F811

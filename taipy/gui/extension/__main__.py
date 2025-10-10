@@ -72,7 +72,7 @@ def generate_doc(library: ElementLibrary) -> str:  # noqa: C901
                 prop_type = re.sub(r"\b(?<!t\.)\b(Optional|Union)\[", r"t.\1[", prop_type)
             else:
                 # Could use 'match' with Python >= 3.10
-                prop_type = "t.Union[str, any]"
+                prop_type = "t.Union[str, t.Any]"
                 if property.property_type in [PropertyType.boolean, PropertyType.dynamic_boolean]:
                     prop_type = "t.Union[bool, str]"
                 elif property.property_type in [PropertyType.string, PropertyType.dynamic_string]:
@@ -105,7 +105,7 @@ def generate_doc(library: ElementLibrary) -> str:  # noqa: C901
                 line = lines.pop(0)
                 documentation += f"{I}{line}\n" if line else "\n"
         else:
-            documentation = f'{I}"""\n'
+            documentation = f'{I}"""\n' if property_doc else ""
         if property_doc:
             documentation += f"\n{I}### Parameters:\n"
             for property_name in property_names:
@@ -121,7 +121,7 @@ def generate_doc(library: ElementLibrary) -> str:  # noqa: C901
         if documentation:
             documentation += f'{I}"""\n'
         parameters_list = ",\n".join([f"{I}{p}" for p in parameters])
-        print(f"def {element_name}(\n{parameters_list},\n):\n{documentation}{I}...", file=stream)
+        print(f"def {element_name}(\n{parameters_list},\n) -> None:\n{documentation}{I}...", file=stream)
 
     return stream.getvalue()
 
