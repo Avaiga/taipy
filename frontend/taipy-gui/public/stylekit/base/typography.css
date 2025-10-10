@@ -75,3 +75,52 @@ h6,
 .text-caption {
     font-size: var(--font-size-caption);
 }
+
+/**************************************************************
+
+                CODE BLOCK STYLES
+
+***************************************************************/
+
+/* Inline code */
+code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+    background-color: rgba(0, 0, 0, 0.06);
+    color: var(--color-contrast);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+}
+
+/* Dark mode inline code */
+.taipy-dark code {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Code blocks (pre) */
+pre {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    background-color: rgba(0, 0, 0, 0.04);
+    color: var(--color-contrast);
+    padding: var(--spacing1);
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 0.5em 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode code blocks */
+.taipy-dark pre {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Code inside pre should not have extra styling */
+pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+}
