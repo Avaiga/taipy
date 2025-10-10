@@ -69,7 +69,7 @@ No more compromises on performance, customization, and scalability.
 - [Taipy and its ecosystem](#-taipy-and-taipy-ecosystem)
 - [Quickstart](#-quickstart)
 - [Documentation and resources](#-documentation-and-resources)
-- [Contributing](#-contributing)
+- [Contributing](#contributing)
 - [Code of Conduct](#-code-of-conduct)
 - [License](#-license)
 
@@ -129,7 +129,7 @@ It includes
 [API references](https://docs.taipy.io/en/latest/refmans/), and
 [Galleries](https://docs.taipy.io/en/latest/gallery/).
 
-## ⚒️ Contributing
+## ⚒️ Contributing <a id="contributing"></a>
 
 Want to help build Taipy? Check out our [**Contributing Guide**](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
 
