@@ -129,7 +129,7 @@ It includes
 [API references](https://docs.taipy.io/en/latest/refmans/), and
 [Galleries](https://docs.taipy.io/en/latest/gallery/).
 
-## ⚒️ Contributing
+## ⚒️ Contributing <a id="-contributing"></a>
 
 Want to help build Taipy? Check out our [**Contributing Guide**](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
 
