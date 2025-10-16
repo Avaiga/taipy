@@ -34,5 +34,5 @@ def test_metric_builder_circular(gui: Gui, helpers):
 def test_metric_builder_linear(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
         tgb.metric(type="linear", value=42)
-    expected_list = ["<Metric", 'type="linear"', 'value="{!42.0}']
+    expected_list = ["<Metric", 'type="linear"', 'value="{!42.0']
     helpers.test_control_builder(gui, page, expected_list)

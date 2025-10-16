@@ -21,7 +21,7 @@ def test_indicator_builder(gui: Gui, test_client, helpers):
         "<Indicator",
         'libClassName="taipy-indicator"',
         'defaultValue="{!15',
-        '"display="{!12.0',
+        'display="{!12.0',
         'format="%.2f"',
         'max="{!20.0',
         'min="{!1.0',
