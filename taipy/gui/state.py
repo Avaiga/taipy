@@ -238,11 +238,11 @@ class State(SimpleNamespace, metaclass=ABCMeta):
 
             **Complex Data Structures:**
 
-            Replace objects within a list:
+            Merge fields into objects within a list:
             ```python
             # data = {"users": [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]}
             state.patch("data", change={"users": {0: {"age": 31}}})
-            # Result: {"users": [{"age": 31}, {"name": "Jane", "age": 25}]}
+            # Result: {"users": [{"name": "John", "age": 31}, {"name": "Jane", "age": 25}]}
             ```
 
             Update objects by replacing with a list (preserves other properties):
