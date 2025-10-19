@@ -158,31 +158,105 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         """Patch a variable on a client.
 
         The connected client will receive an update of the variable called *name* with the
-        provided change and/or remove description.
+        provided change and/or remove description. This method allows efficient partial
+        updates of complex data structures without replacing the entire variable.
 
         Arguments:
             name (str): The variable name to update.
-            change (dict, optional): A dictionary describing the changes to apply to the variable.
-                Defaults to None.
-            remove (dict, optional): A dictionary describing the elements to remove from the variable.
-                Defaults to None.
+            change (dict, optional): A dictionary describing the changes to apply to the
+                variable. Defaults to None.
+            remove (dict, optional): A dictionary describing the elements to remove from
+                the variable. Defaults to None.
 
-        TODO: Add examples here.
-        state.patch("data", change={"y": "anything"}) # change the y value of the data dict
-        state.patch("data", change={"a": {"b": "anything"}}) # change the a.b value of the data dict
-        state.patch("data", change={"y": {4: "something"}}) # change the 4th index of the y list
-        state.patch("data", change={"y": {4: ["something", "else"]}}) # change the 4th and 5th indices of the y list
-        state.patch("data", change={"y": {4: [{"b": "patch object in list", "c": "else"}]}})
-            # patch the 4th and 5th indices of the y list which is a list of object
-        state.patch("data", remove={"y": None}) # remove the y value of the data dict
-        state.patch("data", change={"a": {-1: [1,2]}}) # insert 2 elements at index 0 of list
-        state.patch("data", change={"a": {-10: [1,2]}})
-            # insert 2 elements at index 9 of list or append if len(list) < 9
-        state.patch("data", change={"a": {1000: [1,2]}}) # append 2 elements at the end of list if 1000 > len(list)
+        Examples:
+            **Dictionary Operations:**
 
-        Not supported yet:
-        patch dataframe on the back end (the data is patched on the front end)
-        patch sorted data in a table (the wrong data will be patched if the table is sorted)
+            Update a single key in a dictionary:
+            ```python
+            # data = {"x": 1, "y": 2}
+            state.patch("data", change={"y": 10})
+            # Result: {"x": 1, "y": 10}
+            ```
+
+            Update nested dictionary values:
+            ```python
+            # data = {"user": {"name": "John", "age": 30}}
+            state.patch("data", change={"user": {"age": 31}})
+            # Result: {"user": {"name": "John", "age": 31}}
+            ```
+
+            Remove dictionary keys:
+            ```python
+            # data = {"x": 1, "y": 2, "z": 3}
+            state.patch("data", remove={"y": None})
+            # Result: {"x": 1, "z": 3}
+            ```
+
+            **List Operations:**
+
+            Update a specific list element by index:
+            ```python
+            # data = {"items": [1, 2, 3, 4]}
+            state.patch("data", change={"items": {1: "updated"}})
+            # Result: {"items": [1, "updated", 3, 4]}
+            ```
+
+            Update multiple consecutive list elements:
+            ```python
+            # data = {"items": [1, 2, 3, 4]}
+            state.patch("data", change={"items": {1: ["a", "b"]}})
+            # Result: {"items": [1, "a", "b", 4]}
+            ```
+
+            Insert elements at the beginning of a list (negative index):
+            ```python
+            # data = {"items": [3, 4, 5]}
+            state.patch("data", change={"items": {-1: [1, 2]}})
+            # Result: {"items": [1, 2, 3, 4, 5]}
+            ```
+
+            Insert elements at a specific position:
+            ```python
+            # data = {"items": [1, 4, 5]}
+            state.patch("data", change={"items": {-2: [2, 3]}})
+            # Result: {"items": [1, 2, 3, 4, 5]}
+            ```
+
+            Append elements to the end of a list:
+            ```python
+            # data = {"items": [1, 2, 3]}
+            state.patch("data", change={"items": {100: [4, 5]}})
+            # Result: {"items": [1, 2, 3, 4, 5]}
+            ```
+
+            Remove list elements by index:
+            ```python
+            # data = {"items": [1, 2, 3, 4]}
+            state.patch("data", remove={"items": {1: None}})
+            # Result: {"items": [1, 3, 4]}
+            ```
+
+            **Complex Data Structures:**
+
+            Replace objects within a list:
+            ```python
+            # data = {"users": [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]}
+            state.patch("data", change={"users": {0: {"age": 31}}})
+            # Result: {"users": [{"age": 31}, {"name": "Jane", "age": 25}]}
+            ```
+
+            Update objects by replacing with a list (preserves other properties):
+            ```python
+            # data = {"users": [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]}
+            state.patch("data", change={"users": {1: [{"name": "Bob", "age": 40}]}})
+            # Result: {"users": [{"name": "John", "age": 30}, {"name": "Bob", "age": 40}]}
+            ```
+
+        Limitations:
+            - DataFrames are patched on the front end only, not on the backend
+            - Patching sorted data in tables may update incorrect rows if the table
+              is currently sorted
+            - Index-based operations on lists require knowledge of current list state
         """
         ...
 
