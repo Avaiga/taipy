@@ -208,6 +208,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
             # Result: {"items": [1, "a", "b", 4]}
             ```
 
+            **Note on negative indices:** In this convention, negative indices specify insertion positions counting from the start of the list: -1 inserts at position 0, -2 at position 1, ..., -N at position N-1.
             Insert elements at the beginning of a list (negative index):
             ```python
             # data = {"items": [3, 4, 5]}
