@@ -11,7 +11,7 @@
 # -----------------------------------------------------------------------------------------
 # To execute this script, make sure that the taipy-gui package is installed in your
 # Python environment and run:
-#     python <script>
+#     python state_patch_demo.py
 # -----------------------------------------------------------------------------------------
 """
 Demonstrates the State.patch method for efficient partial updates of complex data structures.
