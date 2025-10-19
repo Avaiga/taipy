@@ -245,7 +245,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
             # Result: {"users": [{"name": "John", "age": 31}, {"name": "Jane", "age": 25}]}
             ```
 
-            Update objects by replacing with a list (preserves other properties):
+            Patch objects within a list using consecutive updates (merges properties):
             ```python
             # data = {"users": [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}]}
             state.patch("data", change={"users": {1: [{"name": "Bob", "age": 40}]}})
