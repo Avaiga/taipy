@@ -670,12 +670,12 @@
                     {
                         "name": "xaxis",
                         "type": "indexed(str)",
-                        "doc": "The <i>x</i> axis identifier for the indicated trace."
+                        "doc": "The <i>x</i> axis identifier for the indicated trace. This property is used to assign traces to specific x-axes when using multiple x-axes. To set x-axis titles, use the <i>layout</i> property with <i>xaxis.title</i> instead."
                     },
                     {
                         "name": "yaxis",
                         "type": "indexed(str)",
-                        "doc": "The <i>y</i> axis identifier for the indicated trace."
+                        "doc": "The <i>y</i> axis identifier for the indicated trace. This property is used to assign traces to specific y-axes when using multiple y-axes. To set y-axis titles, use the <i>layout</i> property with <i>yaxis.title</i> instead."
                     },
                     {
                         "name": "width",
