@@ -194,7 +194,7 @@ const ChatRow = (props: ChatRowProps) => {
                                 ) : mode == "raw" ? (
                                     message
                                 ) : (
-                                    <Markdown>{message}</Markdown>
+                                    <Markdown>{message.replace(/\n/g, '  \n')}</Markdown>
                                 )}
                             </Paper>
                         </Stack>
@@ -211,7 +211,7 @@ const ChatRow = (props: ChatRowProps) => {
                         ) : mode == "raw" ? (
                             message
                         ) : (
-                            <Markdown>{message}</Markdown>
+                            <Markdown>{message.replace(/\n/g, '  \n')}</Markdown>
                         )}
                     </Paper>
                 )}
@@ -275,10 +275,10 @@ const Chat = (props: ChatProps) => {
         [props.height]
     );
 
-    const onChangeHandler = useCallback((evt: ChangeEvent<HTMLInputElement>) => setEnableSend(!!evt.target.value), []);
+    const onChangeHandler = useCallback((evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setEnableSend(!!evt.target.value), []);
 
     const sendAction = useCallback(
-        (elt: HTMLInputElement | null | undefined, reason: string) => {
+        (elt: HTMLInputElement | HTMLTextAreaElement | null | undefined, reason: string) => {
             if (elt && (elt?.value || imagePreview)) {
                 toDataUrl(imagePreview)
                     .then((dataUrl) => {
@@ -310,9 +310,22 @@ const Chat = (props: ChatProps) => {
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && ENTER_KEY == evt.key) {
-                sendAction(evt.currentTarget.querySelector("input"), evt.key);
-                evt.preventDefault();
+            if (ENTER_KEY == evt.key) {
+                if (evt.ctrlKey || evt.metaKey) {
+                    const textarea = evt.currentTarget.querySelector("textarea") as HTMLTextAreaElement;
+                    if (textarea) {
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const value = textarea.value;
+                        textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+                        textarea.setSelectionRange(start + 1, start + 1);
+                        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    evt.preventDefault();
+                } else {
+                    sendAction(evt.currentTarget.querySelector("textarea"), evt.key);
+                    evt.preventDefault();
+                }
             }
         },
         [sendAction]
@@ -320,7 +333,7 @@ const Chat = (props: ChatProps) => {
 
     const handleClick = useCallback(
         (evt: MouseEvent<HTMLButtonElement>) => {
-            sendAction(evt.currentTarget.parentElement?.parentElement?.querySelector("input"), "click");
+            sendAction(evt.currentTarget.parentElement?.parentElement?.querySelector("textarea"), "click");
             evt.preventDefault();
         },
         [sendAction]
@@ -569,6 +582,9 @@ const Chat = (props: ChatProps) => {
                         <TextField
                             margin="dense"
                             fullWidth
+                            multiline
+                            minRows={1}
+                            maxRows={4}
                             onChange={onChangeHandler}
                             className={getSuffixedClassNames(className, "-input")}
                             label={`message (${senderId})`}

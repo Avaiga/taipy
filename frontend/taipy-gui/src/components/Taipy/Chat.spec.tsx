@@ -54,7 +54,7 @@ describe("Chat Component", () => {
         const elt = getByText(searchMsg);
         expect(elt.tagName).toBe("DIV");
         const input = getByLabelText("message (taipy)");
-        expect(input.tagName).toBe("INPUT");
+        expect(input.tagName).toBe("TEXTAREA");
     });
     it("uses the class", async () => {
         const { getByText } = render(
@@ -240,5 +240,86 @@ describe("Chat Component", () => {
             expect(() => getByAltText("Image preview")).toThrow();
         });
         jest.restoreAllMocks();
+    });
+    it("inserts newline on Ctrl+Enter", async () => {
+        const { getByLabelText } = render(<Chat messages={messages} defaultKey={valueKey} mode="raw" />);
+        const elt = getByLabelText("message (taipy)") as HTMLTextAreaElement;
+        await userEvent.click(elt);
+        await userEvent.keyboard("Hello");
+        await userEvent.keyboard("{Control>}{Enter}{/Control}");
+        expect(elt.value).toBe("Hello\n");
+        expect(elt.selectionStart).toBe(6);
+        expect(elt.selectionEnd).toBe(6);
+    });
+    it("inserts newline on Cmd+Enter (Mac)", async () => {
+        const { getByLabelText } = render(<Chat messages={messages} defaultKey={valueKey} mode="raw" />);
+        const elt = getByLabelText("message (taipy)") as HTMLTextAreaElement;
+        await userEvent.click(elt);
+        await userEvent.keyboard("Hello");
+        await userEvent.keyboard("{Meta>}{Enter}{/Meta}");
+        expect(elt.value).toBe("Hello\n");
+        expect(elt.selectionStart).toBe(6);
+        expect(elt.selectionEnd).toBe(6);
+    });
+    it("allows multiple newlines with Ctrl+Enter", async () => {
+        const { getByLabelText } = render(<Chat messages={messages} defaultKey={valueKey} mode="raw" />);
+        const elt = getByLabelText("message (taipy)") as HTMLTextAreaElement;
+        await userEvent.click(elt);
+        await userEvent.keyboard("Line 1");
+        await userEvent.keyboard("{Control>}{Enter}{/Control}");
+        await userEvent.keyboard("Line 2");
+        await userEvent.keyboard("{Control>}{Enter}{/Control}");
+        await userEvent.keyboard("Line 3");
+        expect(elt.value).toBe("Line 1\nLine 2\nLine 3");
+    });
+    it("still sends message on Enter (backwards compatibility)", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByLabelText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Chat messages={messages} updateVarName="varName" defaultKey={valueKey} mode="raw" />
+            </TaipyContext.Provider>
+        );
+        const elt = getByLabelText("message (taipy)") as HTMLTextAreaElement;
+        await userEvent.click(elt);
+        await userEvent.keyboard("test message{Enter}");
+        expect(dispatch).toHaveBeenCalledWith({
+            type: "SEND_ACTION_ACTION",
+            name: "",
+            context: undefined,
+            payload: {
+                action: undefined,
+                args: ["Enter", "varName", "test message", "taipy", null],
+            },
+        });
+    });
+    it("preserves newlines in message display", async () => {
+        const messagesWithNewlines: TableValueType = {
+            [valueKey]: {
+                data: [
+                    ["1", "Line 1\nLine 2\nLine 3", "Fred"],
+                ],
+                rowcount: 1,
+                start: 0,
+            },
+        };
+        const { getByText } = render(<Chat messages={messagesWithNewlines} defaultKey={valueKey} mode="raw" />);
+        const messageElement = getByText((content, element) => {
+            return element?.textContent === "Line 1\nLine 2\nLine 3";
+        });
+        expect(messageElement).toBeInTheDocument();
+    });
+    it("handles newlines in markdown mode", async () => {
+        const messagesWithNewlines: TableValueType = {
+            [valueKey]: {
+                data: [
+                    ["1", "Line 1\nLine 2\nLine 3", "Fred"],
+                ],
+                rowcount: 1,
+                start: 0,
+            },
+        };
+        const { container } = render(<Chat messages={messagesWithNewlines} defaultKey={valueKey} mode="markdown" />);
+        expect(container).toBeInTheDocument();
     });
 });
