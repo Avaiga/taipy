@@ -65,3 +65,30 @@ def test_bad_navigate(gui: Gui, helpers):
     with warnings.catch_warnings(record=True) as records:
         navigate(None, "test")  # type: ignore[arg-type]
         assert len(records) == 1
+
+
+@pytest.mark.skip_if_not_server("flask")
+def test_navigate_url_schemes(gui: Gui, helpers):
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
+    gui.add_page("test", Markdown("<|hello|button|>"))
+    gui.run(run_server=False)
+    server_test_client = gui._server.test_client()
+    # ws client and emit
+    ws_client = gui._server._ws.test_client(gui._server.get_server_instance())  # type: ignore[arg-type]
+    cid = helpers.create_scope_and_get_sid(gui)
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
+
+    def test_navigate_to_url(url: str):
+        with gui._server.test_request_context(f"/{Gui._JSX_URL}/test/?client_id={cid}", data={"client_id": cid}):
+            gui._server.request.get_request_meta().client_id = cid
+            navigate(gui._Gui__state, url)  # type: ignore[attr-defined]
+
+        received_messages = ws_client.get_received()
+        helpers.assert_outward_ws_simple_message(received_messages[0], "NA", {"to": url})
+
+    # test several URL schemes
+    test_navigate_to_url("mailto:someone@example.com")
+    test_navigate_to_url("tel:+1234567890")
+    test_navigate_to_url("sms:+1234567890")

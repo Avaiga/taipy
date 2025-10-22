@@ -2481,7 +2481,8 @@ class Gui:
         force: t.Optional[bool] = False,
     ):
         to = to or Gui.__root_page_name
-        if not to.startswith("/") and to not in self._config.routes and not urlparse(to).netloc:
+        parsed_url = urlparse(to)
+        if not to.startswith("/") and to not in self._config.routes and not parsed_url.netloc and not parsed_url.scheme:
             _warn(f'Cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
             return False
         self.__send_ws_navigate(to if to != Gui.__root_page_name else "/", params, tab, force or False)
