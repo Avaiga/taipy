@@ -846,4 +846,22 @@ describe("PaginatedTable Component", () => {
         // Clean up the spy
         logSpy.mockRestore();
     });
+    it("should cycle through three-state sorting: unsorted -> asc -> desc -> unsorted", async () => {
+        await waitFor(() => {
+            render(<PaginatedTable data={tableValue} defaultColumns={tableColumns} />);
+        });
+        const elt = document.querySelector('svg[data-testid="ArrowDownwardIcon"]');
+        act(() => {
+            fireEvent.click(elt as Element);
+        });
+        expect(document.querySelector('th[aria-sort="ascending"]')).toBeInTheDocument();
+        act(() => {
+            fireEvent.click(elt as Element);
+        });
+        expect(document.querySelector('th[aria-sort="descending"]')).toBeInTheDocument();
+        act(() => {
+            fireEvent.click(elt as Element);
+        });
+        expect(document.querySelector('th[aria-sort]')).not.toBeInTheDocument();
+    });
 });

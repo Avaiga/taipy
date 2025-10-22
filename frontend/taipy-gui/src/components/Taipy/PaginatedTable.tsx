@@ -393,9 +393,20 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         (e: MouseEvent<HTMLElement>) => {
             const col = e.currentTarget.getAttribute("data-dfid");
             if (col) {
-                const isAsc = orderBy === col && order === "asc";
-                setOrder(isAsc ? "desc" : "asc");
-                setOrderBy(col);
+                if (orderBy === col) {
+                    if (order === "asc") {
+                        // asc -> desc
+                        setOrder("desc");
+                    } else {
+                        // desc -> unsorted
+                        setOrderBy("");
+                        setOrder("asc");
+                    }
+                } else {
+                    // unsorted -> asc
+                    setOrder("asc");
+                    setOrderBy(col);
+                }
             }
         },
         [orderBy, order]
