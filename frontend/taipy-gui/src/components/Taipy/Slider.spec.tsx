@@ -342,4 +342,58 @@ describe("Slider Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
+    it("should handle negative values in labels", async () => {
+        const labels = {
+            "1": "-2",
+            "2": "-1",
+            "3": "0",
+            "4": "1",
+            "5": "2",
+        };
+        const { container } = render(
+            <Slider
+                min={1}
+                max={5}
+                step={1}
+                labels={JSON.stringify(labels)}
+                value={0}
+            />
+        );
+        const markLabels = container.querySelectorAll('.MuiSlider-markLabel');
+        expect(markLabels).toHaveLength(5);
+        const labelTexts = Array.from(markLabels).map(label => label.textContent);
+        expect(labelTexts).toContain("-2");
+        expect(labelTexts).toContain("-1");
+        expect(labelTexts).toContain("0");
+        expect(labelTexts).toContain("1");
+        expect(labelTexts).toContain("2");
+    });
+    it("should handle decimal values in labels", async () => {
+        const labels = {
+            "1": "0.0",
+            "2": "0.2",
+            "3": "0.4",
+            "4": "0.6",
+            "5": "0.8",
+            "6": "1.0",
+        };
+        const { container } = render(
+            <Slider
+                min={1}
+                max={6}
+                step={0.1}
+                labels={JSON.stringify(labels)}
+                value={0.5}
+            />
+        );
+        const markLabels = container.querySelectorAll('.MuiSlider-markLabel');
+        expect(markLabels).toHaveLength(6);
+        const labelTexts = Array.from(markLabels).map(label => label.textContent);
+        expect(labelTexts).toContain("0.0");
+        expect(labelTexts).toContain("0.2");
+        expect(labelTexts).toContain("0.4");
+        expect(labelTexts).toContain("0.6");
+        expect(labelTexts).toContain("0.8");
+        expect(labelTexts).toContain("1.0");
+    });
 });

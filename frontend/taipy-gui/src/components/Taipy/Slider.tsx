@@ -161,15 +161,18 @@ const Slider = (props: SliderProps) => {
                     const marks: Array<{ value: number; label: string }> = [];
                     Object.keys(labels).forEach((key) => {
                         if (labels[key]) {
-                            let idx = lovList.findIndex((it) => it.id === key);
+                            const idx = lovList.findIndex((it) => it.id === key);
+                            let value = idx;
                             if (idx == -1) {
                                 try {
-                                    idx = parseInt(key, 10);
+                                    value = parseFloat(key);
+                                    if (!isNaN(value)) {
+                                        marks.push({ value: value, label: labels[key] });
+                                    }
                                 } catch {
                                     // too bad
                                 }
-                            }
-                            if (idx != -1) {
+                            } else {
                                 marks.push({ value: idx, label: labels[key] });
                             }
                         }
@@ -182,7 +185,7 @@ const Slider = (props: SliderProps) => {
                 }
             }
         }
-        return lovList.length > 0;
+        return undefined;
     }, [props.labels, lovList, getLabel]);
 
     const textAnchorSx = useMemo(() => {
