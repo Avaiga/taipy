@@ -145,9 +145,13 @@ const Input = (props: TaipyInputProps) => {
 
     const handleBlur = useCallback(
         (evt: React.FocusEvent<HTMLInputElement>) => {
-            const val =
+            const val = 
                 type === "number"
-                    ? Number(evt.currentTarget.value)
+                    ? (min !== undefined && Number(value) < min
+                    ? min
+                    : max !== undefined && Number(value) > max
+                    ? max
+                    : evt.currentTarget.value)
                     : multiline
                     ? evt.currentTarget.value
                     : evt.currentTarget.value;
@@ -164,7 +168,7 @@ const Input = (props: TaipyInputProps) => {
                 });
             evt.preventDefault();
         },
-        [dispatch, type, updateVarName, module, onChange, propagate, changeDelay, id, multiline, onAction]
+        [dispatch, type, updateVarName, module, onChange, propagate, changeDelay, id, multiline, onAction, max, min, value]
     );
 
     const handleAction = useCallback(
@@ -378,6 +382,7 @@ const Input = (props: TaipyInputProps) => {
                                   : value)
                             : value ?? ""
                     }
+           
                     className={`${className} ${getComponentClassName(props.children)}`}
                     type={showPassword && type == "password" ? "text" : type}
                     id={id}
