@@ -55,6 +55,7 @@ const verticalDivStyle: CSSProperties = {
 const noPaddingYSx = { py: 0 };
 
 const Input = (props: TaipyInputProps) => {
+  
     const {
         type,
         id,
@@ -70,6 +71,7 @@ const Input = (props: TaipyInputProps) => {
     } = props;
 
     const [value, setValue] = useState(defaultValue);
+    
     const dispatch = useDispatch();
     const delayCall = useRef(-1);
     const [actionKeys] = useState(() => getActionKeys(props.actionKeys));
@@ -354,6 +356,7 @@ const Input = (props: TaipyInputProps) => {
     );
 
     useEffect(() => {
+     
         if (props.value !== undefined) {
             setValue(props.value);
         }
@@ -366,7 +369,15 @@ const Input = (props: TaipyInputProps) => {
                     sx={textSx}
                     margin="dense"
                     hiddenLabel
-                    value={value ?? ""}
+                    value={
+                        type === "number"
+                            ? (min !== undefined && Number(value) < min
+                                  ? min
+                                  : max !== undefined && Number(value) > max
+                                  ? max
+                                  : value)
+                            : value ?? ""
+                    }
                     className={`${className} ${getComponentClassName(props.children)}`}
                     type={showPassword && type == "password" ? "text" : type}
                     id={id}
