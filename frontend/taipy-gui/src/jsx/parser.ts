@@ -76,7 +76,7 @@ const translate = (
     tagKeys: Record<string, number> = {},
     withKey = false
 ): React.ReactNode | null => {
-    if (Array.isArray(root) && root.length == 0) return;
+    if (Array.isArray(root) && root.length === 0) return;
 
     if (root.nodeType === 3) {
         //Textnodes
