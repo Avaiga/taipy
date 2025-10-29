@@ -61,19 +61,19 @@ const replaceInterpolations = (txt: string, state?: Record<string, unknown>) => 
     return txt;
 };
 
-const TagKeyRecord: Record<string, number> = {};
-const getTagKey = (tag: string) => {
-    if (!(tag in TagKeyRecord)) {
-        TagKeyRecord[tag] = 0;
+const getTagKey = (tagKeys: Record<string, number>, tag: string) => {
+    if (!(tag in tagKeys)) {
+        tagKeys[tag] = 0;
     }
-    TagKeyRecord[tag] += 1;
-    return `${tag}-${TagKeyRecord[tag]}`;
+    tagKeys[tag] += 1;
+    return `${tag}-${tagKeys[tag]}`;
 };
 
 const translate = (
     root: HTMLElement,
     state?: Record<string, unknown>,
     components?: Record<string, React.ComponentType<object>>,
+    tagKeys: Record<string, number> = {},
     withKey = false
 ): React.ReactNode | null => {
     if (Array.isArray(root) && root.length == 0) return;
@@ -84,10 +84,11 @@ const translate = (
         return "" + parseText(root.textContent, state);
     }
     const nbChildren = root.childNodes.length;
+    const withSubKey = nbChildren > 1;
     const children =
         nbChildren > 0
             ? Array.from(root.childNodes)
-                  .map((child) => translate(child as HTMLElement, state, components, nbChildren > 1))
+                  .map((child) => translate(child as HTMLElement, state, components, tagKeys, withSubKey))
                   .filter((c) => c != null)
             : [];
 
@@ -100,7 +101,7 @@ const translate = (
         return acc;
     }, {} as Record<string, unknown>);
     if (withKey && !props.key) {
-        props.key = getTagKey(root.tagName);
+        props.key = getTagKey(tagKeys, root.tagName);
     }
     return React.createElement(comp, props, children);
 };
@@ -118,7 +119,8 @@ export const parseJSX = (
         return [] as React.ReactElement<React.PropsWithChildren<unknown>>[];
     }
     const nbChildren = doc.children[0].childNodes.length;
+    const withKey = nbChildren > 1;
     return Array.from(doc.children[0].childNodes).map((child) =>
-        translate(child as HTMLElement, state, components, nbChildren > 1)
+        translate(child as HTMLElement, state, components, {}, withKey)
     ) as React.ReactElement<React.PropsWithChildren<unknown>>[];
 };
