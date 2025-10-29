@@ -61,10 +61,20 @@ const replaceInterpolations = (txt: string, state?: Record<string, unknown>) => 
     return txt;
 };
 
+const TagKeyRecord: Record<string, number> = {};
+const getTagKey = (tag: string) => {
+    if (!(tag in TagKeyRecord)) {
+        TagKeyRecord[tag] = 0;
+    }
+    TagKeyRecord[tag] += 1;
+    return `${tag}-${TagKeyRecord[tag]}`;
+};
+
 const translate = (
     root: HTMLElement,
     state?: Record<string, unknown>,
-    components?: Record<string, React.ComponentType<object>>
+    components?: Record<string, React.ComponentType<object>>,
+    withKey = false
 ): React.ReactNode | null => {
     if (Array.isArray(root) && root.length == 0) return;
 
@@ -73,26 +83,26 @@ const translate = (
         if (!root.textContent || root.textContent.trim() === "") return null;
         return "" + parseText(root.textContent, state);
     }
+    const nbChildren = root.childNodes.length;
     const children =
-        root.childNodes.length > 0
+        nbChildren > 0
             ? Array.from(root.childNodes)
-                  .map((child) => translate(child as HTMLElement, state, components))
+                  .map((child) => translate(child as HTMLElement, state, components, nbChildren > 1))
                   .filter((c) => c != null)
             : [];
 
     const comp = components && root.tagName in components ? components[root.tagName] : root.tagName;
-
-    return React.createElement(
-        comp,
-        Array.from(root.attributes).reduce((acc, attr) => {
-            const value = replaceInterpolations(attr.value as string, state);
-            if (value !== undefined) {
-                acc[attr.name] = value;
-            }
-            return acc;
-        }, {} as Record<string, unknown>),
-        children
-    );
+    const props = Array.from(root.attributes).reduce((acc, attr) => {
+        const value = replaceInterpolations(attr.value as string, state);
+        if (value !== undefined) {
+            acc[attr.name == "class" ? "className" : attr.name] = value;
+        }
+        return acc;
+    }, {} as Record<string, unknown>);
+    if (withKey && !props.key) {
+        props.key = getTagKey(root.tagName);
+    }
+    return React.createElement(comp, props, children);
 };
 
 export const parseJSX = (
@@ -100,11 +110,15 @@ export const parseJSX = (
     state?: Record<string, unknown>,
     components?: Record<string, React.ComponentType<object>>
 ) => {
+    if (!jsx || jsx.trim() === "") {
+        return [] as React.ReactElement<React.PropsWithChildren<unknown>>[];
+    }
     const doc = new DOMParser().parseFromString("<span>" + jsx + "</span>", "application/xml");
     if (!doc || doc.children.length !== 1) {
         return [] as React.ReactElement<React.PropsWithChildren<unknown>>[];
     }
-    return Array.from(doc.children[0].children).map((child) =>
-        translate(child as HTMLElement, state, components)
+    const nbChildren = doc.children[0].childNodes.length;
+    return Array.from(doc.children[0].childNodes).map((child) =>
+        translate(child as HTMLElement, state, components, nbChildren > 1)
     ) as React.ReactElement<React.PropsWithChildren<unknown>>[];
 };
