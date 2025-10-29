@@ -96,7 +96,7 @@ const translate = (
     const props = Array.from(root.attributes).reduce((acc, attr) => {
         const value = replaceInterpolations(attr.value as string, state);
         if (value !== undefined) {
-            acc[attr.name == "class" ? "className" : attr.name] = value;
+            acc[attr.name === "class" ? "className" : attr.name] = value;
         }
         return acc;
     }, {} as Record<string, unknown>);
