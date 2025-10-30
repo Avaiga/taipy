@@ -53,6 +53,12 @@ const verticalDivStyle: CSSProperties = {
     gap: 0,
 };
 const noPaddingYSx = { py: 0 };
+const IsInteger = 2;
+
+// numberType: 0 -> not a number, 1 -> number, 2 -> integer
+const valToNumber = (val: string, numberType: number) => {
+    numberType ? (numberType === IsInteger ? Math.round(Number(val)) : Number(val)) : val;
+};
 
 const Input = (props: TaipyInputProps) => {
     const {
@@ -96,9 +102,8 @@ const Input = (props: TaipyInputProps) => {
     );
 
     // 0 if value is not a number, 1 means general number, 2 means integer
-    const IS_INTEGER = 2;
     const numberType = useMemo<number>(() => {
-        return type === "number" ? (props.integer === true ? 2 : 1) : 0;
+        return type === "number" ? (props.integer === true ? IsInteger : 1) : 0;
     }, [type, props.integer]);
 
     const updateValueWithDelay = useCallback(
@@ -107,7 +112,7 @@ const Input = (props: TaipyInputProps) => {
                 return;
             }
             if (numberType) {
-                value = numberType === IS_INTEGER ? Math.round(Number(value)) : Number(value);
+                value = numberType === IsInteger ? Math.round(Number(value)) : Number(value);
             }
             if (changeDelay === 0) {
                 // Workaround using microtask to ensure the value is updated before the next action to avoid the bad setState behavior
@@ -130,7 +135,7 @@ const Input = (props: TaipyInputProps) => {
     const handleInput = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
-            if (numberType === IS_INTEGER && !/^-?\d*$/.test(val)) {
+            if (numberType === IsInteger && !/^-?\d*$/.test(val)) {
                 return;
             }
             setValue(val);
@@ -140,13 +145,7 @@ const Input = (props: TaipyInputProps) => {
             if (changeDelay === 0) {
                 Promise.resolve().then(() => {
                     dispatch(
-                        createSendUpdateAction(
-                            updateVarName,
-                            numberType ? (numberType === IS_INTEGER ? Math.round(Number(val)) : Number(val)) : val,
-                            module,
-                            onChange,
-                            propagate
-                        )
+                        createSendUpdateAction(updateVarName, valToNumber(val, numberType), module, onChange, propagate)
                     );
                 });
             }
@@ -156,13 +155,7 @@ const Input = (props: TaipyInputProps) => {
             delayCall.current = window.setTimeout(() => {
                 delayCall.current = -1;
                 dispatch(
-                    createSendUpdateAction(
-                        updateVarName,
-                        numberType ? (numberType === IS_INTEGER ? Math.round(Number(val)) : Number(val)) : val,
-                        module,
-                        onChange,
-                        propagate
-                    )
+                    createSendUpdateAction(updateVarName, valToNumber(val, numberType), module, onChange, propagate)
                 );
             }, changeDelay);
         },
@@ -172,7 +165,7 @@ const Input = (props: TaipyInputProps) => {
     const handleBlur = useCallback(
         (evt: React.FocusEvent<HTMLInputElement>) => {
             let val = numberType
-                ? numberType === IS_INTEGER
+                ? numberType === IsInteger
                     ? Math.round(Number(evt.currentTarget.value))
                     : Number(evt.currentTarget.value)
                 : evt.currentTarget.value;
@@ -228,7 +221,7 @@ const Input = (props: TaipyInputProps) => {
                 const val = multiline
                     ? evt.currentTarget.querySelector("textarea")?.value
                     : numberType
-                    ? numberType === IS_INTEGER
+                    ? numberType === IsInteger
                         ? Math.round(Number(evt.currentTarget.querySelector("input")?.value))
                         : Number(evt.currentTarget.querySelector("input")?.value)
                     : evt.currentTarget.querySelector("input")?.value;
