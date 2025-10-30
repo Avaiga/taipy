@@ -87,7 +87,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     template_Dark_?: string;
     template_Light_?: string;
     //[key: `selected${number}`]: number[];
-    figure?: Array<Record<string, unknown>>;
+    figure?: Record<string, unknown>;
     onClick?: string;
     dataVarNames?: string;
 }
@@ -495,8 +495,8 @@ const Chart = (props: ChartProp) => {
             layout.template = template;
         }
         if (props.figure) {
-            return merge({}, props.figure[0].layout as Partial<Layout>, layout, {
-                title: title || layout.title || (props.figure[0].layout as Partial<Layout>).title,
+            return merge({}, props.figure.layout as Partial<Layout>, layout, {
+                title: title || layout.title || (props.figure.layout as Partial<Layout>).title,
                 clickmode: "event+select",
             });
         }
@@ -936,9 +936,9 @@ const Chart = (props: ChartProp) => {
         <Tooltip title={hover || ""}>
             <Box id={props.id} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                    {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
+                    {props.figure?.data !== undefined ? (
                         <Plot
-                            data={props.figure[0].data as Data[]}
+                            data={props.figure.data as Data[]}
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}
