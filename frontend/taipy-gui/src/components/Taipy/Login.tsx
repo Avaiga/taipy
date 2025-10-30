@@ -81,7 +81,9 @@ const Login = (props: LoginProps) => {
             const { close, idx } = evt?.currentTarget.dataset || {};
             const args = close
                 ? [null, null, document.location.pathname.substring(1)]
-                : idx ? [user, password, document.location.pathname.substring(1), parseInt(idx, 10)]: [user, password, document.location.pathname.substring(1)];
+                : idx
+                ? [user, password, document.location.pathname.substring(1), parseInt(idx, 10)]
+                : [user, password, document.location.pathname.substring(1)];
             setShowProgress(!idx);
             dispatch(createSendActionNameAction(id, module, onAction, ...args));
         },
@@ -115,7 +117,7 @@ const Login = (props: LoginProps) => {
                 endAdornment: (
                     <InputAdornment position="end">
                         <IconButton
-                            aria-label="toggle password visibility"
+                            aria-label="Toggle password visibility"
                             onClick={handleClickShowPassword}
                             onMouseDown={handleMouseDownPassword}
                             edge="end"
