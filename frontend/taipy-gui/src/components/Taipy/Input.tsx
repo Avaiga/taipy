@@ -197,7 +197,7 @@ const Input = (props: TaipyInputProps) => {
                 });
             evt.preventDefault();
         },
-        [dispatch, numberType, updateVarName, module, onChange, propagate, changeDelay, id, onAction]
+        [dispatch, numberType, min, max, updateVarName, module, onChange, propagate, changeDelay, id, onAction]
     );
 
     const handleAction = useCallback(
