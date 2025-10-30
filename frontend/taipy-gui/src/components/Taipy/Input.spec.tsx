@@ -240,7 +240,7 @@ describe("Number Component", () => {
         await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
-            payload: { value: "666" },
+            payload: { value: 666 },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
