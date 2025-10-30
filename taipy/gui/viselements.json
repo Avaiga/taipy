@@ -183,6 +183,12 @@
                         "doc": "The maximum acceptable value.<br/>Values above this threshold are invalid."
                     },
                     {
+                        "name": "integer",
+                        "type": "bool",
+                        "default_value": "False",
+                        "doc": "If True, the value is restricted to integers only."
+                    },
+                    {
                         "name": "action_on_blur",
                         "type": "bool",
                         "default_value": "False",
