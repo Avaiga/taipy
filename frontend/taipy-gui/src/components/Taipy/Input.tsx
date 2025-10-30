@@ -56,9 +56,8 @@ const noPaddingYSx = { py: 0 };
 const IsInteger = 2;
 
 // numberType: 0 -> not a number, 1 -> number, 2 -> integer
-const valToNumber = (val: string, numberType: number) => {
+const valToNumber = (val: string, numberType: number) =>
     numberType ? (numberType === IsInteger ? Math.round(Number(val)) : Number(val)) : val;
-};
 
 const Input = (props: TaipyInputProps) => {
     const {
