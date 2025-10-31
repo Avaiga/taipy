@@ -414,7 +414,7 @@ const Input = (props: TaipyInputProps) => {
                     sx={textSx}
                     margin="dense"
                     hiddenLabel
-                    value={value}
+                    value={value ?? ""}
                     className={`${className} ${getComponentClassName(props.children)}`}
                     type={showPassword && type == "password" ? "text" : type}
                     id={id}
