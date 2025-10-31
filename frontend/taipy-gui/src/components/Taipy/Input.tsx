@@ -19,7 +19,6 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { getCssSize, TaipyInputProps } from "./utils";
 import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
@@ -65,12 +64,11 @@ const Input = (props: TaipyInputProps) => {
         onAction,
         onChange,
         multiline = false,
-        actionOnBlur = false,
+        actionOnBlur = true,
         linesShown = 5,
         size = "medium",
     } = props;
-
-    const [value, setValue] = useState(defaultValue);
+    
     
     const dispatch = useDispatch();
     const delayCall = useRef(-1);
@@ -85,6 +83,21 @@ const Input = (props: TaipyInputProps) => {
     const stepMultiplier = useDynamicProperty(props.stepMultiplier, props.defaultStepMultiplier, 10);
     const min = useDynamicProperty(props.min, props.defaultMin, undefined);
     const max = useDynamicProperty(props.max, props.defaultMax, undefined);
+    const initializedDefaultValue = () => {
+        const initVal = 
+                type === "number"
+                    ? (min !== undefined && Number(defaultValue) < min
+                    ? min
+                    : max !== undefined && Number(defaultValue) > max
+                    ? max
+                    : defaultValue)
+                    : multiline
+                    ? defaultValue
+                    : defaultValue;
+        return initVal;
+    }
+    const initDefaultValue = initializedDefaultValue();
+    const [value, setValue] = useState(initDefaultValue);
 
     const textSx = useMemo(
         () =>
@@ -155,7 +168,8 @@ const Input = (props: TaipyInputProps) => {
                     : multiline
                     ? evt.currentTarget.value
                     : evt.currentTarget.value;
-            if (delayCall.current > 0 || changeDelay === -1) {
+            // Always dispatch on blur within delay
+            if (delayCall.current > 0 || changeDelay === -1 || delayCall.current === -1) {
                 if (changeDelay > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
@@ -195,7 +209,7 @@ const Input = (props: TaipyInputProps) => {
                     updateValueWithDelay(val);
                     evt.preventDefault();
                 }
-            } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key)) {
+            } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key) ) {
                 const val = multiline
                     ? evt.currentTarget.querySelector("textarea")?.value
                     : evt.currentTarget.querySelector("input")?.value;
@@ -249,7 +263,7 @@ const Input = (props: TaipyInputProps) => {
         (event: React.MouseEvent<HTMLButtonElement>, increment: boolean) => {
             setValue((prevValue) => {
                 const newValue = calculateNewValue(
-                    prevValue,
+                    prevValue.toString(),
                     step || 1,
                     stepMultiplier || 10,
                     event.shiftKey,
@@ -373,16 +387,7 @@ const Input = (props: TaipyInputProps) => {
                     sx={textSx}
                     margin="dense"
                     hiddenLabel
-                    value={
-                        type === "number"
-                            ? (min !== undefined && Number(value) < min
-                                  ? min
-                                  : max !== undefined && Number(value) > max
-                                  ? max
-                                  : value)
-                            : value ?? ""
-                    }
-           
+                    value={value}
                     className={`${className} ${getComponentClassName(props.children)}`}
                     type={showPassword && type == "password" ? "text" : type}
                     id={id}
