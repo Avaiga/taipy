@@ -52,6 +52,11 @@ const verticalDivStyle: CSSProperties = {
     gap: 0,
 };
 const noPaddingYSx = { py: 0 };
+const IsInteger = 2;
+
+// numberType: 0 -> not a number, 1 -> number, 2 -> integer
+const valToNumber = (val: string, numberType: number) =>
+    numberType ? (numberType === IsInteger ? Math.round(Number(val)) : Number(val)) : val;
 
 const Input = (props: TaipyInputProps) => {
   
@@ -110,10 +115,18 @@ const Input = (props: TaipyInputProps) => {
         [props.width]
     );
 
+    // 0 if value is not a number, 1 means general number, 2 means integer
+    const numberType = useMemo<number>(() => {
+        return type === "number" ? (props.integer === true ? IsInteger : 1) : 0;
+    }, [type, props.integer]);
+
     const updateValueWithDelay = useCallback(
         (value: number | string) => {
             if (changeDelay === -1) {
                 return;
+            }
+            if (numberType) {
+                value = numberType === IsInteger ? Math.round(Number(value)) : Number(value);
             }
             if (changeDelay === 0) {
                 // Workaround using microtask to ensure the value is updated before the next action to avoid the bad setState behavior
@@ -130,19 +143,24 @@ const Input = (props: TaipyInputProps) => {
                 dispatch(createSendUpdateAction(updateVarName, value, module, onChange, propagate));
             }, changeDelay);
         },
-        [changeDelay, dispatch, updateVarName, module, onChange, propagate]
+        [changeDelay, numberType, dispatch, updateVarName, module, onChange, propagate]
     );
 
     const handleInput = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
+            if (numberType === IsInteger && !/^-?\d*$/.test(val)) {
+                return;
+            }
             setValue(val);
             if (changeDelay === -1) {
                 return;
             }
             if (changeDelay === 0) {
                 Promise.resolve().then(() => {
-                    dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+                    dispatch(
+                        createSendUpdateAction(updateVarName, valToNumber(val, numberType), module, onChange, propagate)
+                    );
                 });
             }
             if (delayCall.current > 0) {
@@ -150,26 +168,30 @@ const Input = (props: TaipyInputProps) => {
             }
             delayCall.current = window.setTimeout(() => {
                 delayCall.current = -1;
-                dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
+                dispatch(
+                    createSendUpdateAction(updateVarName, valToNumber(val, numberType), module, onChange, propagate)
+                );
             }, changeDelay);
         },
-        [changeDelay, dispatch, updateVarName, module, onChange, propagate]
+        [changeDelay, numberType, dispatch, updateVarName, module, onChange, propagate]
     );
 
     const handleBlur = useCallback(
         (evt: React.FocusEvent<HTMLInputElement>) => {
-            const val = 
-                type === "number"
-                    ? (min !== undefined && Number(value) < min
-                    ? min
-                    : max !== undefined && Number(value) > max
-                    ? max
-                    : evt.currentTarget.value)
-                    : multiline
-                    ? evt.currentTarget.value
-                    : evt.currentTarget.value;
-            // Always dispatch on blur within the time delay
-            if (delayCall.current > 0 || changeDelay === -1 || delayCall.current === -1) {
+            let val = numberType
+                ? numberType === IsInteger
+                    ? Math.round(Number(evt.currentTarget.value))
+                    : Number(evt.currentTarget.value)
+                : evt.currentTarget.value;
+            if (numberType) {
+                if (min !== undefined && (val as number) < min) {
+                    val = min;
+                }
+                if (max !== undefined && (val as number) > max) {
+                    val = max;
+                }
+            }
+            if (delayCall.current > 0 || changeDelay === -1) {
                 if (changeDelay > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
@@ -182,12 +204,12 @@ const Input = (props: TaipyInputProps) => {
                 });
             evt.preventDefault();
         },
-        [dispatch, type, updateVarName, module, onChange, propagate, changeDelay, id, multiline, onAction, max, min, value]
+        [dispatch, numberType, min, max, updateVarName, module, onChange, propagate, changeDelay, id, onAction]
     );
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (evt.shiftKey && type === "number") {
+            if (evt.shiftKey && numberType) {
                 if (evt.key === "ArrowUp") {
                     let val =
                         Number(evt.currentTarget.querySelector("input")?.value || 0) +
@@ -212,7 +234,12 @@ const Input = (props: TaipyInputProps) => {
             } else if (!evt.shiftKey && !evt.ctrlKey && !evt.altKey && actionKeys.includes(evt.key) ) {
                 const val = multiline
                     ? evt.currentTarget.querySelector("textarea")?.value
+                    : numberType
+                    ? numberType === IsInteger
+                        ? Math.round(Number(evt.currentTarget.querySelector("input")?.value))
+                        : Number(evt.currentTarget.querySelector("input")?.value)
                     : evt.currentTarget.querySelector("input")?.value;
+
                 if (changeDelay > 0 && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
@@ -225,11 +252,12 @@ const Input = (props: TaipyInputProps) => {
             }
         },
         [
-            type,
+            numberType,
             multiline,
             actionKeys,
             step,
             stepMultiplier,
+            min,
             max,
             updateValueWithDelay,
             onAction,
@@ -237,7 +265,6 @@ const Input = (props: TaipyInputProps) => {
             id,
             module,
             updateVarName,
-            min,
             changeDelay,
             onChange,
             propagate,
@@ -348,7 +375,7 @@ const Input = (props: TaipyInputProps) => {
                       input: {
                           endAdornment: (
                               <IconButton
-                                  aria-label="toggle password visibility"
+                                  aria-label="Toggle password visibility"
                                   onClick={handleClickShowPassword}
                                   onMouseDown={handleMouseDownPassword}
                                   edge="end"

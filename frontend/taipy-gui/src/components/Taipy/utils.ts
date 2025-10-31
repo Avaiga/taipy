@@ -63,6 +63,7 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, Tai
     defaultMin?: number;
     max?: number;
     defaultMax?: number;
+    integer?: boolean;
     changeDelay?: number;
     onAction?: string;
     actionKeys?: string;

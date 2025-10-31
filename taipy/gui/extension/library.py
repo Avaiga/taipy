@@ -304,6 +304,10 @@ class ElementLibrary(ABC):
         """
         return _to_camel_case(self.get_name(), True)
 
+    def get_tgb_header(self) -> t.Optional[str]:
+        # Inserted at the top of the __init__.pyi file
+        return None
+
     def __get_class_folder(self):
         if not hasattr(self, "_class_folder"):
             module_obj = sys.modules.get(self.__class__.__module__)

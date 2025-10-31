@@ -17,7 +17,7 @@ from operator import attrgetter
 from pathlib import Path
 from types import FrameType, SimpleNamespace
 
-from .utils import _get_module_name_from_frame, _is_in_notebook
+from .utils import _get_module_name_from_frame, _is_in_notebook  # pyright: ignore[reportPrivateUsage]
 from .utils._attributes import _attrsetter
 
 if t.TYPE_CHECKING:
@@ -154,7 +154,12 @@ class State(SimpleNamespace, metaclass=ABCMeta):
     def _invoke_on_gui(self, method: t.Callable, *args: t.Any) -> t.Any: ...
 
     @abstractmethod
-    def patch(self, name: str, change: t.Optional[dict] = None, remove: t.Optional[dict] = None):
+    def patch(
+        self,
+        name: str,
+        change: t.Optional[t.Dict[t.Union[str, int], t.Any]] = None,
+        remove: t.Optional[t.Dict[t.Union[str, int], t.Any]] = None,
+    ):
         """Patch a variable on a client.
 
         The connected client will receive an update of the variable called *name* with the
@@ -233,7 +238,9 @@ class _GuiState(State):
             encoded_name = self._gui._bind_var(name)  # type: ignore[attr-defined]
             self._gui._broadcast_all_clients(encoded_name, value)  # type: ignore[attr-defined]
 
-    def patch(self, name: str, change: t.Optional[dict] = None, remove: t.Optional[dict] = None):
+    def patch(
+        self, name: str, change: t.Optional[dict[t.Any, t.Any]] = None, remove: t.Optional[dict[t.Any, t.Any]] = None
+    ):
         with self._set_context(self._gui):
             self._gui._patch_variable(name, change, remove, getattr(self, name, None))  # type: ignore[attr-defined]
 
