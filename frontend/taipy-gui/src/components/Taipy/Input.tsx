@@ -168,7 +168,7 @@ const Input = (props: TaipyInputProps) => {
                     : multiline
                     ? evt.currentTarget.value
                     : evt.currentTarget.value;
-            // Always dispatch on blur within delay
+            // Always dispatch on blur within the delay
             if (delayCall.current > 0 || changeDelay === -1 || delayCall.current === -1) {
                 if (changeDelay > 0) {
                     clearTimeout(delayCall.current);
