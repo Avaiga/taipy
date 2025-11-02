@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+import os
 import re
 import typing as t
 from unittest.mock import patch
@@ -65,7 +66,7 @@ class TgbLibrary(ElementLibrary):
 
 
 def test_tgb_generation(gui: Gui, test_client, helpers):
-    from taipy.gui.extension.__main__ import generate_doc
+    from taipy.gui.extension._main._generate_tgb import generate_doc
 
     library = TgbLibrary()
     api = generate_doc(library)
@@ -91,13 +92,15 @@ def test_tgb_generation(gui: Gui, test_client, helpers):
 
 
 def test_tgb_generation_entry_point(gui: Gui, test_client, helpers):
-    import os
     import tempfile
 
     from taipy.gui.extension.__main__ import main
 
+    saved_cwd = os.getcwd()
     temp_file = tempfile.NamedTemporaryFile(delete=False)
     temp_file.close()
+    os.chdir(os.path.dirname(__file__))
     with patch("sys.argv", ["main", "generate_tgb", "extlib_test", temp_file.name]):
         assert main() == 0
+    os.chdir(saved_cwd)
     os.remove(temp_file.name)
