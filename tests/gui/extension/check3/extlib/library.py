@@ -12,27 +12,17 @@ from taipy.gui.extension import Element, ElementLibrary, ElementProperty, Proper
 
 
 class Library(ElementLibrary):
-    """Test Extension Library"""
+    """Test Extension Library for Checker"""
 
     def get_name(self) -> str:
-        return "test"
+        return "checker_test2"
 
     def get_elements(self) -> dict:
         return {
             "test": Element(
                 "test",
                 {
-                    "test": ElementProperty(PropertyType.string, default_value="test", doc_string=""),
-                    "dict_test": ElementProperty(
-                        PropertyType.dict,
-                        default_value="{}",
-                    ),
+                    "test": ElementProperty(PropertyType.string),
                 },
-                doc_string="""Multi-line test doc.
-                              With some indentation.
-                              """,
             ),
         }
-
-    def get_tgb_header(self) -> str:
-        return "# Test Extension Library TGB Header"

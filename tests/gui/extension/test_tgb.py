@@ -100,7 +100,9 @@ def test_tgb_generation_entry_point(gui: Gui, test_client, helpers):
     temp_file = tempfile.NamedTemporaryFile(delete=False)
     temp_file.close()
     os.chdir(os.path.dirname(__file__))
-    with patch("sys.argv", ["main", "generate_tgb", "extlib_test", temp_file.name]):
-        assert main() == 0
-    os.chdir(saved_cwd)
-    os.remove(temp_file.name)
+    try:
+        with patch("sys.argv", ["main", "generate_tgb", "extlib_test", temp_file.name]):
+            assert main() == 0
+    finally:
+        os.chdir(saved_cwd)
+        os.remove(temp_file.name)

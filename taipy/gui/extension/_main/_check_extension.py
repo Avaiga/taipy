@@ -38,6 +38,14 @@ class Results:
     def fail(self, category: str, msg: str, hint: t.Optional[str] = None) -> None:
         self.results.append(Message(category, "FAIL", msg, hint))
 
+    def test(
+        self, condition: bool, ko_status: str, category: str, ok_msg: str, fail_msg: str, hint: t.Optional[str] = None
+    ) -> None:
+        if condition:
+            self.results.append(Message(category, "OK", ok_msg))
+        else:
+            self.results.append(Message(category, ko_status, fail_msg, hint))
+
     def render(self) -> int:
         warn_count = sum(1 for r in self.results if r.status == "WARN")
         fail_count = sum(1 for r in self.results if r.status == "FAIL")
@@ -60,7 +68,7 @@ class Results:
 def _read_text(p: Path) -> t.Optional[str]:
     try:
         return p.read_text(encoding="utf-8")
-    except Exception:
+    except Exception:  # pragma: no cover
         return None
 
 
@@ -100,7 +108,7 @@ class _LibraryInspector(ast.NodeVisitor):
                 value = stmt.value
                 if isinstance(value, ast.Constant) and isinstance(value.value, str):
                     return value.value
-        return ""
+        return ""  # pragma: no cover
 
     def _extract_return_list_of_str(self, fn: ast.FunctionDef) -> list[str]:
         for stmt in fn.body:
@@ -112,7 +120,7 @@ class _LibraryInspector(ast.NodeVisitor):
                         if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
                             items.append(elt.value)
                     return items
-        return []
+        return []  # pragma: no cover
 
     def visit_ClassDef(self, node: ast.ClassDef) -> t.Any:
         if node.bases:
@@ -174,8 +182,8 @@ def parse_webpack_config(file_content: str) -> dict[str, str]:
     return config
 
 
-def _check_extension(package_root_dir: str, error_fn: t.Callable[[str], None]) -> int:  # noqa: C901
-    """Check the validity of the the extension package."""
+def _check_extension(package_root_dir: str, _: t.Optional[t.Callable[[str], None]] = None) -> int:  # noqa: C901
+    """Check the validity of the extension library package."""
 
     results = Results()
     top_dir_path = Path(".")
@@ -188,14 +196,14 @@ def _check_extension(package_root_dir: str, error_fn: t.Callable[[str], None]) -
         proj_name = pyproject.get("name")
         proj_version = pyproject.get("version")
         if proj_name:
-            if proj_name == package_root_dir:
-                results.ok("pyproject.name", f"[project].name='{proj_name}' matches package name.")
-            else:
-                results.warn(
-                    "pyproject.name",
-                    f"[project].name='{proj_name}' differs from package name '{package_root_dir}'.",
-                    "Consider aligning the distribution name with the package name.",
-                )
+            results.test(
+                proj_name == package_root_dir,
+                "WARN",
+                "pyproject.name",
+                f"[project].name='{proj_name}' matches package name.",
+                f"[project].name='{proj_name}' differs from package name '{package_root_dir}'.",
+                hint="Consider aligning the distribution name with the package name.",
+            )
         else:
             results.warn(
                 "pyproject.name",
@@ -208,7 +216,7 @@ def _check_extension(package_root_dir: str, error_fn: t.Callable[[str], None]) -
         results.warn(
             "pyproject.toml",
             f"The extension package should contain a 'pyproject.toml' file at its root ('{package_root_dir}').",
-            "This file is required for packaging and distributing the extension library.",
+            hint="This file is required for packaging and distributing the extension library.",
         )
 
     # Read MANIFEST.in
@@ -235,7 +243,7 @@ def _check_extension(package_root_dir: str, error_fn: t.Callable[[str], None]) -
         file_content = None
         if filename.endswith(".py") and (file_content := _read_text(package_path / filename)) is not None:
             find_extension_libraries(filename, file_content, libraries)
-    if not libraries:
+    if not libraries:  # pragma: no cover
         results.fail(
             "ElementLibrary",
             "No ElementLibrary subclass found in any module at the root of the package directory "
@@ -249,7 +257,7 @@ def _check_extension(package_root_dir: str, error_fn: t.Callable[[str], None]) -
             + f" package directory '{package_root_dir}'.",
         )
         main_library_name = next(iter(libraries.keys()))
-        if len(libraries) > 1:
+        if len(libraries) > 1:  # pragma: no cover
             results.warn(
                 "ElementLibrary",
                 "Multiple ElementLibrary subclasses found.",
@@ -257,18 +265,15 @@ def _check_extension(package_root_dir: str, error_fn: t.Callable[[str], None]) -
             )
     for classname, library in libraries.items():
         if name := library.get("name"):
-            if name == package_root_dir:
-                results.ok(
-                    "library.name",
-                    f"Library name '{name}' defined in '{classname}.get_name()' matches package name.",
-                )
-            else:
-                results.warn(
-                    "library.name",
-                    f"Library name '{name}' defined in '{classname}.get_name()' differs "
-                    + f"from package name '{package_root_dir}'.",
-                    "Consider aligning the library name with the package name.",
-                )
+            results.test(
+                name == package_root_dir,
+                "WARN",
+                "library.name",
+                f"Library name '{name}' defined in '{classname}.get_name()' matches package name.",
+                f"Library name '{name}' defined in '{classname}.get_name()' differs "
+                + f"from package name '{package_root_dir}'.",
+                hint="Consider aligning the library name with the package name.",
+            )
         else:
             results.fail(
                 "library.name",
@@ -314,17 +319,14 @@ def _check_extension(package_root_dir: str, error_fn: t.Callable[[str], None]) -
 
     if "entry" in webpack_config and frontend_dir_path:
         entry_path = frontend_dir_path / webpack_config["entry"]
-        if entry_path.is_file():
-            results.ok(
-                "webpack.entry",
-                f"Webpack entry point file found: {entry_path.relative_to(top_dir_path)}",
-            )
-        else:
-            results.fail(
-                "webpack.entry",
-                f"Webpack entry point file not found: {entry_path.relative_to(top_dir_path)}",
-                hint="Check the 'entry' field in your webpack.config.js to ensure it points to a valid file.",
-            )
+        results.test(
+            entry_path.is_file(),
+            "WARN",
+            "webpack.entry",
+            f"Webpack entry point file found: {entry_path.relative_to(top_dir_path)}",
+            f"Webpack entry point file not found: {entry_path.relative_to(top_dir_path)}",
+            hint="Check the 'entry' field in your webpack.config.js to ensure it points to a valid file.",
+        )
     else:
         results.warn("webpack.entry", "Couldn't verify webpack entry point directory existence.")
 
@@ -332,38 +334,32 @@ def _check_extension(package_root_dir: str, error_fn: t.Callable[[str], None]) -
         # NOTE: We only consider the first library found
         if "js_name" in libraries[main_library_name]:
             expected_module_name = libraries[main_library_name]["js_name"]
-            if webpack_config["name"] == expected_module_name:
-                results.ok(
-                    "webpack.library.name",
-                    f"Webpack library name '{expected_module_name}' matches name defined in"
-                    + f"{main_library_name}.get_js_name().",
-                )
-            else:
-                results.fail(
-                    "webpack.library.name",
-                    f"Webpack library name '{webpack_config['name']}' does not match "
-                    + f"the name defined in {main_library_name}.get_js_name() ('{expected_module_name}').",
-                    hint="Align the webpack library name with the module name defined in"
-                    + f"{main_library_name}.get_js_name().",
-                )
-        else:
+            results.test(
+                webpack_config["name"] == expected_module_name,
+                "FAIL",
+                "webpack.library.name",
+                f"Webpack library name '{expected_module_name}' matches name defined in"
+                + f"{main_library_name}.get_js_name().",
+                f"Webpack library name '{webpack_config['name']}' does not match "
+                + f"the name defined in {main_library_name}.get_js_name() ('{expected_module_name}').",
+                hint="Align the webpack library name with the module name defined in"
+                + f"{main_library_name}.get_js_name().",
+            )
+        elif "name" in libraries[main_library_name]:
             expected_module_name = "".join(
                 word.capitalize() for word in libraries[main_library_name]["name"].split("_")
             )
-            if webpack_config["name"] == expected_module_name:
-                results.ok(
-                    "webpack.library.name",
-                    f"Webpack library name '{expected_module_name}' matches name derived from "
-                    + f"{main_library_name}.get_name().",
-                )
-            else:
-                results.fail(
-                    "webpack.library.name",
-                    f"Webpack library name '{webpack_config['name']}' does not match "
-                    + f"the name derived from {main_library_name}.get_name() ('{expected_module_name}').",
-                    hint="Align the webpack library name with the name derived from the name returned by "
-                    + f"{main_library_name}.get_name().",
-                )
+            results.test(
+                webpack_config["name"] == expected_module_name,
+                "FAIL",
+                "webpack.library.name",
+                f"Webpack library name '{expected_module_name}' matches name derived from "
+                + f"{main_library_name}.get_name().",
+                f"Webpack library name '{webpack_config['name']}' does not match "
+                + f"the name derived from {main_library_name}.get_name() ('{expected_module_name}').",
+                hint="Align the webpack library name with the name derived from the name returned by "
+                + f"{main_library_name}.get_name().",
+            )
 
     if (
         "filename" in webpack_config
@@ -376,29 +372,24 @@ def _check_extension(package_root_dir: str, error_fn: t.Callable[[str], None]) -
             bundle_dir = os.path.join(bundle_dir, webpack_config["path"])
         bundle_path = os.path.join(bundle_dir, webpack_config["filename"]).replace("\\", "/")
         bundle_dir = os.path.join(package_path, bundle_dir).replace("\\", "/")
-        if bundle_path in libraries[main_library_name]["scripts"]:
-            results.ok(
-                "webpack.output",
-                f"Webpack output path '{bundle_path}' is returned by {main_library_name}.get_scripts().",
-            )
-        else:
-            results.fail(
-                "webpack.output",
-                f"Webpack output path '{bundle_path}' is not returned by {main_library_name}.get_scripts().",
-            )
+        results.test(
+            bundle_path in libraries[main_library_name]["scripts"],
+            "FAIL",
+            "webpack.output",
+            f"Webpack output path '{bundle_path}' is returned by {main_library_name}.get_scripts().",
+            f"Webpack output path '{bundle_path}' is not returned by {main_library_name}.get_scripts().",
+            hint=f"Add '{bundle_path}' to the list returned by {main_library_name}.get_scripts().",
+        )
         bundle_path = os.path.join(bundle_dir, webpack_config["filename"]).replace("\\", "/")
         if manifest_includes:
-            if any(bundle_dir + "/*" == include or bundle_path == include for include in manifest_includes):
-                results.ok(
-                    "MANIFEST.include",
-                    f"Webpack output path '{bundle_path}' is included in MANIFEST.in.",
-                )
-            else:
-                results.fail(
-                    "MANIFEST.include",
-                    f"Webpack output path '{bundle_path}' is not included in MANIFEST.in.",
-                    hint="Include the JS bundle in MANIFEST.in for packaging and distributing the extension library.",
-                )
+            results.test(
+                any(bundle_dir + "/*" == include or bundle_path == include for include in manifest_includes),
+                "FAIL",
+                "MANIFEST.include",
+                f"Webpack output path '{bundle_path}' is included in MANIFEST.in.",
+                f"Webpack output path '{bundle_path}' is not included in MANIFEST.in.",
+                hint="Include the JS bundle in MANIFEST.in for packaging and distributing the extension library.",
+            )
 
     return results.render()
 

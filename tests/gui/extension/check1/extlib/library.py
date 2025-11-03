@@ -8,31 +8,28 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from typing import List
 from taipy.gui.extension import Element, ElementLibrary, ElementProperty, PropertyType
 
 
 class Library(ElementLibrary):
-    """Test Extension Library"""
+    """Test Extension Library for Checker"""
 
     def get_name(self) -> str:
-        return "test"
+        return "checker1"
 
     def get_elements(self) -> dict:
         return {
             "test": Element(
                 "test",
                 {
-                    "test": ElementProperty(PropertyType.string, default_value="test", doc_string=""),
-                    "dict_test": ElementProperty(
-                        PropertyType.dict,
-                        default_value="{}",
-                    ),
+                    "test": ElementProperty(PropertyType.string),
                 },
-                doc_string="""Multi-line test doc.
-                              With some indentation.
-                              """,
             ),
         }
 
-    def get_tgb_header(self) -> str:
-        return "# Test Extension Library TGB Header"
+    def get_js_name(self) -> str:
+        return "Test"
+
+    def get_scripts(self) -> List[str]:
+        return ["frontend/testdist/test.js"]
