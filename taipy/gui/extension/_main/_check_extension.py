@@ -26,7 +26,7 @@ class Message:
 
 
 class Results:
-    def __init__(self):
+    def __init__(self) -> None:
         self.results: t.List[Message] = []
 
     def ok(self, category: str, msg: str, hint: t.Optional[str] = None) -> None:
@@ -237,7 +237,7 @@ def _check_extension(package_root_dir: str, _: t.Optional[t.Callable[[str], None
         )
 
     # Find the Library subclass in any module at the root of the package directory
-    libraries = {}
+    libraries: dict[str, dict[str, str]] = {}
     main_library_name = None  # TODO - We only consider a single extension library at this point
     for filename in os.listdir(package_root_dir):
         file_content = None

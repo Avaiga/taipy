@@ -1,2 +1,2 @@
 include some/inexistent/file
-include extlib/frontend/testdist/test.js
+include extlib1/frontend/testdist/test.js

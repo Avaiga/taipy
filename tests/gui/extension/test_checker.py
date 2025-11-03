@@ -29,7 +29,7 @@ def test_extension_checker(capsys):
     # check1 has no issue
     os.chdir(os.path.dirname(__file__) + "/check1")
     try:
-        failure = _check_extension("extlib")
+        failure = _check_extension("extlib1")
         captured = capsys.readouterr()
         assert not failure  # expect success
         assert "front-end: Found front-end" in captured.out
@@ -41,7 +41,7 @@ def test_extension_checker(capsys):
     # check2 has a fatal issue: library without get_name()
     os.chdir(os.path.dirname(__file__) + "/check2")
     try:
-        failure = _check_extension("extlib")
+        failure = _check_extension("extlib2")
         captured = capsys.readouterr()
         assert failure  # expect failure
         assert "is missing get_name() implementation" in captured.out
@@ -51,7 +51,7 @@ def test_extension_checker(capsys):
     # check3 has a fatal issue: name mismatch with webpack library name
     os.chdir(os.path.dirname(__file__) + "/check3")
     try:
-        failure = _check_extension("extlib")
+        failure = _check_extension("extlib3")
         captured = capsys.readouterr()
         assert failure  # expect failure
         assert "does not match the name derived" in captured.out
