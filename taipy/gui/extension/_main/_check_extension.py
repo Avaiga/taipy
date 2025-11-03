@@ -152,33 +152,44 @@ def find_extension_libraries(filename: str, file_content: str, libraries: dict[s
 
 
 def parse_webpack_config(file_content: str) -> dict[str, str]:
-    import regex
+    # The proper way would be to use the 'regex' module, that supports recursive patterns:
+    # import regex
+    #
+    # define
+    #   BRACES_RE = r"(?(DEFINE)(?P<BLOCK>\{(?:[^{}]++|(?&BLOCK))*\}))"
+    # then use that to extract the 'return' object:"
+    #   return_re = regex.compile(BRACES_RE + r"return\s*(?P<obj>(?&BLOCK))", FLAGS)
+    #   if m := return_re.search(file_content):
+    #       config_obj = m.group("obj")
+    # config_obj can then be further processed to extract 'entry', 'output', etc.
+    #
+    # However, we decided to use a simpler approach here because it would otherwise need 'regex' to
+    # be added to the dependencies, and enforces its installation in the user's environment.
+
+    # Remove all JS comments from the input text
+    FLAGS = re.DOTALL | re.MULTILINE
+    file_content = re.sub(r"//.*?$|/\*.*?\*/", "", file_content, flags=FLAGS)
 
     config: dict[str, str] = {}
-    BRACES_RE = r"(?(DEFINE)(?P<BLOCK>\{(?:[^{}]++|(?&BLOCK))*\}))"
-    FLAGS = re.VERBOSE | re.DOTALL | re.IGNORECASE
     config_obj = ""
-    return_re = regex.compile(BRACES_RE + r"return\s*(?P<obj>(?&BLOCK))", FLAGS)
-    if m := return_re.search(file_content):
-        config_obj = m.group("obj")
-
+    if m := re.search(r"return\s*\{\s*", file_content, flags=FLAGS):
+        config_obj = file_content[m.end() :]
     # entry value
     m = re.search(r"entry\s*:\s*\[?['\"](.+?)['\"]\]?", config_obj, FLAGS)
     if m:
         config["entry"] = m.group(1)
     # output settings
-    output_re = regex.compile(BRACES_RE + r"output\s*:\s*(?P<obj>(?&BLOCK))", FLAGS)
-    if m := output_re.search(file_content):
-        output = m.group("obj")
+    if m := re.search(r"output\s*:\s*\{\s*", config_obj, flags=FLAGS):
+        output = config_obj[m.end() :]
         if m := re.search(r"filename\s*:\s*['\"](.+?)['\"]", output, FLAGS):
             config["filename"] = m.group(1)
         if m := re.search(r"path\s*:\s*path\.resolve\(__dirname,\s*['\"](.+?)['\"]\)", output, FLAGS):
             config["path"] = m.group(1)
-        library_re = regex.compile(BRACES_RE + r"library\s*:\s*(?P<obj>(?&BLOCK))", FLAGS)
-        if m := library_re.search(file_content):
-            library = m.group("obj")
-            if m := re.search(r"name\s*:\s*['\"](.+?)['\"]", library, FLAGS):
-                config["name"] = m.group(1)
+        # output.library settings
+        if m := re.search(r"library\s*:\s*\{\s*", output, FLAGS):
+            library = output[m.end() :]
+            if m := re.search(r"name\s*:\s*(['\"])(.+?)\1", library, FLAGS):
+                config["name"] = m.group(2)
     return config
 
 

@@ -30,7 +30,6 @@ python-dotenv = "==1.0.0"
 python-magic = {version = "==0.4.24", markers="sys_platform != 'win32'"}
 python-magic-bin = {version = "==0.4.14", markers="sys_platform == 'win32'"}
 pytz = "==2021.3"
-regex = "==2023.12.25"
 simple-websocket = "==0.10.1"
 sqlalchemy = "==2.0.16"
 toml = "==0.10"
