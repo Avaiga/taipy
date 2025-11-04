@@ -24,6 +24,13 @@ describe("JSX Parser", () => {
         const children = elements[0].props.children as React.ReactNode[];
         expect(children[0]).toBe("Hello World");
     });
+    it("parse no children HTML", async () => {
+        const elements = parseJSX("<hr/>");
+        expect(elements).not.toBeNull();
+        expect(elements).toHaveLength(1);
+        expect(elements[0].type).toBe("hr");
+        expect(elements[0].props.children).toBeUndefined();
+    });
     it("parse simple jsx", async () => {
         const elements = parseJSX("<MyComponent>Hello World</MyComponent>");
         expect(elements).not.toBeNull();

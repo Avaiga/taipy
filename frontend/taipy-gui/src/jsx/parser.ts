@@ -93,17 +93,20 @@ const translate = (
             : [];
 
     const comp = components && root.tagName in components ? components[root.tagName] : root.tagName;
+    let withProps = false;
     const props = Array.from(root.attributes).reduce((acc, attr) => {
         const value = replaceInterpolations(attr.value as string, state);
         if (value !== undefined) {
             acc[attr.name === "class" ? "className" : attr.name] = value;
+            withProps = true;
         }
         return acc;
     }, {} as Record<string, unknown>);
     if (withKey && !props.key) {
         props.key = getTagKey(tagKeys, root.tagName);
+        withProps = true;
     }
-    return React.createElement(comp, props, children);
+    return React.createElement(comp, withProps ? props : undefined, ...children);
 };
 
 export const parseJSX = (
