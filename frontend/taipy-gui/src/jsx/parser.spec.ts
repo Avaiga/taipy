@@ -20,9 +20,7 @@ describe("JSX Parser", () => {
         expect(elements).not.toBeNull();
         expect(elements).toHaveLength(1);
         expect(elements[0].type).toBe("div");
-        expect(elements[0].props.children).toHaveLength(1);
-        const children = elements[0].props.children as React.ReactNode[];
-        expect(children[0]).toBe("Hello World");
+        expect(elements[0].props.children).toBe("Hello World");
     });
     it("parse no children HTML", async () => {
         const elements = parseJSX("<hr/>");
@@ -36,9 +34,7 @@ describe("JSX Parser", () => {
         expect(elements).not.toBeNull();
         expect(elements).toHaveLength(1);
         expect(elements[0].type).toBe("MyComponent");
-        expect(elements[0].props.children).toHaveLength(1);
-        const children = elements[0].props.children as React.ReactNode[];
-        expect(children[0]).toBe("Hello World");
+        expect(elements[0].props.children).toBe("Hello World");
     });
     it("parse complex jsx", async () => {
         const elements = parseJSX("<MyComponent>Hello World<AnotherComponent/></MyComponent><div>Bye</div>");
@@ -50,9 +46,7 @@ describe("JSX Parser", () => {
         expect(children[0]).toBe("Hello World");
         expect((children[1] as React.ReactElement).type).toBe("AnotherComponent");
         expect(elements[1].type).toBe("div");
-        expect(elements[1].props.children).toHaveLength(1);
-        const children2 = elements[1].props.children as React.ReactNode[];
-        expect(children2[0]).toBe("Bye");
+        expect(elements[1].props.children).toBe("Bye");
     });
     it("parse jsx with component", async () => {
         const elements = parseJSX('<MyComponent prop="property">Hello World</MyComponent>', {}, { MyComponent: (props: any) => React.createElement("div", {}) });
@@ -65,9 +59,7 @@ describe("JSX Parser", () => {
         expect(elements).not.toBeNull();
         expect(elements).toHaveLength(1);
         expect(elements[0].type).toBe("MyComponent");
-        expect(elements[0].props.children).toHaveLength(1);
-        const children = elements[0].props.children as React.ReactNode[];
-        expect(children[0]).toBe("Hello World");
+        expect(elements[0].props.children).toBe("Hello World");
         expect((elements[0].props as any).prop).toBe("property");
     });
     it("parse jsx with property and undefined interpolation", async () => {
@@ -75,9 +67,7 @@ describe("JSX Parser", () => {
         expect(elements).not.toBeNull();
         expect(elements).toHaveLength(1);
         expect(elements[0].type).toBe("MyComponent");
-        expect(elements[0].props.children).toHaveLength(1);
-        const children = elements[0].props.children as React.ReactNode[];
-        expect(children[0]).toBe("Hello World");
+        expect(elements[0].props.children).toBe("Hello World");
         expect((elements[0].props as any).prop).toBeUndefined();
     });
     it("parse jsx with property and interpolation", async () => {
@@ -89,9 +79,7 @@ describe("JSX Parser", () => {
         expect(elements).not.toBeNull();
         expect(elements).toHaveLength(1);
         expect(elements[0].type).toBe("MyComponent");
-        expect(elements[0].props.children).toHaveLength(1);
-        const children = elements[0].props.children as React.ReactNode[];
-        expect(children[0]).toBe("Hello World");
+        expect(elements[0].props.children).toBe("Hello World");
         expect((elements[0].props as any).prop).toBe("prop");
         expect((elements[0].props as any).objectProp).toStrictEqual(state.objectProp);
         expect((elements[0].props as any).numProp).toBe(1);
