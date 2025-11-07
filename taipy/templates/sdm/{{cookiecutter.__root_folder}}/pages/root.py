@@ -13,11 +13,10 @@ import taipy.gui.builder as tgb
 
 selected_scenario = None
 selected_data_node = None
-content = ""
 
 
 with tgb.Page() as root:
-    with tgb.layout(columns="1, 5"):
+    with tgb.layout(columns="1 5"):
         with tgb.part(class_name="sidebar"):
             tgb.scenario_selector("{selected_scenario}")
 
@@ -28,4 +27,4 @@ with tgb.Page() as root:
             tgb.navbar()
 
             with tgb.part(class_name="main"):
-                tgb.text("{content}")
+                tgb.content()

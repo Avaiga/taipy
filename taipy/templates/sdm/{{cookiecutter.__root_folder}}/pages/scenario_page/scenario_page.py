@@ -29,7 +29,7 @@ def manage_data_node_partial(state):
 
 
 with tgb.Page() as scenario_page:
-    with tgb.layout(columns="1, 1"):
+    with tgb.layout(columns="1 1"):
         with tgb.part(render="{selected_scenario}"):
             tgb.scenario(
                 "{selected_scenario}",
