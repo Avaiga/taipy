@@ -16,6 +16,7 @@ import importlib
 import json
 import math
 import os
+import pandas as pd
 import re
 import sys
 import tempfile
@@ -1856,10 +1857,57 @@ class Gui:
     def _get_adapted_lov(self, lov: list, var_type: str):
         return self.__adapter._get_adapted_lov(lov, var_type)
 
+    def _get_var_from_name(self, var_name: str):
+        """Retrieve a variable from internal store, GUI state, or globals."""
+        try:
+            
+            if not hasattr(self, "_variables"):
+                self._variables = {}
+
+            if var_name in self._variables:
+                return self._variables[var_name]
+
+            if hasattr(self, "state") and var_name in getattr(self, "state", {}):
+                return self.state[var_name]
+
+            if hasattr(self, var_name):
+                return getattr(self, var_name)
+
+            if var_name in globals():
+                return globals()[var_name]
+
+        except Exception as e:
+            _warn(f"Error while retrieving variable '{var_name}'.", e)
+            return None
+
+        _warn(f"Variable '{var_name}' not found.")
+        return None
+
+    def _set_var_in_name(self, var_name: str, value):
+        """Set or update a variable in internal store, GUI state, or globals."""
+        try:
+            if not hasattr(self, "_variables"):
+                self._variables = {}
+
+            self._variables[var_name] = value
+
+            if hasattr(self, "state") and var_name in getattr(self, "state", {}):
+                self.state[var_name] = value
+                return
+
+            if hasattr(self, var_name):
+                setattr(self, var_name, value)
+                return
+
+            globals()[var_name] = value
+
+        except Exception as e:
+            _warn(f"Failed to set variable '{var_name}'.", e)
+
     def table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
         """Default implementation of the `on_edit` callback for tables.
 
-           This function sets the value of a specific cell in the tabular dataset stored in
+        #This function sets the value of a specific cell in the tabular dataset stored in
            *var_name*, typically bound to the *data* property of a table control.
 
         Arguments:
@@ -1896,7 +1944,13 @@ class Gui:
                 to 0, with the exact meaning depending on the column data type.
         """
         try:
-            setattr(state, var_name, self._get_accessor().on_add(getattr(state, var_name), payload, new_row))
+            df = self._get_var_from_name(var_name)
+            if isinstance(df, pd.DataFrame):
+                new_row = payload.get("row", {})
+                df = pd.concat([df, pd.DataFrame([new_row], columns=df.columns)], ignore_index=True)
+                self._set_var_in_name(var_name, df)
+            else:
+                _warn(f"Variable '{var_name}' is not a DataFrame.")
         except Exception as e:
             _warn("Gui.table_on_add() failed potentially from a table's on_add callback.", e)
 
@@ -1912,7 +1966,26 @@ class Gui:
             payload: The payload dictionary received from the `on_delete` callback.
         """
         try:
-            setattr(state, var_name, self._get_accessor().on_delete(getattr(state, var_name), payload))
+            var = self._get_var_from_name(var_name)
+            df = self._get_var_from_name(var_name)
+            if isinstance(df, pd.DataFrame):
+                idx = payload.get("index")
+                if idx is None:
+                    _warn("No index provided for deletion.")
+                    return
+                try:
+                    df = df.drop(df.index[int(idx)])
+                    df.reset_index(drop=True, inplace=True)
+                    self._set_var_in_name(var_name, df)
+                except (ValueError, IndexError, KeyError):
+                    if idx in df.index:
+                        df = df.drop(idx)
+                        df.reset_index(drop=True, inplace=True)
+                        self._set_var_in_name(var_name, df)
+                    else:
+                        _warn(f"Row '{idx}' not found in DataFrame.")
+            else:
+                _warn(f"Variable '{var_name}' is not a DataFrame.")
         except Exception as e:
             _warn("Gui.table_on_delete() failed potentially from a table's on_delete callback.", e)
 
@@ -2110,10 +2183,8 @@ class Gui:
                 It can be an instance of `Markdown^` or `Html^`.<br/>
                 If *page* is a string, then:
 
-                - If *page* is set to the pathname of a readable file, the page
-                  content is read as Markdown input text.
-                - If it is not, the page content is read from this string as
-                  Markdown text.
+                - If *page* is set to the pathname of a readable file, the page content is read as Markdown input text.
+                - If it is not, the page content is read from this string as Markdown text.
             style (Optional[str]): Additional CSS style to apply to this page.
 
                 - If there is style associated with a page, it is used at a global level
