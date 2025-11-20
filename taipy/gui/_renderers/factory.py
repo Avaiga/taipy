@@ -465,6 +465,7 @@ class _Factory:
                 ("anchor", PropertyType.string, "left"),
                 ("on_close", PropertyType.function),
                 ("persistent", PropertyType.boolean, False),
+                ("title", PropertyType.string),
                 ("active", PropertyType.dynamic_boolean, True),
                 ("width", PropertyType.string_or_number, "30vw"),
                 ("height", PropertyType.string_or_number, "30vh"),

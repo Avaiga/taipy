@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, { CSSProperties, JSX, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
@@ -37,6 +37,7 @@ interface PaneProps extends TaipyActiveProps, TaipyChangeProps {
     defaultOpen?: string | boolean;
     anchor?: AnchorType;
     persistent?: boolean;
+    title?: string;
     onClose?: string;
     page?: string;
     partial?: boolean;
@@ -45,14 +46,38 @@ interface PaneProps extends TaipyActiveProps, TaipyChangeProps {
     showButton?: boolean;
 }
 
-const getHeaderSx = (anchor: AnchorType) => {
+const getHeaderSx = (anchor: AnchorType): CSSProperties => {
+    const baseStyle = { display: "flex", alignItems: "center" };
     switch (anchor) {
-        case "right":
         case "top":
         case "bottom":
-            return { display: "flex", alignItems: "center" };
+            return baseStyle;
+        case "right":
+            return { ...baseStyle, flexDirection: "row-reverse" };
         default:
-            return { display: "flex", alignItems: "center", justifyContent: "flex-end" };
+            return { ...baseStyle, justifyContent: "flex-end" };
+    }
+};
+const getHeaderIcon = (anchor: AnchorType): JSX.Element => {
+    switch (anchor) {
+        case "right":
+            return <ChevronRightIcon />;
+        case "top":
+            return <ExpandLess />;
+        case "bottom":
+            return <ExpandMore />;
+        default:
+            return <ChevronLeftIcon />;
+    }
+};
+const getTitleSx = (anchor: AnchorType): CSSProperties => {
+    switch (anchor) {
+        case "right":
+            return { flexGrow: 1, paddingRight: 2 };
+        default:
+        case "top":
+        case "bottom":
+            return { flexGrow: 1, paddingLeft: 2 };
     }
 };
 const getDrawerSx = (horizontal: boolean, width: string | number, height: string | number) => ({
@@ -65,7 +90,6 @@ const getDrawerSx = (horizontal: boolean, width: string | number, height: string
         boxSizing: "border-box",
     },
 });
-
 const buttonDrawerSx = {
     "& .MuiDrawer-paper": {
         width: "fit-content",
@@ -79,6 +103,7 @@ const Pane = (props: PaneProps) => {
         id,
         anchor = "left",
         persistent = false,
+        title,
         onClose,
         page,
         partial,
@@ -102,6 +127,8 @@ const Pane = (props: PaneProps) => {
         [width, height, anchor]
     );
     const headerSx = useMemo(() => getHeaderSx(anchor), [anchor]);
+    const headerIcon = useMemo(() => getHeaderIcon(anchor), [anchor]);
+    const titleSx = useMemo(() => getTitleSx(anchor), [anchor]);
 
     const handleClose = useCallback(() => {
         if (active) {
@@ -146,9 +173,10 @@ const Pane = (props: PaneProps) => {
         >
             {persistent ? (
                 <>
-                    <Box sx={headerSx}>
+                    <Box sx={headerSx} className={getSuffixedClassNames(className, "-header")}>
+                        {title ? <Box sx={titleSx}>{title}</Box> : null}
                         <IconButton onClick={handleClose} disabled={!active}>
-                            {anchor === "left" ? <ChevronLeftIcon /> : anchor === "right" ? <ChevronRightIcon />: anchor === "top" ? <ExpandLess/>: <ExpandMore/>}
+                            {headerIcon}
                         </IconButton>
                     </Box>
                     <Divider />
@@ -162,9 +190,15 @@ const Pane = (props: PaneProps) => {
             </Tooltip>
         </Drawer>
     ) : showButton ? (
-        <Drawer variant="permanent" sx={buttonDrawerSx} anchor={anchor} open={true} className={getSuffixedClassNames(className, "-button")}>
+        <Drawer
+            variant="permanent"
+            sx={buttonDrawerSx}
+            anchor={anchor}
+            open={true}
+            className={getSuffixedClassNames(className, "-button")}
+        >
             <IconButton onClick={handleOpen} disabled={!active}>
-                {anchor === "left" ? <ChevronRightIcon /> : anchor === "right" ? <ChevronLeftIcon /> : anchor === "top" ? <ExpandMore/> : <ExpandLess/>}
+                {headerIcon}
             </IconButton>
         </Drawer>
     ) : null;
