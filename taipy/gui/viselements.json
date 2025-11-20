@@ -1888,7 +1888,7 @@
                         "name": "anchor",
                         "type": "str",
                         "default_value": "\"left\"",
-                        "doc": "Anchor side of the pane.<br/>Valid values are \"left\", \"right\", \"top\", or \"bottom\"."
+                        "doc": "Anchor side of the pane.<br/>Valid values are \"left\", \"right\", \"top\", or \"bottom\" (or \"l\", \"r\", \"t\", or \"b\" for short)."
                     },
                     {
                         "name": "persistent",

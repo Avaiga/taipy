@@ -35,7 +35,7 @@ interface PaneProps extends TaipyActiveProps, TaipyChangeProps {
     children?: ReactNode;
     open?: boolean;
     defaultOpen?: string | boolean;
-    anchor?: AnchorType;
+    anchor?: string;
     persistent?: boolean;
     title?: string;
     onClose?: string;
@@ -80,16 +80,19 @@ const getTitleSx = (anchor: AnchorType): CSSProperties => {
             return { flexGrow: 1, paddingLeft: 2 };
     }
 };
-const getDrawerSx = (horizontal: boolean, width: string | number, height: string | number) => ({
-    width: horizontal ? width : undefined,
-    height: horizontal ? undefined : height,
-    flexShrink: 0,
-    "& .MuiDrawer-paper": {
+const getDrawerSx = (anchor: AnchorType, width: string | number, height: string | number) => {
+    const horizontal = anchor === "left" || anchor === "right";
+    return {
         width: horizontal ? width : undefined,
-        height: horizontal ? undefined : height,
-        boxSizing: "border-box",
-    },
-});
+        height: horizontal ? undefined : anchor === "bottom" ? 0 : height,
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
+            width: horizontal ? width : undefined,
+            height: horizontal ? undefined : height,
+            boxSizing: "border-box",
+        },
+    };
+};
 const buttonDrawerSx = {
     "& .MuiDrawer-paper": {
         width: "fit-content",
@@ -101,7 +104,6 @@ const buttonDrawerSx = {
 const Pane = (props: PaneProps) => {
     const {
         id,
-        anchor = "left",
         persistent = false,
         title,
         onClose,
@@ -121,15 +123,25 @@ const Pane = (props: PaneProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-
-    const drawerSx = useMemo(
-        () => getDrawerSx(anchor === "left" || anchor === "right", width, height),
-        [width, height, anchor]
+    const anchor = useMemo<AnchorType>(
+        () =>
+            props.anchor
+                ? props.anchor.toLowerCase().startsWith("l")
+                    ? "left"
+                    : props.anchor.toLowerCase().startsWith("r")
+                    ? "right"
+                    : props.anchor.toLowerCase().startsWith("t")
+                    ? "top"
+                    : props.anchor.toLowerCase().startsWith("b")
+                    ? "bottom"
+                    : "left"
+                : "left",
+        [props.anchor]
     );
+    const drawerSx = useMemo(() => getDrawerSx(anchor, width, height), [width, height, anchor]);
     const headerSx = useMemo(() => getHeaderSx(anchor), [anchor]);
     const headerIcon = useMemo(() => getHeaderIcon(anchor), [anchor]);
     const titleSx = useMemo(() => getTitleSx(anchor), [anchor]);
-
     const handleClose = useCallback(() => {
         if (active) {
             setOpen(false);
