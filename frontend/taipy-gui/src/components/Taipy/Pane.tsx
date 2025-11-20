@@ -75,8 +75,6 @@ const getTitleSx = (anchor: AnchorType): CSSProperties => {
         case "right":
             return { flexGrow: 1, paddingRight: 2 };
         default:
-        case "top":
-        case "bottom":
             return { flexGrow: 1, paddingLeft: 2 };
     }
 };
