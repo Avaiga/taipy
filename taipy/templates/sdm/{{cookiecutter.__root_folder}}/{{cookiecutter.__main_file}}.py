@@ -10,25 +10,51 @@
 # specific language governing permissions and limitations under the License.
 
 from config.config import configure
-from pages import job_page, scenario_page
-from pages.root import root, selected_data_node, selected_scenario
+from pages import job, scenario
 
 import taipy as tp
+import taipy.gui.builder as tgb
 from taipy import Gui, Orchestrator
+from taipy.gui import State
+
+selected_scenario = None
+selected_data_node = None
 
 
-def on_init(state): ...
+def on_init(state: State):
+    scenario.on_init(state)
+    job.on_init(state)
 
 
-def on_change(state, var, val):
-    if var == "selected_data_node" and val:
-        state["scenario"].manage_data_node_partial(state)
+def on_change(state: State, var_name: str, var_value): ...
+
+
+def update_selected_data_node(state: State, var_name: str, var_value):
+    if var_value:
+        scenario.manage_data_node_partial(state)
+
+
+with tgb.Page() as root:
+    with tgb.layout(columns="1 5"):
+        with tgb.part(class_name="sidebar"):
+            tgb.scenario_selector("{selected_scenario}")
+
+            with tgb.part(render="{selected_scenario}"):
+                tgb.data_node_selector(
+                    "{selected_data_node}", display_cycles=False, on_change=update_selected_data_node
+                )
+
+        with tgb.part(class_name="main"):
+            tgb.navbar()
+
+            with tgb.part(class_name="main"):
+                tgb.content()
 
 
 pages = {
     "/": root,
-    "scenario": scenario_page,
-    "jobs": job_page,
+    "scenario": scenario.page,
+    "jobs": job.page,
 }
 
 

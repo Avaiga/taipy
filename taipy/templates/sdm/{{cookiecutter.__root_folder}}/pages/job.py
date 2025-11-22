@@ -9,4 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from .job_page import job_page
+import taipy.gui.builder as tgb
+from taipy.gui import State
+
+
+def on_init(state: State): ...
+
+
+with tgb.Page() as page:
+    tgb.job_selector()

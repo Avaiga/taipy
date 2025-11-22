@@ -10,10 +10,24 @@
 # specific language governing permissions and limitations under the License.
 
 import taipy.gui.builder as tgb
+from taipy import DataNode, Submission
+from taipy.gui import State, notify
+
+
+def on_init(state: State): ...
+
+
+def notify_on_submission(state: State, submission: Submission, details: dict):
+    if details["submission_status"] == "COMPLETED":
+        notify(state, "success", "Submission completed!")
+    elif details["submission_status"] == "FAILED":
+        notify(state, "error", "Submission failed!")
+    else:
+        notify(state, "info", "In progress...")
 
 
 # build partial content for a specific data node
-def build_dn_partial(dn, dn_label):
+def build_dn_partial(dn: DataNode, dn_label: str):
     with tgb.Page() as partial_content:
         with tgb.part(render="{selected_scenario}"):
             # ##########################################################################################################
@@ -46,8 +60,23 @@ def build_dn_partial(dn, dn_label):
     return partial_content
 
 
-def manage_partial(state):
+def manage_data_node_partial(state: State):
     dn = state.selected_data_node
     dn_label = dn.get_simple_label()
     partial_content = build_dn_partial(dn, dn_label)
     state.data_node_partial.update_content(state, partial_content)
+
+
+with tgb.Page() as page:
+    with tgb.layout(columns="1 1"):
+        with tgb.part(render="{selected_scenario}"):
+            tgb.scenario(
+                "{selected_scenario}",
+                expandable=False,
+                expanded=True,
+                on_submission_change=notify_on_submission,
+            )
+
+            tgb.scenario_dag("{selected_scenario}")
+
+        tgb.part(partial="{data_node_partial}", render="{selected_data_node}")
