@@ -15,7 +15,7 @@ from taipy.gui import notify
 from .data_node_management import manage_partial
 
 
-def notify_on_submission(state, submitable, details):
+def notify_on_submission(state, submission, details):
     if details["submission_status"] == "COMPLETED":
         notify(state, "success", "Submission completed!")
     elif details["submission_status"] == "FAILED":
