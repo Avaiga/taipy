@@ -16,7 +16,6 @@ import importlib
 import json
 import math
 import os
-import pandas as pd
 import re
 import sys
 import tempfile
@@ -464,6 +463,19 @@ class Gui:
         if libraries is not None:
             for library in libraries:
                 Gui.add_library(library)
+
+    def _get_var_from_name(self, state, var_name: str):
+        try:
+            return getattr(state, var_name)
+        except Exception as e:
+            _warn(f"Failed to get variable '{var_name}' from state.", e)
+            return None
+            
+    def _set_var_in_name(self, state, var_name: str, value):
+        try:
+            setattr(state, var_name, value)
+        except Exception as e:
+            _warn(f"Failed to set variable '{var_name}' in state.", e)
 
     def __load_scripts(self, script_paths: t.Union[str, Path, t.List[t.Union[str, Path]], None]):
         if script_paths is None:
@@ -1857,52 +1869,18 @@ class Gui:
     def _get_adapted_lov(self, lov: list, var_type: str):
         return self.__adapter._get_adapted_lov(lov, var_type)
 
-    def _get_var_from_name(self, var_name: str):
-        """Retrieve a variable from internal store, GUI state, or globals."""
+    def _get_var_from_name(self, state, var_name: str):
         try:
-            
-            if not hasattr(self, "_variables"):
-                self._variables = {}
-
-            if var_name in self._variables:
-                return self._variables[var_name]
-
-            if hasattr(self, "state") and var_name in getattr(self, "state", {}):
-                return self.state[var_name]
-
-            if hasattr(self, var_name):
-                return getattr(self, var_name)
-
-            if var_name in globals():
-                return globals()[var_name]
-
+            return getattr(state, var_name)
         except Exception as e:
-            _warn(f"Error while retrieving variable '{var_name}'.", e)
+            _warn(f"Failed to get variable '{var_name}' from state.", e)
             return None
-
-        _warn(f"Variable '{var_name}' not found.")
-        return None
-
-    def _set_var_in_name(self, var_name: str, value):
-        """Set or update a variable in internal store, GUI state, or globals."""
+    
+    def _set_var_in_name(self, state, var_name: str, value):
         try:
-            if not hasattr(self, "_variables"):
-                self._variables = {}
-
-            self._variables[var_name] = value
-
-            if hasattr(self, "state") and var_name in getattr(self, "state", {}):
-                self.state[var_name] = value
-                return
-
-            if hasattr(self, var_name):
-                setattr(self, var_name, value)
-                return
-
-            globals()[var_name] = value
-
+            setattr(state, var_name, value)
         except Exception as e:
-            _warn(f"Failed to set variable '{var_name}'.", e)
+            _warn(f"Failed to set variable '{var_name}' in state.", e)
 
     def table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
         """Default implementation of the `on_edit` callback for tables.
@@ -1928,64 +1906,22 @@ class Gui:
             _warn("Gui.table_on_edit() failed potentially from a table's on_edit callback.", e)
 
     def table_on_add(
-        self, state: State, var_name: str, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
+    self, state: State, var_name: str, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
     ):
-        """Default implementation of the `on_add` callback for tables.
-
-        This function creates a new row in the tabular dataset stored in *var_name*.<br/>
-        The row is added at the index specified in *payload["index"]*.
-
-        Arguments:
-            state: The state instance received from the callback.
-            var_name: The name of the variable bound to the table's *data* property.
-            payload: The payload dictionary received from the `on_add` callback.
-            new_row: The initial values for the new row.<br/>
-                If this parameter is not specified, the new row is initialized with all values set
-                to 0, with the exact meaning depending on the column data type.
-        """
         try:
-            df = self._get_var_from_name(var_name)
-            if isinstance(df, pd.DataFrame):
-                new_row = payload.get("row", {})
-                df = pd.concat([df, pd.DataFrame([new_row], columns=df.columns)], ignore_index=True)
-                self._set_var_in_name(var_name, df)
-            else:
-                _warn(f"Variable '{var_name}' is not a DataFrame.")
+            old_value = getattr(state, var_name)
+            accessor = self._get_accessor()
+            new_value = accessor.on_add(old_value, payload, new_row=new_row)
+            setattr(state, var_name, new_value)
         except Exception as e:
             _warn("Gui.table_on_add() failed potentially from a table's on_add callback.", e)
 
     def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
-        """Default implementation of the `on_delete` callback for tables.
-
-        This function removes a row from the tabular dataset stored in *var_name*.<br/>
-        The row to be removed is located at the index specified in *payload["index"]*.
-
-        Arguments:
-            state: The state instance received in the callback.
-            var_name: The name of the variable bound to the table's *data* property.
-            payload: The payload dictionary received from the `on_delete` callback.
-        """
         try:
-            var = self._get_var_from_name(var_name)
-            df = self._get_var_from_name(var_name)
-            if isinstance(df, pd.DataFrame):
-                idx = payload.get("index")
-                if idx is None:
-                    _warn("No index provided for deletion.")
-                    return
-                try:
-                    df = df.drop(df.index[int(idx)])
-                    df.reset_index(drop=True, inplace=True)
-                    self._set_var_in_name(var_name, df)
-                except (ValueError, IndexError, KeyError):
-                    if idx in df.index:
-                        df = df.drop(idx)
-                        df.reset_index(drop=True, inplace=True)
-                        self._set_var_in_name(var_name, df)
-                    else:
-                        _warn(f"Row '{idx}' not found in DataFrame.")
-            else:
-                _warn(f"Variable '{var_name}' is not a DataFrame.")
+            old_value = getattr(state, var_name)
+            accessor = self._get_accessor()
+            new_value = accessor.on_delete(old_value, payload)
+            setattr(state, var_name, new_value)
         except Exception as e:
             _warn("Gui.table_on_delete() failed potentially from a table's on_delete callback.", e)
 
