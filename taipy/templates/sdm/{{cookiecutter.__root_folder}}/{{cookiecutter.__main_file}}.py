@@ -29,20 +29,13 @@ def on_init(state: State):
 def on_change(state: State, var_name: str, var_value): ...
 
 
-def update_selected_data_node(state: State, var_name: str, var_value):
-    if var_value:
-        scenario.manage_data_node_partial(state)
-
-
 with tgb.Page() as root:
     with tgb.layout(columns="1 5"):
         with tgb.part(class_name="sidebar"):
             tgb.scenario_selector("{selected_scenario}")
 
             with tgb.part(render="{selected_scenario}"):
-                tgb.data_node_selector(
-                    "{selected_data_node}", display_cycles=False, on_change=update_selected_data_node
-                )
+                tgb.data_node_selector("{selected_data_node}", display_cycles=False)
 
         with tgb.part(class_name="main"):
             tgb.navbar()
@@ -75,5 +68,4 @@ if __name__ == "__main__":
 
     # Instantiate, configure and run the GUI
     gui = Gui(pages=pages)
-    data_node_partial = gui.add_partial("")
     gui.run(title="{{cookiecutter.__application_title}}", margin="0em")
