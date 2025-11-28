@@ -109,3 +109,23 @@ check-hidden = true
 ignore-regex = '^\s*"image/\S+": ".*|\b(inPort|anId|IST|Opps|Rouge|notifAction)\b'
 # some unfortunate names for variables
 ignore-words-list = 'ags,selt'
+
+[tool.poetry]
+name = "taipy-local"
+version = "4.1.0"
+description = "Fix for Taipy editable dataframe issue"
+authors = ["Your Name <your@email.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^2.0"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "flake8",
+    "mypy",
+    "isort",
+    "pre-commit"
+]
