@@ -10,44 +10,61 @@
 # specific language governing permissions and limitations under the License.
 
 import taipy.gui.builder as tgb
+from taipy import DataNode, Submission
+from taipy.gui import State, notify
+
+path_to_uploaded_file = None
 
 
-# build partial content for a specific data node
-def build_dn_partial(dn, dn_label):
-    with tgb.Page() as partial_content:
+def on_init(state: State): ...
+
+
+def notify_on_submission(state: State, submission: Submission, details: dict):
+    if details["submission_status"] == "COMPLETED":
+        notify(state, "success", "Submission completed!")
+    elif details["submission_status"] == "FAILED":
+        notify(state, "error", "Submission failed!")
+    else:
+        notify(state, "info", "In progress...")
+
+
+with tgb.Page() as page:
+    with tgb.layout(columns="1 1"):
         with tgb.part(render="{selected_scenario}"):
+            tgb.scenario(
+                "{selected_scenario}",
+                expandable=False,
+                expanded=True,
+                on_submission_change=notify_on_submission,
+            )
+
+            tgb.scenario_dag("{selected_scenario}")
+
+        with tgb.part(render="{selected_data_node and selected_scenario}"):
             # ##########################################################################################################
             # PLACEHOLDER: data node specific content before automatic content                                         #
             #                                                                                                          #
             # Example:                                                                                                 #
-            if dn_label == "replacement_type":
+            with tgb.part(
+                render='{selected_data_node and selected_data_node.get_simple_label() == "replacement_type"}'
+            ):
                 tgb.text("All missing values will be replaced by the data node value.")
             # Comment, remove or replace the previous lines with your own use case                                     #
             # ##########################################################################################################
 
             # Automatic data node content
-            tgb.data_node("{selected_scenario.data_nodes['" + dn.config_id + "']}", scenario="{selected_scenario}")
+            tgb.data_node("{selected_data_node}", scenario="{selected_scenario}")
 
             # ##########################################################################################################
             # PLACEHOLDER: data node specific content after automatic content                                          #
             #                                                                                                          #
             # Example:                                                                                                 #
-            if dn_label == "initial_dataset":
+            with tgb.part(render='{selected_data_node and selected_data_node.get_simple_label() == "initial_dataset"}'):
                 tgb.text("Select your  CSV file:")
                 tgb.file_selector(
-                    "{selected_data_node.path}",
+                    "{path_to_uploaded_file}",
                     extensions=".csv",
-                    on_action="{lambda s: s.refresh('selected_scenario')}",
+                    on_action=lambda s: setattr(s.selected_data_node, "path", s.path_to_uploaded_file),
                 )
-
             # Comment, remove or replace the previous lines with your own use case                                     #
             # ##########################################################################################################
-
-    return partial_content
-
-
-def manage_partial(state):
-    dn = state.selected_data_node
-    dn_label = dn.get_simple_label()
-    partial_content = build_dn_partial(dn, dn_label)
-    state.data_node_partial.update_content(state, partial_content)
