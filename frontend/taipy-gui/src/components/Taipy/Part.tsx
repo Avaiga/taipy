@@ -14,7 +14,7 @@
 import React, { ReactNode, useCallback, useContext, useMemo, useRef } from "react";
 import Box from "@mui/material/Box";
 
-import { useClassNames, useDynamicJsonProperty, useDynamicProperty, useModule } from "../../utils/hooks";
+import { useClassNames, useDynamicDictProperty, useDynamicProperty, useModule } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
 import { expandSx, getCssSize, TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
@@ -62,12 +62,12 @@ const Part = (props: PartProps) => {
 
     const itemRef = useRef<HTMLDivElement>(null);
 
-    const dragData = useDynamicJsonProperty(
+    const dragData = useDynamicDictProperty(
         props.dragData,
         props.defaultDragData || "",
         undefined as Record<string, unknown> | undefined
     );
-    const dropData = useDynamicJsonProperty(
+    const dropData = useDynamicDictProperty(
         props.dropData,
         props.defaultDropData || "",
         undefined as Record<string, unknown> | undefined

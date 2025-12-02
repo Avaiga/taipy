@@ -49,7 +49,7 @@ import {
     useClassNames,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
-    useDynamicJsonProperty,
+    useDynamicDictProperty,
     useDynamicProperty,
     useModule,
 } from "../../utils/hooks";
@@ -364,7 +364,7 @@ const Chart = (props: ChartProp) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
+    const baseLayout = useDynamicDictProperty(props.layout, props.defaultLayout || "", emptyLayout);
     const title = useDynamicProperty(props.title, props.defaultTitle, "");
 
     const dataVarNames = useMemo(() => (props.dataVarNames ? props.dataVarNames.split(";") : []), [props.dataVarNames]);
@@ -423,7 +423,7 @@ const Chart = (props: ChartProp) => {
         });
     }, [props]);
 
-    const config = useDynamicJsonProperty(props.config, props.defaultConfig, defaultConfig);
+    const config = useDynamicDictProperty(props.config, props.defaultConfig, defaultConfig);
 
     useEffect(() => {
         setDataKeys((oldDtKeys) => {

@@ -121,7 +121,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                     setPageState({
                         jsx: `<h1>${res ? res[0].replace("<br>", "<br/>") : "Unknown Error"}</h1><h2>No data fetched from backend from ${
                             path === "/TaiPy_root_page" ? baseURL : baseURL + path
-                        }</h2><br/>${res[0] ? "" : error}`,
+                        }</h2><br/>${res && res[0] ? "" : error}`,
                     });
                 });
         }

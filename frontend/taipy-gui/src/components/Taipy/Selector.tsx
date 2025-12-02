@@ -56,7 +56,7 @@ import {
     useClassNames,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
-    useDynamicJsonProperty,
+    useDynamicDictProperty,
     useDynamicProperty,
     useModule,
 } from "../../utils/hooks";
@@ -228,12 +228,12 @@ const Selector = (props: SelectorProps) => {
     const lovList = useLovListMemo(lov, defaultLov);
     const lovVarName = useMemo(() => getUpdateVar(updateVars, "lov"), [updateVars]);
 
-    const dragData = useDynamicJsonProperty(
+    const dragData = useDynamicDictProperty(
         props.dragData,
         props.defaultDragData || "",
         undefined as Record<string, unknown> | undefined
     );
-    const dropData = useDynamicJsonProperty(
+    const dropData = useDynamicDictProperty(
         props.dropData,
         props.defaultDropData || "",
         undefined as Record<string, unknown> | undefined
