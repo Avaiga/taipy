@@ -54,7 +54,28 @@ def _get_non_existent_file_path(dir_path: Path, file_name: str) -> Path:
 
 
 def _secure_filename_unicode(filename: str) -> str:
-    """Modified version that preserves Unicode characters"""
+    """
+    Sanitizes a filename for safe filesystem use while preserving Unicode characters.
+
+    This function removes or replaces characters that are invalid or unsafe for filenames,
+    normalizes Unicode characters, replaces path separators with spaces, and ensures
+    compatibility with Windows device filenames.
+
+    Parameters:
+        filename (str): The original filename to sanitize.
+
+    Returns:
+        str: The sanitized filename, safe for use on most filesystems. Returns an empty string
+        if the input is invalid or results in an empty filename after sanitization.
+
+    Important:
+        - Preserves Unicode characters using NFC normalization.
+        - Removes invalid characters (e.g., < > : " / \ | ? * and control characters).
+        - Replaces path separators with spaces.
+        - Converts whitespace to underscores and collapses multiple underscores.
+        - Strips leading/trailing dots and underscores.
+        - On Windows, prepends an underscore if the filename matches a reserved device name.
+    """
     filename = unicodedata.normalize("NFC", filename)
 
     for sep in os.sep, os.path.altsep:
