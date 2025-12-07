@@ -64,7 +64,7 @@ def test_secure_filename_unicode_valid_cases(gui: Gui, helpers, input_filename, 
         ("file<s>.txt", "files.txt"),
         ("file:name.txt", "filename.txt"),
         ('file"name".txt', "filename.txt"),
-        ("file/test\\file.txt", "file_testfile.txt"),
+        ("file|name.txt", "filename.txt"),
         ("file\x00\x1f\x7f.txt", "file.txt"),
     ],
 )
