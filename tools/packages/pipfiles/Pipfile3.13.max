@@ -1,0 +1,82 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+freezegun = "*"
+ipython = "*"
+ipykernel = "*"
+mkdocs = "*"
+mkdocs-autorefs = "*"
+mkdocs-include-markdown-plugin = "*"
+mkdocs-macros-plugin = "*"
+mkdocs-material = "==7.3.0"
+mkdocs-material-extensions = "*"
+mkdocstrings = "*"
+mongomock = "*"
+requests = "*"
+ruff = "*"
+pandas-stubs = "*"
+playwright = "*"
+pre-commit = "*"
+pyopenssl = "*"
+pytest = "==7.4.3"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest-playwright = "*"
+pytest-timeout = "*"
+python-dotenv = "*"
+testbook = "*"
+tox = "*"
+twine = "*"
+types-flask = "*"
+types-Flask-Cors = "*"
+types-Markdown = "*"
+types-python-dateutil = "*"
+types-pytz = "*"
+types-toml = ">=0.10.0"
+types-tzlocal = "*"
+
+[requires]
+python_version = "3"
+
+[pipenv]
+allow_prereleases = false
+
+[dev-packages.moto]
+extras = [ "s3",]
+version = "==4.2.13"
+
+
+[packages]
+"pyarrow" = {version="==18.1.0"}
+"networkx" = {version="==3.4.2", markers="python_version>'3.8'"}
+"openpyxl" = {version="==3.1.5"}
+"pandas" = {version="==2.2.3", markers="python_version>'3.8'"}
+"pymongo" = {version="==4.10.1", extras=["srv"]}
+"sqlalchemy" = {version="==2.0.36"}
+"toml" = {version="==0.10.2"}
+"boto3" = {version="==1.35.71"}
+"cookiecutter" = {version="==2.6.0"}
+"flask" = {version="==3.1.0"}
+"flask-cors" = {version="==5.0.0"}
+"flask-socketio" = {version="==5.4.1"}
+"markdown" = {version="==3.7"}
+"python-dotenv" = {version="==1.0.1"}
+"pytz" = {version="==2024.2"}
+"tzlocal" = {version="==5.2"}
+"gevent" = {version="==24.11.1"}
+"gevent-websocket" = {version="==0.10.1"}
+"kthread" = {version="==0.2.3"}
+"gitignore-parser" = {version="==0.1.11"}
+"simple-websocket" = {version="==1.1.0"}
+"twisted" = {version="==24.10.0"}
+"deepdiff" = {version="==8.0.1"}
+"flask-restful" = {version="==0.3.10"}
+"passlib" = {version="==1.7.4"}
+"marshmallow" = {version="==3.23.1"}
+"apispec" = {version="==6.7.1", extras=["yaml"]}
+"apispec-webframeworks" = {version="==1.2.0"}
+"watchdog" = {version="==6.0.0"}
+"charset-normalizer" = {version="==3.4.0"}

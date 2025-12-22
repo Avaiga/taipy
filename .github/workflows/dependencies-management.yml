@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
         os: [ubuntu-latest]
     permissions:
       contents: write
@@ -50,8 +50,8 @@ jobs:
           echo EOF >> "$GITHUB_OUTPUT"
           cat pipfiles/Pipfile${{matrix.python-version}}.max
 
-      - name: Create the pull request updating the dependencies (3.12 only)
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.12'
+      - name: Create the pull request updating the dependencies (3.13 only)
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version == '3.13'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -67,7 +67,7 @@ jobs:
             tools/packages/taipy*/*requirements.txt
 
       - name: Create the pull request updating the Pipfile max
-        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version != '3.12'
+        if: steps.ensure-dependencies-are-up-to-date.outputs.diff != '' && matrix.python-version != '3.13'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
