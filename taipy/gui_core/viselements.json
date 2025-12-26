@@ -38,6 +38,12 @@
                         "doc": "If False, prevents users from searching for scenarios by label."
                     },
                     {
+                        "name": "editable",
+                        "type": "dynamic(bool)",
+                        "default_value": "True",
+                        "doc": "If False, prevents users from editing scenario names and tags. The edit icon/button is hidden from the UI."
+                    },
+                    {
                         "name": "sort",
                         "type": "Union[bool,str,taipy.gui_core.filters.ScenarioFilter,list[Union[str,taipy.gui_core.filters.ScenarioFilter]]]",
                         "default_value": "\"*\"",

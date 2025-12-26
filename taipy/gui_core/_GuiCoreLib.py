@@ -86,6 +86,7 @@ class _GuiCore(ElementLibrary):
                 "filter": ElementProperty(_GuiCoreScenarioFilter, "*"),
                 "sort": ElementProperty(_GuiCoreScenarioSort, "*"),
                 "show_search": ElementProperty(PropertyType.boolean, True),
+                "editable": ElementProperty(PropertyType.dynamic_boolean, True),
             },
             inner_properties={
                 "inner_scenarios": ElementProperty(

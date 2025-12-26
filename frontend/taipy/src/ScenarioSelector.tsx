@@ -92,6 +92,7 @@ interface ScenarioSelectorProps extends CoreProps {
     updateScVars?: string;
     showSearch?: boolean;
     creationNotAllowed?: string;
+    editable?: boolean;
 }
 
 interface ScenarioEditDialogProps {
@@ -422,6 +423,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         updateScVars = "",
         showSearch = true,
         creationNotAllowed = "",
+        editable = true,
     } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
@@ -521,7 +523,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
                     entities={props.innerScenarios}
                     leafType={NodeType.SCENARIO}
                     lovPropertyName="innerScenarios"
-                    editComponent={editScenario}
+                    editComponent={editable ? editScenario : undefined}
                     showPins={showPins}
                     multiple={multiple}
                     updateCoreVars={updateScVars}
