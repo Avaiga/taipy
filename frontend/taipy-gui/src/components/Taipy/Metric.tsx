@@ -17,7 +17,7 @@ import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import Tooltip from "@mui/material/Tooltip";
 import { useTheme } from "@mui/material";
-import { useClassNames, useDynamicJsonProperty, useDynamicProperty } from "../../utils/hooks";
+import { useClassNames, useDynamicDictProperty, useDynamicProperty } from "../../utils/hooks";
 import { extractPrefix, extractSuffix, sprintfToD3Converter } from "../../utils/formatConversion";
 import { TaipyBaseProps, TaipyHoverProps } from "./utils";
 import { darkThemeTemplate } from "../../themes/darkThemeTemplate";
@@ -78,7 +78,7 @@ const Metric = (props: MetricProps) => {
     const threshold = useDynamicProperty(props.threshold, props.defaultThreshold, undefined);
     const delta = useDynamicProperty(props.delta, props.defaultDelta, undefined);
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
-    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", defaultLayout);
+    const baseLayout = useDynamicDictProperty(props.layout, props.defaultLayout || "", defaultLayout);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const theme = useTheme();
 
