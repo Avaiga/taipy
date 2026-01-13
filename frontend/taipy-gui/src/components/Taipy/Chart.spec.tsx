@@ -260,7 +260,7 @@ describe("Chart Component", () => {
         expect(elements[0].tagName).toBe("TD");
     });
     it("Chart renders correctly", () => {
-        const figure = [{ data: [], layout: { title: "Mock Title" } }];
+        const figure = { data: [], layout: { title: "Mock Title" } };
         const { container } = render(
             <Chart
                 id="table"

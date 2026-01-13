@@ -15,15 +15,14 @@ import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { ErrorBoundary } from "react-error-boundary";
 import { Helmet } from "react-helmet-async";
-import JsxParser from "react-jsx-parser";
 import { useLocation } from "react-router";
 
 import { PageContext, TaipyContext } from "../../context/taipyContext";
 import { createPartialAction } from "../../context/taipyReducers";
-import { emptyArray, getBaseURL } from "../../utils";
+import { getBaseURL } from "../../utils";
 import ErrorFallback from "../../utils/ErrorBoundary";
 import { getRegisteredComponents } from "../Taipy";
-import { renderError, unregisteredRender } from "../Taipy/Unregistered";
+import { parseJSX } from "../../jsx/parser";
 
 interface TaipyRenderedProps {
     path?: string;
@@ -64,7 +63,7 @@ const setStyle = (id: string, styleString: string): void => {
 
 // set script tag for the page
 const setScript = (id: string, scriptPaths: string[]): void => {
-    document.querySelectorAll(`script[id^="${id}_"]`).forEach(script => script.remove());
+    document.querySelectorAll(`script[id^="${id}_"]`).forEach((script) => script.remove());
     scriptPaths.forEach((path, index) => {
         const script = document.createElement("script");
         script.id = `${id}_${index}`;
@@ -110,7 +109,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                     if (!fromBlock) {
                         setStyle(
                             path == "/TaiPy_root_page" ? "Taipy_root_style" : "Taipy_style",
-                            result.data.style || "",
+                            result.data.style || ""
                         );
                         Array.isArray(result.data.head) && setHead(result.data.head);
                         Array.isArray(result.data.scriptPaths) && setScript("Taipy_script", result.data.scriptPaths);
@@ -120,9 +119,9 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                     const res =
                         error.response?.data && /<p\sclass=\"errormsg\">([\s\S]*?)<\/p>/gm.exec(error.response?.data);
                     setPageState({
-                        jsx: `<h1>${res ? res[0] : "Unknown Error"}</h1><h2>No data fetched from backend from ${
+                        jsx: `<h1>${res ? res[0].replace("<br>", "<br/>") : "Unknown Error"}</h1><h2>No data fetched from backend from ${
                             path === "/TaiPy_root_page" ? baseURL : baseURL + path
-                        }</h2><br></br>${res[0] ? "" : error}`,
+                        }</h2><br/>${res && res[0] ? "" : error}`,
                     });
                 });
         }
@@ -137,7 +136,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 </Helmet>
             ) : null}
             <PageContext.Provider value={pageState}>
-                <JsxParser
+                {/* <JsxParser
                     disableKeyGeneration={true}
                     bindings={state.data}
                     components={getRegisteredComponents()}
@@ -146,7 +145,8 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                     allowUnknownElements={false}
                     renderError={renderError}
                     blacklistedAttrs={emptyArray}
-                />
+                /> */}
+                {parseJSX(pageState.jsx || "", state.data, getRegisteredComponents())}
             </PageContext.Provider>
         </ErrorBoundary>
     );

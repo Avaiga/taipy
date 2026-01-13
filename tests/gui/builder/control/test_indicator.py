@@ -20,11 +20,11 @@ def test_indicator_builder(gui: Gui, test_client, helpers):
     expected_list = [
         "<Indicator",
         'libClassName="taipy-indicator"',
-        "defaultValue={15}",
-        "display={12.0}",
+        'defaultValue="{!15',
+        'display="{!12.0',
         'format="%.2f"',
-        "max={20.0}",
-        "min={1.0}",
-        "value={_TpN_tpec_TpExPr_val_TPMDL_0}",
+        'max="{!20.0',
+        'min="{!1.0',
+        'value="{!_TpN_tpec_TpExPr_val_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)

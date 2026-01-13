@@ -45,14 +45,14 @@ runs:
       shell: bash
 
     - name: Setup LibMagic (MacOS)
-      if: inputs.os == 'macos-13' && inputs.install-gui
+      if: inputs.os == 'macos-14' && inputs.install-gui
       run: brew install libmagic
       shell: bash
 
     - uses: actions/setup-node@v4
       if: inputs.install-gui
       with:
-        node-version: 20
+        node-version: 22
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
 

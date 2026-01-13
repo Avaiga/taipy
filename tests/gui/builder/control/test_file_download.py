@@ -23,7 +23,7 @@ def test_file_download_url_builder(gui: Gui, test_client, helpers):
         tgb.file_download(content="{content}")  # type: ignore[attr-defined]
     expected_list = [
         "<FileDownload",
-        "content={_TpC_tpec_TpExPr_content_TPMDL_0}",
+        'content="{!_TpC_tpec_TpExPr_content_TPMDL_0',
         'defaultContent="some_url"',
     ]
     helpers.test_control_builder(gui, page, expected_list)

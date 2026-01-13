@@ -17,7 +17,7 @@ from operator import attrgetter
 from pathlib import Path
 from types import FrameType, SimpleNamespace
 
-from .utils import _get_module_name_from_frame, _is_in_notebook
+from .utils import _get_module_name_from_frame, _is_in_notebook  # pyright: ignore[reportPrivateUsage]
 from .utils._attributes import _attrsetter
 
 if t.TYPE_CHECKING:
@@ -153,6 +153,44 @@ class State(SimpleNamespace, metaclass=ABCMeta):
     @abstractmethod
     def _invoke_on_gui(self, method: t.Callable, *args: t.Any) -> t.Any: ...
 
+    @abstractmethod
+    def patch(
+        self,
+        name: str,
+        change: t.Optional[t.Dict[t.Union[str, int], t.Any]] = None,
+        remove: t.Optional[t.Dict[t.Union[str, int], t.Any]] = None,
+    ):
+        """Patch a variable on a client.
+
+        The connected client will receive an update of the variable called *name* with the
+        provided change and/or remove description.
+
+        Arguments:
+            name (str): The variable name to update.
+            change (dict, optional): A dictionary describing the changes to apply to the variable.
+                Defaults to None.
+            remove (dict, optional): A dictionary describing the elements to remove from the variable.
+                Defaults to None.
+
+        TODO: Add examples here.
+        state.patch("data", change={"y": "anything"}) # change the y value of the data dict
+        state.patch("data", change={"a": {"b": "anything"}}) # change the a.b value of the data dict
+        state.patch("data", change={"y": {4: "something"}}) # change the 4th index of the y list
+        state.patch("data", change={"y": {4: ["something", "else"]}}) # change the 4th and 5th indices of the y list
+        state.patch("data", change={"y": {4: [{"b": "patch object in list", "c": "else"}]}})
+            # patch the 4th and 5th indices of the y list which is a list of object
+        state.patch("data", remove={"y": None}) # remove the y value of the data dict
+        state.patch("data", change={"a": {-1: [1,2]}}) # insert 2 elements at index 0 of list
+        state.patch("data", change={"a": {-10: [1,2]}})
+            # insert 2 elements at index 9 of list or append if len(list) < 9
+        state.patch("data", change={"a": {1000: [1,2]}}) # append 2 elements at the end of list if 1000 > len(list)
+
+        Not supported yet:
+        patch dataframe on the back end (the data is patched on the front end)
+        patch sorted data in a table (the wrong data will be patched if the table is sorted)
+        """
+        ...
+
 
 class _GuiState(State):
     __gui_attr = "_gui"
@@ -165,6 +203,7 @@ class _GuiState(State):
         "assign",
         "broadcast",
         "get_gui",
+        "patch",
         "refresh",
         "set_favicon",
         "_set_context",
@@ -198,6 +237,12 @@ class _GuiState(State):
         with self._set_context(self._gui):
             encoded_name = self._gui._bind_var(name)  # type: ignore[attr-defined]
             self._gui._broadcast_all_clients(encoded_name, value)  # type: ignore[attr-defined]
+
+    def patch(
+        self, name: str, change: t.Optional[dict[t.Any, t.Any]] = None, remove: t.Optional[dict[t.Any, t.Any]] = None
+    ):
+        with self._set_context(self._gui):
+            self._gui._patch_variable(name, change, remove, getattr(self, name, None))  # type: ignore[attr-defined]
 
     def __getattribute__(self, name: str) -> t.Any:
         if name == "__class__":

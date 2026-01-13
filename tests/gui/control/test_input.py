@@ -23,7 +23,7 @@ def test_input_md(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="text"',
-        "value={tpec_TpExPr_x_TPMDL_0}",
+        'value="{!tpec_TpExPr_x_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -38,7 +38,7 @@ def test_input_md_width(gui: Gui, helpers):
         'defaultValue="Hello World!"',
         'type="text"',
         'width="70%"',
-        "value={tpec_TpExPr_x_TPMDL_0}",
+        'value="{!tpec_TpExPr_x_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -52,7 +52,7 @@ def test_password_md(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="password"',
-        "value={tpec_TpExPr_x_TPMDL_0}",
+        'value="{!tpec_TpExPr_x_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -66,7 +66,7 @@ def test_input_html_1(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="text"',
-        "value={tpec_TpExPr_x_TPMDL_0}",
+        'value="{!tpec_TpExPr_x_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -80,8 +80,8 @@ def test_password_html(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="password"',
-        'width={100}',
-        "value={tpec_TpExPr_x_TPMDL_0}",
+        'width="{!100',
+        'value="{!tpec_TpExPr_x_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -95,6 +95,6 @@ def test_input_html_2(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="text"',
-        "value={tpec_TpExPr_x_TPMDL_0}",
+        'value="{!tpec_TpExPr_x_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)

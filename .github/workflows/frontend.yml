@@ -23,8 +23,8 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node-version: [20.x]
-        os: [ubuntu-latest, windows-latest, macos-13]
+        node-version: [22.x]
+        os: [ubuntu-latest, windows-latest, macos-14]
     runs-on: ${{ matrix.os }}
 
     defaults:
@@ -86,8 +86,8 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        node-version: [20.x]
-        os: [ubuntu-latest, windows-latest, macos-13]
+        node-version: [22.x]
+        os: [ubuntu-latest, windows-latest, macos-14]
     runs-on: ${{ matrix.os }}
 
     defaults:

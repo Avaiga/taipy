@@ -21,7 +21,7 @@ def test_file_download_url_md(gui: Gui, test_client, helpers):
     md_string = "<|{content}|file_download|>"
     expected_list = [
         "<FileDownload",
-        "content={_TpC_tpec_TpExPr_content_TPMDL_0}",
+        'content="{!_TpC_tpec_TpExPr_content_TPMDL_0',
         'defaultContent="some_url"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -89,7 +89,7 @@ def test_file_download_url_width_md(gui: Gui, test_client, helpers):
     md_string = "<|{content}|file_download|width=70%|>"
     expected_list = [
         "<FileDownload",
-        "content={_TpC_tpec_TpExPr_content_TPMDL_0}",
+        'content="{!_TpC_tpec_TpExPr_content_TPMDL_0',
         'defaultContent="some_url"',
         'width="70%"',
     ]

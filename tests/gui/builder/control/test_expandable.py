@@ -18,7 +18,7 @@ def test_expandable_builder_1(gui: Gui, helpers):
         tgb.text(value="This is an expandable section")  # type: ignore[attr-defined]
     expected_list = [
         "<Expandable",
-        "expanded={false}",
+        'expanded="{!false',
         'title="Expandable section"',
         "This is an expandable section",
     ]

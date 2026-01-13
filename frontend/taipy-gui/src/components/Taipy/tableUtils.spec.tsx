@@ -51,7 +51,7 @@ describe("Editable cell", () => {
                     tableClassName="taipy-table"
                 />
             );
-            const elt = getByRole("checkbox");
+            const elt = getByRole("switch");
             expect(elt.tagName).toBe("INPUT");
             const switchCtl = elt.closest(".MuiSwitch-root");
             expect(switchCtl).not.toBeNull();
@@ -89,7 +89,7 @@ describe("Editable cell", () => {
             );
             const but = getByTestId("EditIcon");
             await userEvent.click(but);
-            const elt = getByRole("checkbox");
+            const elt = getByRole("switch");
             expect(elt.tagName).toBe("INPUT");
             const switchCtl = elt.closest(".MuiSwitch-root");
             expect(switchCtl).not.toBeNull();
@@ -119,17 +119,30 @@ describe("Editable cell", () => {
 
 describe("getSortByIndex", () => {
     it("should return a sorted list for indexed columns", () => {
-        const columns = { col0: { index: 0 } as ColumnDesc, col1: { index: 1 } as ColumnDesc, col2: { index: 2 } as ColumnDesc };
+        const columns = {
+            col0: { index: 0 } as ColumnDesc,
+            col1: { index: 1 } as ColumnDesc,
+            col2: { index: 2 } as ColumnDesc,
+        };
         const result = Object.keys(columns).sort(getSortByIndex(columns));
         expect(result).toEqual(["col0", "col1", "col2"]);
     });
     it("should return a sorted list for multi columns", () => {
-        const columns = { col0: { multi: 0 } as ColumnDesc, col1: { multi: 1 } as ColumnDesc, col2: { multi: 2 } as ColumnDesc };
+        const columns = {
+            col0: { multi: 0 } as ColumnDesc,
+            col1: { multi: 1 } as ColumnDesc,
+            col2: { multi: 2 } as ColumnDesc,
+        };
         const result = Object.keys(columns).sort(getSortByIndex(columns));
         expect(result).toEqual(["col0", "col1", "col2"]);
     });
     it("should return a sorted list for indexed and multi columns", () => {
-        const columns = { col0: { index: 0 } as ColumnDesc, col1: { index: 1 } as ColumnDesc, col2: { multi: 1, index: 2 } as ColumnDesc, col3: { multi: 0, index: 3 } as ColumnDesc };
+        const columns = {
+            col0: { index: 0 } as ColumnDesc,
+            col1: { index: 1 } as ColumnDesc,
+            col2: { multi: 1, index: 2 } as ColumnDesc,
+            col3: { multi: 0, index: 3 } as ColumnDesc,
+        };
         const result = Object.keys(columns).sort(getSortByIndex(columns));
         expect(result).toEqual(["col3", "col2", "col0", "col1"]);
     });

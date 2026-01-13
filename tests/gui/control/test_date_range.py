@@ -23,7 +23,7 @@ def test_date_range_md_1(gui: Gui, test_client, helpers):
         "<DateRange",
         'defaultDates="[&quot;2020-12-',
         'updateVarName="_TpDr_tpec_TpExPr_dates_TPMDL_0"',
-        "dates={_TpDr_tpec_TpExPr_dates_TPMDL_0}",
+        'dates="{!_TpDr_tpec_TpExPr_dates_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -37,8 +37,8 @@ def test_date_range_md_2(gui: Gui, test_client, helpers):
         "<DateRange",
         'defaultDates="[&quot;2020-12-',
         'updateVarName="_TpDr_tpec_TpExPr_dates_TPMDL_0"',
-        "dates={_TpDr_tpec_TpExPr_dates_TPMDL_0}",
-        "withTime={true}",
+        'dates="{!_TpDr_tpec_TpExPr_dates_TPMDL_0',
+        'withTime="{!true',
         'labelStart="start"',
         'labelEnd="end"',
     ]
@@ -53,9 +53,9 @@ def test_date_range_md_3(gui: Gui, test_client, helpers):
         "<DateRange",
         'defaultDates="[&quot;2020-12-',
         'updateVarName="_TpDr_tpec_TpExPr_dates_TPMDL_0"',
-        "dates={_TpDr_tpec_TpExPr_dates_TPMDL_0}",
-        "withTime={true}",
-        "analogic={true}",
+        'dates="{!_TpDr_tpec_TpExPr_dates_TPMDL_0',
+        'withTime="{!true',
+        'analogic="{!true',
         'labelStart="start"',
         'labelEnd="end"',
     ]
@@ -72,7 +72,7 @@ def test_date_range_md_width(gui: Gui, test_client, helpers):
         'defaultDates="[&quot;2020-12-',
         'updateVarName="_TpDr_tpec_TpExPr_dates_TPMDL_0"',
         'width="70%"',
-        "dates={_TpDr_tpec_TpExPr_dates_TPMDL_0}",
+        'dates="{!_TpDr_tpec_TpExPr_dates_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -86,7 +86,7 @@ def test_date_range_html_1(gui: Gui, test_client, helpers):
         "<DateRange",
         'defaultDates="[&quot;2020-12-',
         'updateVarName="_TpDr_tpec_TpExPr_dates_TPMDL_0"',
-        "dates={_TpDr_tpec_TpExPr_dates_TPMDL_0}",
+        'dates="{!_TpDr_tpec_TpExPr_dates_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -100,6 +100,6 @@ def test_date_range_html_2(gui: Gui, test_client, helpers):
         "<DateRange",
         'defaultDates="[&quot;2020-12-',
         'updateVarName="_TpDr_tpec_TpExPr_dates_TPMDL_0"',
-        "dates={_TpDr_tpec_TpExPr_dates_TPMDL_0}",
+        'dates="{!_TpDr_tpec_TpExPr_dates_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)

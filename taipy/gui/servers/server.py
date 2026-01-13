@@ -115,8 +115,6 @@ class _Server(ABC):
     def _render_jsx_fragment(html_fragment):
         template_str = _Server._RE_OPENING_CURLY.sub(_Server._OPENING_CURLY, html_fragment)
         template_str = _Server._RE_CLOSING_CURLY.sub(_Server._CLOSING_CURLY, template_str)
-        template_str = template_str.replace('"{!', "{")
-        template_str = template_str.replace('!}"', "}")
         return template_str
 
     def render(self, html_fragment, script_paths, style, head, context):

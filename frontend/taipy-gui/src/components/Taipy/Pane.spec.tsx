@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react";
+import { getByRole, render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -90,7 +90,7 @@ describe("Pane Component", () => {
         );
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeInTheDocument();
-        elt && await userEvent.click(elt);
+        elt && (await userEvent.click(elt));
     });
     it("is enabled by default", async () => {
         const dispatch = jest.fn();
@@ -104,7 +104,7 @@ describe("Pane Component", () => {
         );
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeInTheDocument();
-        elt && await userEvent.click(elt);
+        elt && (await userEvent.click(elt));
         expect(dispatch).toHaveBeenCalled();
     });
     it("is enabled by active", async () => {
@@ -119,7 +119,7 @@ describe("Pane Component", () => {
         );
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeInTheDocument();
-        elt && await userEvent.click(elt);
+        elt && (await userEvent.click(elt));
         expect(dispatch).toHaveBeenCalled();
     });
     it("persistent is disabled", async () => {
@@ -149,7 +149,7 @@ describe("Pane Component", () => {
         );
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeInTheDocument();
-        elt && await userEvent.click(elt);
+        elt && (await userEvent.click(elt));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
             payload: { action: "testCloseAction", args: [false] },
@@ -192,5 +192,59 @@ describe("Pane Component", () => {
         const but = getByRole("button");
         expect(but).not.toBeDisabled();
     });
-
+    it("anchors to the left when no anchor is set", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={true} />
+            </HelmetProvider>
+        );
+        const elt = getByRole("presentation");
+        expect(elt).toHaveClass("MuiDrawer-root");
+        expect(elt).toHaveClass("MuiDrawer-anchorLeft");
+    });
+    it("anchors to the left when no anchor 'l' is set", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={true} anchor="l" />
+            </HelmetProvider>
+        );
+        const elt = getByRole("presentation");
+        expect(elt).toHaveClass("MuiDrawer-anchorLeft");
+    });
+    it("anchors to the right when anchor is set to 'right'", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={true} anchor="right" />
+            </HelmetProvider>
+        );
+        const elt = getByRole("presentation");
+        expect(elt).toHaveClass("MuiDrawer-anchorRight");
+    });
+    it("anchors to the top when anchor is set to 'top'", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={true} anchor="top" />
+            </HelmetProvider>
+        );
+        const elt = getByRole("presentation");
+        expect(elt).toHaveClass("MuiDrawer-anchorTop");
+    });
+    it("anchors to the bottom when anchor is set to 'bottom'", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={true} anchor="bottom" />
+            </HelmetProvider>
+        );
+        const elt = getByRole("presentation");
+        expect(elt).toHaveClass("MuiDrawer-anchorBottom");
+    });
+    it("renders with a title", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={true} persistent={true} title="pane-title-test" />
+            </HelmetProvider>
+        );
+        const elt = document.querySelector(".MuiBox-root");
+        expect(elt).toHaveTextContent("pane-title-test");
+    });
 });

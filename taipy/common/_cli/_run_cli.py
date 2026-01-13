@@ -54,7 +54,17 @@ class _RunCLI(_AbstractCLI):
             external_args.extend(all_args[external_args_index + 1 :])
             all_args = all_args[:external_args_index]
 
-        taipy_args = [f"--taipy-{arg[2:]}" if arg.startswith("--") else arg for arg in all_args]
+        def add_taipy_prefix(key: str):
+            """
+            Adds the '--taipy-' prefix to command-line arguments starting with '--'.
+            If the argument starts with '--no-', inserts 'taipy-' after '--no-'.
+            Otherwise, inserts 'taipy-' after '--'.
+            """
+            if key.startswith("--no-"):
+                return key[:5] + "taipy-" + key[5:]
+            return key[:2] + "taipy-" + key[2:]
+
+        taipy_args = [add_taipy_prefix(arg) if arg.startswith("--") else arg for arg in all_args]
 
         try:
             subprocess.run(

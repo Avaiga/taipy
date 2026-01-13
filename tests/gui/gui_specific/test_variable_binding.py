@@ -28,13 +28,13 @@ def test_variable_binding(helpers, gui_server):
     gui.add_page("test", Markdown("<|{x}|> | <|{y}|> | <|{z}|button|on_action=another_function|>"))
     gui.run(run_server=False, single_client=True)
     client = gui._server.test_client()
-    response = client.get("/taipy-jsx/test")
+    response = client.get(f"/{Gui._JSX_URL}/test")
     jsx = helpers.get_response_data(response, gui)["jsx"]
-    for expected in ["<Button", 'defaultLabel="button label"', "label={tpec_TpExPr_z_TPMDL_0}"]:
+    for expected in ["<Button", 'defaultLabel="button label"', 'label="{!tpec_TpExPr_z_TPMDL_0']:
         assert expected in jsx
-    assert gui._bindings().x == x
-    assert gui._bindings().y == y
-    assert gui._bindings().z == z
+    assert gui._bindings().x == x # type: ignore[reportAttributeAccessIssue]
+    assert gui._bindings().y == y # type: ignore[reportAttributeAccessIssue]
+    assert gui._bindings().z == z # type: ignore[reportAttributeAccessIssue]
     with gui.get_app_context():
         assert callable(gui._get_user_function("another_function"))
     helpers.test_cleanup()
@@ -47,7 +47,7 @@ def test_properties_binding(helpers, gui_server):
     gui.add_page("test", Markdown("<|button|properties=button_properties|>"))
     gui.run(run_server=False)
     client = gui._server.test_client()
-    response = client.get("/taipy-jsx/test")
+    response = client.get(f"/{Gui._JSX_URL}/test")
     jsx = helpers.get_response_data(response, gui)["jsx"]
     for expected in ["<Button", 'defaultLabel="A nice button"']:
         assert expected in jsx
@@ -62,7 +62,7 @@ def test_dict_binding(helpers, gui_server):
     gui = Gui("<|{d.k}|>", server=gui_server)
     gui.run(run_server=False)
     client = gui._server.test_client()
-    response = client.get("/taipy-jsx/TaiPy_root_page")
+    response = client.get(f"/{Gui._JSX_URL}/TaiPy_root_page")
     jsx = helpers.get_response_data(response, gui)["jsx"]
     for expected in ["<Field", 'defaultValue="test"']:
         assert expected in jsx

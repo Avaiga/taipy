@@ -8,8 +8,11 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from taipy.common import _module_exists
 
-import taipy.gui.builder as tgb
 
-with tgb.Page() as job_page:
-    tgb.job_selector()
+def _is_plotly_figure(obj) -> bool:
+    if _module_exists("plotly.graph_objs"):
+        from plotly.graph_objs import Figure as PlotlyFigure  # type: ignore[reportMissingImports]
+        return isinstance(obj, PlotlyFigure)
+    return False

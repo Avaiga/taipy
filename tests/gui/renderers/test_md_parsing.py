@@ -20,7 +20,7 @@ def test_invalid_control_name(gui: Gui, helpers):
 
 def test_value_to_negated_property(gui: Gui, helpers):
     md_string = "<|button|not active=true|>"
-    expected_list = ["<Button", "active={false}"]
+    expected_list = ["<Button", 'active="{!false']
     helpers.test_control_md(gui, md_string, expected_list)
 
 

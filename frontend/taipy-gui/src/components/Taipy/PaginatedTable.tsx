@@ -48,7 +48,7 @@ import {
     useClassNames,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
-    useDynamicJsonProperty,
+    useDynamicDictProperty,
     useDynamicProperty,
     useFormatConfig,
     useModule,
@@ -138,7 +138,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, false);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const baseColumns = useDynamicJsonProperty(props.columns, props.defaultColumns, defaultColumns);
+    const baseColumns = useDynamicDictProperty(props.columns, props.defaultColumns, defaultColumns);
 
     const [
         colsOrder,

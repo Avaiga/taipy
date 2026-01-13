@@ -211,25 +211,6 @@ class _Builder:
     def __set_json_attribute(self, name, value):
         return self.set_attribute(name, json.dumps(value, cls=_TaipyJsonEncoder))
 
-    def __set_any_attribute(self, name: str, default_value: t.Optional[str] = None):
-        value = self.__prop_values.get(name, default_value)
-        return self.__set_json_attribute(_to_camel_case(name), value)
-
-    def __set_dynamic_any_attribute(self, name: str, default_value: t.Optional[str] = None):
-        value = self.__prop_values.get(name, default_value)
-        self.__set_json_attribute(_to_camel_case(f"default_{name}"), value)
-
-        if hash := self.__hashes.get(name):
-            if isinstance(value, (dict, _MapDict)):
-                hash = self.__get_typed_hash_name(hash, PropertyType.dynamic_dict)
-                react_name = _to_camel_case(name)
-                self.__update_vars.append(f"{react_name}={hash}")
-                self.__set_react_attribute(react_name, hash)
-            else:
-                self.__update_vars.append(f"{name}={hash}")
-                self.__set_react_attribute(name, hash)
-        return self
-
     def __get_boolean_attribute(self, name: str, default_value=False):
         bool_attr = self.__prop_values.get(name, default_value)
         return _is_true(bool_attr) if isinstance(bool_attr, str) else bool(bool_attr)
@@ -243,7 +224,7 @@ class _Builder:
             name (str): The property name.
             value (bool): the boolean value.
         """
-        return self.__set_react_attribute(_to_camel_case(name), value)
+        return self.__set_react_attribute(_to_camel_case(name), value, is_var=False)
 
     def __set_dynamic_bool_attribute(self, name: str, def_val: t.Any, with_update: bool, update_main=True):
         value = self.__get_boolean_attribute(name, def_val)
@@ -253,12 +234,13 @@ class _Builder:
             self.__set_boolean_attribute(default_name, value)
         if hash is not None:
             hash = self.__get_typed_hash_name(hash, PropertyType.dynamic_boolean)
-            self.__set_react_attribute(_to_camel_case(name), _get_client_var_name(hash))
+            react_name = _to_camel_case(name)
+            self.__set_react_attribute(react_name, hash, client_var_name=True)
             if with_update:
                 if update_main:
                     self.__set_update_var_name(hash)
                 else:
-                    self.__update_vars.append(f"{_to_camel_case(name)}={hash}")
+                    self.__update_vars.append(f"{react_name}={hash}")
 
     def __set_number_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
@@ -289,7 +271,7 @@ class _Builder:
             raise ValueError(
                 f"Property {name} expects a number for control {self.__control_type}, received {type(value)}"
             )
-        return self.__set_react_attribute(_to_camel_case(name), val)
+        return self.__set_react_attribute(_to_camel_case(name), val, is_var=False)
 
     def __set_dynamic_number_attribute(self, var_name: str, default_value: t.Any):
         value = self.__prop_values.get(var_name)
@@ -302,7 +284,7 @@ class _Builder:
                 _warn(f"{self.__element_name}: {var_name} cannot be transformed into a number", e)
                 value = 0
         if isinstance(value, numbers.Number):
-            self.__set_react_attribute(_to_camel_case(f"default_{var_name}"), value)
+            self.__set_react_attribute(_to_camel_case(f"default_{var_name}"), value, is_var=False)
         elif value is not None:
             _warn(f"{self.__element_name}: {var_name} value is not valid ({value}).")
         if hash := self.__hashes.get(var_name):
@@ -343,7 +325,7 @@ class _Builder:
         if value is None:
             return self
         if isinstance(value, numbers.Number):
-            return self.__set_react_attribute(_to_camel_case(name), value)
+            return self.__set_react_attribute(_to_camel_case(name), value, is_var=False)
         else:
             return self.set_attribute(_to_camel_case(name), value)
 
@@ -456,7 +438,7 @@ class _Builder:
             if value is None:
                 return self
         elif _is_boolean(value) and not _is_true(t.cast(str, value)):
-            return self.__set_react_attribute(_to_camel_case(name), False)
+            return self.__set_react_attribute(_to_camel_case(name), False, is_var=False)
         elif value:
             value = str(value)
             func = self.__gui._get_user_function(value)  # type: ignore[attr-defined]
@@ -464,7 +446,13 @@ class _Builder:
                 _warn(f"{self.__control_type}.{name}: {value} is not a function.")
         return self.set_attribute(_to_camel_case(name), value) if value else self
 
-    def __set_react_attribute(self, name: str, value: t.Any):
+    def __set_react_attribute(
+        self, name: str, value: t.Any, is_var: t.Optional[bool] = True, client_var_name: t.Optional[bool] = False
+    ):
+        if is_var and isinstance(value, str):
+            self.__gui._add_front_end_variable(value)  # type: ignore[attr-defined]
+            if client_var_name:
+                value = _get_client_var_name(value)
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
     @staticmethod
@@ -665,10 +653,7 @@ class _Builder:
             self.__set_json_attribute("defaultColumns", col_dict)
         if cmp_hash:
             hash_name = self.__get_typed_hash_name(cmp_hash, PropertyType.data)
-            self.__set_react_attribute(
-                _to_camel_case("data"),
-                _get_client_var_name(hash_name),
-            )
+            self.__set_react_attribute(_to_camel_case("data"), hash_name, client_var_name=True)
             self.__set_update_var_name(hash_name)
             self.__set_boolean_attribute("compare", True)
             self.__set_string_attribute("on_compare")
@@ -721,7 +706,7 @@ class _Builder:
             while add_data_hash := self.__hashes.get(name_idx):
                 typed_hash = self.__get_typed_hash_name(add_data_hash, _TaipyData)
                 data_updates.append(typed_hash)
-                self.__set_react_attribute(f"data{data_idx}", _get_client_var_name(typed_hash))
+                self.__set_react_attribute(f"data{data_idx}", typed_hash, client_var_name=True)
                 add_data = self.__prop_values.get(name_idx)
                 data_idx += 1
                 name_idx = f"data[{data_idx}]"
@@ -797,12 +782,13 @@ class _Builder:
                 else:
                     list_val = [str(v) for v in list_val]
                 if list_val:
-                    self.__set_react_attribute(_to_camel_case(name), list_val)
+                    self.__set_react_attribute(_to_camel_case(name), list_val, is_var=False)
             elif list_val is not None:
-                    _warn(f"{self.__element_name}: {name} should be a list.")
+                _warn(f"{self.__element_name}: {name} should be a list.")
         else:
-            self.__set_react_attribute(_to_camel_case(name), hash_name)
-            self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
+            react_name = _to_camel_case(name)
+            self.__set_react_attribute(react_name, hash_name)
+            self.__update_vars.append(f"{react_name}={hash_name}")
         return self
 
     def __set_class_names(self):
@@ -838,10 +824,7 @@ class _Builder:
         if hash_name:
             hash_name = self.__get_typed_hash_name(hash_name, PropertyType.image if image else PropertyType.content)
         if hash_name:
-            self.__set_react_attribute(
-                var_name,
-                _get_client_var_name(hash_name),
-            )
+            self.__set_react_attribute(var_name, hash_name, client_var_name=True)
         return self.set_attribute(_to_camel_case(f"default_{var_name}"), value)
 
     def __set_default_value(
@@ -859,9 +842,9 @@ class _Builder:
         elif isinstance(value, str):
             return self.set_attribute(default_var_name, value)
         elif native_type and isinstance(value, numbers.Number):
-            return self.__set_react_attribute(default_var_name, value)
+            return self.__set_react_attribute(default_var_name, value, is_var=False)
         elif value is None:
-            return self.__set_react_attribute(default_var_name, "null")
+            return self.__set_react_attribute(default_var_name, "null", is_var=False)
         elif var_type == PropertyType.lov_value:
             # Done by _get_adapter
             return self
@@ -901,7 +884,7 @@ class _Builder:
                 var_type = PropertyType.lov_value
                 native_type = False
             elif var_type == PropertyType.toggle_value:
-                self.__set_react_attribute(_to_camel_case("is_switch"), True)
+                self.__set_react_attribute(_to_camel_case("is_switch"), True, is_var=False)
                 var_type = PropertyType.dynamic_boolean
                 native_type = True
             else:
@@ -912,13 +895,10 @@ class _Builder:
                 )
                 native_type = True
         if var_type == PropertyType.dynamic_boolean:
-            return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])
+            return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])  # type: ignore
         if hash_name := self.__hashes.get(var_name):
             hash_name = self.__get_typed_hash_name(hash_name, var_type)
-            self.__set_react_attribute(
-                _to_camel_case(var_name),
-                _get_client_var_name(hash_name),
-            )
+            self.__set_react_attribute(_to_camel_case(var_name), hash_name, client_var_name=True)
             if with_update:
                 self.__set_update_var_name(hash_name)
             if with_default:
@@ -930,6 +910,9 @@ class _Builder:
                     self.__set_default_value(var_name, val, native_type=native_type)
                 else:
                     self.__set_default_value(var_name, var_type=var_type)
+        elif var_type == PropertyType.json:
+            # TODO - refactor with set_attributes
+            ...
         else:
             if var_type == PropertyType.data and (self.__control_type != "chart" or "figure" not in self.__prop_values):
                 _warn(f"{self.__control_type}.{var_name} property should be bound.")
@@ -940,7 +923,7 @@ class _Builder:
                         with contextlib.suppress(Exception):
                             value = float(value)
                     if isinstance(value, (int, float)):
-                        return self.__set_react_attribute(_to_camel_case(var_name), value)
+                        return self.__set_react_attribute(_to_camel_case(var_name), value, is_var=False)
                 if isinstance(value, (datetime, date, time)):
                     value = _date_to_string(value)
                 self.set_attribute(_to_camel_case(var_name), value)
@@ -949,7 +932,7 @@ class _Builder:
     def _set_labels(self, var_name: str = "labels"):
         if value := self.__prop_values.get(var_name):
             if _is_true(value):
-                return self.__set_react_attribute(_to_camel_case(var_name), True)
+                return self.__set_react_attribute(_to_camel_case(var_name), True, is_var=False)
             elif isinstance(value, (dict, _MapDict)):
                 return self.__set_dict_attribute(var_name)
         return self
@@ -962,8 +945,8 @@ class _Builder:
                 _warn(f"{self.__element_name} control: page and partial should not be both defined.")
             if isinstance(partial, Partial):
                 self.__prop_values["page"] = partial._route
-                self.__set_react_attribute("partial", partial._route)
-                self.__set_react_attribute("defaultPartial", True)
+                self.__set_react_attribute("partial", partial._route, is_var=False)
+                self.__set_react_attribute("defaultPartial", True, is_var=False)
         return self
 
     def _set_propagate(self):
@@ -1016,7 +999,7 @@ class _Builder:
         else:
             hash_name = self.__get_typed_hash_name(hash_name, property_type)
             self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
-            self.__set_react_attribute(_to_camel_case(name), _get_client_var_name(hash_name))
+            self.__set_react_attribute(_to_camel_case(name), hash_name, client_var_name=True)
         return self
 
     def __set_html_content(self, name: str, property_name: str, property_type: PropertyType):
@@ -1034,7 +1017,7 @@ class _Builder:
                 },
             ),
         )
-        return self.__set_react_attribute(_to_camel_case(property_name), _get_client_var_name(front_var))
+        return self.__set_react_attribute(_to_camel_case(property_name), front_var, client_var_name=True)
 
     def _set_indexed_icons(self, name="use_icon"):
         global_icon = self.__prop_values.get(name)
@@ -1070,13 +1053,13 @@ class _Builder:
             if not isinstance(attr, tuple):
                 attr = (attr,)
             var_type = _get_tuple_val(attr, 1, PropertyType.string)
-            if var_type == PropertyType.to_json:
+            is_dynamic_json = False
+            if var_type == PropertyType.json:
                 var_type = _TaipyToJson
-            if var_type == PropertyType.any:
-                self.__set_any_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == PropertyType.dynamic_any:
-                self.__set_dynamic_any_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == PropertyType.boolean:
+            elif var_type == PropertyType.dynamic_json:
+                var_type = _TaipyToJson
+                is_dynamic_json = True
+            if var_type == PropertyType.boolean:
                 def_val = _get_tuple_val(attr, 2, False)
                 if isinstance(def_val, bool) or self.__prop_values.get(attr[0], None) is not None:
                     val = self.__get_boolean_attribute(attr[0], def_val)
@@ -1134,7 +1117,7 @@ class _Builder:
                     self.__set_react_attribute(prop_name, hash_name)
                 else:
                     self.__set_react_attribute(
-                        prop_name, self.__prop_values.get(attr[0], _get_tuple_val(attr, 2, None))
+                        prop_name, self.__prop_values.get(attr[0], _get_tuple_val(attr, 2, None)), is_var=False
                     )
             elif var_type == PropertyType.broadcast:
                 self.__set_react_attribute(
@@ -1165,6 +1148,17 @@ class _Builder:
                     hash_name = self.__gui._evaluate_bind_holder(var_type, expr)  # type: ignore[attr-defined]
                     self.__update_vars.append(f"{prop_name}={hash_name}")
                     self.__set_react_attribute(prop_name, hash_name)
+                    if is_dynamic_json:
+                        val = self.__prop_values.get(attr[0])
+                        if val:
+                            json_val = var_type(val, "").get()  # type: ignore
+                            self.set_attribute(
+                                _to_camel_case(f"default_{prop_name}"),
+                                json.dumps(json_val),
+                            )
+                        else:
+                            # val is None
+                            ...
                 else:
                     val = self.__prop_values.get(attr[0])
                     self.set_attribute(

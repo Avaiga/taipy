@@ -18,6 +18,8 @@ from urllib.request import urlopen
 import pytest
 from testbook import testbook
 
+from taipy.gui import Gui
+
 
 def wait_for_content(url, expected_text, timeout=10):
     start = time.time()
@@ -45,36 +47,36 @@ def test_notebook_simple_gui(tb, helpers):
     tb.execute_cell("gui_run")
     while not helpers.port_check():
         time.sleep(0.1)
-    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
-    assert 'defaultValue=\\"10\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    assert wait_for_content(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1", ">Hello</h1>"), "Expected content not found"
+    assert 'defaultValue=\\"10\\"' in urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1").read().decode("utf-8")
     # Test state manipulation within notebook
     tb.execute_cell("get_variable")
     assert "10" in tb.cell_output_text("get_variable")
-    assert 'defaultValue=\\"10\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    assert 'defaultValue=\\"10\\"' in urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1").read().decode("utf-8")
     tb.execute_cell("set_variable")
-    assert 'defaultValue=\\"20\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    assert 'defaultValue=\\"20\\"' in urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1").read().decode("utf-8")
     tb.execute_cell("re_get_variable")
     assert "20" in tb.cell_output_text("re_get_variable")
     # Test page reload
     tb.execute_cell("gui_stop")
     with pytest.raises(Exception) as exc_info:
-        urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+        urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1")
     assert "501: Gateway error" in str(exc_info.value)
     tb.execute_cell("gui_re_run")
     while True:
         with contextlib.suppress(Exception):
-            urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+            urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1")
             break
-    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
+    assert wait_for_content(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1", ">Hello</h1>"), "Expected content not found"
     tb.execute_cell("gui_reload")
     while True:
         with contextlib.suppress(Exception):
-            urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+            urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1")
             break
-    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
+    assert wait_for_content(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1", ">Hello</h1>"), "Expected content not found"
     tb.execute_cell("gui_re_stop")
     with pytest.raises(Exception) as exc_info:
-        urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+        urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1")
     assert "501: Gateway error" in str(exc_info.value)
 
 
@@ -89,34 +91,34 @@ def test_notebook_simple_gui_fastapi(tb, helpers):
     tb.execute_cell("gui_run")
     while not helpers.port_check():
         time.sleep(0.1)
-    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
-    assert 'defaultValue=\\"10\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    assert wait_for_content(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1", ">Hello</h1>"), "Expected content not found"
+    assert 'defaultValue=\\"10\\"' in urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1").read().decode("utf-8")
     # Test state manipulation within notebook
     tb.execute_cell("get_variable")
     assert "10" in tb.cell_output_text("get_variable")
-    assert 'defaultValue=\\"10\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    assert 'defaultValue=\\"10\\"' in urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1").read().decode("utf-8")
     tb.execute_cell("set_variable")
-    assert 'defaultValue=\\"20\\"' in urlopen("http://127.0.0.1:5000/taipy-jsx/page1").read().decode("utf-8")
+    assert 'defaultValue=\\"20\\"' in urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1").read().decode("utf-8")
     tb.execute_cell("re_get_variable")
     assert "20" in tb.cell_output_text("re_get_variable")
     # Test page reload
     tb.execute_cell("gui_stop")
     with pytest.raises(Exception) as exc_info:
-        urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+        urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1")
     assert "refused" in str(exc_info.value)
     tb.execute_cell("gui_re_run")
     while True:
         with contextlib.suppress(Exception):
-            urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+            urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1")
             break
-    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
+    assert wait_for_content(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1", ">Hello</h1>"), "Expected content not found"
     tb.execute_cell("gui_reload")
     while True:
         with contextlib.suppress(Exception):
-            urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+            urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1")
             break
-    assert wait_for_content("http://127.0.0.1:5000/taipy-jsx/page1", ">Hello</h1>"), "Expected content not found"
+    assert wait_for_content(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1", ">Hello</h1>"), "Expected content not found"
     tb.execute_cell("gui_re_stop")
     with pytest.raises(Exception) as exc_info:
-        urlopen("http://127.0.0.1:5000/taipy-jsx/page1")
+        urlopen(f"http://127.0.0.1:5000/{Gui._JSX_URL}/page1")
     assert "refused" in str(exc_info.value)

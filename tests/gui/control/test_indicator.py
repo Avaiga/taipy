@@ -18,12 +18,12 @@ def test_indicator_md(gui: Gui, test_client, helpers):
     expected_list = [
         "<Indicator",
         'libClassName="taipy-indicator"',
-        "defaultValue={15}",
-        "display={12.0}",
+        'defaultValue="{!15',
+        'display="{!12.0',
         'format="%.2f"',
-        "max={20.0}",
-        "min={1.0}",
-        "value={_TpN_tpec_TpExPr_val_TPMDL_0}",
+        'max="{!20.0',
+        'min="{!1.0',
+        'value="{!_TpN_tpec_TpExPr_val_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -34,11 +34,11 @@ def test_menu_html(gui: Gui, test_client, helpers):
     expected_list = [
         "<Indicator",
         'libClassName="taipy-indicator"',
-        "defaultValue={15}",
-        "display={12.0}",
+        'defaultValue="{!15',
+        'display="{!12.0',
         'format="%.2f"',
-        "max={20.0}",
-        "min={1.0}",
-        "value={_TpN_tpec_TpExPr_val_TPMDL_0}",
+        'max="{!20.0',
+        'min="{!1.0',
+        'value="{!_TpN_tpec_TpExPr_val_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)

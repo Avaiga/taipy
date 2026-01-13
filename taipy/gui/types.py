@@ -29,6 +29,7 @@ from .utils import (
     _TaipyLovValue,
     _TaipyNumber,
     _TaipyTime,
+    _TaipyToDynamicJson,
     _TaipyToJson,
 )
 
@@ -51,6 +52,7 @@ class _WsType(Enum):
     FAVICON = "FV"
     BROADCAST = "BC"
     LOCAL_STORAGE = "LS"
+    PATCH = "PT"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}
@@ -69,47 +71,60 @@ class PropertyType(Enum):
     See `ElementProperty^` for more details.
     """
 
-    any = "any"
-    """
-    The property holds a value of any serializable type.
-    """
-    dynamic_any = "dynamicany"
-    """
-    The property is dynamic and holds a value of any serializable type.
-    """
     boolean = "boolean"
     """
     The property holds a Boolean value.
     """
-    toHtmlContent = _TaipyContentHtml
-    content = _TaipyContent
-    data = _TaipyData
-    date = _TaipyDate
-    date_range = _TaipyDateRange
-    dict = "dict"
-    time = _TaipyTime
+    dynamic_boolean = _TaipyBool
     """
-    The property holds a dictionary.
+    The property is dynamic and holds a Boolean value.
     """
-    dynamic_date = "dynamicdate"
+    number = "number"
     """
-    The property is dynamic and holds a date.
-    """
-    dynamic_dict = _TaipyDict
-    """
-    The property is dynamic and holds a dictionary.
+    The property holds a number.
     """
     dynamic_number = _TaipyNumber
     """
     The property is dynamic and holds a number.
     """
+    string = "string"
+    """
+    The property holds a string.
+    """
+    dynamic_string = "dynamicstring"
+    """
+    The property is dynamic and holds a string.
+    """
+    string_or_number = "string|number"
+    """
+    The property holds a string or a number.
+
+    This is typically used to handle CSS dimension values, where a unit can be used.
+    """
+    date = _TaipyDate
+    """
+    The property holds a date.
+    """
+    time = _TaipyTime
+    dynamic_date = "dynamicdate"
+    """
+    The property is dynamic and holds a date.
+    """
+    date_range = _TaipyDateRange
+    dict = "dict"
+    """
+    The property holds a dictionary.
+    """
+    dynamic_dict = _TaipyDict
+    """
+    The property is dynamic and holds a dictionary.
+    """
+    toHtmlContent = _TaipyContentHtml
+    content = _TaipyContent
+    data = _TaipyData
     dynamic_lo_numbers = _TaipyLoNumbers
     """
     The property is dynamic and holds a list of numbers.
-    """
-    dynamic_boolean = _TaipyBool
-    """
-    The property is dynamic and holds a Boolean value.
     """
     dynamic_list = "dynamiclist"
     """
@@ -119,16 +134,19 @@ class PropertyType(Enum):
     "default<PropertyName>" that must be a string, set to the JSON representation of the initial value
     of the property.
     """
-    dynamic_string = "dynamicstring"
-    """
-    The property is dynamic and holds a string.
-    """
     function = "function"
     """
     The property holds a reference to a function.
     """
     image = _TaipyContentImage
-    json = "json"
+    json = _TaipyToJson
+    """
+    The property is JSON serializable.
+    """
+    dynamic_json = _TaipyToDynamicJson
+    """
+    The property is JSON serializable and dynamic.
+    """
     single_lov = "singlelov"
     lov = _TaipyLov
     lov_no_default = "lovnodefault"
@@ -139,22 +157,8 @@ class PropertyType(Enum):
     """
     The property holds a value in a LoV (list of values).
     """
-    number = "number"
-    """
-    The property holds a number.
-    """
     react = "react"
     broadcast = "broadcast"
-    string = "string"
-    """
-    The property holds a string.
-    """
-    string_or_number = "string|number"
-    """
-    The property holds a string or a number.
-
-    This is typically used to handle CSS dimension values, where a unit can be used.
-    """
     boolean_or_list = "boolean|list"
     slider_value = "number|number[]|lovValue"
     toggle_value = "boolean|lovValue"
@@ -164,7 +168,6 @@ class PropertyType(Enum):
     The property holds an inner attributes that is defined by a library and cannot be overridden by the user.
     """
     inner = "inner"
-    to_json = _TaipyToJson
 
 
 @t.overload  # noqa: F811

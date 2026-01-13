@@ -17,6 +17,7 @@ from ._attributes import (
     _setscopeattr,
     _setscopeattr_drill,
 )
+from ._check_plotly import _is_plotly_figure
 from ._lambda import _get_lambda_id
 from ._locals_context import _LocalsContext
 from ._map_dict import _MapDict
@@ -38,6 +39,7 @@ from .html import _get_css_var_value
 from .is_debugging import is_debugging
 from .is_port_open import _is_port_open
 from .isnotebook import _is_in_notebook
+from .patch import _patch_value
 from .types import (
     _DoNotUpdate,
     _TaipyBase,
@@ -54,6 +56,7 @@ from .types import (
     _TaipyLovValue,
     _TaipyNumber,
     _TaipyTime,
+    _TaipyToDynamicJson,
     _TaipyToJson,
 )
 from .varnamefromcontent import _varname_from_content

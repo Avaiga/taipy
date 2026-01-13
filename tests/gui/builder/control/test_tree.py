@@ -22,7 +22,7 @@ def test_tree_builder(gui: Gui, test_client, helpers):
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
         'updateVarName="_TpLv_tpec_TpExPr_value_TPMDL_0"',
-        "value={_TpLv_tpec_TpExPr_value_TPMDL_0}",
+        'value="{!_TpLv_tpec_TpExPr_value_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -36,8 +36,8 @@ def test_tree_expanded_builder_1(gui: Gui, test_client, helpers):
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
         'updateVarName="_TpLv_tpec_TpExPr_value_TPMDL_0"',
-        "value={_TpLv_tpec_TpExPr_value_TPMDL_0}",
-        "expanded={false}",
+        'value="{!_TpLv_tpec_TpExPr_value_TPMDL_0',
+        'expanded="{!false',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -52,9 +52,9 @@ def test_tree_expanded_builder_2(gui: Gui, test_client, helpers):
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
         'updateVarName="_TpLv_tpec_TpExPr_value_TPMDL_0"',
-        "value={_TpLv_tpec_TpExPr_value_TPMDL_0}",
+        'value="{!_TpLv_tpec_TpExPr_value_TPMDL_0',
         'defaultExpanded="[&quot;Item1&quot;]"',
-        "expanded={tpec_TpExPr_expa_TPMDL_0}",
+        'expanded="{!tpec_TpExPr_expa_TPMDL_0',
         'updateVars="expanded=tpec_TpExPr_expa_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)

@@ -20,6 +20,7 @@ import { nanoid } from "nanoid";
 
 import { FilterDesc } from "../components/Taipy/tableUtils";
 import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
+import { patchValue, PatchChange, PatchRemove} from "./patch"
 import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
@@ -50,6 +51,7 @@ export enum Types {
     Broadcast = "BROADCAST",
     LocalStorage = "LOCAL_STORAGE",
     RefreshThemes = "REFRESH_THEMES",
+    Patch = "PATCH",
 }
 
 /**
@@ -145,11 +147,19 @@ export interface FileDownloadProps {
     context?: string;
 }
 
+interface PatchDescription {
+    names: string[];
+    change?: PatchChange;
+    remove?: PatchRemove;
+}
+
 interface TaipyIdAction extends TaipyBaseAction, IdMessage {}
 
 interface TaipyAckAction extends TaipyBaseAction, IdMessage {}
 
 interface TaipyDownloadAction extends TaipyBaseAction, FileDownloadProps {}
+
+interface TaipyPatchAction extends TaipyBaseAction, PatchDescription {}
 
 interface TaipySetMenuAction extends TaipyBaseAction {
     menu: MenuProps;
@@ -185,7 +195,7 @@ const getUserTheme = (mode: PaletteMode) => {
                     },
                 },
             },
-        }),
+        })
     );
 };
 
@@ -247,6 +257,8 @@ export const messageToAction = (message: WsMessage) => {
             stackBroadcast((message as NamePayload).name, (message as NamePayload).payload.value);
         } else if (message.type == "GA") {
             checkGuiAddr((message.payload as Record<string, string>).id);
+        } else if (message.type === "PT") {
+            return createPatchAction(message as unknown as PatchDescription);
         }
     }
     return {} as TaipyBaseAction;
@@ -379,6 +391,9 @@ export const retrieveBlockUi = (): BlockMessage => {
 };
 
 export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): TaipyState => {
+    if (!baseAction || !baseAction.type) {
+        return state;
+    }
     const action = baseAction as TaipyAction;
     let ackId = "";
     switch (action.type) {
@@ -420,7 +435,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                         system: notificationAction.system,
                         duration: notificationAction.duration,
                         notificationId: notificationAction.notificationId,
-                        snackbarId: notificationAction.nType ? nanoid() : notificationAction.nType
+                        snackbarId: notificationAction.nType ? nanoid() : notificationAction.nType,
                     },
                 ],
             };
@@ -487,7 +502,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             return {
                 ...state,
                 themes: tempThemes,
-                theme: tempThemes[state.theme.palette.mode]
+                theme: tempThemes[state.theme.palette.mode],
             };
         }
         case Types.SetTimeZone: {
@@ -517,7 +532,15 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 delete state.download;
                 return { ...state };
             }
-            return { ...state, download: { content: dAction.content, name: dAction.name, onAction: dAction.onAction, context: dAction.context } };
+            return {
+                ...state,
+                download: {
+                    content: dAction.content,
+                    name: dAction.name,
+                    onAction: dAction.onAction,
+                    context: dAction.context,
+                },
+            };
         }
         case Types.Partial: {
             const pAction = baseAction as TaipyPartialAction;
@@ -529,6 +552,36 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             }
             return { ...state, data: data };
         }
+        case Types.Patch:
+            const patchDesc = action as unknown as TaipyPatchAction;
+            if (patchDesc.names && patchDesc.names.length > 0 && (patchDesc.change || patchDesc.remove)) {
+                const patchedData = {} as typeof state.data;
+                for (const name of patchDesc.names) {
+                    const currentValue = state.data[name];
+                    if (currentValue !== undefined && currentValue !== null && typeof currentValue === "object") {
+                        if (name.startsWith("_TpD_")) {
+                            Object.entries(currentValue)
+                                .filter((e) => e[1].__taipy_refresh === undefined)
+                                .forEach(([k, v]) => {
+                                    const newValue = patchValue(v, patchDesc.change, patchDesc.remove);
+                                    if (newValue !== v) {
+                                        patchedData[name] = patchedData[name] || {};
+                                        (patchedData[name] as Record<string, unknown>)[k] = newValue;
+                                    }
+                                });
+                        } else {
+                            const newValue = patchValue(currentValue, patchDesc.change, patchDesc.remove);
+                            if (newValue !== currentValue) {
+                                patchedData[name] = newValue;
+                            }
+                        }
+                    }
+                }
+                if (Object.keys(patchedData).length > 0) {
+                    return { ...state, data: { ...state.data, ...patchedData } };
+                }
+            }
+            break;
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
@@ -878,15 +931,15 @@ export const createNotificationAction = (notification: NotificationMessage): Tai
     system: notification.system,
     duration: notification.duration,
     notificationId: notification.notificationId,
-    snackbarId: notification.snackbarId
+    snackbarId: notification.snackbarId,
 });
 
 export const createDeleteNotificationAction = (snackbarId: string): TaipyDeleteNotificationAction => {
     return {
         type: Types.DeleteNotification,
         snackbarId,
-    }
-}
+    };
+};
 
 export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({
     type: Types.SetBlock,
@@ -925,6 +978,11 @@ export const createDownloadAction = (dMessage?: FileDownloadProps): TaipyDownloa
     name: dMessage?.name,
     onAction: dMessage?.onAction,
     context: dMessage?.context,
+});
+
+const createPatchAction = (payload: PatchDescription): TaipyPatchAction => ({
+    ...payload,
+    type: Types.Patch,
 });
 
 export const createSetMenuAction = (menu: MenuProps): TaipySetMenuAction => ({

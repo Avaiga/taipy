@@ -156,6 +156,84 @@ use_reloader = "true:bool"
         gui.stop()
 
 
+def test_cli_arguments_no_run_browser_and_no_reloader():
+    # Test --no-run-browser argument
+    with patch("sys.argv", ["prog", "--no-run-browser"]):
+        gui = Gui()
+        gui.run(run_server=False, run_browser=True)
+        service_config = gui._config.config
+        assert not service_config["run_browser"]
+        gui.stop()
+
+    # Test --no-reloader argument
+    with patch("sys.argv", ["prog", "--no-reloader"]):
+        gui = Gui()
+        gui.run(run_server=False, use_reloader=True)
+        service_config = gui._config.config
+        assert not service_config["use_reloader"]
+        gui.stop()
+
+    # Test both arguments together
+    with patch("sys.argv", ["prog", "--no-run-browser", "--no-reloader"]):
+        gui = Gui()
+        gui.run(run_server=False, run_browser=True, use_reloader=True)
+        service_config = gui._config.config
+        assert not service_config["run_browser"]
+        assert not service_config["use_reloader"]
+        gui.stop()
+
+    # Test CLI arguments override TOML configuration
+    toml_config = NamedTemporaryFile(
+        content="""
+[TAIPY]
+
+[gui]
+run_browser = "true:bool"
+use_reloader = "true:bool"
+    """
+    )
+    Config.load(toml_config.filename)
+
+    with patch("sys.argv", ["prog", "--no-run-browser", "--no-reloader"]):
+        gui = Gui()
+        gui.run(run_server=False)
+        service_config = gui._config.config
+        assert not service_config["run_browser"]
+        assert not service_config["use_reloader"]
+        gui.stop()
+
+    # Test CLI arguments override Config.configure_gui()
+    Config.configure_gui(run_browser=True, use_reloader=True)
+
+    with patch("sys.argv", ["prog", "--no-run-browser", "--no-reloader"]):
+        gui = Gui()
+        gui.run(run_server=False)
+        service_config = gui._config.config
+        assert not service_config["run_browser"]
+        assert not service_config["use_reloader"]
+        gui.stop()
+
+    # Test precedence: CLI > TOML > Config.configure_gui() > Gui.run()
+    toml_config_2 = NamedTemporaryFile(
+        content="""
+[TAIPY]
+
+[gui]
+run_browser = "true:bool"
+use_reloader = "false:bool"
+    """
+    )
+    Config.load(toml_config_2.filename)
+    Config.configure_gui(run_browser=False, use_reloader=True)
+
+    with patch("sys.argv", ["prog", "--no-run-browser"]):
+        gui = Gui()
+        gui.run(run_server=False, run_browser=True, use_reloader=False)
+        service_config = gui._config.config
+        assert not service_config["run_browser"]
+        assert service_config["use_reloader"]
+        gui.stop()
+
 def test_clean_config():
     gui_config = Config.configure_gui(dark_mode=False)
 

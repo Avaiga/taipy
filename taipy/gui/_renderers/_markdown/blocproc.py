@@ -28,16 +28,16 @@ class _StartBlockProcessor(BlockProcessor):
     def extend(md, gui, priority):
         instance = _StartBlockProcessor(md.parser)
         md.parser.blockprocessors.register(instance, "taipy", priority)
-        instance._gui = gui
+        instance._gui = gui # type: ignore[reportAttributeAccessIssue]
 
     def test(self, parent, block):
-        return re.match(_StartBlockProcessor.__RE_FENCE_START, block)
+        return bool(re.match(_StartBlockProcessor.__RE_FENCE_START, block))
 
     def run(self, parent, blocks):
         original_block = blocks[0]
         original_match = re.search(_StartBlockProcessor.__RE_FENCE_START, original_block)
         blocks[0] = re.sub(_StartBlockProcessor.__RE_FENCE_START, "", blocks[0], count=1)
-        tag = original_match.group(1)
+        tag = original_match.group(1) # type: ignore[reportOptionalMemberAccess]
         stack = [tag]
         # Find block with ending fence
         for block_num, block in enumerate(blocks):
@@ -56,10 +56,10 @@ class _StartBlockProcessor(BlockProcessor):
                     count=1,
                 )
                 # render fenced area inside a new div
-                e = _MarkdownFactory.create_element(self._gui, original_match.group(1), original_match.group(2))
-                parent.append(e)
+                e = _MarkdownFactory.create_element(self._gui, original_match.group(1), original_match.group(2)) # type: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+                parent.append(e) # type: ignore[reportArgumentType]
                 # parse inside blocks
-                self.parser.parseBlocks(e, blocks[: block_num + 1])
+                self.parser.parseBlocks(e, blocks[: block_num + 1]) # type: ignore[reportArgumentType]
                 # remove used blocks
                 del blocks[: block_num + 1]
                 return True  # or could have had no return statement

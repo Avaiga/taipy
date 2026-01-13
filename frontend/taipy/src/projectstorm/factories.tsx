@@ -22,7 +22,7 @@ export class TaipyNodeFactory extends AbstractReactFactory<TaipyNodeModel, Diagr
         super(nodeType);
     }
 
-    generateReactWidget(event: GenerateWidgetEvent<TaipyNodeModel>): JSX.Element {
+    generateReactWidget(event: GenerateWidgetEvent<TaipyNodeModel>): React.JSX.Element {
         return <NodeWidget engine={this.engine} node={event.model} />;
     }
 

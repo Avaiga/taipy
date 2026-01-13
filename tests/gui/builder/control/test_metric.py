@@ -16,23 +16,23 @@ from taipy.gui import Gui
 def test_metric_builder_none(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
         tgb.metric(type=None, value=42)
-    expected_list = ["<Metric", 'type="None"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="None"', 'value="{!42.0']
     helpers.test_control_builder(gui, page, expected_list)
 
 def test_metric_builder_none_lowercase(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
         tgb.metric(type="none", value=42)
-    expected_list = ["<Metric", 'type="none"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="none"', 'value="{!42.0']
     helpers.test_control_builder(gui, page, expected_list)
 
 def test_metric_builder_circular(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
         tgb.metric(type="circular", value=42)
-    expected_list = ["<Metric", 'type="circular"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="circular"', 'value="{!42.0']
     helpers.test_control_builder(gui, page, expected_list)
 
 def test_metric_builder_linear(gui: Gui, helpers):
     with tgb.Page(frame=None) as page:
         tgb.metric(type="linear", value=42)
-    expected_list = ["<Metric", 'type="linear"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="linear"', 'value="{!42.0']
     helpers.test_control_builder(gui, page, expected_list)

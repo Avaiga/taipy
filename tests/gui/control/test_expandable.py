@@ -20,7 +20,7 @@ def test_expandable_md_1(gui: Gui, helpers):
 """
     expected_list = [
         "<Expandable",
-        "expanded={false}",
+        'expanded="{!false',
         'title="Expandable section"',
         "<h1",
         "This is an expandable section",
@@ -36,7 +36,7 @@ def test_expandable_md_2(gui: Gui, helpers):
 """
     expected_list = [
         "<Expandable",
-        "expanded={false}",
+        'expanded="{!false',
         'title="Expandable section"',
         "<h1",
         "This is an expandable section",
@@ -48,7 +48,7 @@ def test_expandable_html(gui: Gui, helpers):
     html_string = '<taipy:expandable title="Expandable section" expanded="false"><h1>This is an expandable section</h1></taipy:expandable >'  # noqa: E501
     expected_list = [
         "<Expandable",
-        "expanded={false}",
+        'expanded="{!false',
         'title="Expandable section"',
         "<h1",
         "This is an expandable section",

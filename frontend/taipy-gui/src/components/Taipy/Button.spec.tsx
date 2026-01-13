@@ -15,7 +15,6 @@ import React from "react";
 import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
-
 import Button from "./Button";
 import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
@@ -70,22 +69,22 @@ describe("Button Component", () => {
         const elt = getByText("val");
         expect(elt).not.toBeDisabled();
     });
-    it("renders with default properties",()=>{
-        const {getByRole} = render(<Button label="val"/>);
+    it("renders with default properties", () => {
+        const { getByRole } = render(<Button label="val" />);
         const elt = getByRole("button");
         expect(elt).toBeInTheDocument();
         expect(elt).toHaveClass("MuiButton-sizeMedium");
         expect(elt).toHaveClass("MuiButton-outlinedPrimary");
     });
-    it("applies correct size",()=>{
-        const {getByRole}=render(<Button label="val" size="large"/>);
+    it("applies correct size", () => {
+        const { getByRole } = render(<Button label="val" size="large" />);
         const elt = getByRole("button");
         expect(elt).toBeInTheDocument();
         expect(elt).toHaveClass("MuiButton-sizeLarge");
     });
-    it("applies correct variant",()=>{
-        const {getByRole}=render(<Button label="val" variant="text"/>);
-        const elt=getByRole("button");
+    it("applies correct variant", () => {
+        const { getByRole } = render(<Button label="val" variant="text" />);
+        const elt = getByRole("button");
         expect(elt).toBeInTheDocument();
         expect(elt).toHaveClass("MuiButton-textPrimary");
     });
@@ -104,5 +103,35 @@ describe("Button Component", () => {
             payload: { args: [], action: "on_action" },
             type: "SEND_ACTION_ACTION",
         });
+    });
+    it("trigger once in auto-repeat mode after holding for less that half a second", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Button label="Button" onAction="on_action" autoRepeat={200} />
+            </TaipyContext.Provider>
+        );
+        const elt = getByText("Button");
+        await userEvent.pointer([{ target: elt, keys: "[MouseLeft>]" }]);
+        await new Promise((r) => setTimeout(r, 50));
+        await userEvent.pointer([{ target: elt, keys: "[/MouseLeft]" }]);
+        const nCalls = dispatch.mock.calls.length;
+        expect(nCalls).toBe(1);
+    });
+    it("trigger multiple times in auto-repeat mode after holding for 1 second", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Button label="Button" onAction="on_action" autoRepeat={100} />
+            </TaipyContext.Provider>
+        );
+        const elt = getByText("Button");
+        await userEvent.pointer([{ target: elt, keys: "[MouseLeft>]" }]);
+        await new Promise((r) => setTimeout(r, 1000));
+        await userEvent.pointer([{ target: elt, keys: "[/MouseLeft]" }]);
+        const nCalls = dispatch.mock.calls.length;
+        expect(nCalls).toBeGreaterThan(1);
     });
 });

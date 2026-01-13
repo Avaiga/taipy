@@ -14,40 +14,40 @@ from taipy.gui import Gui
 
 def test_metric_md_none(gui: Gui, helpers):
     md_string = "<|metric|type=None|value=42|>"
-    expected_list = ["<Metric", 'type="None"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="None"', 'value="{!42.0']
     helpers.test_control_md(gui, md_string, expected_list)
 
 def test_metric_md_none_lowercase(gui: Gui, helpers):
     md_string = "<|metric|type=none|value=42|>"
-    expected_list = ["<Metric", 'type="none"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="none"', 'value="{!42.0']
     helpers.test_control_md(gui, md_string, expected_list)
 
 def test_metric_md_circular(gui: Gui, helpers):
     md_string = "<|metric|type=circular|value=42|>"
-    expected_list = ["<Metric", 'type="circular"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="circular"', 'value="{!42.0']
     helpers.test_control_md(gui, md_string, expected_list)
 
 def test_metric_md_linear(gui: Gui, helpers):
     md_string = "<|metric|type=linear|value=42|>"
-    expected_list = ["<Metric", 'type="linear"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="linear"', 'value="{!42.0']
     helpers.test_control_md(gui, md_string, expected_list)
 
 def test_metric_html_none(gui: Gui, helpers):
     html_string = '<taipy:metric type="None" value="42" />'
-    expected_list = ["<Metric", 'type="None"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="None"', 'value="{!42.0']
     helpers.test_control_html(gui, html_string, expected_list)
 
 def test_metric_html_none_lowercase(gui: Gui, helpers):
     html_string = '<taipy:metric type="none" value="42" />'
-    expected_list = ["<Metric", 'type="none"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="none"', 'value="{!42.0']
     helpers.test_control_html(gui, html_string, expected_list)
 
 def test_metric_html_circular(gui: Gui, helpers):
     html_string = '<taipy:metric type="circular" value="42" />'
-    expected_list = ["<Metric", 'type="circular"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="circular"', 'value="{!42.0']
     helpers.test_control_html(gui, html_string, expected_list)
 
 def test_metric_html_linear(gui: Gui, helpers):
     html_string = '<taipy:metric type="linear" value="42" />'
-    expected_list = ["<Metric", 'type="linear"', 'value={42.0}']
+    expected_list = ["<Metric", 'type="linear"', 'value="{!42.0']
     helpers.test_control_html(gui, html_string, expected_list)

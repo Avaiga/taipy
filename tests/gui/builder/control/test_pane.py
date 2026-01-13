@@ -22,7 +22,7 @@ def test_pane_builder(gui: Gui, test_client, helpers):
         "<Pane",
         'anchor="left"',
         'updateVarName="_TpB_tpec_TpExPr_show_pane_TPMDL_0"',
-        "open={_TpB_tpec_TpExPr_show_pane_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_show_pane_TPMDL_0',
         "This is a Pane",
     ]
     helpers.test_control_builder(gui, page, expected_list)
@@ -36,9 +36,9 @@ def test_pane_persistent_builder(gui: Gui, test_client, helpers):
     expected_list = [
         "<Pane",
         'anchor="left"',
-        "persistent={true}",
+        'persistent="{!true',
         'updateVarName="_TpB_tpec_TpExPr_show_pane_TPMDL_0"',
-        "open={_TpB_tpec_TpExPr_show_pane_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_show_pane_TPMDL_0',
         "This is a Pane",
     ]
     helpers.test_control_builder(gui, page, expected_list)

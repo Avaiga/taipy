@@ -49,7 +49,7 @@ import {
     useClassNames,
     useDispatch,
     useDispatchRequestUpdateOnFirstRender,
-    useDynamicJsonProperty,
+    useDynamicDictProperty,
     useDynamicProperty,
     useModule,
 } from "../../utils/hooks";
@@ -87,7 +87,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     template_Dark_?: string;
     template_Light_?: string;
     //[key: `selected${number}`]: number[];
-    figure?: Array<Record<string, unknown>>;
+    figure?: Record<string, unknown>;
     onClick?: string;
     dataVarNames?: string;
 }
@@ -364,7 +364,7 @@ const Chart = (props: ChartProp) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const baseLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", emptyLayout);
+    const baseLayout = useDynamicDictProperty(props.layout, props.defaultLayout || "", emptyLayout);
     const title = useDynamicProperty(props.title, props.defaultTitle, "");
 
     const dataVarNames = useMemo(() => (props.dataVarNames ? props.dataVarNames.split(";") : []), [props.dataVarNames]);
@@ -423,7 +423,7 @@ const Chart = (props: ChartProp) => {
         });
     }, [props]);
 
-    const config = useDynamicJsonProperty(props.config, props.defaultConfig, defaultConfig);
+    const config = useDynamicDictProperty(props.config, props.defaultConfig, defaultConfig);
 
     useEffect(() => {
         setDataKeys((oldDtKeys) => {
@@ -495,8 +495,8 @@ const Chart = (props: ChartProp) => {
             layout.template = template;
         }
         if (props.figure) {
-            return merge({}, props.figure[0].layout as Partial<Layout>, layout, {
-                title: title || layout.title || (props.figure[0].layout as Partial<Layout>).title,
+            return merge({}, props.figure.layout as Partial<Layout>, layout, {
+                title: title || layout.title || (props.figure.layout as Partial<Layout>).title,
                 clickmode: "event+select",
             });
         }
@@ -936,9 +936,9 @@ const Chart = (props: ChartProp) => {
         <Tooltip title={hover || ""}>
             <Box id={props.id} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                    {Array.isArray(props.figure) && props.figure.length && props.figure[0].data !== undefined ? (
+                    {props.figure?.data !== undefined ? (
                         <Plot
-                            data={props.figure[0].data as Data[]}
+                            data={props.figure.data as Data[]}
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}

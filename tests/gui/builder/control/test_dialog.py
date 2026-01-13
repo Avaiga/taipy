@@ -26,7 +26,7 @@ def test_dialog_builder_1(gui: Gui, helpers):
         'page="page_test"',
         'title="This is a Dialog"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
-        "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -48,7 +48,7 @@ def test_dialog_builder_2(gui: Gui, helpers):
         'title="Another Dialog"',
         'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
-        "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -71,7 +71,7 @@ def test_dialog_labels_builder(gui: Gui, helpers):
         'labels="[&quot;Cancel&quot;, &quot;Validate&quot;]"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'closeLabel="MYClose"',
-        "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 

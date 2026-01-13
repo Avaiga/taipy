@@ -24,10 +24,10 @@ def test_selector_builder_1(gui: Gui, test_client, helpers):
         "<Selector",
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
-        "filter={true}",
-        "multiple={true}",
+        'filter="{!true',
+        'multiple="{!true',
         'updateVarName="_TpLv_tpec_TpExPr_selected_val_TPMDL_0"',
-        "value={_TpLv_tpec_TpExPr_selected_val_TPMDL_0}",
+        'value="{!_TpLv_tpec_TpExPr_selected_val_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -41,7 +41,7 @@ def test_selector_builder_2(gui: Gui, test_client, helpers):
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
         'updateVarName="_TpLv_tpec_TpExPr_selected_val_TPMDL_0"',
-        "value={_TpLv_tpec_TpExPr_selected_val_TPMDL_0}",
+        'value="{!_TpLv_tpec_TpExPr_selected_val_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -64,11 +64,11 @@ def test_selector_builder_3(gui: Gui, test_client, helpers):
         "<Selector",
         'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;1&quot;]"',
-        "lov={_TpL_tp_TpExPr_gui_get_adapted_lov_scenario_list_dict_TPMDL_0_0}",
-        "propagate={false}",
+        'lov="{!_TpL_tp_TpExPr_gui_get_adapted_lov_scenario_list_dict_TPMDL_0_0',
+        'propagate="{!false',
         'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_scenario_list_dict_TPMDL_0_0"',
         'updateVarName="_TpLv_tpec_TpExPr_selected_obj_TPMDL_0"',
-        "value={_TpLv_tpec_TpExPr_selected_obj_TPMDL_0}",
+        'value="{!_TpLv_tpec_TpExPr_selected_obj_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -84,6 +84,6 @@ def test_selector_pandas_series(gui: Gui, test_client, helpers):
         'defaultLov="[&quot;l1&quot;, &quot;l2&quot;, &quot;l3&quot;]"',
         'defaultValue="[&quot;l1&quot;]"',
         'updateVarName="_TpLv_tpec_TpExPr_selected_val_TPMDL_0"',
-        "value={_TpLv_tpec_TpExPr_selected_val_TPMDL_0}",
+        'value="{!_TpLv_tpec_TpExPr_selected_val_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)

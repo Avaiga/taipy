@@ -23,11 +23,10 @@ def test_image_url_builder(gui: Gui, test_client, helpers):
         tgb.image(content="{content}")  # type: ignore[attr-defined]
     expected_list = [
         "<Image",
-        "content={_TpCi_tpec_TpExPr_content_TPMDL_0}",
+        'content="{!_TpCi_tpec_TpExPr_content_TPMDL_0',
         'defaultContent="some_url"',
     ]
     helpers.test_control_builder(gui, page, expected_list)
-
 
 def test_image_file_builder(gui: Gui, test_client, helpers):
     with open((pathlib.Path(__file__).parent.parent.parent / "resources" / "fred.png").resolve(), "rb") as content:

@@ -23,7 +23,7 @@ def test_get_state_id(gui: Gui, helpers):
     gui.run(run_server=False)
     server_test_client = gui._server.test_client()
     cid = helpers.create_scope_and_get_sid(gui)
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
     with gui.get_app_context():
         gui._server.request.get_request_meta().client_id = cid
         assert cid == get_state_id(gui._Gui__state)  # type: ignore[attr-defined]
