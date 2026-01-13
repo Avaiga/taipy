@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, { CSSProperties, JSX, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
@@ -35,8 +35,9 @@ interface PaneProps extends TaipyActiveProps, TaipyChangeProps {
     children?: ReactNode;
     open?: boolean;
     defaultOpen?: string | boolean;
-    anchor?: AnchorType;
+    anchor?: string;
     persistent?: boolean;
+    title?: string;
     onClose?: string;
     page?: string;
     partial?: boolean;
@@ -45,27 +46,51 @@ interface PaneProps extends TaipyActiveProps, TaipyChangeProps {
     showButton?: boolean;
 }
 
-const getHeaderSx = (anchor: AnchorType) => {
+const getHeaderSx = (anchor: AnchorType): CSSProperties => {
+    const baseStyle = { display: "flex", alignItems: "center" };
     switch (anchor) {
-        case "right":
         case "top":
         case "bottom":
-            return { display: "flex", alignItems: "center" };
+            return baseStyle;
+        case "right":
+            return { ...baseStyle, flexDirection: "row-reverse" };
         default:
-            return { display: "flex", alignItems: "center", justifyContent: "flex-end" };
+            return { ...baseStyle, justifyContent: "flex-end" };
     }
 };
-const getDrawerSx = (horizontal: boolean, width: string | number, height: string | number) => ({
-    width: horizontal ? width : undefined,
-    height: horizontal ? undefined : height,
-    flexShrink: 0,
-    "& .MuiDrawer-paper": {
+const getHeaderIcon = (anchor: AnchorType): JSX.Element => {
+    switch (anchor) {
+        case "right":
+            return <ChevronRightIcon />;
+        case "top":
+            return <ExpandLess />;
+        case "bottom":
+            return <ExpandMore />;
+        default:
+            return <ChevronLeftIcon />;
+    }
+};
+const getTitleSx = (anchor: AnchorType): CSSProperties => {
+    switch (anchor) {
+        case "right":
+            return { flexGrow: 1, paddingRight: 2 };
+        default:
+            return { flexGrow: 1, paddingLeft: 2 };
+    }
+};
+const getDrawerSx = (anchor: AnchorType, width: string | number, height: string | number) => {
+    const horizontal = anchor === "left" || anchor === "right";
+    return {
         width: horizontal ? width : undefined,
-        height: horizontal ? undefined : height,
-        boxSizing: "border-box",
-    },
-});
-
+        height: horizontal ? undefined : anchor === "bottom" ? 0 : height,
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
+            width: horizontal ? width : undefined,
+            height: horizontal ? undefined : height,
+            boxSizing: "border-box",
+        },
+    };
+};
 const buttonDrawerSx = {
     "& .MuiDrawer-paper": {
         width: "fit-content",
@@ -77,8 +102,8 @@ const buttonDrawerSx = {
 const Pane = (props: PaneProps) => {
     const {
         id,
-        anchor = "left",
         persistent = false,
+        title,
         onClose,
         page,
         partial,
@@ -96,13 +121,25 @@ const Pane = (props: PaneProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-
-    const drawerSx = useMemo(
-        () => getDrawerSx(anchor === "left" || anchor === "right", width, height),
-        [width, height, anchor]
+    const anchor = useMemo<AnchorType>(
+        () =>
+            props.anchor
+                ? props.anchor.toLowerCase().startsWith("l")
+                    ? "left"
+                    : props.anchor.toLowerCase().startsWith("r")
+                    ? "right"
+                    : props.anchor.toLowerCase().startsWith("t")
+                    ? "top"
+                    : props.anchor.toLowerCase().startsWith("b")
+                    ? "bottom"
+                    : "left"
+                : "left",
+        [props.anchor]
     );
+    const drawerSx = useMemo(() => getDrawerSx(anchor, width, height), [width, height, anchor]);
     const headerSx = useMemo(() => getHeaderSx(anchor), [anchor]);
-
+    const headerIcon = useMemo(() => getHeaderIcon(anchor), [anchor]);
+    const titleSx = useMemo(() => getTitleSx(anchor), [anchor]);
     const handleClose = useCallback(() => {
         if (active) {
             setOpen(false);
@@ -146,9 +183,10 @@ const Pane = (props: PaneProps) => {
         >
             {persistent ? (
                 <>
-                    <Box sx={headerSx}>
+                    <Box sx={headerSx} className={getSuffixedClassNames(className, "-header")}>
+                        {title ? <Box sx={titleSx}>{title}</Box> : null}
                         <IconButton onClick={handleClose} disabled={!active}>
-                            {anchor === "left" ? <ChevronLeftIcon /> : anchor === "right" ? <ChevronRightIcon />: anchor === "top" ? <ExpandLess/>: <ExpandMore/>}
+                            {headerIcon}
                         </IconButton>
                     </Box>
                     <Divider />
@@ -162,9 +200,15 @@ const Pane = (props: PaneProps) => {
             </Tooltip>
         </Drawer>
     ) : showButton ? (
-        <Drawer variant="permanent" sx={buttonDrawerSx} anchor={anchor} open={true} className={getSuffixedClassNames(className, "-button")}>
+        <Drawer
+            variant="permanent"
+            sx={buttonDrawerSx}
+            anchor={anchor}
+            open={true}
+            className={getSuffixedClassNames(className, "-button")}
+        >
             <IconButton onClick={handleOpen} disabled={!active}>
-                {anchor === "left" ? <ChevronRightIcon /> : anchor === "right" ? <ChevronLeftIcon /> : anchor === "top" ? <ExpandMore/> : <ExpandLess/>}
+                {headerIcon}
             </IconButton>
         </Drawer>
     ) : null;

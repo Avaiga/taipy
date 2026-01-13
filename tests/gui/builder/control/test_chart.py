@@ -48,14 +48,14 @@ def test_chart_builder_1(gui: Gui, helpers, csvdata):
         )
     expected_list = [
         "<Chart",
-        "selected0={tpec_TpExPr_selected_indices_TPMDL_0}",
-        "selected1={tpec_TpExPr_selected_indices_TPMDL_0}",
+        'selected0="{!tpec_TpExPr_selected_indices_TPMDL_0',
+        'selected1="{!tpec_TpExPr_selected_indices_TPMDL_0',
         'height="100%"',
         'defaultLayout="{&quot;grid&quot;: &#x7B;&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;&#x7D;}"',  # noqa: E501
         'onRangeChange="range_change"',
         'updateVars="layout=_TpDi_tpec_TpExPr_subplot_layout_TPMDL_0;selected0=tpec_TpExPr_selected_indices_TPMDL_0;selected1=tpec_TpExPr_selected_indices_TPMDL_0"',
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
+        'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
         'width="100%"',
     ]
     gui._set_frame(inspect.currentframe())
@@ -83,14 +83,14 @@ def test_chart_builder_2(gui: Gui, helpers, csvdata):
         )
     expected_list = [
         "<Chart",
-        "selected0={tpec_TpExPr_selected_indices_TPMDL_0}",
-        "selected1={tpec_TpExPr_selected_indices_TPMDL_0}",
+        'selected0="{!tpec_TpExPr_selected_indices_TPMDL_0',
+        'selected1="{!tpec_TpExPr_selected_indices_TPMDL_0',
         'height="100%"',
         'defaultLayout="{&quot;grid&quot;: &#x7B;&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;&#x7D;}"',  # noqa: E501
         'onRangeChange="range_change"',
         'updateVars="selected0=tpec_TpExPr_selected_indices_TPMDL_0;selected1=tpec_TpExPr_selected_indices_TPMDL_0"',
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
+        'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
         'width="100%"',
     ]
     gui._set_frame(inspect.currentframe())
@@ -176,7 +176,7 @@ def test_map_builder(gui: Gui, helpers):
         "<Chart",
         "&quot;Lat&quot;: &#x7B;&quot;",
         "&quot;Lon&quot;: &#x7B;&quot;",
-        "data={_TpD_tpec_TpExPr_mapData_TPMDL_0}",
+        'data="{!_TpD_tpec_TpExPr_mapData_TPMDL_0',
         'defaultLayout="{&quot;dragmode&quot;: &quot;zoom&quot;, &quot;map&quot;: &#x7B;&quot;style&quot;: &quot;open-street-map&quot;, &quot;center&quot;: &#x7B;&quot;lat&quot;: 38, &quot;lon&quot;: -90&#x7D;, &quot;zoom&quot;: 3&#x7D;, &quot;margin&quot;: &#x7B;&quot;r&quot;: 0, &quot;t&quot;: 0, &quot;b&quot;: 0, &quot;l&quot;: 0&#x7D;}"',  # noqa: E501
         'updateVarName="_TpD_tpec_TpExPr_mapData_TPMDL_0"',
     ]
@@ -271,8 +271,8 @@ def test_chart_multi_data(gui: Gui, helpers, csvdata):
         "<Chart",
         'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
         'dataVarNames="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
-        "data1={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
+        'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
+        'data1="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_builder(gui, page, expected_list)
@@ -286,7 +286,7 @@ def test_chart_none_data(gui: Gui, helpers):
         )
     expected_list = [
         "<Chart",
-        "data={_TpD_tpec_TpExPr_data_TPMDL_0}",
+        'data="{!_TpD_tpec_TpExPr_data_TPMDL_0',
         'dataVarNames=""',
         'defaultConfig="{&quot;traces&quot;: []}"',
         'libClassName="taipy-chart"',

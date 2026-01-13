@@ -23,7 +23,7 @@ def test_date_builder_1(gui: Gui, test_client, helpers):
         "<DateSelector",
         'defaultDate="2020-12-',
         'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
-        "date={_TpDt_tpec_TpExPr_date_TPMDL_0}",
+        'date="{!_TpDt_tpec_TpExPr_date_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -36,7 +36,7 @@ def test_date_builder_2(gui: Gui, test_client, helpers):
         "<DateSelector",
         'defaultDate="2020-12-',
         'updateVarName="_TpDt_tpec_TpExPr_date_TPMDL_0"',
-        "date={_TpDt_tpec_TpExPr_date_TPMDL_0}",
-        "withTime={true}",
+        'date="{!_TpDt_tpec_TpExPr_date_TPMDL_0',
+        'withTime="{!true',
     ]
     helpers.test_control_builder(gui, page, expected_list)

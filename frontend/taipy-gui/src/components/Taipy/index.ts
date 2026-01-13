@@ -106,5 +106,5 @@ export const getRegisteredComponents = () => {
             });
         }
     }
-    return registeredComponents  as Record<string, ComponentType<object>>;
+    return registeredComponents  as Record<string, ComponentType<unknown>>;
 };

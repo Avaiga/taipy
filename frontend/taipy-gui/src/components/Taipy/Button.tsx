@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import CardHeader from "@mui/material/CardHeader";
 import MuiButton from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
@@ -29,15 +29,20 @@ interface ButtonProps extends TaipyActiveProps {
     width?: string | number;
     size?: "small" | "medium" | "large";
     variant?: "text" | "outlined" | "contained";
+    autoRepeat?: number;
 }
 
 const cardSx = { p: 0 };
+const initialRepeatDelay = 500; // Initial delay before auto-repeat starts (in ms)
 
 const Button = (props: ButtonProps) => {
+    // TODO: Allow default value for auto_repeat in the builder
     const { id, onAction = "", defaultLabel, size = "medium", variant = "outlined" } = props;
     const [value, setValue] = useState<stringIcon>("");
     const dispatch = useDispatch();
     const module = useModule();
+    const autoRepeatInitialRef = useRef<number | null>(null);
+    const autoRepeatIntervalRef = useRef<number | null>(null);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -47,6 +52,37 @@ const Button = (props: ButtonProps) => {
     const handleClick = useCallback(() => {
         dispatch(createSendActionNameAction(id, module, onAction));
     }, [id, onAction, dispatch, module]);
+
+    // Handle auto-repeat
+    const autoRepeatDelay = useMemo(() => {
+        if (props.autoRepeat && props.autoRepeat > 0) {
+            return props.autoRepeat;
+        }
+        return 0; // No auto-repeat delay by default
+    }, [props.autoRepeat]);
+
+    const startRepeating = useCallback(() => {
+        if (autoRepeatInitialRef.current || autoRepeatIntervalRef.current) {
+            // Prevent simultaneous repeats
+            return;
+        }
+        handleClick(); // Trigger immediately
+        autoRepeatIntervalRef.current = window.setTimeout(() => {
+            autoRepeatIntervalRef.current = window.setInterval(handleClick, autoRepeatDelay);
+            autoRepeatInitialRef.current = null;
+        }, initialRepeatDelay);
+    }, [handleClick, autoRepeatDelay]);
+
+    const stopRepeating = () => {
+        if (autoRepeatInitialRef.current) {
+            window.clearTimeout(autoRepeatInitialRef.current);
+            autoRepeatInitialRef.current = null;
+        }
+        if (autoRepeatIntervalRef.current) {
+            window.clearInterval(autoRepeatIntervalRef.current);
+            autoRepeatIntervalRef.current = null;
+        }
+    };
 
     useEffect(() => {
         setValue((val) => {
@@ -74,6 +110,12 @@ const Button = (props: ButtonProps) => {
                 onClick={handleClick}
                 disabled={!active}
                 sx={buttonSx}
+                onMouseDown={autoRepeatDelay ? startRepeating : undefined}
+                onPointerDown={autoRepeatDelay ? startRepeating : undefined}
+                onMouseUp={autoRepeatDelay ? stopRepeating : undefined}
+                onMouseLeave={autoRepeatDelay ? stopRepeating : undefined}
+                onTouchStart={autoRepeatDelay ? startRepeating : undefined}
+                onTouchEnd={autoRepeatDelay ? stopRepeating : undefined}
             >
                 {typeof value === "string" ? (
                     value

@@ -19,14 +19,14 @@ from taipy.gui import Gui
 def test_expression_text_control_str(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", "Hello World!")
     md_string = "<|{x}|>"
-    expected_list = ["<Field", 'dataType="str"', 'defaultValue="Hello World!"', "value={tpec_TpExPr_x_TPMDL_0}"]
+    expected_list = ["<Field", 'dataType="str"', 'defaultValue="Hello World!"', 'value="{!tpec_TpExPr_x_TPMDL_0']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_expression_text_control_int(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", 10)
     md_string = "<|{x}|>"
-    expected_list = ["<Field", 'dataType="int"', 'defaultValue="10"', "value={tpec_TpExPr_x_TPMDL_0}"]
+    expected_list = ["<Field", 'dataType="int"', 'defaultValue="10"', 'value="{!tpec_TpExPr_x_TPMDL_0']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -39,7 +39,7 @@ def test_expression_text_control_1(gui: Gui, test_client, helpers):
         "<Field",
         'dataType="int"',
         'defaultValue="30"',
-        "value={tp_TpExPr_x_y_TPMDL_0_0}",
+        'value="{!tp_TpExPr_x_y_TPMDL_0_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -53,7 +53,7 @@ def test_expression_text_control_2(gui: Gui, test_client, helpers):
         "<Field",
         'dataType="str"',
         'defaultValue="x + y = 30"',
-        "value={tp_TpExPr_x_y_x_y_TPMDL_0_0}",
+        'value="{!tp_TpExPr_x_y_x_y_TPMDL_0_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -67,7 +67,7 @@ def test_expression_text_control_3(gui: Gui, test_client, helpers):
         "<Field",
         'dataType="str"',
         'defaultValue="Hello Mickey Mouse and Donald Duck"',
-        "value={tp_TpExPr_Hello_x_and_y_TPMDL_0_0}",
+        'value="{!tp_TpExPr_Hello_x_and_y_TPMDL_0_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -80,7 +80,7 @@ def test_expression_text_gt_operator(gui: Gui, test_client, helpers):
         "<Field",
         'dataType="bool"',
         'defaultValue="false"',
-        "value={tp_TpExPr_x_0_TPMDL_0_0}",
+        'value="{!tp_TpExPr_x_0_TPMDL_0_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -88,7 +88,7 @@ def test_expression_text_gt_operator(gui: Gui, test_client, helpers):
 def test_expression_button_control(gui: Gui, test_client, helpers):
     gui._bind_var_val("label", "A button label")
     md_string = "<|button|label={label}|>"
-    expected_list = ["<Button", 'defaultLabel="A button label"', "label={tpec_TpExPr_label_TPMDL_0}"]
+    expected_list = ["<Button", 'defaultLabel="A button label"', 'label="{!tpec_TpExPr_label_TPMDL_0']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -102,7 +102,7 @@ def test_expression_table_control(gui: Gui, test_client, helpers):
         "<Table",
         'defaultColumns="{&quot;Letters&quot;: &#x7B;&quot;type&quot;: &quot;object&quot;, &quot;index&quot;: 0, &quot;dfid&quot;: &quot;Letters&quot;&#x7D;, &quot;Numbers&quot;: &#x7B;&quot;type&quot;: &quot;int&quot;, &quot;index&quot;: 1, &quot;dfid&quot;: &quot;Numbers&quot;&#x7D;}"',  # noqa: E501
         'updateVarName="_TpD_tp_TpExPr_pd_concat_series_1_series_2_axis_1_TPMDL_0_0"',
-        "data={_TpD_tp_TpExPr_pd_concat_series_1_series_2_axis_1_TPMDL_0_0}",
+        'data="{!_TpD_tp_TpExPr_pd_concat_series_1_series_2_axis_1_TPMDL_0_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
     assert isinstance(gui._get_data_scope().tp_TpExPr_pd_concat_series_1_series_2_axis_1_TPMDL_0_0, pd.DataFrame)
@@ -124,8 +124,8 @@ def test_lambda_expression_selector(gui: Gui, test_client, helpers):
         'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',  # noqa: E501
         'defaultValue="[&quot;1&quot;]"',
         'updateVars="lov=_TpL_tp_TpExPr_gui_get_adapted_lov_lov_test_TPMDL_0_0"',
-        "lov={_TpL_tp_TpExPr_gui_get_adapted_lov_lov_test_TPMDL_0_0}",
+        'lov="{!_TpL_tp_TpExPr_gui_get_adapted_lov_lov_test_TPMDL_0_0',
         'updateVarName="_TpLv_tpec_TpExPr_sel_TPMDL_0"',
-        "value={_TpLv_tpec_TpExPr_sel_TPMDL_0}",
+        'value="{!_TpLv_tpec_TpExPr_sel_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)

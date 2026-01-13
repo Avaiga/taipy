@@ -1,3 +1,4 @@
+[![Getting Started book announcement](https://cdn.sanity.io/images/12yo38rb/production/f1ffeaabe94c5605d20321f0f417fef69b8d48f8-1860x600.png)](https://links.taipy.io/bookgithub)
 <div align="center">
   <a href="https://taipy.io?utm_source=github" target="_blank">
   <picture>
@@ -128,7 +129,7 @@ It includes
 [API references](https://docs.taipy.io/en/latest/refmans/), and
 [Galleries](https://docs.taipy.io/en/latest/gallery/).
 
-## ⚒️ Contributing
+## ⚒️ Contributing <a id="-contributing"></a>
 
 Want to help build Taipy? Check out our [**Contributing Guide**](https://github.com/Avaiga/taipy/blob/develop/CONTRIBUTING.md).
 

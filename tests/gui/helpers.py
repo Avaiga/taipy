@@ -95,7 +95,7 @@ class Helpers:
     def _test_control(gui: Gui, expected_values: t.Union[str, t.List]):
         gui.run(run_server=False, single_client=True, stylekit=False)
         client = gui._server.test_client()
-        response = client.get("/taipy-jsx/test")
+        response = client.get(f"/{Gui._JSX_URL}/test")
         assert response.status_code == 200, f"response.status_code {response.status_code} != 200"
         response_data = Helpers.get_response_data(response, gui)
         assert isinstance(response_data, t.Dict), "response_data is not Dict"

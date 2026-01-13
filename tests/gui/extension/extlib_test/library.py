@@ -18,4 +18,21 @@ class Library(ElementLibrary):
         return "test"
 
     def get_elements(self) -> dict:
-        return {"test": Element("test", {"test": ElementProperty(PropertyType.string)})}
+        return {
+            "test": Element(
+                "test",
+                {
+                    "test": ElementProperty(PropertyType.string, default_value="test", doc_string=""),
+                    "dict_test": ElementProperty(
+                        PropertyType.dict,
+                        default_value="{}",
+                    ),
+                },
+                doc_string="""Multi-line test doc.
+                              With some indentation.
+                              """,
+            ),
+        }
+
+    def get_tgb_header(self) -> str:
+        return "# Test Extension Library TGB Header"

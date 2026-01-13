@@ -24,8 +24,8 @@ def test_get_content_url(gui: Gui, helpers):
     server_test_client = gui._server.test_client()
     # WS client and emit
     cid = helpers.create_scope_and_get_sid(gui)
-    server_test_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui._server.test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+    server_test_client.get(f"/{Gui._JSX_URL}/test?client_id={cid}")
+    with gui._server.test_request_context(f"/{Gui._JSX_URL}/test/?client_id={cid}", data={"client_id": cid}):
         gui._server.request.get_request_meta().client_id = cid
         url = get_user_content_url(gui._Gui__state, "path")  # type: ignore[attr-defined]
         assert url == "/taipy-user-content/path?client_id=test"

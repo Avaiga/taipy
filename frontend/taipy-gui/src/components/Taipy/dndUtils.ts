@@ -33,7 +33,7 @@ export const droppableSx = { color: "red" };
 
 const dndDataType = "application/taipy-dnd";
 export const useDrag = (
-    eltRef: RefObject<HTMLElement>,
+    eltRef: RefObject<HTMLElement | null>,
     dragType?: string,
     sourceData?: Record<string, unknown>,
     itemId?: string,
@@ -69,7 +69,7 @@ export const useDrag = (
 };
 
 export const useDrop = (
-    eltRef: RefObject<HTMLElement>,
+    eltRef: RefObject<HTMLElement | null>,
     dropTypes?: string[],
     targetItemId?: string,
     onDrop?: dropHandlerInterface

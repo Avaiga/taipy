@@ -14,10 +14,10 @@ import json
 import typing as t
 from abc import ABC, abstractmethod
 from datetime import datetime
-
-from taipy.common import _module_exists
+from inspect import ismethod
 
 from .._warnings import _warn
+from ..json_properties import JsonProperty
 from . import _date_to_string, _MapDict, _string_to_date, _variable_decode
 
 
@@ -223,18 +223,27 @@ class _TaipyToJson(_TaipyBase):
         val = super().get()
         if not val:
             return None
-        if _module_exists("plotly.graph_objs"):
-            from plotly.graph_objs import Figure as PlotlyFigure  # type: ignore[reportMissingImports]
-
-            if isinstance(val, PlotlyFigure):
+        if isinstance(val, JsonProperty):
+            try:
+                return val.to_json()
+            except Exception as e:
+                _warn("Issue while serializing 'JsonProperty'.", e)
+        elif method := getattr(val, "to_json", None):
+            if ismethod(method):
                 try:
-                    return [json.loads(val.to_json())]
+                    json_val = method()
+                    return json.loads(json_val) if isinstance(json_val, str) else json_val
                 except Exception as e:
-                    _warn("Issue while serializing Plotly Figure", e)
-                    return None
-        _warn("'figure' property value must be a plotly.graph_objects.Figure.")
+                    _warn("Issue while serializing object.", e)
+            else:
+                _warn(f"'{self._get_readable_name()}.to_json' is not a valid method.")
+        else:
+            _warn(f"'{self._get_readable_name()}.to_json()' must be defined.")
         return None
 
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Tj"
+
+
+class _TaipyToDynamicJson(_TaipyToJson): ...

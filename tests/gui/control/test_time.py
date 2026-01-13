@@ -21,7 +21,7 @@ def test_date_md_1(gui: Gui, test_client, helpers):
         "<TimeSelector",
         'defaultTime="2020-12-15T18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
-        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
+        'time="{!_TpTm_tpec_TpExPr_time_TPMDL_0',
     ]
 
     helpers.test_control_md(gui, md_string, expected_list)
@@ -34,7 +34,7 @@ def test_date_md_2(gui: Gui, test_client, helpers):
         "<TimeSelector",
         'defaultTime="2020-12-15T18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
-        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
+        'time="{!_TpTm_tpec_TpExPr_time_TPMDL_0',
         'label="a label"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -48,7 +48,7 @@ def test_date_md_width(gui: Gui, test_client, helpers):
         'defaultTime="2020-12-15T18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
         'width="70%"',
-        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
+        'time="{!_TpTm_tpec_TpExPr_time_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -60,7 +60,7 @@ def test_date_html_1(gui: Gui, test_client, helpers):
         "<TimeSelector",
         'defaultTime="2020-12-15T18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
-        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
+        'time="{!_TpTm_tpec_TpExPr_time_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -72,6 +72,6 @@ def test_date_html_2(gui: Gui, test_client, helpers):
         "<TimeSelector",
         'defaultTime="2020-12-15T18:18:18',
         'updateVarName="_TpTm_tpec_TpExPr_time_TPMDL_0"',
-        "time={_TpTm_tpec_TpExPr_time_TPMDL_0}",
+        'time="{!_TpTm_tpec_TpExPr_time_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)

@@ -22,8 +22,8 @@ def test_slider_builder(gui: Gui, test_client, helpers):
     expected_list = [
         "<Slider",
         'updateVarName="_TpN_tpec_TpExPr_x_TPMDL_0',
-        "defaultValue={10}",
-        "value={_TpN_tpec_TpExPr_x_TPMDL_0}",
+        'defaultValue="{!10',
+        'value="{!_TpN_tpec_TpExPr_x_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -32,7 +32,10 @@ def test_slider_with_min_max_builder(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", 0)
     with tgb.Page(frame=None) as page:
         tgb.slider(value="{x}", min=-10, max=10)  # type: ignore[attr-defined]
-    expected_list = ["<Slider", "min={-10.0}", "max={10.0}", "defaultValue={0}"]
+    expected_list = ["<Slider",
+                     'min="{!-10.0',
+                     'max="{!10.0',
+                     'defaultValue="{!0']
     helpers.test_control_builder(gui, page, expected_list)
 
 
@@ -42,10 +45,10 @@ def test_slider_with_step_builder(gui: Gui, test_client, helpers):
         tgb.slider(value="{x}", min=-10, max=10, step=2)  # type: ignore[attr-defined]
     expected_list = [
         "<Slider",
-        "min={-10.0}",
-        "max={10.0}",
-        "step={2.0}",
-        "defaultValue={0}",
+        'min="{!-10.0',
+        'max="{!10.0',
+        'step="{!2.0',
+        'defaultValue="{!0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -68,7 +71,8 @@ def test_slider_with_boolean_labels_builder(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     with tgb.Page(frame=None) as page:
         tgb.slider(value="{sel}", lov="Item 1;Item 2;Item 3", labels=True)  # type: ignore[attr-defined]
-    expected_list = ["<Slider", "labels={true}"]
+    expected_list = ["<Slider",
+                     'labels="{!true']
     helpers.test_control_builder(gui, page, expected_list)
 
 
@@ -79,7 +83,7 @@ def test_slider_items_builder(gui: Gui, test_client, helpers):
     expected_list = [
         "<Slider",
         'updateVarName="_TpLv_tpec_TpExPr_x_TPMDL_0"',
-        "value={_TpLv_tpec_TpExPr_x_TPMDL_0}",
+        'value="{!_TpLv_tpec_TpExPr_x_TPMDL_0',
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
         'textAnchor="left"',
@@ -94,7 +98,7 @@ def test_slider_text_anchor_builder(gui: Gui, test_client, helpers):
     expected_list = [
         "<Slider",
         'updateVarName="_TpN_tpec_TpExPr_x_TPMDL_0"',
-        "value={_TpN_tpec_TpExPr_x_TPMDL_0}",
+        'value="{!_TpN_tpec_TpExPr_x_TPMDL_0',
         'textAnchor="none"',
     ]
     helpers.test_control_builder(gui, page, expected_list)
@@ -107,7 +111,7 @@ def test_slider_text_anchor_default_builder(gui: Gui, test_client, helpers):
     expected_list = [
         "<Slider",
         'updateVarName="_TpN_tpec_TpExPr_x_TPMDL_0"',
-        "value={_TpN_tpec_TpExPr_x_TPMDL_0}",
+        'value="{!_TpN_tpec_TpExPr_x_TPMDL_0',
         'textAnchor="bottom"',
     ]
     helpers.test_control_builder(gui, page, expected_list)

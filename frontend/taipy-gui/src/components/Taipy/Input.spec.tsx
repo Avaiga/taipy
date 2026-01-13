@@ -28,30 +28,26 @@ describe("Input Component", () => {
     });
     it("displays the right info for string", async () => {
         const { getByDisplayValue } = render(
-            <Input value="toto" type="text" defaultValue="titi" className="taipy-input" />,
+            <Input value="toto" type="text" defaultValue="titi" className="taipy-input" />
         );
         const elt = getByDisplayValue("toto");
         expect(elt.parentElement?.parentElement).toHaveClass("taipy-input");
     });
     it("displays the default value", async () => {
         const { getByDisplayValue } = render(
-            <Input defaultValue="titi" value={undefined as unknown as string} type="text" />,
+            <Input defaultValue="titi" value={undefined as unknown as string} type="text" />
         );
         getByDisplayValue("titi");
     });
     it("displays with width=70%", async () => {
-        const { getByDisplayValue } = render(
-            <Input value="toto" type="text" defaultValue="titi" width="70%"/>
-        );
+        const { getByDisplayValue } = render(<Input value="toto" type="text" defaultValue="titi" width="70%" />);
         const element = getByDisplayValue("toto");
-        expect(element.parentElement?.parentElement).toHaveStyle('max-width: 70%');
+        expect(element.parentElement?.parentElement).toHaveStyle("max-width: 70%");
     });
     it("displays with width=500", async () => {
-        const { getByDisplayValue } = render(
-            <Input value="toto" type="text" defaultValue="titi" width={500}/>
-        );
+        const { getByDisplayValue } = render(<Input value="toto" type="text" defaultValue="titi" width={500} />);
         const element = getByDisplayValue("toto");
-        expect(element.parentElement?.parentElement).toHaveStyle('max-width: 500px');
+        expect(element.parentElement?.parentElement).toHaveStyle("max-width: 500px");
     });
     it("is disabled", async () => {
         const { getByDisplayValue } = render(<Input value="val" type="text" active={false} />);
@@ -68,7 +64,7 @@ describe("Input Component", () => {
         const elt = getByDisplayValue("val");
         expect(elt).not.toBeDisabled();
     });
-    it("applies correct size", async ()=> {
+    it("applies correct size", async () => {
         const { getByRole } = render(<Input value="val" type="text" size="small" />);
         const elt = getByRole("textbox");
         expect(elt).toBeInTheDocument();
@@ -80,7 +76,7 @@ describe("Input Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Input value="Val" type="text" updateVarName="varname" />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");
         await userEvent.clear(elt);
@@ -98,7 +94,7 @@ describe("Input Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Input value="Val" type="text" updateVarName="varname" onAction="on_action" />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");
         await userEvent.click(elt);
@@ -116,7 +112,7 @@ describe("Input Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Input value="Val" type="text" updateVarName="varname" changeDelay={-1} />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");
         await userEvent.click(elt);
@@ -135,7 +131,7 @@ describe("Input Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Input value="Val" type="text" updateVarName="varname" changeDelay={0} />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");
         await userEvent.click(elt);
@@ -154,7 +150,7 @@ describe("Input Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Input value="Val" type="text" updateVarName="varname" onAction="on_action" />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");
         await userEvent.click(elt);
@@ -169,19 +165,19 @@ describe("Input Component", () => {
     });
     it("should display visibility off icon when password is visible", async () => {
         const { getByLabelText } = render(<Input value={"Test Input"} type="password" />);
-        const visibilityButton = getByLabelText("toggle password visibility");
+        const visibilityButton = getByLabelText("Toggle password visibility");
         fireEvent.click(visibilityButton);
         const visibilityIcon = document.querySelector('svg[data-testid="VisibilityOffIcon"]');
         expect(visibilityIcon).toBeInTheDocument();
     });
     it("should display visibility icon when password is hidden", async () => {
         const { getByLabelText } = render(<Input value={"Test Input"} type="password" />);
-        const visibilityButton = getByLabelText("toggle password visibility");
+        const visibilityButton = getByLabelText("Toggle password visibility");
         expect(visibilityButton).toBeInTheDocument();
     });
     it("should prevent default action when mouse down event occurs on password visibility button", async () => {
         const { getByLabelText } = render(<Input value={"Test Input"} type="password" />);
-        const visibilityButton = getByLabelText("toggle password visibility");
+        const visibilityButton = getByLabelText("Toggle password visibility");
         const keyDown = createEvent.mouseDown(visibilityButton);
         fireEvent(visibilityButton, keyDown);
         expect(keyDown.defaultPrevented).toBe(true);
@@ -202,14 +198,14 @@ describe("Number Component", () => {
     });
     it("displays the right info for string", async () => {
         const { getByDisplayValue } = render(
-            <Input value="12" type="number" defaultValue="1" className="taipy-number" />,
+            <Input value="12" type="number" defaultValue="1" className="taipy-number" />
         );
         const elt = getByDisplayValue(12);
         expect(elt.parentElement?.parentElement).toHaveClass("taipy-number");
     });
     it("displays the default value", async () => {
         const { getByDisplayValue } = render(
-            <Input defaultValue="1" value={undefined as unknown as string} type="number" />,
+            <Input defaultValue="1" value={undefined as unknown as string} type="number" />
         );
         getByDisplayValue("1");
     });
@@ -236,7 +232,7 @@ describe("Number Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Input value={"33"} type="number" updateVarName="varname" />
-            </TaipyContext.Provider>,
+            </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("33");
         await userEvent.clear(elt);
@@ -244,7 +240,7 @@ describe("Number Component", () => {
         await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
-            payload: { value: "666" },
+            payload: { value: 666 },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -261,7 +257,7 @@ describe("Number Component", () => {
     });
     it("Validates increment by step value on up click", async () => {
         const { getByDisplayValue, getByLabelText } = render(
-            <Input id={"Test Input"} value={"0"} type="number" step={2} />,
+            <Input id={"Test Input"} value={"0"} type="number" step={2} />
         );
         const upSpinner = getByLabelText("Increment value");
         const elt = getByDisplayValue("0") as HTMLInputElement;
@@ -270,7 +266,7 @@ describe("Number Component", () => {
     });
     it("Validates decrement by step value on down click", async () => {
         const { getByDisplayValue, getByLabelText } = render(
-            <Input id={"Test Input"} value={"0"} type="number" step={2} />,
+            <Input id={"Test Input"} value={"0"} type="number" step={2} />
         );
         const downSpinner = getByLabelText("Decrement value");
         const elt = getByDisplayValue("0") as HTMLInputElement;
@@ -280,7 +276,7 @@ describe("Number Component", () => {
     it("Validates increment when holding shift key and clicking up", async () => {
         const user = userEvent.setup();
         const { getByDisplayValue, getByLabelText } = render(
-            <Input id={"Test Input"} value={"0"} type="number" step={2} />,
+            <Input id={"Test Input"} value={"0"} type="number" step={2} />
         );
         const upSpinner = getByLabelText("Increment value");
         const elt = getByDisplayValue("0") as HTMLInputElement;
@@ -291,7 +287,7 @@ describe("Number Component", () => {
     it("Validates decrement when holding shift key and clicking down", async () => {
         const user = userEvent.setup();
         const { getByDisplayValue, getByLabelText } = render(
-            <Input id={"Test Input"} value={"0"} type="number" step={2} />,
+            <Input id={"Test Input"} value={"0"} type="number" step={2} />
         );
         const downSpinner = getByLabelText("Decrement value");
         const elt = getByDisplayValue("0") as HTMLInputElement;
@@ -339,7 +335,7 @@ describe("Number Component", () => {
     });
     it("should not exceed max value when incrementing", async () => {
         const { getByLabelText } = render(
-            <Input id={"Test Input"} type="number" value="0" max={20} step={2} stepMultiplier={15} />,
+            <Input id={"Test Input"} type="number" value="0" max={20} step={2} stepMultiplier={15} />
         );
         const upSpinner = getByLabelText("Increment value");
         fireEvent.mouseDown(upSpinner, { shiftKey: true });

@@ -25,7 +25,7 @@ def test_input_builder(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="text"',
-        "value={tpec_TpExPr_x_TPMDL_0}",
+        'value="{!tpec_TpExPr_x_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)
 
@@ -40,6 +40,6 @@ def test_password_builder(gui: Gui, helpers):
         'updateVarName="tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="Hello World!"',
         'type="password"',
-        "value={tpec_TpExPr_x_TPMDL_0}",
+        'value="{!tpec_TpExPr_x_TPMDL_0',
     ]
     helpers.test_control_builder(gui, page, expected_list)

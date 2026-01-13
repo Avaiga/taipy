@@ -88,6 +88,7 @@ from .utils import (
     _is_unnamed_function,
     _LocalsContext,
     _MapDict,
+    _patch_value,
     _setscopeattr,
     _setscopeattr_drill,
     _TaipyBase,
@@ -97,6 +98,7 @@ from .utils import (
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
+    _TaipyToJson,
     _to_camel_case,
     _variable_decode,
     is_debugging,
@@ -444,7 +446,10 @@ class Gui:
             ]
         )
 
+        # Init Event Manager
         self.__event_manager = _EventManager()
+
+        self.__front_end_variables: t.Set[str] = set()
 
         # Init Gui Hooks
         _Hooks()._init(self)
@@ -1179,14 +1184,19 @@ class Gui:
                 modified_vars.remove(v.get_name())
             elif isinstance(v, _DoNotUpdate):
                 modified_vars.remove(k)
+        custom_page_filtered_types = _Hooks()._get_resource_handler_data_layer_supported_types()
+        in_custom_page_context = _Hooks()._is_in_custom_page_context()
         for _var in modified_vars:
+            if not self.__is_front_end_variable(_var) and not in_custom_page_context:
+                _TaipyLogger._get_logger().debug(f"Skipping variable '{_var}' not in front-end.")
+                continue
             newvalue = values.get(_var)
-            custom_page_filtered_types = _Hooks()._get_resource_handler_data_layer_supported_types()
             if isinstance(newvalue, (_TaipyData)) or (
                 custom_page_filtered_types and isinstance(newvalue, custom_page_filtered_types)
             ):  # type: ignore
                 newvalue = {"__taipy_refresh": True}
             else:
+                is_json = False
                 if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
                     ret_value = self.__get_content_accessor().get_info(
                         t.cast(str, front_var), newvalue.get(), isinstance(newvalue, _TaipyContentImage)
@@ -1204,14 +1214,15 @@ class Gui:
                         newvalue.get_name(), newvalue.get(), id_only=isinstance(newvalue, _TaipyLovValue)
                     )
                 elif isinstance(newvalue, _TaipyBase):
+                    is_json = isinstance(newvalue, _TaipyToJson)
                     newvalue = newvalue.get()
                 # Skip in taipy-gui, available in custom frontend
-                if isinstance(newvalue, (dict, _MapDict)) and not _Hooks()._is_in_custom_page_context():
+                if isinstance(newvalue, (dict, _MapDict)) and not in_custom_page_context and not is_json:
                     continue
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
-                if newvalue is not None and not isinstance(newvalue, str):
+                if newvalue is not None and not isinstance(newvalue, str) and not is_json:
                     debug_warnings: t.List[warnings.WarningMessage] = []
                     with warnings.catch_warnings(record=True) as warns:
                         warnings.resetwarnings()
@@ -1440,6 +1451,18 @@ class Gui:
             {
                 "type": _WsType.PARTIAL.value,
                 "name": partial,
+            }
+        )
+
+    def __send_ws_patch(
+        self, names: t.List[str], change: t.Optional[dict] = None, remove: t.Optional[dict] = None
+    ) -> None:
+        self.__send_ws(
+            {
+                "type": _WsType.PATCH.value,
+                "names": names,
+                "change": change,
+                "remove": remove,
             }
         )
 
@@ -1807,6 +1830,9 @@ class Gui:
         if self.__evaluator is None:
             return False
         return self.__evaluator._is_expression(expr)
+
+    def _get_variable_dependencies(self, var_name: str) -> t.Set[str]:
+        return self.__evaluator._get_variable_dependencies(var_name)
 
     # make components resettable
     def _set_building(self, building: bool):
@@ -2612,7 +2638,7 @@ class Gui:
         ):
             return _Hooks()._handle_custom_page_render(self, page_name, pr)
         # Handle page rendering
-        context = page.render(self)  # type: ignore[arg-type]
+        context = page.render(self)
         if (
             nav_page == Gui.__root_page_name
             and page._rendered_jsx is not None
@@ -3100,3 +3126,25 @@ class Gui:
         finally:
             if this_sid:
                 get_server_request_accessor(self).set_sid(this_sid)
+
+    def _add_front_end_variable(self, var_name: str):
+        self.__front_end_variables.add(var_name)
+
+    def __is_front_end_variable(self, var_name: str) -> bool:
+        return var_name in self.__front_end_variables
+
+    def _patch_variable(
+        self, var_name: str, change: t.Optional[dict] = None, remove: t.Optional[dict] = None, value: t.Any = None
+    ) -> None:
+        if value and (change or remove):
+            # patch local variable
+            _patch_value(value, change, remove)
+            var_name = self._bind_var(var_name)
+            deps = [dep for dep in self._get_variable_dependencies(var_name) if dep in self.__front_end_variables]
+            if deps:
+                # send patch to client
+                self.__send_ws_patch(
+                    deps,
+                    change,
+                    remove,
+                )

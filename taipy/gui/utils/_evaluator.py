@@ -89,6 +89,19 @@ class _Evaluator:
     def _fetch_expression_list(self, expr: str) -> t.List:
         return [v[0] for v in _Evaluator.__EXPR_RE.findall(expr)]
 
+    def _get_variable_dependencies(self, var_name: str) -> t.Set[str]:
+        var_set: t.Set[str] = set()
+        for expr in self.__var_to_expr_list.get(var_name, []):
+            var_map = self.__expr_to_var_map.get(expr, {})
+            if len(var_map) == 1 and var_name in var_map:
+                hash_name = self.__expr_to_hash.get(expr, None)
+                if hash_name:
+                    var_set.add(hash_name)
+                    for hld in self.__expr_to_holders.get(expr, set()):
+                        hash_val = self.__get_holder_hash(hld, hash_name)
+                        var_set.add(hash_val)
+        return var_set
+
     def _analyze_expression(
         self, gui: Gui, expr: str, lazy_declare: t.Optional[bool] = False
     ) -> t.Tuple[t.Dict[str, t.Any], t.Dict[str, str]]:

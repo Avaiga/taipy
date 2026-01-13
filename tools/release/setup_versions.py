@@ -36,11 +36,8 @@ def __setup_dev_version(
 ) -> None:
     # Find latest dev release for that version
     ext_index = 0
-    latest_version = (
-        max([v for v in released_versions if v.matches(version) and v.validate_extension()])
-        if released_versions
-        else None
-    )
+    matching_versions = [v for v in released_versions if v.matches(version) and v.validate_extension()]
+    latest_version = (max(matching_versions) if matching_versions else None)
     ext, ext_index = ("dev", 0)
     if latest_version:
         ext, ext_index = latest_version.split_ext()

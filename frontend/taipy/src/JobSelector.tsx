@@ -502,7 +502,7 @@ const JobSelector = (props: JobSelectorProps) => {
     const [filters, setFilters] = useState<FilterData[]>();
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [showDetails, setShowDetails] = useState(false);
-    const detailId = useRef<string>();
+    const detailId = useRef<string>(null);
 
     const dispatch = useDispatch();
     const module = useModule();

@@ -25,7 +25,7 @@ def test_multiple_instance(gui_server, helpers):
 
 
 def assert_multiple_instance(gui, client, helpers, expected_value):
-    response = client.get("/taipy-jsx/TaiPy_root_page")
+    response = client.get(f"/{Gui._JSX_URL}/TaiPy_root_page")
     response_data = helpers.get_response_data(response, gui)
     assert response.status_code == 200
     assert isinstance(response_data, dict)

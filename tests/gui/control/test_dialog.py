@@ -24,7 +24,7 @@ def test_dialog_md_1(gui: Gui, helpers):
         'page="page_test"',
         'title="This is a Dialog"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
-        "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -40,7 +40,7 @@ def test_dialog_md_2(gui: Gui, helpers):
         'title="Another Dialog"',
         'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
-        "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -58,7 +58,7 @@ def test_dialog_labels_md(gui: Gui, helpers):
         'labels="[&quot;Cancel&quot;, &quot;Validate&quot;]"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'closeLabel="MYClose"',
-        "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -75,7 +75,7 @@ def test_dialog_html_1(gui: Gui, helpers):
         'title="This is a Dialog"',
         'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
-        "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -93,7 +93,7 @@ def test_dialog_html_2(gui: Gui, helpers):
         'title="Another Dialog"',
         'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
-        "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -110,6 +110,6 @@ def test_dialog_labels_html(gui: Gui, helpers):
         'title="Another Dialog"',
         'labels="[&quot;Cancel&quot;, &quot;Validate&quot;]"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
-        "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
+        'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
     helpers.test_control_html(gui, html_string, expected_list)

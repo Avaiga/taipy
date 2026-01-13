@@ -12,7 +12,7 @@
  */
 
 import React, { useMemo } from "react";
-import { useDynamicJsonProperty } from "taipy-gui";
+import { useDynamicDictProperty } from "taipy-gui";
 
 import Plot from "react-plotly.js";
 import { Data, Layout } from "plotly.js";
@@ -25,8 +25,8 @@ interface DashboardProps {
 }
 
 const Dashboard = (props: DashboardProps) => {
-  const value = useDynamicJsonProperty(props.data, props.defaultData || "", {} as Partial<Data>);
-  const dashboardLayout = useDynamicJsonProperty(props.layout, props.defaultLayout || "", {} as Partial<Layout>);
+  const value = useDynamicDictProperty(props.data, props.defaultData || "", {} as Partial<Data>);
+  const dashboardLayout = useDynamicDictProperty(props.layout, props.defaultLayout || "", {} as Partial<Layout>);
 
   const data = useMemo(() => {
     if (Array.isArray(value)) {

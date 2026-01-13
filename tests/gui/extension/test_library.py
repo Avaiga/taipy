@@ -102,10 +102,10 @@ def test_lib_input_md(gui: Gui, test_client, helpers):
     expected_list = [
         "<TestLib_Input",
         'libClassName="test_lib-testinput"',
-        "multiline={true}",
+        'multiline="{!true',
         'defaultValue=""',
-        "broadcast={_bc_broadcast}",
-        "value={tpec_TpExPr_val_TPMDL_0}",
+        'broadcast="{!_bc_broadcast',
+        'value="{!tpec_TpExPr_val_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -132,10 +132,10 @@ def test_lib_input_html_1(gui: Gui, test_client, helpers):
     html_string = '<test_lib:testinput value="{val}" multiline="true" />'
     expected_list = [
         "<TestLib_Input",
-        "multiline={true}",
+        'multiline="{!true',
         'defaultValue=""',
-        "broadcast={_bc_broadcast}",
-        "value={tpec_TpExPr_val_TPMDL_0}",
+        'broadcast="{!_bc_broadcast',
+        'value="{!tpec_TpExPr_val_TPMDL_0',
         "/>",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -147,10 +147,10 @@ def test_lib_input_html_2(gui: Gui, test_client, helpers):
     html_string = '<test_lib:testinput multiline="true">{val}</test_lib:testinput>'
     expected_list = [
         "<TestLib_Input",
-        "multiline={true}",
+        'multiline="{!true',
         'defaultValue=""',
-        "broadcast={_bc_broadcast}",
-        "value={tpec_TpExPr_val_TPMDL_0}",
+        'broadcast="{!_bc_broadcast',
+        'value="{!tpec_TpExPr_val_TPMDL_0',
         "/>",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -162,8 +162,8 @@ def test_lib_inner_md(gui: Gui, test_client, helpers):
     md_string = "<|{val}|test_lib.inner|>"
     expected = [
         "<TestLib_Inner",
-        "value={tpec_TpExPr_val_TPMDL_0}",
-        "withProperty={tpec_TpExPr_val_TPMDL_0}",
+        'value="{!tpec_TpExPr_val_TPMDL_0',
+        'withProperty="{!tpec_TpExPr_val_TPMDL_0',
     ]
     helpers.test_control_md(gui, md_string, expected)
 
@@ -171,7 +171,7 @@ def test_lib_inner_md(gui: Gui, test_client, helpers):
 def test_lib_inner_no_value_md(gui: Gui, test_client, helpers):
     gui._set_frame(inspect.currentframe())
     md_string = "<|test_lib.inner|>"
-    expected = ["<TestLib_Inner", "withProperty={tpec_TpExPr_None_TPMDL_0}"]
+    expected = ["<TestLib_Inner", 'withProperty="{!tpec_TpExPr_None_TPMDL_0']
     helpers.test_control_md(gui, md_string, expected)
 
 

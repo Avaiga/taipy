@@ -90,7 +90,7 @@ describe("Image Component", () => {
     it("URL replaced when content prop is an empty string", () => {
         const { getByRole } = render(<Image defaultContent="/url/to/default/image.png" content="" />);
         const img = getByRole("img") as HTMLImageElement;
-        expect(img.src).toBe("http://localhost/");
+        expect(img.src).toBe("");
     });
     it("URL replaced when content prop is a string of length less than 4", () => {
         const { getByRole } = render(<Image defaultContent="/url/to/default/image.png" content="abc" />);

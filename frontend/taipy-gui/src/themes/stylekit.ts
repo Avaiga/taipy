@@ -164,6 +164,23 @@ export const stylekitTheme = () => ({
                 },
             },
         },
+
+        MuiTableRow: {
+            styleOverrides: {
+                root: {
+                    "&:hover": {
+                        backgroundColor: "rgba(0, 0, 0, 0.08)",
+                    },
+                    "&.Mui-selected": {
+                        backgroundColor: "rgba(245, 197, 197, 0.86)", // Selected color
+                    },
+                    "&.Mui-selected:hover": {
+                        backgroundColor: "rgba(234, 140, 140, 0.8)", // Selected + hover color
+                    },
+                },
+            },
+        },
+
     },
 });
 

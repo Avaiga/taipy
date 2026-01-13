@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "devDependencies": {
-    "@types/react": "^18.0.15",
+    "@types/react": "^19.2.0",
     "@types/react-plotly.js": "^2.6.3",
     "@typescript-eslint/eslint-plugin": "^5.30.7",
     "@typescript-eslint/parser": "^5.30.7",
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "plotly.js": "^2.35.3",
-    "react": "^18.2.0",
+    "react": "^19.2.0",
     "react-plotly.js": "^2.6.0"
   },
   "scripts": {

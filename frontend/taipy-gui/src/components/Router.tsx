@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -119,8 +119,10 @@ const Router = () => {
         document.body.className = classes.join(" ");
     }, [themeClass]);
 
+    const contextStore = useMemo(() => ({ state, dispatch }), [state, dispatch]);
+
     return (
-        <TaipyContext.Provider value={{ state, dispatch }}>
+        <TaipyContext.Provider value={contextStore}>
             <HelmetProvider>
                 <ThemeProvider theme={state.theme}>
                     <SnackbarProvider maxSnack={5}>

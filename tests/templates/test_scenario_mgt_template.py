@@ -34,9 +34,7 @@ def test_scenario_management_with_toml_config(tmpdir):
         ["requirements.txt", ".taipyignore", "main.py", "algos", "config", "pages"]
     )
 
-    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "config"))) == sorted(
-        ["__init__.py", "config.py", "config.toml"]
-    )
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "config"))) == sorted(["config.py", "config.toml"])
     with open(os.path.join(tmpdir, "foo_app", "config", "config.py")) as config_file:
         assert 'Config.load("config/config.toml")' in config_file.read()
 
@@ -66,7 +64,7 @@ def test_scenario_management_without_toml_config(tmpdir):
         ["requirements.txt", ".taipyignore", "main.py", "algos", "config", "pages"]
     )
 
-    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "config"))) == sorted(["__init__.py", "config.py"])
+    assert sorted(os.listdir(os.path.join(tmpdir, "foo_app", "config"))) == sorted(["config.py"])
     with open(os.path.join(tmpdir, "foo_app", "config", "config.py")) as config_file:
         config_content = config_file.read()
         assert 'Config.load("config/config.toml")' not in config_content

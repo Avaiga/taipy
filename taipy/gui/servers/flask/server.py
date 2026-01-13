@@ -347,7 +347,11 @@ class _FlaskServer(_Server):
         notebook_proxy,
         port_auto_ranges,
     ):
-        host_value = host if host != "0.0.0.0" else "localhost"
+        host_value = host
+        message_details = ""
+        if host == "0.0.0.0":
+            host_value = "localhost"
+            message_details = " (listening on all addresses)"
         self._host = host
         if port == "auto":
             port = self._get_random_port(port_auto_ranges)
@@ -370,10 +374,8 @@ class _FlaskServer(_Server):
         if not server_log:
             log = logging.getLogger("werkzeug")
             log.disabled = True
-            if not self.is_running_from_reloader():
-                _TaipyLogger._get_logger().info(f" * Server starting on {server_url}")
-            else:
-                _TaipyLogger._get_logger().info(f" * Server reloaded on {server_url}")
+            operation = "reloaded" if self.is_running_from_reloader() else "starting"
+            _TaipyLogger._get_logger().info(f" * Server {operation} on {server_url}{message_details}")
             if client_url is not None:
                 client_url = client_url.format(port=port)
                 _TaipyLogger._get_logger().info(f" * Application is accessible at {client_url}")

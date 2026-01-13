@@ -83,7 +83,7 @@ describe("Table Filter Component", () => {
         await userEvent.click(dropdownElts[0].parentElement?.firstElementChild || dropdownElts[0]);
         await findByRole("listbox");
         await userEvent.click(getByText("StringCol"));
-        await findByRole("checkbox");
+        await findByRole("switch");
         const validate = getByTestId("CheckIcon").parentElement;
         expect(validate).not.toBeDisabled();
     });
@@ -99,7 +99,7 @@ describe("Table Filter Component", () => {
         await userEvent.click(dropdownElts[0].parentElement?.firstElementChild || dropdownElts[0]);
         await findByRole("listbox");
         await userEvent.click(getByText("StringCol"));
-        await findByRole("checkbox");
+        await findByRole("switch");
         const validate = getByTestId("CheckIcon");
         expect(validate.parentElement).not.toBeDisabled();
         await userEvent.click(validate);
@@ -120,7 +120,7 @@ describe("Table Filter Component", () => {
         await userEvent.click(dropdownElts[0].parentElement?.firstElementChild || dropdownElts[0]);
         await findByRole("listbox");
         await userEvent.click(getByText("StringCol"));
-        await findByRole("checkbox");
+        await findByRole("switch");
         const validate = getByTestId("CheckIcon");
         expect(validate.parentElement).not.toBeDisabled();
         await userEvent.click(validate);

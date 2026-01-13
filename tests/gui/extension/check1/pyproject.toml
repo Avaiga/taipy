@@ -1,0 +1,6 @@
+[build-system]
+requires = [ "setuptools" ]
+
+[project]
+name = "extlib_checker1"
+version = "1.0.0"
