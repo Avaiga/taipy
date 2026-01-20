@@ -97,7 +97,7 @@ const Input = (props: TaipyInputProps) => {
                       maxWidth: getCssSize(props.width),
                   }
                 : numberSx,
-        [props.width]
+        [props.width],
     );
 
     // 0 if value is not a number, 1 means general number, 2 means integer
@@ -128,7 +128,7 @@ const Input = (props: TaipyInputProps) => {
                 dispatch(createSendUpdateAction(updateVarName, value, module, onChange, propagate));
             }, changeDelay);
         },
-        [changeDelay, numberType, dispatch, updateVarName, module, onChange, propagate]
+        [changeDelay, numberType, dispatch, updateVarName, module, onChange, propagate],
     );
 
     const handleInput = useCallback(
@@ -144,7 +144,13 @@ const Input = (props: TaipyInputProps) => {
             if (changeDelay === 0) {
                 Promise.resolve().then(() => {
                     dispatch(
-                        createSendUpdateAction(updateVarName, valToNumber(val, numberType), module, onChange, propagate)
+                        createSendUpdateAction(
+                            updateVarName,
+                            valToNumber(val, numberType),
+                            module,
+                            onChange,
+                            propagate,
+                        ),
                     );
                 });
             }
@@ -154,11 +160,11 @@ const Input = (props: TaipyInputProps) => {
             delayCall.current = window.setTimeout(() => {
                 delayCall.current = -1;
                 dispatch(
-                    createSendUpdateAction(updateVarName, valToNumber(val, numberType), module, onChange, propagate)
+                    createSendUpdateAction(updateVarName, valToNumber(val, numberType), module, onChange, propagate),
                 );
             }, changeDelay);
         },
-        [changeDelay, numberType, dispatch, updateVarName, module, onChange, propagate]
+        [changeDelay, numberType, dispatch, updateVarName, module, onChange, propagate],
     );
 
     const handleBlur = useCallback(
@@ -189,7 +195,7 @@ const Input = (props: TaipyInputProps) => {
                 });
             evt.preventDefault();
         },
-        [dispatch, numberType, min, max, updateVarName, module, onChange, propagate, changeDelay, id, onAction]
+        [dispatch, numberType, min, max, updateVarName, module, onChange, propagate, changeDelay, id, onAction],
     );
 
     const handleAction = useCallback(
@@ -220,10 +226,10 @@ const Input = (props: TaipyInputProps) => {
                 const val = multiline
                     ? evt.currentTarget.querySelector("textarea")?.value
                     : numberType
-                    ? numberType === IsInteger
-                        ? Math.round(Number(evt.currentTarget.querySelector("input")?.value))
-                        : Number(evt.currentTarget.querySelector("input")?.value)
-                    : evt.currentTarget.querySelector("input")?.value;
+                      ? numberType === IsInteger
+                          ? Math.round(Number(evt.currentTarget.querySelector("input")?.value))
+                          : Number(evt.currentTarget.querySelector("input")?.value)
+                      : evt.currentTarget.querySelector("input")?.value;
 
                 if (changeDelay > 0 && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
@@ -253,7 +259,7 @@ const Input = (props: TaipyInputProps) => {
             changeDelay,
             onChange,
             propagate,
-        ]
+        ],
     );
 
     const roundBasedOnStep = useMemo(() => {
@@ -279,7 +285,7 @@ const Input = (props: TaipyInputProps) => {
                     step || 1,
                     stepMultiplier || 10,
                     event.shiftKey,
-                    increment
+                    increment,
                 );
 
                 if (min !== undefined && Number(newValue) < min) {
@@ -296,21 +302,21 @@ const Input = (props: TaipyInputProps) => {
                 return newValue;
             });
         },
-        [calculateNewValue, step, stepMultiplier, min, max, updateValueWithDelay]
+        [calculateNewValue, step, stepMultiplier, min, max, updateValueWithDelay],
     );
 
     const handleUpStepperMouseDown = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             handleStepperMouseDown(event, true);
         },
-        [handleStepperMouseDown]
+        [handleStepperMouseDown],
     );
 
     const handleDownStepperMouseDown = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             handleStepperMouseDown(event, false);
         },
-        [handleStepperMouseDown]
+        [handleStepperMouseDown],
     );
 
     // password
@@ -318,7 +324,7 @@ const Input = (props: TaipyInputProps) => {
     const handleClickShowPassword = useCallback(() => setShowPassword((show) => !show), []);
     const handleMouseDownPassword = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault(),
-        []
+        [],
     );
     const inputProps = useMemo(
         () =>
@@ -355,22 +361,22 @@ const Input = (props: TaipyInputProps) => {
                       },
                   }
                 : type == "password"
-                ? {
-                      htmlInput: { autoComplete: "current-password" },
-                      input: {
-                          endAdornment: (
-                              <IconButton
-                                  aria-label="Toggle password visibility"
-                                  onClick={handleClickShowPassword}
-                                  onMouseDown={handleMouseDownPassword}
-                                  edge="end"
-                              >
-                                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                          ),
-                      },
-                  }
-                : undefined,
+                  ? {
+                        htmlInput: { autoComplete: "current-password" },
+                        input: {
+                            endAdornment: (
+                                <IconButton
+                                    aria-label="Toggle password visibility"
+                                    onClick={handleClickShowPassword}
+                                    onMouseDown={handleMouseDownPassword}
+                                    edge="end"
+                                >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            ),
+                        },
+                    }
+                  : undefined,
         [
             active,
             type,
@@ -382,7 +388,7 @@ const Input = (props: TaipyInputProps) => {
             handleMouseDownPassword,
             handleUpStepperMouseDown,
             handleDownStepperMouseDown,
-        ]
+        ],
     );
 
     useEffect(() => {
@@ -392,8 +398,8 @@ const Input = (props: TaipyInputProps) => {
     }, [props.value]);
 
     return (
-        <Tooltip title={hover || ""}>
-            <>
+        <>
+            <Tooltip title={hover || ""}>
                 <TextField
                     sx={textSx}
                     margin="dense"
@@ -413,9 +419,9 @@ const Input = (props: TaipyInputProps) => {
                     maxRows={linesShown}
                     size={size}
                 />
-                {props.children}
-            </>
-        </Tooltip>
+            </Tooltip>
+            {props.children}
+        </>
     );
 };
 export default Input;
