@@ -14,16 +14,17 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import { FallbackProps } from "react-error-boundary";
 
 interface ErrorFallBackProps {
     error: Error;
     resetErrorBoundary: () => void;
 }
 
-const ErrorFallback = (props: ErrorFallBackProps) => (
+const ErrorFallback = (props: FallbackProps) => (
     <Box sx={{ backgroundColor: "error.main" }}>
         <Box>Something went wrong ...</Box>
-        <Box>{props.error.message}</Box>
+        <Box>{(props as ErrorFallBackProps).error.message}</Box>
         <Button onClick={props.resetErrorBoundary} color="secondary">
             Try again
         </Button>
