@@ -256,4 +256,79 @@ describe("Pane Component", () => {
         const elt = document.querySelector(".MuiBox-root");
         expect(elt).toHaveTextContent("pane-dynamic-title-test");
     });
+    it("shows correct icon when closed with left anchor", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={false} showButton={true} anchor="left" />
+            </HelmetProvider>
+        );
+        const but = getByRole("button");
+        expect(but).toBeInTheDocument();
+        const svg = but.querySelector("svg");
+        expect(svg).toHaveAttribute("data-testid", "ChevronRightIcon");
+    });
+    it("shows correct icon when closed with right anchor", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={false} showButton={true} anchor="right" />
+            </HelmetProvider>
+        );
+        const but = getByRole("button");
+        const svg = but.querySelector("svg");
+        expect(svg).toHaveAttribute("data-testid", "ChevronLeftIcon");
+    });
+    it("shows correct icon when closed with top anchor", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={false} showButton={true} anchor="top" />
+            </HelmetProvider>
+        );
+        const but = getByRole("button");
+        const svg = but.querySelector("svg");
+        expect(svg).toHaveAttribute("data-testid", "ExpandMoreIcon");
+    });
+    it("shows correct icon when closed with bottom anchor", async () => {
+        const { getByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={false} showButton={true} anchor="bottom" />
+            </HelmetProvider>
+        );
+        const but = getByRole("button");
+        const svg = but.querySelector("svg");
+        expect(svg).toHaveAttribute("data-testid", "ExpandLessIcon");
+    });
+    it("shows hover text when closed", async () => {
+        const { getByRole, findByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={false} showButton={true} defaultHoverText="Test hover text" />
+            </HelmetProvider>
+        );
+        const but = getByRole("button");
+        await userEvent.hover(but);
+        const tooltip = await findByRole("tooltip");
+        expect(tooltip).toHaveTextContent("Test hover text");
+    });
+    it("shows dynamic hover text when closed", async () => {
+        const { getByRole, findByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={false} showButton={true} defaultHoverText="Default hover" hoverText="Dynamic hover" />
+            </HelmetProvider>
+        );
+        const but = getByRole("button");
+        await userEvent.hover(but);
+        const tooltip = await findByRole("tooltip");
+        expect(tooltip).toHaveTextContent("Dynamic hover");
+    });
+    it("shows title and hover text combined when closed", async () => {
+        const { getByRole, findByRole } = render(
+            <HelmetProvider>
+                <Pane page="page" open={false} showButton={true} defaultTitle="Pane Title" defaultHoverText="Hover text" />
+            </HelmetProvider>
+        );
+        const but = getByRole("button");
+        await userEvent.hover(but);
+        const tooltip = await findByRole("tooltip");
+        expect(tooltip).toHaveTextContent("Pane Title");
+        expect(tooltip).toHaveTextContent("Hover text");
+    });
 });
