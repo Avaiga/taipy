@@ -202,7 +202,7 @@ describe("Pane Component", () => {
         expect(elt).toHaveClass("MuiDrawer-root");
         expect(elt).toHaveClass("MuiDrawer-anchorLeft");
     });
-    it("anchors to the left when no anchor 'l' is set", async () => {
+    it("anchors to the left when anchor is set to 'l'", async () => {
         const { getByRole } = render(
             <HelmetProvider>
                 <Pane page="page" open={true} anchor="l" />
@@ -239,12 +239,21 @@ describe("Pane Component", () => {
         expect(elt).toHaveClass("MuiDrawer-anchorBottom");
     });
     it("renders with a title", async () => {
-        const { getByRole } = render(
+        render(
             <HelmetProvider>
-                <Pane page="page" open={true} persistent={true} title="pane-title-test" />
+                <Pane page="page" open={true} persistent={true} defaultTitle="pane-title-test" />
             </HelmetProvider>
         );
         const elt = document.querySelector(".MuiBox-root");
         expect(elt).toHaveTextContent("pane-title-test");
+    });
+    it("renders with a dynamic title", async () => {
+        render(
+            <HelmetProvider>
+                <Pane page="page" open={true} persistent={true} defaultTitle="pane-title-test" title="pane-dynamic-title-test" />
+            </HelmetProvider>
+        );
+        const elt = document.querySelector(".MuiBox-root");
+        expect(elt).toHaveTextContent("pane-dynamic-title-test");
     });
 });
