@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { ComponentProps, CSSProperties, useMemo, MouseEvent, useRef } from "react";
+import React, { ComponentPropsWithoutRef, CSSProperties, useMemo, MouseEvent, useRef } from "react";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -110,7 +110,7 @@ export const LovImage = ({
     item: Icon;
     disableTypo?: boolean;
     height?: string;
-    slotProps?: ComponentProps<typeof CardHeader>["slotProps"];
+    slotProps?: ComponentPropsWithoutRef<typeof CardHeader>["slotProps"];
 }) => {
     const sx = useMemo(
         () => (height ? { height: height, "& .MuiAvatar-img": { objectFit: "contain" } } : undefined) as SxProps,
@@ -143,7 +143,7 @@ export interface ItemProps extends DndInternalProps {
     item: stringIcon;
     disabled: boolean;
     withAvatar?: boolean;
-    slotProps?: ComponentProps<typeof CardHeader>["slotProps"];
+    slotProps?: ComponentPropsWithoutRef<typeof CardHeader>["slotProps"];
 }
 
 export const SingleItem = ({
