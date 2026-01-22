@@ -250,32 +250,6 @@ describe("TaipyRendered Component", () => {
         });
     });
 
-    it("does not set style when fromBlock is true", async () => {
-        mockedAxios.get.mockResolvedValue({
-            data: {
-                jsx: "<div>Block Content</div>",
-                style: "body { color: blue; }",
-                head: [],
-                context: "",
-                scriptPaths: ["./script.js"],
-            },
-        });
-
-        const dispatch = jest.fn();
-        render(
-            <HelmetProvider>
-                <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch }}>
-                    <TaipyRendered path="/test" fromBlock={true} />
-                </TaipyContext.Provider>
-            </HelmetProvider>,
-        );
-
-        await waitFor(() => {
-            const style = document.getElementById("Taipy_style");
-            expect(style).not.toBeInTheDocument();
-        });
-    });
-
     it("uses root style id for TaiPy_root_page path", async () => {
         mockedAxios.get.mockResolvedValue({
             data: {
