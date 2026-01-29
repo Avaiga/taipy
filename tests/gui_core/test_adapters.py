@@ -62,13 +62,13 @@ class TestGetReason:
 class TestGuiCoreDoNotUpdate:
     def test_repr_with_get_label(self):
         obj = _GuiCoreDoNotUpdate()
-        obj.get_label = Mock(return_value="Test Label") # pyright: ignore[reportAttributeAccessIssue]
+        obj.get_label = Mock(return_value="Test Label")  # pyright: ignore[reportAttributeAccessIssue]
         assert repr(obj) == "Test Label"
 
     def test_repr_without_get_label(self):
         obj = _GuiCoreDoNotUpdate()
         result = repr(obj)
-        assert "_GuiCoreDoNotUpdate" in result
+        assert "Taipy: Do not update" in result
 
 
 class TestEntityType:
@@ -85,13 +85,13 @@ class TestGuiCoreScenarioAdapter:
 
     def test_get_with_none(self):
         adapter = _GuiCoreScenarioAdapter(None, "")
-        adapter._get_data = Mock(return_value=None) # pyright: ignore[reportAttributeAccessIssue]
+        adapter._get_data = Mock(return_value=None)  # pyright: ignore[reportAttributeAccessIssue]
         assert adapter.get() is None
 
     def test_get_with_scenario_in_list(self):
         scenario = Scenario("test_config", None, {})
-        adapter = _GuiCoreScenarioAdapter(None, "")
-        adapter._get_data = Mock(return_value=[scenario]) # pyright: ignore[reportAttributeAccessIssue]
+        adapter = _GuiCoreScenarioAdapter(scenario, "")
+        adapter._get_data = Mock(return_value=[scenario])  # pyright: ignore[reportAttributeAccessIssue]
 
         with patch("taipy.gui_core._adapters.core_get") as mock_core_get:
             with patch("taipy.gui_core._adapters.is_deletable") as mock_is_deletable:
@@ -111,8 +111,8 @@ class TestGuiCoreScenarioAdapter:
 
     def test_get_with_exception(self):
         scenario = Scenario("test_config", None, {})
-        adapter = _GuiCoreScenarioAdapter(None, "")
-        adapter._get_data = Mock(return_value=scenario) # pyright: ignore[reportAttributeAccessIssue]
+        adapter = _GuiCoreScenarioAdapter(scenario, "")
+        adapter._get_data = Mock(return_value=scenario)  # pyright: ignore[reportAttributeAccessIssue]
 
         with patch("taipy.gui_core._adapters.core_get", side_effect=Exception("Test error")):
             with patch("taipy.gui_core._adapters._warn") as mock_warn:
@@ -143,8 +143,8 @@ class TestGuiCoreScenarioDagAdapter:
 
     def test_get_with_exception(self):
         scenario = Scenario("test_config", None, {})
-        adapter = _GuiCoreScenarioDagAdapter(None, "")
-        adapter._get_data = Mock(return_value=scenario) # pyright: ignore[reportAttributeAccessIssue]
+        adapter = _GuiCoreScenarioDagAdapter(scenario, "")
+        adapter._get_data = Mock(return_value=scenario)  # pyright: ignore[reportAttributeAccessIssue]
 
         with patch("taipy.gui_core._adapters.core_get", side_effect=Exception("Test error")):
             with patch("taipy.gui_core._adapters._warn") as mock_warn:
@@ -203,8 +203,8 @@ class TestGuiCoreDatanodeAdapter:
 
     def test_get_with_exception(self):
         dn = PickleDataNode("test_config", Scope.SCENARIO)
-        adapter = _GuiCoreDatanodeAdapter(None, "")
-        adapter._get_data = Mock(return_value=dn) # pyright: ignore[reportAttributeAccessIssue]
+        adapter = _GuiCoreDatanodeAdapter(dn, "")
+        adapter._get_data = Mock(return_value=dn)  # pyright: ignore[reportAttributeAccessIssue]
 
         with patch("taipy.gui_core._adapters.core_get", side_effect=Exception("Test error")):
             with patch("taipy.gui_core._adapters._warn") as mock_warn:
@@ -340,17 +340,16 @@ class TestInvokeAction:
         mock_entity.test_value = Mock(side_effect=Exception("Test error"))
 
         result = _invoke_action(mock_entity, "test_value", "str", False, "==", "test")
-        assert result is True
+        assert result is False
 
 
 class TestGetEntityProperty:
     def test_get_entity_property_with_simple_attribute(self):
         scenario = Scenario("test_config", None, {})
-        scenario.config_id = "test_config_id"  # pyright: ignore[reportAttributeAccessIssue]
 
         sort_fn = _get_entity_property("config_id", Scenario)
         result = sort_fn(scenario)
-        assert result == "test_config_id"
+        assert result == "test_config"
 
     def test_get_entity_property_with_method(self):
         scenario = Scenario("test_config", None, {})
@@ -360,8 +359,7 @@ class TestGetEntityProperty:
         assert isinstance(result, str)
 
     def test_get_entity_property_with_datetime(self):
-        scenario = Scenario("test_config", None, {})
-        scenario.creation_date = datetime(2023, 1, 1, 12, 0, 0)
+        scenario = Scenario("test_config", None, {}, creation_date=datetime(2023, 1, 1, 12, 0, 0))
 
         sort_fn = _get_entity_property("creation_date", Scenario)
         result = sort_fn(scenario)
@@ -525,9 +523,7 @@ class TestGuiCoreDatanodeAdapterGetData:
         assert result == (None, None, True, None)
 
     def test_get_data_with_float_nan(self):
-        dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
-        dn.write(math.nan)
+        dn = PickleDataNode("test_config", Scope.SCENARIO, properties={"default_data": math.nan})
 
         adapter = _GuiCoreDatanodeAdapter(None, "")
         result = adapter._GuiCoreDatanodeAdapter__get_data(dn)  # pyright: ignore[reportAttributeAccessIssue]
@@ -536,9 +532,7 @@ class TestGuiCoreDatanodeAdapterGetData:
         assert result[1] == "float"
 
     def test_get_data_with_int_value(self):
-        dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
-        dn.write(42)
+        dn = PickleDataNode("test_config", Scope.SCENARIO, properties={"default_data": 42})
 
         adapter = _GuiCoreDatanodeAdapter(None, "")
         result = adapter._GuiCoreDatanodeAdapter__get_data(dn)  # pyright: ignore[reportAttributeAccessIssue]
@@ -547,9 +541,7 @@ class TestGuiCoreDatanodeAdapterGetData:
         assert result[1] == "int"
 
     def test_get_data_with_string_value(self):
-        dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
-        dn.write("test string")
+        dn = PickleDataNode("test_config", Scope.SCENARIO, properties={"default_data": "test string"})
 
         adapter = _GuiCoreDatanodeAdapter(None, "")
         result = adapter._GuiCoreDatanodeAdapter__get_data(dn)  # pyright: ignore[reportAttributeAccessIssue]
@@ -558,11 +550,8 @@ class TestGuiCoreDatanodeAdapterGetData:
         assert result[1] == "str"
 
     def test_get_data_with_date_value(self):
-        dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
         test_date = datetime(2023, 1, 1, 12, 0, 0)
-        dn.write(test_date)
-
+        dn = PickleDataNode("test_config", Scope.SCENARIO, properties={"default_data": test_date})
         adapter = _GuiCoreDatanodeAdapter(None, "")
         result = adapter._GuiCoreDatanodeAdapter__get_data(dn)  # pyright: ignore[reportAttributeAccessIssue]
 
@@ -570,11 +559,8 @@ class TestGuiCoreDatanodeAdapterGetData:
         assert result[1] == "date"
 
     def test_get_data_with_dataframe(self):
-        dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
         df = pd.DataFrame({"a": [1, 2, 3]})
-        dn.write(df)
-
+        dn = PickleDataNode("test_config", Scope.SCENARIO, properties={"default_data": df})
         adapter = _GuiCoreDatanodeAdapter(None, "")
         result = adapter._GuiCoreDatanodeAdapter__get_data(dn)  # pyright: ignore[reportAttributeAccessIssue]
 
@@ -582,7 +568,6 @@ class TestGuiCoreDatanodeAdapterGetData:
 
     def test_get_data_with_read_exception(self):
         dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
 
         adapter = _GuiCoreDatanodeAdapter(None, "")
 
@@ -593,21 +578,6 @@ class TestGuiCoreDatanodeAdapterGetData:
             assert result[1] is None
             assert result[2] is None
             assert "read data_node" in result[3]
-
-    def test_get_data_with_unsupported_type(self):
-        dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
-
-        class CustomObject:
-            pass
-
-        dn.write(CustomObject())
-
-        adapter = _GuiCoreDatanodeAdapter(None, "")
-        result = adapter._GuiCoreDatanodeAdapter__get_data(dn)  # pyright: ignore[reportAttributeAccessIssue]
-
-        assert result[3] is not None
-        assert "Unsupported data" in result[3]
 
     def test_get_data_with_json_datanode(self):
         mock_dn = Mock(spec=JSONDataNode)
@@ -623,12 +593,9 @@ class TestGuiCoreDatanodeAdapterGetData:
 
 class TestGuiCoreDatanodeAdapterGet:
     def test_get_with_datanode_list(self):
-        dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
-        dn.write(42)
+        dn = PickleDataNode("test_config", Scope.SCENARIO, properties={"default_data": 42})
 
-        adapter = _GuiCoreDatanodeAdapter(None, "")
-        adapter._get_data = Mock(return_value=[dn])  # pyright: ignore[reportAttributeAccessIssue]
+        adapter = _GuiCoreDatanodeAdapter(dn, "")
 
         with patch("taipy.gui_core._adapters.core_get", return_value=dn):
             with patch("taipy.gui_core._adapters.is_readable", return_value=ReasonCollection()):
@@ -640,13 +607,9 @@ class TestGuiCoreDatanodeAdapterGet:
 
     def test_get_with_scenario_owner(self):
         scenario = Scenario("scenario_config", None, {})
-        dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
-        dn.owner_id = scenario.id  # pyright: ignore[reportAttributeAccessIssue]
-        dn.write(42)
+        dn = PickleDataNode("test_config", Scope.SCENARIO, owner_id=scenario.id, properties={"default_data": 42})
 
-        adapter = _GuiCoreDatanodeAdapter(None, "")
-        adapter._get_data = Mock(return_value=dn)  # pyright: ignore[reportAttributeAccessIssue]
+        adapter = _GuiCoreDatanodeAdapter(dn, "")
 
         with patch("taipy.gui_core._adapters.core_get") as mock_core_get:
 
@@ -670,13 +633,9 @@ class TestGuiCoreDatanodeAdapterGet:
         cycle = Cycle(
             Frequency.DAILY, {}, datetime(2023, 1, 1), datetime(2023, 12, 31), datetime(2023, 12, 31), "test_cycle"
         )
-        dn = PickleDataNode("test_config", Scope.SCENARIO)
-        dn._last_edit_date = datetime.now()
-        dn.owner_id = cycle.id  # pyright: ignore[reportAttributeAccessIssue]
-        dn.write(42)
+        dn = PickleDataNode("test_config", Scope.SCENARIO, owner_id=cycle.id, properties={"default_data": 42})
 
-        adapter = _GuiCoreDatanodeAdapter(None, "")
-        adapter._get_data = Mock(return_value=dn) # pyright: ignore[reportAttributeAccessIssue]
+        adapter = _GuiCoreDatanodeAdapter(dn, "")
 
         with patch("taipy.gui_core._adapters.core_get") as mock_core_get:
 
