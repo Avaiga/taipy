@@ -15,7 +15,6 @@ from datetime import date, datetime
 from unittest.mock import Mock, patch
 
 import pandas as pd
-import pytest
 
 from taipy import Scope
 from taipy.core import Cycle, DataNode, Scenario
