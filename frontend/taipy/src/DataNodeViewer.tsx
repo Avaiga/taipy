@@ -50,7 +50,7 @@ import CheckCircle from "@mui/icons-material/CheckCircle";
 import Download from "@mui/icons-material/Download";
 import Launch from "@mui/icons-material/Launch";
 import LockOutlined from "@mui/icons-material/LockOutlined";
-import {Upload} from "@mui/icons-material"; // issue with Mui not exporting Upload icon in the latest version
+import Upload from "@mui/icons-material/Upload";
 
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
@@ -131,7 +131,7 @@ type DataNodeFull = [
     string, // notEditableReason
     boolean, // is file based
     string, // notDownloadableReason
-    string // notUploadableReason
+    string, // notUploadableReason
 ];
 
 enum DataNodeFullProps {
@@ -155,12 +155,13 @@ enum DataNodeFullProps {
 }
 const DataNodeFullLength = Object.keys(DataNodeFullProps).length / 2;
 
-type DatanodeData = [RowValue, string | null, boolean | null, string | null];
+type DatanodeData = [RowValue, string | null, boolean | null, string | null, boolean | undefined];
 enum DatanodeDataProps {
     value,
     type,
     tabular,
     error,
+    isJson,
 }
 
 interface DataNodeViewerProps extends CoreProps {
@@ -205,8 +206,8 @@ const getValidDataNode = (datanode: DataNodeFull | DataNodeFull[]) =>
     datanode.length == DataNodeFullLength && typeof datanode[DataNodeFullProps.id] === "string"
         ? (datanode as DataNodeFull)
         : datanode.length == 1
-        ? (datanode[0] as DataNodeFull)
-        : undefined;
+          ? (datanode[0] as DataNodeFull)
+          : undefined;
 
 const invalidDatanode: DataNodeFull = [
     "",
@@ -218,7 +219,7 @@ const invalidDatanode: DataNodeFull = [
     "",
     "",
     -1,
-    [null, null, null, null],
+    [null, null, null, null, undefined],
     false,
     "",
     "invalid",
@@ -283,15 +284,17 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         dnNotUploadableReason,
     ] = datanode;
     const dtType = dnData[DatanodeDataProps.type];
-    const dtValue = dnData[DatanodeDataProps.value] ?? (dtType == "float" ? null : undefined);
+    const dtTypeIsNull = dtType === "NoneType";
+    const dtValue = dnData[DatanodeDataProps.value] ?? (dtType == "float" || dtTypeIsNull ? null : undefined);
     const dtTabular = dnData[DatanodeDataProps.tabular] ?? false;
     const dtError = dnData[DatanodeDataProps.error];
+    const dtIsJson = dnData[DatanodeDataProps.isJson] && (dtTypeIsNull ||dtType === "dict" || dtType === "list") ? true : false;
 
     const theme = useTheme();
 
     // Tabs
     const [tabValue, setTabValue] = useState<TabValues | undefined>(
-        showData ? TabValues.Data : showProperties ? TabValues.Properties : showHistory ? TabValues.History : undefined
+        showData ? TabValues.Data : showProperties ? TabValues.Properties : showHistory ? TabValues.History : undefined,
     );
     const handleTabChange = useCallback(
         (_: SyntheticEvent, newValue: number) => {
@@ -306,8 +309,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     module,
                                     getUpdateVarNames(updateVars, "history"),
                                     true,
-                                    idVar ? { [idVar]: dnId } : undefined
-                                )
+                                    idVar ? { [idVar]: dnId } : undefined,
+                                ),
                             );
                         }
                         return true;
@@ -324,8 +327,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     module,
                                     getUpdateVarNames(updateVars, "tabularData", "tabularColumns"),
                                     true,
-                                    idVar ? { [idVar]: dnId } : undefined
-                                )
+                                    idVar ? { [idVar]: dnId } : undefined,
+                                ),
                             );
                         }
                         return true;
@@ -342,8 +345,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     module,
                                     getUpdateVarNames(updateVars, "dnProperties"),
                                     true,
-                                    idVar ? { [idVar]: dnId } : undefined
-                                )
+                                    idVar ? { [idVar]: dnId } : undefined,
+                                ),
                             );
                         }
                         return true;
@@ -354,7 +357,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                 setTabValue(newValue);
             }
         },
-        [dnId, dispatch, id, valid, module, updateVars, updateDnVars, dtTabular]
+        [dnId, dispatch, id, valid, module, updateVars, updateDnVars, dtTabular],
     );
 
     useEffect(() => {
@@ -384,8 +387,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             id: oldId,
                             lock: false,
                             error_id: getUpdateVar(updateDnVars, "error_id"),
-                        })
-                    )
+                        }),
+                    ),
                 );
             }
             if (!dn || isNewDn) {
@@ -394,10 +397,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         showData
                             ? TabValues.Data
                             : showProperties
-                            ? TabValues.Properties
-                            : showHistory
-                            ? TabValues.History
-                            : undefined
+                              ? TabValues.Properties
+                              : showHistory
+                                ? TabValues.History
+                                : undefined,
                     );
             }
             if (!dn) {
@@ -410,8 +413,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                     const vars = getUpdateVarNames(updateVars, "history");
                     Promise.resolve().then(() =>
                         dispatch(
-                            createRequestUpdateAction(id, module, vars, true, idVar ? { [idVar]: newDnId } : undefined)
-                        )
+                            createRequestUpdateAction(id, module, vars, true, idVar ? { [idVar]: newDnId } : undefined),
+                        ),
                     );
                     return true;
                 }
@@ -423,8 +426,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                     const vars = getUpdateVarNames(updateVars, "tabularData", "tabularColumns");
                     Promise.resolve().then(() =>
                         dispatch(
-                            createRequestUpdateAction(id, module, vars, true, idVar ? { [idVar]: newDnId } : undefined)
-                        )
+                            createRequestUpdateAction(id, module, vars, true, idVar ? { [idVar]: newDnId } : undefined),
+                        ),
                     );
                     return true;
                 }
@@ -436,8 +439,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                     const vars = getUpdateVarNames(updateVars, "dnProperties");
                     Promise.resolve().then(() =>
                         dispatch(
-                            createRequestUpdateAction(id, module, vars, true, idVar ? { [idVar]: newDnId } : undefined)
-                        )
+                            createRequestUpdateAction(id, module, vars, true, idVar ? { [idVar]: newDnId } : undefined),
+                        ),
                     );
                     return true;
                 }
@@ -471,10 +474,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         id: dnId,
                         lock: false,
                         error_id: getUpdateVar(updateDnVars, "error_id"),
-                    })
+                    }),
                 );
         },
-        [dnId, id, dispatch, module, props.onLock, updateDnVars]
+        [dnId, id, dispatch, module, props.onLock, updateDnVars],
     );
 
     const active = useDynamicProperty(props.active, props.defaultActive, true) && !dnNotReadableReason;
@@ -489,7 +492,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const [userExpanded, setUserExpanded] = useState(valid && expanded);
     const onExpand = useCallback(
         (e: SyntheticEvent, expand: boolean) => expandable && setUserExpanded(expand),
-        [expandable]
+        [expandable],
     );
 
     // focus
@@ -504,12 +507,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         id: dnId,
                         lock: true,
                         error_id: getUpdateVar(updateDnVars, "error_id"),
-                    })
+                    }),
                 );
                 editLock.current = true;
             }
         },
-        [dnId, props.onLock, id, dispatch, module, updateDnVars]
+        [dnId, props.onLock, id, dispatch, module, updateDnVars],
     );
 
     // Label
@@ -523,12 +526,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         id: dnId,
                         name: label,
                         error_id: getUpdateVar(updateDnVars, "error_id"),
-                    })
+                    }),
                 );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, dnId, label, id, dispatch, module, updateDnVars]
+        [valid, props.onEdit, dnId, label, id, dispatch, module, updateDnVars],
     );
     const cancelLabel = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -536,7 +539,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             setLabel(dnLabel);
             setFocusName("");
         },
-        [dnLabel]
+        [dnLabel],
     );
     const onLabelChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setLabel(e.target.value), []);
 
@@ -544,7 +547,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
     const scenarioUpdateVars = useMemo(
         () => ["scenario", "scenarios"].map((vn) => getUpdateVar(updateVars, vn)),
-        [updateVars]
+        [updateVars],
     );
     const showScenarios = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -557,13 +560,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         module,
                         scenarioUpdateVars.filter((v) => v) as string[],
                         true,
-                        ownerIdVar ? { [ownerIdVar]: dnOwnerId } : undefined
-                    )
+                        ownerIdVar ? { [ownerIdVar]: dnOwnerId } : undefined,
+                    ),
                 );
                 setAnchorEl(e.currentTarget);
             }
         },
-        [dnOwnerId, valid, updateDnVars, scenarioUpdateVars, dispatch, id, module]
+        [dnOwnerId, valid, updateDnVars, scenarioUpdateVars, dispatch, id, module],
     );
     const handleClose = useCallback(() => setAnchorEl(null), []);
 
@@ -595,12 +598,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         comment: comment,
                         error_id: getUpdateVar(updateDnVars, "error_id"),
                         data_id: getUpdateVar(updateDnVars, "data_id"),
-                    })
+                    }),
                 );
                 setFocusName("");
             }
         },
-        [valid, props.onDataValue, dnId, dataValue, dtType, id, dispatch, module, comment, updateDnVars]
+        [valid, props.onDataValue, dnId, dataValue, dtType, id, dispatch, module, comment, updateDnVars],
     );
     const cancelDataValue = useCallback(
         (e: MouseEvent<HTMLElement>) => {
@@ -612,12 +615,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                     id: dnId,
                     lock: false,
                     error_id: getUpdateVar(updateDnVars, "error_id"),
-                })
+                }),
             );
         },
-        [dtValue, dtType, dnId, id, dispatch, module, props.onLock, updateDnVars]
+        [dtValue, dtType, dnId, id, dispatch, module, props.onLock, updateDnVars],
     );
     const onDataValueChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setDataValue(e.target.value), []);
+    const onDataValueSwitchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setDataValue(e.target.checked), []);
     const onDataValueDateChange = useCallback((d: Date | null) => d && setDataValue(d), []);
     useEffect(() => {
         if (dtValue !== undefined) {
@@ -637,13 +641,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         module,
                         getUpdateVarNames(updateVars, "chartConfig"),
                         true,
-                        idVar ? { [idVar]: dnId } : undefined
-                    )
+                        idVar ? { [idVar]: dnId } : undefined,
+                    ),
                 );
                 setViewType(value);
             }
         },
-        [dnId, updateVars, updateDnVars, dispatch, id, module]
+        [dnId, updateVars, updateDnVars, dispatch, id, module],
     );
 
     // base tabular columns
@@ -660,7 +664,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
 
     const dnMainBoxSx = useMemo(
         () => (props.width ? { ...MainBoxSx, maxWidth: props.width } : MainBoxSx),
-        [props.width]
+        [props.width],
     );
 
     // file action
@@ -675,11 +679,11 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         action: action,
                         type: "raw",
                         error_id: getUpdateVar(updateDnVars, "error_id"),
-                    })
+                    }),
                 );
             }
         },
-        [props.onFileAction, dispatch, dnId, id, module, updateDnVars]
+        [props.onFileAction, dispatch, dnId, id, module, updateDnVars],
     );
 
     const uploadData = useMemo(
@@ -691,7 +695,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                       upload_check: props.uploadCheck,
                   })
                 : undefined,
-        [dnId, valid, isFileBased, fileUpload, props.uploadCheck, updateDnVars]
+        [dnId, valid, isFileBased, fileUpload, props.uploadCheck, updateDnVars],
     );
 
     // Refresh on broadcast
@@ -1017,7 +1021,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                         size={12}
                                         justifyContent="space-between"
                                         data-focus={dataValueFocus}
-                                        onClick={dtType === "dict" ? undefined : onFocus}
+                                        onClick={dtIsJson || dtTypeIsNull ? undefined : onFocus}
                                         sx={hoverSx}
                                     >
                                         {active &&
@@ -1030,8 +1034,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                     <>
                                                         <Grid size={10}>
                                                             <Switch
-                                                                value={dataValue as boolean}
-                                                                onChange={onDataValueChange}
+                                                                checked={dataValue as boolean}
+                                                                onChange={onDataValueSwitchChange}
                                                             />
                                                         </Grid>
                                                         <Grid size={2}>
@@ -1098,8 +1102,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                             typeof dtValue == "number"
                                                                 ? "number"
                                                                 : dtType == "float" && dtValue === null
-                                                                ? "number"
-                                                                : undefined
+                                                                  ? "number"
+                                                                  : undefined
                                                         }
                                                         slotProps={{
                                                             input: {
@@ -1144,11 +1148,11 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                 <Grid size={8}>
                                                     {typeof dtValue == "boolean" ? (
                                                         <Switch
-                                                            defaultChecked={dtValue}
+                                                            checked={dtValue}
                                                             disabled={true}
                                                             title={`${dtValue}`}
                                                         />
-                                                    ) : dtType === "dict" ? (
+                                                    ) : dtIsJson ? (
                                                         <Suspense fallback={<div>Loading JSON Viewer...</div>}>
                                                             <JsonViewer value={dtValue} theme={theme.palette.mode} />
                                                         </Suspense>
@@ -1158,8 +1162,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                                 ? (dataValue === null || dataValue instanceof Date) &&
                                                                   format(dataValue as Date, "yyyy/MM/dd HH:mm:ss")
                                                                 : dtType == "float" && dtValue === null
-                                                                ? "NaN"
-                                                                : `${dtValue}`}
+                                                                  ? "NaN"
+                                                                  : dtTypeIsNull
+                                                                    ? "None"
+                                                                    : `${dtValue}`}
                                                         </Typography>
                                                     )}
                                                 </Grid>
