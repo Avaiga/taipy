@@ -577,7 +577,7 @@ class TestGuiCoreDatanodeAdapterGetData:
             assert result[0] is None
             assert result[1] is None
             assert result[2] is None
-            assert "read data_node" in result[3]
+            assert "Data unavailable for test_config" in result[3]
 
     def test_get_data_with_json_datanode(self):
         mock_dn = Mock(spec=JSONDataNode)
