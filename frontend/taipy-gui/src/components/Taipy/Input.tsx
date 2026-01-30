@@ -144,9 +144,7 @@ const Input = (props: TaipyInputProps) => {
             const val =
                 type === "number"
                     ? Number(evt.currentTarget.value)
-                    : multiline
-                      ? evt.currentTarget.value
-                      : evt.currentTarget.value;
+                    : evt.currentTarget.value;
             if (delayCall.current > 0 || changeDelay === -1) {
                 if (changeDelay > 0) {
                     clearTimeout(delayCall.current);
@@ -160,7 +158,7 @@ const Input = (props: TaipyInputProps) => {
                 });
             evt.preventDefault();
         },
-        [dispatch, min, max, updateVarName, module, onChange, propagate, changeDelay, id, onAction],
+        [dispatch, type, min, max, updateVarName, module, onChange, propagate, changeDelay, id, onAction],
     );
 
     const handleAction = useCallback(
