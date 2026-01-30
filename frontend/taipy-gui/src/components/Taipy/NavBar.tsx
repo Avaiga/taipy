@@ -49,7 +49,7 @@ const NavBar = (props: LovProps) => {
         if (!lovList.length) {
             return Object.keys(state.locations || {})
                 .filter((key) => key !== "/")
-                .map((key) => ({ id: key, item: state.locations[key].substring(1) } as LovItem));
+                .map((key) => ({ id: key, item: state.locations[key].substring(1) }) as LovItem);
         }
         return lovList;
     }, [lovList, state.locations]);
@@ -62,18 +62,25 @@ const NavBar = (props: LovProps) => {
                 window.open(val, "_blank")?.focus();
             }
         },
-        [state.locations, navigate]
+        [state.locations, navigate],
     );
 
-    const selectedVal = lov.find((it) => (getBaseURL() + it.id.substring(1)) === location.pathname)?.id || (lov.length ? lov[0].id : false);
+    const selectedVal =
+        lov.find((it) => getBaseURL() + it.id.substring(1) === location.pathname)?.id ||
+        (lov.length ? lov[0].id : false);
 
     return isMobile ? (
-        <Tooltip title={hover || ""}>
-            <>
-                <Drawer open={opened} onClose={() => setOpened(false)} className={className}>
+        <>
+            <Drawer open={opened} onClose={() => setOpened(false)} className={className}>
+                <Tooltip title={hover || ""}>
                     <List>
                         {lov.map((val) => (
-                            <ListItemButton key={val.id} onClick={() => setOpened(false)} disabled={!active} selected={selectedVal === val.id}>
+                            <ListItemButton
+                                key={val.id}
+                                onClick={() => setOpened(false)}
+                                disabled={!active}
+                                selected={selectedVal === val.id}
+                            >
                                 <ListItemText>
                                     <Link href={val.id}>
                                         {typeof val.item === "string" ? val.item : <LovImage item={val.item} />}
@@ -82,12 +89,14 @@ const NavBar = (props: LovProps) => {
                             </ListItemButton>
                         ))}
                     </List>
-                </Drawer>
+                </Tooltip>
+            </Drawer>
+            <Tooltip title={hover || ""}>
                 <IconButton onClick={() => setOpened((o) => !o)}>
                     <Menu />
                 </IconButton>
-            </>
-        </Tooltip>
+            </Tooltip>
+        </>
     ) : (
         <Box sx={boxSx} className={className}>
             <Tooltip title={hover || ""}>

@@ -109,7 +109,7 @@ const Pane = (props: PaneProps) => {
                 Promise.resolve().then(() => dispatch(createSendActionNameAction(id, module, onClose, false)));
             } else if (updateVarName) {
                 Promise.resolve().then(() =>
-                    dispatch(createSendUpdateAction(updateVarName, false, module, props.onChange, propagate))
+                    dispatch(createSendUpdateAction(updateVarName, false, module, props.onChange, propagate)),
                 );
             }
         }
@@ -122,7 +122,7 @@ const Pane = (props: PaneProps) => {
                 Promise.resolve().then(() => dispatch(createSendActionNameAction(id, module, onClose, true)));
             } else if (updateVarName) {
                 Promise.resolve().then(() =>
-                    dispatch(createSendUpdateAction(updateVarName, true, module, props.onChange, propagate))
+                    dispatch(createSendUpdateAction(updateVarName, true, module, props.onChange, propagate)),
                 );
             }
         }
@@ -145,26 +145,56 @@ const Pane = (props: PaneProps) => {
         >
             {persistent ? (
                 <>
-                    <Box sx={headerSx}>
-                        <IconButton onClick={handleClose} disabled={!active}>
-                            {anchor === "left" ? <ChevronLeftIcon /> : anchor === "right" ? <ChevronRightIcon />: anchor === "top" ? <ExpandLess/>: <ExpandMore/>}
-                        </IconButton>
-                    </Box>
+                    <Tooltip title={hover || ""}>
+                        <Box sx={headerSx} className={getSuffixedClassNames(className, "-header")}>
+                            <IconButton onClick={handleClose} disabled={!active}>
+                                {anchor === "left" ? (
+                                    <ChevronLeftIcon />
+                                ) : anchor === "right" ? (
+                                    <ChevronRightIcon />
+                                ) : anchor === "top" ? (
+                                    <ExpandLess />
+                                ) : (
+                                    <ExpandMore />
+                                )}
+                            </IconButton>
+                        </Box>
+                    </Tooltip>
                     <Divider />
                 </>
             ) : null}
-            <Tooltip title={hover || ""}>
-                <>
-                    {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
-                    {props.children}
-                </>
-            </Tooltip>
+            <>
+                {page ? (
+                    <Tooltip title={hover || ""}>
+                        <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} />
+                    </Tooltip>
+                ) : null}
+                {props.children}
+            </>
         </Drawer>
     ) : showButton ? (
-        <Drawer variant="permanent" sx={buttonDrawerSx} anchor={anchor} open={true} className={getSuffixedClassNames(className, "-button")}>
-            <IconButton onClick={handleOpen} disabled={!active}>
-                {anchor === "left" ? <ChevronRightIcon /> : anchor === "right" ? <ChevronLeftIcon /> : anchor === "top" ? <ExpandMore/> : <ExpandLess/>}
-            </IconButton>
+        <Drawer
+            variant="permanent"
+            sx={buttonDrawerSx}
+            anchor={anchor}
+            open={true}
+            className={getSuffixedClassNames(className, "-button")}
+        >
+            <Tooltip title={hover || ""}>
+                <span>
+                    <IconButton onClick={handleOpen} disabled={!active}>
+                        {anchor === "left" ? (
+                            <ChevronRightIcon />
+                        ) : anchor === "right" ? (
+                            <ChevronLeftIcon />
+                        ) : anchor === "top" ? (
+                            <ExpandMore />
+                        ) : (
+                            <ExpandLess />
+                        )}
+                    </IconButton>
+                </span>
+            </Tooltip>
         </Drawer>
     ) : null;
 };
