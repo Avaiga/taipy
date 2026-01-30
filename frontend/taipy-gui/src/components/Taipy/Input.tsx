@@ -90,7 +90,7 @@ const Input = (props: TaipyInputProps) => {
                       maxWidth: getCssSize(props.width),
                   }
                 : numberSx,
-        [props.width]
+        [props.width],
     );
 
     const updateValueWithDelay = useCallback(
@@ -113,7 +113,7 @@ const Input = (props: TaipyInputProps) => {
                 dispatch(createSendUpdateAction(updateVarName, value, module, onChange, propagate));
             }, changeDelay);
         },
-        [changeDelay, dispatch, updateVarName, module, onChange, propagate]
+        [changeDelay, dispatch, updateVarName, module, onChange, propagate],
     );
 
     const handleInput = useCallback(
@@ -136,7 +136,7 @@ const Input = (props: TaipyInputProps) => {
                 dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
             }, changeDelay);
         },
-        [changeDelay, dispatch, updateVarName, module, onChange, propagate]
+        [changeDelay, dispatch, updateVarName, module, onChange, propagate],
     );
 
     const handleBlur = useCallback(
@@ -144,8 +144,6 @@ const Input = (props: TaipyInputProps) => {
             const val =
                 type === "number"
                     ? Number(evt.currentTarget.value)
-                    : multiline
-                    ? evt.currentTarget.value
                     : evt.currentTarget.value;
             if (delayCall.current > 0 || changeDelay === -1) {
                 if (changeDelay > 0) {
@@ -160,7 +158,7 @@ const Input = (props: TaipyInputProps) => {
                 });
             evt.preventDefault();
         },
-        [dispatch, type, updateVarName, module, onChange, propagate, changeDelay, id, multiline, onAction]
+        [dispatch, type, updateVarName, module, onChange, propagate, changeDelay, id, onAction],
     );
 
     const handleAction = useCallback(
@@ -191,6 +189,7 @@ const Input = (props: TaipyInputProps) => {
                 const val = multiline
                     ? evt.currentTarget.querySelector("textarea")?.value
                     : evt.currentTarget.querySelector("input")?.value;
+
                 if (changeDelay > 0 && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
@@ -219,7 +218,7 @@ const Input = (props: TaipyInputProps) => {
             changeDelay,
             onChange,
             propagate,
-        ]
+        ],
     );
 
     const roundBasedOnStep = useMemo(() => {
@@ -245,7 +244,7 @@ const Input = (props: TaipyInputProps) => {
                     step || 1,
                     stepMultiplier || 10,
                     event.shiftKey,
-                    increment
+                    increment,
                 );
 
                 if (min !== undefined && Number(newValue) < min) {
@@ -262,21 +261,21 @@ const Input = (props: TaipyInputProps) => {
                 return newValue;
             });
         },
-        [calculateNewValue, step, stepMultiplier, min, max, updateValueWithDelay]
+        [calculateNewValue, step, stepMultiplier, min, max, updateValueWithDelay],
     );
 
     const handleUpStepperMouseDown = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             handleStepperMouseDown(event, true);
         },
-        [handleStepperMouseDown]
+        [handleStepperMouseDown],
     );
 
     const handleDownStepperMouseDown = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => {
             handleStepperMouseDown(event, false);
         },
-        [handleStepperMouseDown]
+        [handleStepperMouseDown],
     );
 
     // password
@@ -284,7 +283,7 @@ const Input = (props: TaipyInputProps) => {
     const handleClickShowPassword = useCallback(() => setShowPassword((show) => !show), []);
     const handleMouseDownPassword = useCallback(
         (event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault(),
-        []
+        [],
     );
     const inputProps = useMemo(
         () =>
@@ -321,22 +320,22 @@ const Input = (props: TaipyInputProps) => {
                       },
                   }
                 : type == "password"
-                ? {
-                      htmlInput: { autoComplete: "current-password" },
-                      input: {
-                          endAdornment: (
-                              <IconButton
-                                  aria-label="toggle password visibility"
-                                  onClick={handleClickShowPassword}
-                                  onMouseDown={handleMouseDownPassword}
-                                  edge="end"
-                              >
-                                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                          ),
-                      },
-                  }
-                : undefined,
+                  ? {
+                        htmlInput: { autoComplete: "current-password" },
+                        input: {
+                            endAdornment: (
+                                <IconButton
+                                    aria-label="Toggle password visibility"
+                                    onClick={handleClickShowPassword}
+                                    onMouseDown={handleMouseDownPassword}
+                                    edge="end"
+                                >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            ),
+                        },
+                    }
+                  : undefined,
         [
             active,
             type,
@@ -348,7 +347,7 @@ const Input = (props: TaipyInputProps) => {
             handleMouseDownPassword,
             handleUpStepperMouseDown,
             handleDownStepperMouseDown,
-        ]
+        ],
     );
 
     useEffect(() => {
@@ -359,26 +358,24 @@ const Input = (props: TaipyInputProps) => {
 
     return (
         <Tooltip title={hover || ""}>
-            <>
-                <TextField
-                    sx={textSx}
-                    margin="dense"
-                    hiddenLabel
-                    value={value ?? ""}
-                    className={className}
-                    type={showPassword && type == "password" ? "text" : type}
-                    id={id}
-                    slotProps={inputProps}
-                    label={props.label}
-                    onChange={handleInput}
-                    onBlur={actionOnBlur ? handleBlur : undefined}
-                    disabled={!active}
-                    onKeyDown={handleAction}
-                    multiline={multiline}
-                    minRows={linesShown}
-                    maxRows={linesShown}
-                />
-            </>
+            <TextField
+                sx={textSx}
+                margin="dense"
+                hiddenLabel
+                value={value ?? ""}
+                className={className}
+                type={showPassword && type == "password" ? "text" : type}
+                id={id}
+                slotProps={inputProps}
+                label={props.label}
+                onChange={handleInput}
+                onBlur={actionOnBlur ? handleBlur : undefined}
+                disabled={!active}
+                onKeyDown={handleAction}
+                multiline={multiline}
+                minRows={linesShown}
+                maxRows={linesShown}
+            />
         </Tooltip>
     );
 };

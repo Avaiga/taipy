@@ -77,31 +77,46 @@ const Image = (props: ImageProps) => {
     }, [svg, svgContent]);
 
     return (
-        <Tooltip title={hover || label}>
-            {onAction ? (
-                <span>
-                    <Button
+        <>
+            <Tooltip title={hover || label}>
+                {onAction ? (
+                    <span>
+                        <Button
+                            id={id}
+                            className={className}
+                            onClick={handleClick}
+                            aria-label={label}
+                            variant="outlined"
+                            disabled={!active}
+                            title={label}
+                        >
+                            {inlineSvg ? (
+                                <div ref={divRef} style={style} />
+                            ) : (
+                                <img src={content} style={style} alt={label} />
+                            )}
+                        </Button>
+                    </span>
+                ) : inlineSvg ? (
+                    <div
                         id={id}
                         className={className}
-                        onClick={handleClick}
                         aria-label={label}
-                        variant="outlined"
-                        disabled={!active}
                         title={label}
-                    >
-                        {inlineSvg ? (
-                            <div ref={divRef} style={style} />
-                        ) : (
-                            <img src={content} style={style} alt={label} />
-                        )}
-                    </Button>
-                </span>
-            ) : inlineSvg ? (
-                <div id={id} className={className} style={style} ref={divRef} title={label}></div>
-            ) : (
-                <img id={id} src={content} style={style} className={className} alt={label} />
-            )}
-        </Tooltip>
+                        ref={divRef}
+                        style={style}
+                    ></div>
+                ) : (
+                    <img
+                        id={id}
+                        src={content}
+                        style={style}
+                        className={className}
+                        alt={label}
+                    />
+                )}
+            </Tooltip>
+        </>
     );
 };
 
