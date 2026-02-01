@@ -155,17 +155,14 @@ class _FlaskServer(_Server):
             if custom_page_resource is not None:
                 return custom_page_resource
             
-            # Solution 4: Override detection for custom favicon
+            # Override default favicon with custom favicon if configured
             if path in ["favicon.png", "favicon.ico"]:
                 custom_favicon = self._gui._get_config("favicon")  # type: ignore[attr-defined]
                 if custom_favicon:
-                    from pathlib import Path
                     # Check if custom favicon filename matches the requested path
-                    custom_path = Path(custom_favicon)
+                    custom_path = pathlib.Path(custom_favicon)
                     if custom_path.name == path:
                         # Serve custom favicon via content accessor
-                        parts = path.split("/")
-                        file_name = parts[-1]
                         # Get the mapped URL from content accessor
                         url = self._gui._get_content("__taipy_favicon", custom_favicon, True)  # type: ignore[attr-defined]
                         # Extract the path after _CONTENT_ROOT
