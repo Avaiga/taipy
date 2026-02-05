@@ -23,7 +23,7 @@ class Core:
     def __new__(cls) -> Orchestrator:  # type: ignore
         _warn_deprecated("'Core'", suggest="the 'Orchestrator' class")
         cls.__logger.warning(
-            "The `Core` service is deprecated and replaced by the `Orchestrator` service."
+            "The `Core` service is deprecated and replaced by the `Orchestrator` service. "
             "An `Orchestrator` instance has been instantiated instead."
         )
         return Orchestrator()
