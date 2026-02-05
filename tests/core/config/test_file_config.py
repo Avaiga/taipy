@@ -30,7 +30,6 @@ mode = "standalone"
 max_nb_of_workers = "2:int"
 
 [CORE]
-root_folder = "./taipy/"
 storage_folder = "user_data/"
 taipy_storage_folder = ".taipy/"
 repository_type = "filesystem"

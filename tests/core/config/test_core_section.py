@@ -69,21 +69,16 @@ force = "true:bool"
 
 
 def test_config_attribute_overiden_by_code_config_including_env_variable_values():
-    assert Config.core.root_folder == CoreSection._DEFAULT_ROOT_FOLDER
     assert Config.core.storage_folder == CoreSection._DEFAULT_STORAGE_FOLDER
-    Config.configure_core(root_folder="ENV[ROOT_FOLDER]", storage_folder="ENV[STORAGE_FOLDER]")
+    Config.configure_core(storage_folder="ENV[STORAGE_FOLDER]")
 
-    with pytest.raises(MissingEnvVariableError):
-        _ = Config.core.root_folder
     with pytest.raises(MissingEnvVariableError):
         _ = Config.core.storage_folder
 
-    with patch.dict(os.environ, {"ROOT_FOLDER": "foo", "STORAGE_FOLDER": "bar"}):
-        assert Config.core.root_folder == "foo"
+    with patch.dict(os.environ, {"STORAGE_FOLDER": "bar"}):
         assert Config.core.storage_folder == "bar"
 
-    with patch.dict(os.environ, {"ROOT_FOLDER": "baz", "STORAGE_FOLDER": "qux"}):
-        assert Config.core.root_folder == "baz"
+    with patch.dict(os.environ, {"STORAGE_FOLDER": "qux"}):
         assert Config.core.storage_folder == "qux"
 
 
