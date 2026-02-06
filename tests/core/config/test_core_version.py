@@ -79,7 +79,6 @@ class TestCoreVersionInCoreSectionConfig:
             max_nb_of_workers = "2:int"
 
             [CORE]
-            root_folder = "./taipy/"
             storage_folder = ".data/"
             repository_type = "filesystem"
             read_entity_retry = "0:int"
@@ -107,7 +106,6 @@ class TestCoreVersionInCoreSectionConfig:
             max_nb_of_workers = "2:int"
 
             [CORE]
-            root_folder = "./taipy/"
             storage_folder = ".data/"
             repository_type = "filesystem"
             read_entity_retry = "0:int"
@@ -132,7 +130,6 @@ class TestCoreVersionInCoreSectionConfig:
             mode = "standalone"
             max_nb_of_workers = "2:int"
             [CORE]
-            root_folder = "./taipy/"
             storage_folder = ".data/"
             repository_type = "filesystem"
             read_entity_retry = "0:int"
