@@ -100,12 +100,12 @@ class _GuiCoreContext(_CoreEventConsumerBase):
         self.submissions_lock = Lock()
         # lazy_start
         self.__started = False
-        # Gui event listener
-        gui._add_event_listener("authorization", self._auth_listener, with_state=True) # type: ignore
         # super
         super().__init__(reg_id, reg_queue)
 
     def on_user_init(self, state: State):
+        # Gui event listener
+        self.gui._add_event_listener("authorization", self._auth_listener, with_state=True) # type: ignore
         self.gui._fire_event("authorization", get_state_id(state), {}) # type: ignore
 
     def __lazy_start(self):
