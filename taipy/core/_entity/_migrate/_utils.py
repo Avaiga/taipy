@@ -241,8 +241,8 @@ def __migrate_job(job: Dict) -> Dict:
 
 
 def __migrate_global_config(config: Dict):
-    fields_to_remove = ["root_folder", "clean_entities_enabled"]
-    fields_to_move = ["storage_folder", "repository_type", "read_entity_retry"]
+    fields_to_remove = ["clean_entities_enabled"]
+    fields_to_move = ["root_folder", "storage_folder", "repository_type", "read_entity_retry"]
 
     for field in fields_to_remove:
         if field in config["TAIPY"]:

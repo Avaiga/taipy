@@ -20,6 +20,8 @@ from tests.common.config.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_override_default_configuration_with_code_configuration():
+    assert not Config.global_config.root_folder == "foo"
+
     assert len(Config.unique_sections) == 1
     assert Config.unique_sections["unique_section_name"] is not None
     assert Config.unique_sections["unique_section_name"].attribute == "default_attribute"

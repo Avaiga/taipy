@@ -987,6 +987,7 @@ class Config:
 
     @staticmethod
     def configure_core(
+        root_folder: Optional[str] = None,
         storage_folder: Optional[str] = None,
         taipy_storage_folder: Optional[str] = None,
         repository_type: Optional[str] = None,
@@ -1000,10 +1001,14 @@ class Config:
         """Configure the Orchestrator service.
 
         Arguments:
-            storage_folder (str): Folder name used to store user data like data node files.
-                The default value is "user_data/".
-            taipy_storage_folder (str): Folder name used to store internal Taipy data.
-                The default value is ".taipy/".
+            root_folder (Optional[str]): Path of the base folder for the taipy application.
+                The default value is "./taipy/"
+            storage_folder (str): Folder name used to store user data. The default value is "user_data/". It is used in
+                conjunction with the *root_folder* attribute. That means the storage path is
+                <root_folder><storage_folder> (The default path is "./taipy/user_data/").
+            taipy_storage_folder (str): Folder name used to store Taipy data. The default value is ".taipy/". It is
+                used in conjunction with the *root_folder* attribute. That means the storage path is
+                <root_folder><storage_folder> (The default path is "./taipy/.taipy/").
             repository_type (Optional[str]): The type of the repository to be used to store Taipy data.
                 The default value is "filesystem".
             repository_properties (Optional[Dict[str, Union[str, int]]]): A dictionary of additional properties

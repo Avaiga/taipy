@@ -20,18 +20,20 @@ from tests.core.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_override_default_configuration_with_code_configuration():
+    assert not Config.core.root_folder == "foo"
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
     assert len(Config.scenarios) == 1
 
     Config.configure_job_executions(max_nb_of_workers=-1)
-    Config.configure_core()
+    Config.configure_core(root_folder="foo")
     foo_config = Config.configure_data_node("foo", "in_memory")
     xyz_config = Config.configure_data_node("xyz")
     bar_config = Config.configure_task("bar", print, [foo_config], [])
     qux_config = Config.configure_scenario("qux", [bar_config], [xyz_config])
 
     assert Config.job_config.max_nb_of_workers == -1
+    assert Config.core.root_folder == "foo"
     assert len(Config.data_nodes) == 3
     assert "default" in Config.data_nodes
     assert foo_config.id in Config.data_nodes

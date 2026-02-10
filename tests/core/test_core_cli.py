@@ -365,6 +365,7 @@ def test_modified_config_properties_without_force(caplog, init_config):
     assert 'DATA_NODE "d0" was removed' in error_message
 
     assert 'DATA_NODE "d2" has attribute "default_path" modified' in error_message
+    assert 'CORE "root_folder" was modified' in error_message
     assert 'CORE "repository_type" was modified' in error_message
     assert 'JOB "mode" was modified' in error_message
     assert 'SCENARIO "my_scenario" has attribute "frequency" modified' in error_message
@@ -401,6 +402,7 @@ def double_twice(a):
 
 def config_scenario_2():
     Config.configure_core(
+        root_folder="foo_root",
         # Changing the "storage_folder" will fail since older versions are stored in older folder
         # storage_folder="foo_storage",
         repository_type="bar",

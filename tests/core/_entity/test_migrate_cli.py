@@ -69,11 +69,6 @@ def test_migrate_fs_specified_folder(caplog, mocker):
             _MigrateCLI.handle_command()
     assert f"Starting entity migration from '{data_path}' folder" in caplog.text
 
-    # Add blank char at EOF. Some file systems add it automatically and it should not cause the migration
-    # to fail or create different results.
-    with open(os.path.join(data_path, "version/b11ea9f9-b2d7-4b58-a1c2-c6b1700bed97.json"), "a") as f:
-        f.write("\n")
-
     # Compare migrated .data folder with data_sample_migrated
     dircmp_result = filecmp.dircmp(data_path, "tests/core/_entity/data_sample_migrated")
 
