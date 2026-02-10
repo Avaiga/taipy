@@ -13,7 +13,6 @@ import json
 import os
 
 
-
 def _get_version():
     with open(f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}version.json") as version_file:
         version = json.load(version_file)
