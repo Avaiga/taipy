@@ -41,10 +41,10 @@ class _TransformVarToValue(ast.NodeTransformer):
         value = _get_value_in_frame(self.frame, var_parts[0])
         if len(var_parts) > 1:
             value = attrgetter(var_parts[1])(value)
-        if not isinstance(value, (str, int, float, bool, list, tuple, dict)):
+        if not isinstance(value, (str, int, float, bool, list, tuple)):
             # transform into constants only what can be (ie not callable or generator for example)
             return node
-        return ast.Constant(value=value, kind=None) # pyright: ignore[reportArgumentType]
+        return ast.Constant(value=value, kind=None)
 
 
 class _LambdaByName(ast.NodeVisitor):

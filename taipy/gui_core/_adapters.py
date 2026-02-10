@@ -218,7 +218,6 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                     val_type,
                     None,
                     error,
-                    isinstance(dn, JSONDataNode)
                 )
             except Exception as e:
                 return (None, None, None, f"read data_node: {e}")
