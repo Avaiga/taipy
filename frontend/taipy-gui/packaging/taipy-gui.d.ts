@@ -607,16 +607,16 @@ export declare const useDynamicProperty: <T>(
     nullToDefault?: boolean
 ) => T;
 /**
- * A React hook to manage a dynamic dict property (prev. useDynamicJsonProperty).
+ * A React hook to manage a dynamic json property.
  *
- * A dynamic dict property  is defined by a default property and a bound property.
+ * A dynamic json property  is defined by a default property and a bound property.
  * @typeParam T - The dynamic property type.
  * @param value - The bound value.
  * @param defaultValue - The default value.
  * @param defaultStatic - The default static value.
  * @returns The latest updated value.
  */
-export declare const useDynamicDictProperty: <T>(
+export declare const useDynamicJsonProperty: <T>(
     value: string | undefined,
     defaultValue: string,
     defaultStatic: T

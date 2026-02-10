@@ -32,7 +32,7 @@ import {
     useClassNames,
     useDispatchRequestUpdateOnFirstRender,
     useDispatch,
-    useDynamicDictProperty,
+    useDynamicJsonProperty,
     useDynamicProperty,
     useModule,
 } from "../utils/hooks";
@@ -64,7 +64,7 @@ export {
     useClassNames,
     useDispatchRequestUpdateOnFirstRender,
     useDispatch,
-    useDynamicDictProperty,
+    useDynamicJsonProperty,
     useDynamicProperty,
     useLovListMemo,
     useModule,
