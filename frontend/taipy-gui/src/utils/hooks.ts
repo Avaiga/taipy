@@ -188,7 +188,7 @@ export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>)
         }
         // Finally update previousProps with current props for next hook call
         previousProps.current = props;
-    }, [name, props]);
+    });
 };
 
 export const useElementVisible = (ref: RefObject<HTMLElement | null>) => {
@@ -197,13 +197,14 @@ export const useElementVisible = (ref: RefObject<HTMLElement | null>) => {
 
     useEffect(() => {
         observerRef.current = new IntersectionObserver(([entry]) => setIsOnScreen(entry.isIntersecting));
-        return () => {
-            observerRef.current && observerRef.current.disconnect();
-        };
     }, []);
 
     useEffect(() => {
         observerRef.current && ref.current && observerRef.current.observe(ref.current);
+
+        return () => {
+            observerRef.current && observerRef.current.disconnect();
+        };
     }, [ref]);
 
     return isOnScreen;

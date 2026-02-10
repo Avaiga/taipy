@@ -47,14 +47,14 @@ const Field = (props: TaipyFieldProps) => {
 
     const style = useMemo(
         () => ({ overflow: "auto", width: props.width ? getCssSize(props.width) : undefined }),
-        [props.width],
+        [props.width]
     );
     const typoSx = useMemo(
         () =>
             props.width
                 ? { ...unsetWeightSx, overflow: "auto", width: getCssSize(props.width), display: "inline-block" }
                 : unsetWeightSx,
-        [props.width],
+        [props.width]
     );
 
     const value = useMemo(() => {
@@ -62,17 +62,17 @@ const Field = (props: TaipyFieldProps) => {
             props.value !== undefined ? props.value : defaultValue || "",
             dataType,
             format,
-            formatConfig,
+            formatConfig
         );
     }, [defaultValue, props.value, dataType, format, formatConfig]);
 
     return (
-        <>
-            <Tooltip title={hover || ""}>
+        <Tooltip title={hover || ""}>
+            <>
                 {mode == "pre" ? (
                     <pre
                         className={`${className} ${getSuffixedClassNames(className, "-pre")} ${getComponentClassName(
-                            props.children,
+                            props.children
                         )}`}
                         id={id}
                         style={style}
@@ -83,7 +83,7 @@ const Field = (props: TaipyFieldProps) => {
                     <div
                         className={`${className} ${getSuffixedClassNames(
                             className,
-                            "-markdown",
+                            "-markdown"
                         )} ${getComponentClassName(props.children)}`}
                     >
                         <Suspense fallback={<div>Loading Markdown...</div>}>
@@ -93,7 +93,7 @@ const Field = (props: TaipyFieldProps) => {
                 ) : raw || mode == "raw" ? (
                     <span
                         className={`${className} ${getSuffixedClassNames(className, "-raw")} ${getComponentClassName(
-                            props.children,
+                            props.children
                         )}`}
                         id={id}
                         style={style}
@@ -103,7 +103,7 @@ const Field = (props: TaipyFieldProps) => {
                 ) : mode == "latex" ? (
                     <MathJax
                         className={`${className} ${getSuffixedClassNames(className, "-latex")} ${getComponentClassName(
-                            props.children,
+                            props.children
                         )}`}
                         id={id}
                         dynamic={true}
@@ -122,9 +122,9 @@ const Field = (props: TaipyFieldProps) => {
                         {value}
                     </Typography>
                 )}
-            </Tooltip>
-            {props.children}
-        </>
+                {props.children}
+            </>
+        </Tooltip>
     );
 };
 

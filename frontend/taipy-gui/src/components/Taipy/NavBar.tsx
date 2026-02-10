@@ -50,7 +50,7 @@ const NavBar = (props: LovProps) => {
         if (!lovList.length) {
             return Object.keys(state.locations || {})
                 .filter((key) => key !== "/")
-                .map((key) => ({ id: key, item: state.locations[key].substring(1) }) as LovItem);
+                .map((key) => ({ id: key, item: state.locations[key].substring(1) } as LovItem));
         }
         return lovList;
     }, [lovList, state.locations]);
@@ -63,19 +63,19 @@ const NavBar = (props: LovProps) => {
                 window.open(val, "_blank")?.focus();
             }
         },
-        [state.locations, navigate],
+        [state.locations, navigate]
     );
 
     const selectedVal = lov.find((it) => getBaseURL() + it.id.substring(1) === location.pathname)?.id || "";
 
     return isMobile ? (
-        <>
-            <Drawer
-                open={opened}
-                onClose={() => setOpened(false)}
-                className={`${className} ${getComponentClassName(props.children)}`}
-            >
-                <Tooltip title={hover || ""}>
+        <Tooltip title={hover || ""}>
+            <>
+                <Drawer
+                    open={opened}
+                    onClose={() => setOpened(false)}
+                    className={`${className} ${getComponentClassName(props.children)}`}
+                >
                     <List>
                         {lov.map((val) => (
                             <ListItemButton
@@ -92,15 +92,13 @@ const NavBar = (props: LovProps) => {
                             </ListItemButton>
                         ))}
                     </List>
-                </Tooltip>
-            </Drawer>
-            <Tooltip title={hover || ""}>
+                </Drawer>
                 <IconButton onClick={() => setOpened((o) => !o)}>
                     <Menu />
                 </IconButton>
-            </Tooltip>
-            {props.children}
-        </>
+                {props.children}
+            </>
+        </Tooltip>
     ) : (
         <Box sx={boxSx} className={`${className} ${getComponentClassName(props.children)}`}>
             <Tooltip title={hover || ""}>

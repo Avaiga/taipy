@@ -66,7 +66,7 @@ const Image = (props: ImageProps) => {
             display: inlineSvg ? "inline-flex" : undefined,
             verticalAlign: inlineSvg ? "middle" : undefined,
         }),
-        [width, height, inlineSvg],
+        [width, height, inlineSvg]
     );
 
     useEffect(() => {
@@ -78,8 +78,8 @@ const Image = (props: ImageProps) => {
     }, [svg, svgContent]);
 
     return (
-        <>
-            <Tooltip title={hover || label}>
+        <Tooltip title={hover || label}>
+            <>
                 {onAction ? (
                     <span>
                         <Button
@@ -115,9 +115,9 @@ const Image = (props: ImageProps) => {
                         alt={label}
                     />
                 )}
-            </Tooltip>
-            {props.children}
-        </>
+                {props.children}
+            </>
+        </Tooltip>
     );
 };
 

@@ -127,14 +127,14 @@ const Pane = (props: PaneProps) => {
                 ? props.anchor.toLowerCase().startsWith("l")
                     ? "left"
                     : props.anchor.toLowerCase().startsWith("r")
-                      ? "right"
-                      : props.anchor.toLowerCase().startsWith("t")
-                        ? "top"
-                        : props.anchor.toLowerCase().startsWith("b")
-                          ? "bottom"
-                          : "left"
+                    ? "right"
+                    : props.anchor.toLowerCase().startsWith("t")
+                    ? "top"
+                    : props.anchor.toLowerCase().startsWith("b")
+                    ? "bottom"
+                    : "left"
                 : "left",
-        [props.anchor],
+        [props.anchor]
     );
     const drawerSx = useMemo(() => getDrawerSx(anchor, width, height), [width, height, anchor]);
     const headerSx = useMemo(() => getHeaderSx(anchor), [anchor]);
@@ -147,7 +147,7 @@ const Pane = (props: PaneProps) => {
                 Promise.resolve().then(() => dispatch(createSendActionNameAction(id, module, onClose, false)));
             } else if (updateVarName) {
                 Promise.resolve().then(() =>
-                    dispatch(createSendUpdateAction(updateVarName, false, module, props.onChange, propagate)),
+                    dispatch(createSendUpdateAction(updateVarName, false, module, props.onChange, propagate))
                 );
             }
         }
@@ -160,7 +160,7 @@ const Pane = (props: PaneProps) => {
                 Promise.resolve().then(() => dispatch(createSendActionNameAction(id, module, onClose, true)));
             } else if (updateVarName) {
                 Promise.resolve().then(() =>
-                    dispatch(createSendUpdateAction(updateVarName, true, module, props.onChange, propagate)),
+                    dispatch(createSendUpdateAction(updateVarName, true, module, props.onChange, propagate))
                 );
             }
         }
@@ -183,25 +183,21 @@ const Pane = (props: PaneProps) => {
         >
             {persistent ? (
                 <>
-                    <Tooltip title={hover || ""}>
-                        <Box sx={headerSx} className={getSuffixedClassNames(className, "-header")}>
-                            {title ? <Box sx={titleSx}>{title}</Box> : null}
-                            <IconButton onClick={handleClose} disabled={!active}>
-                                {headerIcon}
-                            </IconButton>
-                        </Box>
-                    </Tooltip>
+                    <Box sx={headerSx} className={getSuffixedClassNames(className, "-header")}>
+                        {title ? <Box sx={titleSx}>{title}</Box> : null}
+                        <IconButton onClick={handleClose} disabled={!active}>
+                            {headerIcon}
+                        </IconButton>
+                    </Box>
                     <Divider />
                 </>
             ) : null}
-            <>
-                {page ? (
-                    <Tooltip title={hover || ""}>
-                        <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} />
-                    </Tooltip>
-                ) : null}
-                {props.children}
-            </>
+            <Tooltip title={hover || ""}>
+                <>
+                    {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
+                    {props.children}
+                </>
+            </Tooltip>
         </Drawer>
     ) : showButton ? (
         <Drawer
@@ -211,13 +207,9 @@ const Pane = (props: PaneProps) => {
             open={true}
             className={getSuffixedClassNames(className, "-button")}
         >
-            <Tooltip title={hover || ""}>
-                <span>
-                    <IconButton onClick={handleOpen} disabled={!active}>
-                        {headerIcon}
-                    </IconButton>
-                </span>
-            </Tooltip>
+            <IconButton onClick={handleOpen} disabled={!active}>
+                {headerIcon}
+            </IconButton>
         </Drawer>
     ) : null;
 };
