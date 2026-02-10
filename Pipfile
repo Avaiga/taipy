@@ -50,8 +50,8 @@ mkdocs-macros-plugin = "*"
 mkdocs-material = "==7.3.0"
 mkdocs-material-extensions = "*"
 mkdocstrings = "*"
-mongomock = {extras = ["s3"]}
-moto = {extras = ["s3"]}
+mongomock = "*"
+moto = {extras = ["s3"], version = "==4.2.13"}
 requests = "*"
 ruff = "*"
 pandas-stubs = "*"
