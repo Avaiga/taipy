@@ -38,7 +38,6 @@ interface PaneProps extends TaipyActiveProps, TaipyChangeProps {
     anchor?: string;
     persistent?: boolean;
     title?: string;
-    defaultTitle?: string;
     onClose?: string;
     page?: string;
     partial?: boolean;
@@ -59,16 +58,16 @@ const getHeaderSx = (anchor: AnchorType): CSSProperties => {
             return { ...baseStyle, justifyContent: "flex-end" };
     }
 };
-const getHeaderIcon = (anchor: AnchorType, open = true): JSX.Element => {
+const getHeaderIcon = (anchor: AnchorType): JSX.Element => {
     switch (anchor) {
         case "right":
-            return open ? <ChevronRightIcon /> : <ChevronLeftIcon />;
+            return <ChevronRightIcon />;
         case "top":
-            return open ? <ExpandLess /> : <ExpandMore />;
+            return <ExpandLess />;
         case "bottom":
-            return open ? <ExpandMore /> : <ExpandLess />;
+            return <ExpandMore />;
         default:
-            return open ? <ChevronLeftIcon /> : <ChevronRightIcon />;
+            return <ChevronLeftIcon />;
     }
 };
 const getTitleSx = (anchor: AnchorType): CSSProperties => {
@@ -104,6 +103,7 @@ const Pane = (props: PaneProps) => {
     const {
         id,
         persistent = false,
+        title,
         onClose,
         page,
         partial,
@@ -121,7 +121,6 @@ const Pane = (props: PaneProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
-    const title = useDynamicProperty(props.title, props.defaultTitle, undefined);
     const anchor = useMemo<AnchorType>(
         () =>
             props.anchor
@@ -140,7 +139,6 @@ const Pane = (props: PaneProps) => {
     const drawerSx = useMemo(() => getDrawerSx(anchor, width, height), [width, height, anchor]);
     const headerSx = useMemo(() => getHeaderSx(anchor), [anchor]);
     const headerIcon = useMemo(() => getHeaderIcon(anchor), [anchor]);
-    const closedHeaderIcon = useMemo(() => getHeaderIcon(anchor, false), [anchor]);
     const titleSx = useMemo(() => getTitleSx(anchor), [anchor]);
     const handleClose = useCallback(() => {
         if (active) {
@@ -197,7 +195,11 @@ const Pane = (props: PaneProps) => {
                 </>
             ) : null}
             <>
-                {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
+                {page ? (
+                    <Tooltip title={hover || ""}>
+                        <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} />
+                    </Tooltip>
+                ) : null}
                 {props.children}
             </>
         </Drawer>
@@ -209,26 +211,10 @@ const Pane = (props: PaneProps) => {
             open={true}
             className={getSuffixedClassNames(className, "-button")}
         >
-            <Tooltip
-                title={
-                    title ? (
-                        hover ? (
-                            <>
-                                {title}
-                                <br />
-                                {hover}
-                            </>
-                        ) : (
-                            title
-                        )
-                    ) : (
-                        hover || ""
-                    )
-                }
-            >
+            <Tooltip title={hover || ""}>
                 <span>
                     <IconButton onClick={handleOpen} disabled={!active}>
-                        {closedHeaderIcon}
+                        {headerIcon}
                     </IconButton>
                 </span>
             </Tooltip>

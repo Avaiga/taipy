@@ -1898,7 +1898,7 @@
                     },
                     {
                         "name": "title",
-                        "type": "dynamic(str)",
+                        "type": "str",
                         "default_value": "None",
                         "doc": "The title of the opened pane, displayed next to the close button, when <i>persistent</i> is True."
                     },
