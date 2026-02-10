@@ -3063,14 +3063,16 @@ class Gui:
         try:
             return _Hooks()._get_authorization(self, client_id, system) or contextlib.nullcontext()
         except Exception as e:
-            _warn("Hooks: _get_authorization", e)
+            _warn("Hooks._get_authorization()", e)
             return contextlib.nullcontext()
 
     def _is_exception_ignored(self, exception: Exception, source: t.Optional[str] = None) -> bool:
+        if is_debugging():
+            return False
         try:
             return _Hooks()._is_exception_ignored(self, exception, source) or False
         except Exception as e:
-            _warn("Hooks: _is_exception_ignored", e)
+            _warn("Hooks._is_exception_ignored()", e)
             return False
 
     def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
