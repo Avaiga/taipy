@@ -54,7 +54,7 @@ def _get_non_existent_file_path(dir_path: Path, file_name: str) -> Path:
 
 
 def _secure_filename_unicode(filename: str) -> str:
-    """
+    r"""
     Sanitizes a filename for safe filesystem use while preserving Unicode characters.
 
     This function removes or replaces characters that are invalid or unsafe for filenames,
