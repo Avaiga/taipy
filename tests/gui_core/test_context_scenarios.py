@@ -23,12 +23,14 @@ scenarios: t.List[t.Union[Cycle, Scenario]] = [scenario_a, scenario_b]
 class TestGuiCoreContext_scenarios:
     def test_get_scenarios_no_scenarios(self):
         gui_core_context = _GuiCoreContext(Mock())
+        gui_core_context.scenario_by_cycle = {}
         new_scenarios = gui_core_context.get_scenarios(None, None, None)
         assert isinstance(new_scenarios, list)
         assert len(new_scenarios) == 0
 
     def test_get_scenarios_no_filter(self):
         gui_core_context = _GuiCoreContext(Mock())
+        gui_core_context.scenario_by_cycle = {}
         new_scenarios = gui_core_context.get_scenarios(scenarios, None, None)
         assert len(new_scenarios) == len(scenarios)
         for new_scenario, scenario in zip(new_scenarios, scenarios):
