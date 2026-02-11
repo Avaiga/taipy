@@ -237,7 +237,8 @@ class _Evaluator:
                 holder_value.set(expr_value)
             return holder_value
         except Exception as e:
-            _warn(f"Cannot evaluate expression {holder.__name__}({expr_hash},'{expr_hash}') for {expr}", e)
+            if not gui._is_exception_ignored(e, "Evaluator"):
+                _warn(f"Cannot evaluate expression {holder.__name__}({expr_hash},'{expr_hash}') for {expr}", e)
         return None
 
     def evaluate_expr(
@@ -277,12 +278,13 @@ class _Evaluator:
             with gui._get_authorization():  # type: ignore[attr-defined]
                 expr_evaluated = eval(not_encoded_expr if is_edge_case else expr_string, ctx)
         except Exception as e:
-            exception_str = not_encoded_expr if is_edge_case else expr_string
-            _warn(
-                f"Cannot evaluate expression '{_Evaluator._clean_exception_expr(exception_str)}'",
-                e,
-                always_show=True,
-            )
+            if not gui._is_exception_ignored(e, "Evaluator"):
+                exception_str = not_encoded_expr if is_edge_case else expr_string
+                _warn(
+                    f"Cannot evaluate expression '{_Evaluator._clean_exception_expr(exception_str)}'",
+                    e,
+                    always_show=True,
+                )
             expr_evaluated = None
         if lambda_expr and callable(expr_evaluated):
             expr_hash = _get_lambda_id(expr_evaluated, module=module_name)  # type: ignore[arg-type]
@@ -313,7 +315,8 @@ class _Evaluator:
             if holder is not None:
                 holder.set(expr_evaluated)
         except Exception as e:
-            _warn(f"Exception raised evaluating {_Evaluator._clean_exception_expr(expr_string)}", e)
+            if not gui._is_exception_ignored(e, "Evaluator"):
+                _warn(f"Exception raised evaluating {_Evaluator._clean_exception_expr(expr_string)}", e)
 
     def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.Set[str]:  # noqa C901
         """

@@ -41,6 +41,26 @@ def mock_is_true(entity_id):
 
 
 class TestGuiCoreContext_crud_scenario:
+    def test_crud_scenario_none(self):
+        gui_core_context = _GuiCoreContext(Mock())
+        state = MockState(Mock())
+
+        mock_core_delete = Mock()
+
+        with (
+            patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
+            patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_true),
+            patch("taipy.gui_core._context.core_delete", side_effect=mock_core_delete),
+        ):
+            assert (
+                gui_core_context.crud_scenario(
+                    state,
+                    "id",
+                    t.cast(dict, {}),
+                )
+                is None
+            )
+
     def test_crud_scenario_delete(self):
         gui_core_context = _GuiCoreContext(Mock())
         state = MockState(Mock())
@@ -58,3 +78,59 @@ class TestGuiCoreContext_crud_scenario:
                 t.cast(dict, {"args": [None, None, None, True, True, {"id": "a_scenario_id"}], "error_id": "error_id"}),
             )
             mock_core_delete.assert_called_once()
+
+    def test_crud_scenario_create_no_scenario(self):
+        gui_core_context = _GuiCoreContext(Mock())
+        state = MockState(Mock())
+        state.assign = Mock()
+
+        mock_core_delete = Mock()
+
+        with (
+            patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
+            patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_true),
+            patch("taipy.gui_core._context.core_delete", side_effect=mock_core_delete),
+        ):
+            gui_core_context.crud_scenario(
+                state,
+                "id",
+                t.cast(
+                    dict, {"args": [None, None, None, False, True, {"id": "a_scenario_id"}], "error_id": "error_id"}
+                ),
+            )
+            state.assign.assert_called_once_with("error_id", "Invalid configuration id (None)")
+
+    def test_crud_scenario_create_scenario_no_dialog(self):
+        gui_core_context = _GuiCoreContext(Mock())
+        state = MockState(Mock())
+        state.assign = Mock()
+
+        mock_core_delete = Mock()
+
+        with (
+            patch("taipy.gui_core._context.core_get", side_effect=mock_core_get),
+            patch("taipy.gui_core._context.is_deletable", side_effect=mock_is_true),
+            patch("taipy.gui_core._context.core_delete", side_effect=mock_core_delete),
+        ):
+            gui_core_context.crud_scenario(
+                state,
+                "id",
+                t.cast(
+                    dict,
+                    {
+                        "args": [
+                            None,
+                            None,
+                            {"config": "a_scenario_config_id"},
+                            False,
+                            True,
+                            {"id": "a_scenario_id"},
+                            False,
+                        ],
+                        "error_id": "error_id",
+                    },
+                ),
+            )
+            state.assign.assert_called_once_with(
+                "error_id", "Error creating Scenario: only one scenario config needed (0) found."
+            )
