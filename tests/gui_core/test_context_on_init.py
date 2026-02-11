@@ -10,11 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
-from taipy import Scope
-from taipy.core import Cycle, DataNode, Scenario
-from taipy.core.data.pickle import PickleDataNode
+from taipy.core import Cycle, Scenario
 from taipy.gui_core._context import _GuiCoreContext
 
 scenario_a = Scenario("scenario_a_config_id", None, {"a_prop": "a"})
