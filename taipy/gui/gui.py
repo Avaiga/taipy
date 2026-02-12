@@ -32,7 +32,6 @@ from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
 import tzlocal
-from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
 from taipy.common import _module_exists
@@ -89,6 +88,7 @@ from .utils import (
     _LocalsContext,
     _MapDict,
     _patch_value,
+    _secure_filename_unicode,
     _setscopeattr,
     _setscopeattr_drill,
     _TaipyBase,
@@ -1122,7 +1122,7 @@ class Gui:
             upload_path = Path(upload_path).resolve()
             os.makedirs(upload_path, exist_ok=True)
             # Save file into upload_path directory
-            file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
+            file_path = _get_non_existent_file_path(upload_path, _secure_filename_unicode(file.filename))
             self._server.save_uploaded_file(file, os.path.join(upload_path, (file_path.name + suffix)))
         else:
             _warn(f"upload files: Path {path} points outside of upload root.")
