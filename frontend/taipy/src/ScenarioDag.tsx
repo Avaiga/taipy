@@ -106,9 +106,15 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         }
         const tasks = coreChanged?.tasks;
         if (tasks) {
-            setTaskStatuses(tasks as TaskStatuses);
+            setTaskStatuses(tasks);
         }
     }, [coreChanged, props.updateVarName, scenarioId, module, dispatch, props.id]);
+
+    useEffect(() => {
+            if (props.authChanged) {
+                props.updateVarName && dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
+            }
+        }, [props.authChanged, props.updateVarName, module, dispatch, props.id]);
 
     useEffect(() => {
         let dm: DisplayModel | undefined = undefined;
