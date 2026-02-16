@@ -2,14 +2,27 @@ name: Cleanup Old Pre-Releases
 
 on:
   workflow_dispatch:  # Allows manual triggering
+    inputs:
+      version:
+        description: "Taipy version to clean up without extension. Ex: 3.2.1 cleans up all dev releases 3.2.1.devX"
+        required: true
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
+      - name: Display inputs
+        run: |
+          echo "Version: ${{ github.event.inputs.version }}"
+
+      - name: Install mandatory Python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
       - name: Cleanup old dev releases
         id: cleanup
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sh tools/release/cleanup_dev_releases.sh
+          python tools/release/cleanup_dev_releases.py
