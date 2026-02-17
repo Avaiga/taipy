@@ -97,6 +97,10 @@ class _GuiCore(ElementLibrary):
                 "on_scenario_crud": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.crud_scenario}}"),
                 "configs": ElementProperty(PropertyType.react, f"{{{__CTX_VAR_NAME}.get_scenario_configs()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "auth_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._AUTH_CHANGED_NAME),
+                "creation_not_allowed": ElementProperty(
+                    PropertyType.react, f"{{{__CTX_VAR_NAME}.get_creation_not_allowed()}}"
+                ),
                 "error": ElementProperty(PropertyType.react, f"{{{__SCENARIO_SELECTOR_ERROR_VAR}<tp:uniq:sc>}}"),
                 "type": ElementProperty(PropertyType.inner, __SCENARIO_ADAPTER),
                 "scenario_edit": ElementProperty(
@@ -104,7 +108,6 @@ class _GuiCore(ElementLibrary):
                     f"{{{__CTX_VAR_NAME}.get_scenario_by_id({__SCENARIO_SELECTOR_ID_VAR}<tp:uniq:sc>)}}",
                 ),
                 "on_scenario_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.select_scenario}}"),
-                "creation_not_allowed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._AUTH_CHANGED_NAME),
                 "update_sc_vars": ElementProperty(
                     PropertyType.string,
                     f"filter={__SCENARIO_SELECTOR_FILTER_VAR}<tp:uniq:sc>;"
@@ -138,6 +141,7 @@ class _GuiCore(ElementLibrary):
                 "on_submit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.submit_entity}}"),
                 "on_delete": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.crud_scenario}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "auth_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._AUTH_CHANGED_NAME),
                 "error": ElementProperty(PropertyType.react, f"{{{__SCENARIO_VIZ_ERROR_VAR}<tp:uniq:sv>}}"),
                 "update_sc_vars": ElementProperty(
                     PropertyType.string,
@@ -159,6 +163,7 @@ class _GuiCore(ElementLibrary):
             },
             inner_properties={
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "auth_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._AUTH_CHANGED_NAME),
                 "on_select": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.on_dag_select}}"),
             },
         ),
@@ -189,6 +194,7 @@ class _GuiCore(ElementLibrary):
                     + f"{__DATANODE_SELECTOR_SORT_VAR}<tp:uniq:dns>)}}",
                 ),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "auth_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._AUTH_CHANGED_NAME),
                 "type": ElementProperty(PropertyType.inner, __DATANODE_ADAPTER),
                 "error": ElementProperty(PropertyType.react, f"{{{__DATANODE_SELECTOR_ERROR_VAR}<tp:uniq:dns>}}"),
                 "update_dn_vars": ElementProperty(
@@ -227,6 +233,7 @@ class _GuiCore(ElementLibrary):
             inner_properties={
                 "on_edit": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.edit_data_node}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "auth_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._AUTH_CHANGED_NAME),
                 "error": ElementProperty(PropertyType.react, f"{{{__DATANODE_VIZ_ERROR_VAR}<tp:uniq:dn>}}"),
                 "scenarios": ElementProperty(
                     PropertyType.lov,
@@ -295,6 +302,7 @@ class _GuiCore(ElementLibrary):
             inner_properties={
                 "jobs": ElementProperty(PropertyType.lov, f"{{{__CTX_VAR_NAME}.get_jobs_list()}}"),
                 "core_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._CORE_CHANGED_NAME),
+                "auth_changed": ElementProperty(PropertyType.broadcast, _GuiCoreContext._AUTH_CHANGED_NAME),
                 "type": ElementProperty(PropertyType.inner, __JOB_ADAPTER),
                 "on_job_action": ElementProperty(PropertyType.function, f"{{{__CTX_VAR_NAME}.act_on_jobs}}"),
                 "error": ElementProperty(PropertyType.dynamic_string, f"{{{__JOB_SELECTOR_ERROR_VAR}<tp:uniq:jb>}}"),
