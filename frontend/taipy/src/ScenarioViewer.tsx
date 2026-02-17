@@ -873,7 +873,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         ? "Add Sequence"
                                                         : scNotEditableReason
                                                           ? scNotEditableReason
-                                                          : "Can't add Sequence"
+                                                          : "Cannot add Sequence"
                                                 }
                                             >
                                                 <span>

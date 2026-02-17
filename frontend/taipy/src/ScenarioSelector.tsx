@@ -500,7 +500,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
     const editScenario = useCallback(
         (props: EditProps) => (
             <Tooltip
-                title={props.active && !props.notEditable ? "Edit Scenario" : props.notEditable ? props.notEditable : "Can't edit Scenario"}
+                title={props.active && !props.notEditable ? "Edit Scenario" : props.notEditable ? props.notEditable : "Cannot edit Scenario"}
             >
                 <span>
                     <IconButton
