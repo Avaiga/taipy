@@ -81,24 +81,34 @@ The indicated version must not have extensions.""",
                         found_wrong_version.append(release_tag)
                     elif version.matches(release_version) :
                         found_wrong_extension.append(release_tag)
+
+    beautiful_traces(version, extension, del_releases, del_tags, errors, found_wrong_extension, found_wrong_version)
+
+
+def beautiful_traces(version, extension, del_releases, del_tags, errors, found_wrong_extension, found_wrong_version):
     print(" ")  # noqa: T201
     if len(del_releases) == 0:
-        print(f"No dev releases found for version {version}.")  # noqa: T201
+        print(f"No dev releases deleted for version {version}.")  # noqa: T201
     else:
-        print(f"✅ Successfully deleted {len(del_releases)} releases {version} with extension '{extension}'")  # noqa: T201
+        print(
+            f"✅ Successfully deleted {len(del_releases)} releases {version} with extension '{extension}'")  # noqa: T201
     if len(del_tags) == 0:
-        print(f"No tags found for version {version} with extension '{extension}'.")  # noqa: T201
+        print(f"No tags deleted for version {version} with extension '{extension}'.")  # noqa: T201
     else:
-        print(f"✅ Successfully deleted {len(del_tags)} tags for version {version} with extension '{extension}'")  # noqa: T201
+        print(
+            f"✅ Successfully deleted {len(del_tags)} tags for version {version} with extension '{extension}'")  # noqa: T201
     if len(errors) > 0:
         print(f"❌ Failed to delete {len(errors)} items.")  # noqa: T201
     print(" ")
     if len(found_wrong_extension) > 0:
-        print(f"Found {len(found_wrong_extension)} releases matching version {version} but with another extension:")  # noqa: T201
+        print(
+            f"Found {len(found_wrong_extension)} releases matching version {version} but with another extension:")  # noqa: T201
         print(sorted(found_wrong_extension))  # noqa: T201
     if len(found_wrong_version) > 0:
-        print(f"Found {len(found_wrong_version)} releases matching extension '{extension}' but with another version:") # noqa: T201
-        print(sorted(found_wrong_version)) # noqa: T201
+        print(
+            f"Found {len(found_wrong_version)} releases matching extension '{extension}' but with another version:")  # noqa: T201
+        print(sorted(found_wrong_version))  # noqa: T201
+
 
 def __delete_release(dry_run, github_path: str, pkg: str, release_id: str, release_version: Version) -> bool:
     url = f"https://api.github.com/repos/{github_path}/releases/{release_id}"
