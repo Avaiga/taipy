@@ -33,7 +33,7 @@ The indicated version must not have extensions.""",
 
     parser.add_argument(
         "--dry_run",
-        type=bool,
+        type=str.lower,
         default="True",
         help="A boolean flag indicating whether to perform a dry run (default: True). " +
              "If set to True, the script will only print the releases and tags that would " +
@@ -48,15 +48,15 @@ The indicated version must not have extensions.""",
 
     args = parser.parse_args(arg_strings)
     version = args.version
-    dry_run = args.dry_run
-    print(f"DEBUG: {dry_run} {type(dry_run)}")  # noqa: T201
+    dry_run = args.dry_run.strip().lower() in ("true", "1", "yes")
     if dry_run:
         print("⚠️  DRY RUN MODE ENABLED ⚠️")  # noqa: T201
     extension = args.extension
 
     github_path = Git.get_github_path()
     all_releases = fetch_github_releases(github_path)
-    found = []
+    del_releases = []
+    del_tags = []
     found_wrong_version = []
     found_wrong_extension = []
     errors = []
@@ -68,22 +68,31 @@ The indicated version must not have extensions.""",
                     release_id = release["id"]
                     release_tag = release["tag"]
                     if version.matches(release_version) and release_version.validate_extension(ext=extension):
-                        found.append(release_id)
+
                         if not __delete_release(dry_run, github_path, package.name, release_id, release_version):
                             errors.append(f"Release {release_version}-{package.name} (id: {release_id})")
+                        else:
+                            del_releases.append(release_id)
                         if not __delete_tag(dry_run, github_path, release_tag):
                             errors.append(f"Tag {release_tag}")
+                        else:
+                            del_tags.append(release_tag)
                     elif not version.matches(release_version) and release_version.validate_extension(ext=extension):
                         found_wrong_version.append(release_tag)
                     elif version.matches(release_version) :
                         found_wrong_extension.append(release_tag)
-    print()  # noqa: T201
-    if len(found) == 0:
+    print(" ")  # noqa: T201
+    if len(del_releases) == 0:
         print(f"No dev releases found for version {version}.")  # noqa: T201
     else:
-        print(f"✅ Successfully deleted {len(found)} releases {version} with extension '{extension}'")  # noqa: T201
+        print(f"✅ Successfully deleted {len(del_releases)} releases {version} with extension '{extension}'")  # noqa: T201
+    if len(del_tags) == 0:
+        print(f"No tags found for version {version} with extension '{extension}'.")  # noqa: T201
+    else:
+        print(f"✅ Successfully deleted {len(del_tags)} tags for version {version} with extension '{extension}'")  # noqa: T201
     if len(errors) > 0:
-        print(f"❌ Failed to delete {len(errors)} items: {sorted(errors)}")  # noqa: T201
+        print(f"❌ Failed to delete {len(errors)} items.")  # noqa: T201
+    print(" ")
     if len(found_wrong_extension) > 0:
         print(f"Found {len(found_wrong_extension)} releases matching version {version} but with another extension:")  # noqa: T201
         print(sorted(found_wrong_extension))  # noqa: T201
