@@ -15,7 +15,6 @@
 import argparse
 
 import requests
-
 from common import Git, Version, fetch_github_releases
 
 
@@ -96,12 +95,12 @@ def __delete_release(dry_run, github_path: str, pkg: str, release_id: str, relea
               'headers={"Accept": "application/vnd.github+json"})')  # noqa: T201
         return True
     else:
-        response = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
-        if response.status_code == 204:
+        resp = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
+        if resp.status_code == 204:
             print(f"Successfully deleted '{pkg}-{release_version}'.")  # noqa: T201
             return True
         else:
-            print(f"❌ Failed to delete '{pkg}-{release_version}': {response.status_code} - {response.text}")  # noqa: T201
+            print(f"❌ Failed deleting '{pkg}-{release_version}': {resp.status_code} - {resp.text}")  # noqa: T201
             return False
 
 
@@ -112,12 +111,12 @@ def __delete_tag(dry_run, github_path: str, release_tag: str) -> bool:
               'headers={"Accept": "application/vnd.github+json"})')  # noqa: T201
         return True
     else:
-        response = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
-        if response.status_code == 204:
+        resp = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
+        if resp.status_code == 204:
             print(f"Successfully deleted tag {release_tag}.")  # noqa: T201
             return True
         else:
-            print(f"❌ Failed to delete tag {release_tag}: {response.status_code} - {response.text}")  # noqa:
+            print(f"❌ Failed to delete tag {release_tag}: {resp.status_code} - {resp.text}")  # noqa: T201
             return False
 
 
