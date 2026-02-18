@@ -337,13 +337,10 @@ class Git:
     def get_github_path() -> t.Optional[str]:
         """Retrieve current Git path (<owner>/<repo>)."""
         branch_name = Git.get_current_branch()
-        print(f"DEBUG: Current branch - {branch_name}")  # noqa: T201
         remote_name = run_command("git", "config", f"branch.{branch_name}.remote")
-        print(f"DEBUG: Current remote - {remote_name}")
         url = run_command("git", "remote", "get-url", remote_name)
-        print(f"DEBUG: Current url - {url}")
-        if match := re.fullmatch(r"(?:git@github\.com:|https://github\.com/)(.*)\.git", url):
-            return match[1]
+        if match := re.fullmatch(r"(?:git@github\.com:|https://github\.com/)(.*)(?:\.git)?", url):
+            return match[1].rstrip('.git')
         print("ERROR - Could not retrieve GibHub branch path")  # noqa: T201
         return None
 
