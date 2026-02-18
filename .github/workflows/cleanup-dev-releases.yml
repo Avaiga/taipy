@@ -7,6 +7,19 @@ on:
         description: "Taipy version to clean up without extension. Ex: 3.2.1 cleans up all dev releases 3.2.1.devX"
         required: true
 
+      dry_run:
+        description: "Perform a dry run without actually deleting any releases (default: True)"
+        required: true
+        type: choice
+        options:
+          - True
+          - False
+        default: "True"
+
+      extension:
+        description: "Which extension to clean up. (default: dev)"
+        default: "dev"
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest
@@ -14,6 +27,17 @@ jobs:
       - name: Display inputs
         run: |
           echo "Version: ${{ github.event.inputs.version }}"
+          echo "Dry run: ${{ github.event.inputs.dry_run }}"
+          echo "Extension: ${{ github.event.inputs.extension }}"
+
+      - name: Validate version
+        run: |
+          version="${{ github.event.inputs.target_version }}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid version format: '$version' - <M>.<m>.<p> is mandatory."
+            exit 1
+          fi
+          echo "✅ Valid target version: $version"
 
       - name: Install mandatory Python packages
         run: |
@@ -25,4 +49,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python tools/release/cleanup_dev_releases.py
+          python tools/release/cleanup_dev_releases.py \
+            --version ${{ github.event.inputs.version }} \
+            --dry-run ${{ github.event.inputs.dry_run }} \
+            --extension ${{ github.event.inputs.extension }}

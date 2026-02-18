@@ -15,6 +15,7 @@
 import argparse
 
 import requests
+
 from common import Git, Version, fetch_github_releases
 
 
@@ -31,43 +32,93 @@ def main(arg_strings=None):
 The indicated version must not have extensions.""",
     )
 
+    parser.add_argument(
+        "--dry_run",
+        type=bool,
+        default="True",
+        help="A boolean flag indicating whether to perform a dry run (default: True). " +
+             "If set to True, the script will only print the releases and tags that would " +
+             "be deleted without actually deleting them. This can be useful for verifying " +
+             " which releases and tags would be affected before performing the actual deletion.")
+
+    parser.add_argument(
+        "--extension",
+        type=str,
+        default="dev",
+        help="The extension to look for in the releases to be deleted (default: 'dev'). ")
+
     args = parser.parse_args(arg_strings)
+    version = args.version
+    dry_run = args.dry_run
+    extension = args.extension
 
     github_path = Git.get_github_path()
     all_releases = fetch_github_releases(github_path)
-    found_dev_version_to_delete = False
+    found = []
+    found_wrong_version = []
+    found_wrong_extension = []
+    errors = []
     if all_releases:
         for package, releases in all_releases.items():
             for release in releases:
                 release_version: Version = release["version"]
-                release_id = release["id"]
-                release_tag = release["tag"]
-                if release_version.validate_extension() and args.version.match(release_version):
-                    pkg = package.name
-                    found_dev_version_to_delete = True
+                if release_version.has_extension():
+                    release_id = release["id"]
+                    release_tag = release["tag"]
+                    if version.matches(release_version) and release_version.validate_extension(ext=extension):
+                        found.append(release_id)
+                        if not __delete_release(dry_run, github_path, package.name, release_id, release_version):
+                            errors.append(f"Release {release_version}-{package.name} (id: {release_id})")
+                        if not __delete_tag(dry_run, github_path, release_tag):
+                            errors.append(f"Tag {release_tag}")
+                    elif not version.matches(release_version) and release_version.validate_extension(ext=extension):
+                        found_wrong_version.append(release_tag)
+                    elif version.matches(release_version) :
+                        found_wrong_extension.append(release_tag)
+    print()  # noqa: T201
+    if len(found) == 0:
+        print(f"No dev releases found for version {version}.")  # noqa: T201
+    else:
+        print(f"✅ Successfully deleted {len(found)} releases {version} with extension '{extension}'")  # noqa: T201
+    if len(errors) > 0:
+        print(f"❌ Failed to delete {len(errors)} items: {sorted(errors)}")  # noqa: T201
+    if len(found_wrong_extension) > 0:
+        print(f"Found {len(found_wrong_extension)} releases matching version {version} but with another extension:")  # noqa: T201
+        print(sorted(found_wrong_extension))  # noqa: T201
+    if len(found_wrong_version) > 0:
+        print(f"Found {len(found_wrong_version)} releases matching extension '{extension}' but with another version:") # noqa: T201
+        print(sorted(found_wrong_version)) # noqa: T201
 
-                    # Delete release
-                    url = f"https://api.github.com/repos/{github_path}/releases/{release_id}"
-                    response = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
-                    if response.status_code == 204:
-                        print(f"✅ Successfully deleted '{pkg}-{release_version}'.")  # noqa: T201
-                    else:
-                        status = response.status_code
-                        txt = response.text
-                        print(f"❌ Failed to delete '{pkg}-{release_version}': {status} - {txt}")# noqa: T201
+def __delete_release(dry_run, github_path: str, pkg: str, release_id: str, release_version: Version) -> bool:
+    url = f"https://api.github.com/repos/{github_path}/releases/{release_id}"
+    if dry_run:
+        print(f'requests.delete("{url}", ' + # noqa: T201
+              'headers={"Accept": "application/vnd.github+json"})')  # noqa: T201
+        return True
+    else:
+        response = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
+        if response.status_code == 204:
+            print(f"Successfully deleted '{pkg}-{release_version}'.")  # noqa: T201
+            return True
+        else:
+            print(f"❌ Failed to delete '{pkg}-{release_version}': {response.status_code} - {response.text}")  # noqa: T201
+            return False
 
-                    # Delete tag
-                    url = f"https://api.github.com/repos/{github_path}/git/refs/tags/{release_tag}'"
-                    response = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
-                    if response.status_code == 204:
-                        print(f"✅ Successfully deleted tag {release_tag}.")  # noqa: T201
-                    else:
-                        status = response.status_code
-                        txt = response.text
-                        print(f"❌ Failed to delete tag {release_tag}: {status} - {txt}")  # noqa: T201
 
-    if not found_dev_version_to_delete:
-        print(f"No dev releases found for version {args.version}.")  # noqa: T201
+def __delete_tag(dry_run, github_path: str, release_tag: str) -> bool:
+    url = f"https://api.github.com/repos/{github_path}/git/refs/tags/{release_tag}"
+    if dry_run:
+        print(f'requests.delete("{url}", ' +  # noqa: T201
+              'headers={"Accept": "application/vnd.github+json"})')  # noqa: T201
+        return True
+    else:
+        response = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
+        if response.status_code == 204:
+            print(f"Successfully deleted tag {release_tag}.")  # noqa: T201
+            return True
+        else:
+            print(f"❌ Failed to delete tag {release_tag}: {response.status_code} - {response.text}")  # noqa:
+            return False
 
 
 if __name__ == "__main__":

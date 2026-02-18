@@ -100,6 +100,10 @@ class Version:
             raise argparse.ArgumentTypeError(f"'{value}' is not a valid version number.") from e
         return version
 
+    def has_extension(self) -> bool:
+        """Returns True if this Version has an extension part."""
+        return self.ext is not None
+
     def validate_extension(self, ext="dev"):
         """Returns True if the extension part of this Version is the one queried."""
         return self.split_ext()[0] == ext
