@@ -308,7 +308,6 @@ def test_read_json_configuration_file():
     json_config = """
 {
 "TAIPY": {
-"root_folder": "./taipy/",
 "storage_folder": ".data/",
 "repository_type": "filesystem"
 },

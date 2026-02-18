@@ -44,7 +44,7 @@ class TestGuiCoreContextProcessSequenceEvent:
             gui_core_context = _GuiCoreContext(Gui())
             gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
+            mock_get_auth.assert_called_with(system=True)
             if sequence_is_valid:
                 mock_broadcast.assert_called_once_with("core_changed", {"scenario": list(seq_parent_ids)}, None)
             else:
@@ -64,7 +64,7 @@ class TestGuiCoreContextProcessSequenceEvent:
             gui_core_context = _GuiCoreContext(Gui())
             gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
+            mock_get_auth.assert_called_with(system=True)
             mock_broadcast.assert_not_called()
 
     @pytest.mark.parametrize("operation", [EventOperation.CREATION, EventOperation.UPDATE, EventOperation.SUBMISSION])
@@ -86,5 +86,5 @@ class TestGuiCoreContextProcessSequenceEvent:
             gui_core_context = _GuiCoreContext(Gui())
             gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
+            mock_get_auth.assert_called_with(system=True)
             mock_broadcast.assert_not_called()

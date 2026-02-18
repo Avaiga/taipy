@@ -26,6 +26,6 @@ def test_migrate_entities_from_version_2(mocker):
 
     assert expected_data == migrated_data
 
-    # Execute again on the migrated data to ensure that the migration  works on latest versions
+    # Execute again on the migrated data to ensure that the migration works on latest versions
     migrated_data, _ = _migrate(data)
     assert expected_data == migrated_data

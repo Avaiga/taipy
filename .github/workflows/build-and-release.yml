@@ -45,6 +45,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Display inputs
+        run: |
+          echo "Target version: ${{ github.event.inputs.target_version }}"
+          echo "Release type: ${{ github.event.inputs.release_type }}"
+          echo "Sub-packages location: ${{ github.event.inputs.sub_packages_location }}"
+
       - name: Validate target version
         run: |
           version="${{ github.event.inputs.target_version }}"
