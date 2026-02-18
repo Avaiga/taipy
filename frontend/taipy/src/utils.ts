@@ -15,14 +15,21 @@ import { PopoverOrigin } from "@mui/material/Popover";
 import { ReactNode } from "react";
 
 import { getUpdateVar } from "taipy-gui";
+import { TaskStatuses } from "./utils/types";
 
-
-export interface CoreProps {
+export interface CoreProps extends AuthProps {
     id?: string;
     updateVarName?: string;
     active?: boolean;
     defaultActive?: boolean;
-    coreChanged?: Record<string, unknown>;
+    coreChanged?: {
+        scenario?: string | string[];
+        submission?: number;
+        datanode?: string | string[];
+        jobs?: boolean;
+        job?: string;
+        tasks?: TaskStatuses;
+    };
     error?: string;
     updateVars: string;
     libClassName?: string;
@@ -30,6 +37,10 @@ export interface CoreProps {
     dynamicClassName?: string;
     propagate?: boolean;
     children?: ReactNode;
+}
+
+export interface AuthProps {
+    authChanged?: boolean;
 }
 
 export type ScenarioFull = [
@@ -48,7 +59,7 @@ export type ScenarioFull = [
     string, // notPromotableReason
     string, // notSubmittableReason
     string, // notReadableReason
-    string // notEditableReason
+    string, // notEditableReason
 ];
 
 export enum ScFProps {

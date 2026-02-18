@@ -63,14 +63,7 @@ import {
     useModule,
 } from "taipy-gui";
 
-import {
-    disableColor,
-    getUpdateVarNames,
-    popoverOrigin,
-    EllipsisSx,
-    SecondaryEllipsisProps,
-    CoreProps,
-} from "./utils";
+import { disableColor, getUpdateVarNames, popoverOrigin, EllipsisSx, SecondaryEllipsisProps, CoreProps } from "./utils";
 import StatusChip, { Status } from "./StatusChip";
 import JobViewer, { JobDetail } from "./JobViewer";
 
@@ -172,10 +165,10 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
             const { idx } = e.currentTarget.dataset || {};
             form.setFieldValue(
                 "filters",
-                form.values.filters.filter((_, i) => "" + i !== idx)
+                form.values.filters.filter((_, i) => "" + i !== idx),
             );
         },
-        [form]
+        [form],
     );
 
     const addFilter = useCallback(() => {
@@ -232,7 +225,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                                       .filter(
                                                           (item) =>
                                                               item.columnIndex >= 0 &&
-                                                              (item.showPrimaryLabel || item.showSecondayLabel)
+                                                              (item.showPrimaryLabel || item.showSecondayLabel),
                                                       )
                                                       .map((item) => (
                                                           <MenuItem key={item.id} value={item.columnIndex}>
@@ -288,7 +281,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                         .filter(
                                             (item) =>
                                                 item.columnIndex >= 0 &&
-                                                (item.showPrimaryLabel || item.showSecondayLabel)
+                                                (item.showPrimaryLabel || item.showSecondayLabel),
                                         )
                                         .map((item) => (
                                             <MenuItem key={item.id} value={item.columnIndex}>
@@ -521,7 +514,7 @@ const JobSelector = (props: JobSelectorProps) => {
                   }
                 : {}),
         }),
-        [checked]
+        [checked],
     );
 
     const jobSelectorColumns: JobSelectorColumns[] = useMemo(
@@ -571,7 +564,7 @@ const JobSelector = (props: JobSelectorProps) => {
                 showSecondayLabel: showDelete,
             },
         ],
-        [showDate, showSubmittedId, showSubmittedLabel, showId, showSubmissionId, showCancel, showDelete]
+        [showDate, showSubmittedId, showSubmittedLabel, showId, showSubmissionId, showCancel, showDelete],
     );
 
     const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -604,18 +597,25 @@ const JobSelector = (props: JobSelectorProps) => {
                 }
                 const jobsVar = getUpdateVar(props.updateVars, "jobs");
                 dispatch(
-                    createSendUpdateAction(props.updateVarName, newSelected, module, props.onChange, propagate, jobsVar)
+                    createSendUpdateAction(
+                        props.updateVarName,
+                        newSelected,
+                        module,
+                        props.onChange,
+                        propagate,
+                        jobsVar,
+                    ),
                 );
                 return newSelected;
             });
         },
-        [dispatch, module, props.onChange, props.updateVars, props.updateVarName, propagate]
+        [dispatch, module, props.onChange, props.updateVars, props.updateVarName, propagate],
     );
 
     const handleCheckAllClick = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) =>
             setChecked(event.target.checked ? jobRows.map((n) => n[JobProps.id]) : []),
-        [jobRows]
+        [jobRows],
     );
 
     const handleCancelJobs = useCallback(
@@ -628,13 +628,13 @@ const JobSelector = (props: JobSelectorProps) => {
                         id: multiple === false ? [id] : JSON.parse(id),
                         action: "cancel",
                         error_id: getUpdateVar(updateJbVars, "error_id"),
-                    })
+                    }),
                 );
             } catch (e) {
                 console.warn("Error parsing ids for cancel.", e);
             }
         },
-        [dispatch, module, props.id, props.onJobAction, updateJbVars]
+        [dispatch, module, props.id, props.onJobAction, updateJbVars],
     );
 
     const handleDeleteJobs = useCallback(
@@ -647,13 +647,13 @@ const JobSelector = (props: JobSelectorProps) => {
                         id: multiple === false ? [id] : JSON.parse(id),
                         action: "delete",
                         error_id: getUpdateVar(updateJbVars, "error_id"),
-                    })
+                    }),
                 );
             } catch (e) {
                 console.warn("Error parsing ids for delete.", e);
             }
         },
-        [dispatch, module, props.id, props.onJobAction, updateJbVars]
+        [dispatch, module, props.id, props.onJobAction, updateJbVars],
     );
 
     const deleteJob = useCallback(
@@ -661,7 +661,7 @@ const JobSelector = (props: JobSelectorProps) => {
             handleDeleteJobs(event);
             setShowDetails(false);
         },
-        [handleDeleteJobs]
+        [handleDeleteJobs],
     );
 
     const handleShowDetails = useCallback(
@@ -679,12 +679,12 @@ const JobSelector = (props: JobSelectorProps) => {
                         module,
                         getUpdateVarNames(props.updateVars, "details"),
                         true,
-                        idVar ? { [idVar]: id } : undefined
-                    )
+                        idVar ? { [idVar]: id } : undefined,
+                    ),
                 );
             }
         },
-        [dispatch, module, props.id, props.onDetails, props.updateVars, updateJbVars]
+        [dispatch, module, props.id, props.onDetails, props.updateVars, updateJbVars],
     );
 
     const closeDetails = useCallback(() => setShowDetails(false), []);
@@ -698,9 +698,9 @@ const JobSelector = (props: JobSelectorProps) => {
                     (job) =>
                         job[JobProps.status] === Status.SUBMITTED ||
                         job[JobProps.status] === Status.BLOCKED ||
-                        job[JobProps.status] === Status.PENDING
+                        job[JobProps.status] === Status.PENDING,
                 ),
-        [jobRows, checked]
+        [jobRows, checked],
     );
 
     const allowDeleteJobs = useMemo(
@@ -714,9 +714,9 @@ const JobSelector = (props: JobSelectorProps) => {
                         job[JobProps.status] === Status.FAILED ||
                         job[JobProps.status] === Status.COMPLETED ||
                         job[JobProps.status] === Status.SKIPPED ||
-                        job[JobProps.status] === Status.ABANDONED
+                        job[JobProps.status] === Status.ABANDONED,
                 ),
-        [jobRows, checked]
+        [jobRows, checked],
     );
 
     const handleFilterOpen = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
@@ -784,6 +784,13 @@ const JobSelector = (props: JobSelectorProps) => {
             updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
         }
     }, [coreChanged, props.updateVars, module, dispatch, id]);
+
+    useEffect(() => {
+        if (props.authChanged) {
+            const updateVar = getUpdateVar(props.updateVars, "jobs");
+            updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
+        }
+    }, [props.authChanged, props.updateVars, module, dispatch, id]);
 
     const tableHeightSx = useMemo(() => ({ maxHeight: props.height || "50vh" }), [props.height]);
 

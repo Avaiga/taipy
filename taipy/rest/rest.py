@@ -42,7 +42,7 @@ class Rest:
         Start a REST API server. This method is blocking.
 
         Arguments:
-            **kwargs : Options to provide to the application server.
+            **kwargs(dict[str, any]): Options to provide to the application server.
         """
         rest_config = Config.rest
         kwargs.update(

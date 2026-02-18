@@ -66,3 +66,11 @@ class MockState(State):
 
     def _invoke_on_gui(self, method: t.Callable, *args):
         return method(self.get_gui(), *args)
+
+    def patch(
+        self,
+        name: str,
+        change: t.Optional[t.Dict[t.Union[str, int], t.Any]] = None,
+        remove: t.Optional[t.Dict[t.Union[str, int], t.Any]] = None,
+    ):
+        return

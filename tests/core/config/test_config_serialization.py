@@ -113,7 +113,6 @@ def test_read_write_toml_configuration_file():
 mode = "development"
 
 [CORE]
-root_folder = "./taipy/"
 storage_folder = "user_data/"
 taipy_storage_folder = ".taipy/"
 repository_type = "filesystem"
@@ -281,7 +280,6 @@ def test_read_write_json_configuration_file():
 "mode": "development"
 },
 "CORE": {
-"root_folder": "./taipy/",
 "storage_folder": "user_data/",
 "taipy_storage_folder": ".taipy/",
 "repository_type": "filesystem",
@@ -473,7 +471,6 @@ mode = "development"
 max_nb_of_workers = "1:int"
 
 [CORE]
-root_folder = "./taipy/"
 storage_folder = ".data/"
 repository_type = "filesystem"
 mode = "development"
@@ -533,7 +530,6 @@ test_json_dn = [ "tests.core.config.test_config_serialization.compare_function:f
     assert Config.unique_sections is not None
     assert len(Config.unique_sections) == 2
 
-    assert Config.unique_sections[CoreSection.name].root_folder == "./taipy/"
     assert Config.unique_sections[CoreSection.name].storage_folder == ".data/"
     assert Config.unique_sections[CoreSection.name].repository_type == "filesystem"
     assert Config.unique_sections[CoreSection.name].repository_properties == {}
@@ -616,7 +612,6 @@ def test_read_write_json_configuration_file_migrate_sequence_in_scenario():
 "max_nb_of_workers": "1:int"
 },
 "CORE": {
-"root_folder": "./taipy/",
 "storage_folder": ".data/",
 "repository_type": "filesystem",
 "read_entity_retry": "0:int",
@@ -700,7 +695,6 @@ def test_read_write_json_configuration_file_migrate_sequence_in_scenario():
     assert Config.unique_sections is not None
     assert len(Config.unique_sections) == 2
 
-    assert Config.unique_sections[CoreSection.name].root_folder == "./taipy/"
     assert Config.unique_sections[CoreSection.name].storage_folder == ".data/"
     assert Config.unique_sections[CoreSection.name].repository_type == "filesystem"
     assert Config.unique_sections[CoreSection.name].repository_properties == {}

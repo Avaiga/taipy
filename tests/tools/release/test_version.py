@@ -46,7 +46,7 @@ def test_from_string():
     assert version.ext == "some_ext.more_ext"
 
 
-def test_extension():
+def test_split_extension():
     version = Version.from_string("1.2.3")
     extension = version.split_ext()
     assert extension == ("", -1)
@@ -154,3 +154,30 @@ def test_order():
 
     versions = [Version(1, 0), Version(2, 1), Version(3, 4), Version(2, 0)]
     assert max(versions) == Version(3, 4), "Cannot find max in Version list"
+
+
+def test_has_extension():
+    version = Version.from_string("1.2.3")
+    assert not version.has_extension()
+
+    version = Version.from_string("1.2.3.dev")
+    assert version.has_extension()
+
+    version = Version.from_string("1.2.3.dev0")
+    assert version.has_extension()
+
+
+def test_validate_extension():
+    version = Version.from_string("1.2.3")
+    assert not version.validate_extension("dev")
+
+    version = Version.from_string("1.2.3.dev")
+    assert version.validate_extension("dev")
+    assert not version.validate_extension("rc")
+
+    version = Version.from_string("1.2.3.dev0")
+    assert version.validate_extension("dev")
+
+    version = Version.from_string("1.2.3.rc1")
+    assert version.validate_extension("rc")
+    assert not version.validate_extension("dev")

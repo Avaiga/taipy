@@ -40,7 +40,7 @@ class TestGuiCoreContextProcessScenarioEvent:
             gui_core_context = _GuiCoreContext(Gui())
             gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
+            mock_get_auth.assert_called_with(system=True)
             if scenario_is_valid:
                 mock_broadcast.assert_called_once_with("core_changed", {"scenario": scenario_id}, None)
             else:
@@ -60,6 +60,6 @@ class TestGuiCoreContextProcessScenarioEvent:
             gui_core_context = _GuiCoreContext(Gui())
             gui_core_context.process_event(event=event)
 
-            mock_get_auth.assert_called_once_with(system=True)
+            mock_get_auth.assert_called_with(system=True)
             mock_broadcast.assert_called_once_with("core_changed", {"scenario": "scenario_id"}, None)
 

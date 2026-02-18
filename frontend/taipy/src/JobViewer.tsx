@@ -76,20 +76,26 @@ const JobViewer = (props: JobViewerProps) => {
                         id: jobId,
                         action: "delete",
                         error_id: getUpdateVar(updateJbVars, "error_id"),
-                    })
+                    }),
                 );
             } catch (e) {
                 console.warn("Error parsing ids for delete.", e);
             }
         },
-        [jobId, dispatch, module, props.id, props.onDelete, updateJbVars]
+        [jobId, dispatch, module, props.id, props.onDelete, updateJbVars],
     );
 
     useEffect(() => {
-        if (coreChanged?.job  == jobId) {
+        if (coreChanged?.job == jobId) {
             updateVarName && dispatch(createRequestUpdateAction(id, module, [updateVarName], true));
         }
     }, [coreChanged, updateVarName, jobId, module, dispatch, id]);
+
+    useEffect(() => {
+        if (props.authChanged) {
+            props.updateVarName && dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
+        }
+    }, [props.authChanged, props.updateVarName, module, dispatch, props.id]);
 
     return (
         <Grid container className={className} sx={{ maxWidth: width }}>
