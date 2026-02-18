@@ -24,7 +24,7 @@ def main(arg_strings=None):
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument(
-        "version",
+        "--version",
         action="store",
         type=Version.check_argument,
         help="""The version (M.m.p) of the releases to be deleted.
