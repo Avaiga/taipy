@@ -32,7 +32,7 @@ jobs:
 
       - name: Validate version
         run: |
-          version="${{ github.event.inputs.target_version }}"
+          version="${{ github.event.inputs.version }}"
           if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "❌ Invalid version format: '$version' - <M>.<m>.<p> is mandatory."
             exit 1
