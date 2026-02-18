@@ -32,7 +32,6 @@ from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
 import tzlocal
-from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
 from taipy.common import _module_exists
@@ -89,6 +88,7 @@ from .utils import (
     _LocalsContext,
     _MapDict,
     _patch_value,
+    _secure_filename_unicode,
     _setscopeattr,
     _setscopeattr_drill,
     _TaipyBase,
@@ -1122,7 +1122,7 @@ class Gui:
             upload_path = Path(upload_path).resolve()
             os.makedirs(upload_path, exist_ok=True)
             # Save file into upload_path directory
-            file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
+            file_path = _get_non_existent_file_path(upload_path, _secure_filename_unicode(file.filename))
             self._server.save_uploaded_file(file, os.path.join(upload_path, (file_path.name + suffix)))
         else:
             _warn(f"upload files: Path {path} points outside of upload root.")
@@ -1661,9 +1661,13 @@ class Gui:
             cp_args = cp_args[:argcount]
         with self.__event_manager:
             if iscoroutinefunction(user_function):
-                return _invoke_async_callback(user_function, cp_args)
+                return _invoke_async_callback(self.__do_call_with_state, [user_function, cp_args])
             else:
-                return user_function(*cp_args)
+                return self.__do_call_with_state(user_function, cp_args)
+
+    def __do_call_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
+        with self._get_authorization():
+            return user_function(*args)
 
     def _set_module_context(self, module_context: t.Optional[str]) -> t.ContextManager[None]:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
@@ -3063,8 +3067,17 @@ class Gui:
         try:
             return _Hooks()._get_authorization(self, client_id, system) or contextlib.nullcontext()
         except Exception as e:
-            _warn("Hooks:", e)
+            _warn("Hooks._get_authorization()", e)
             return contextlib.nullcontext()
+
+    def _is_exception_ignored(self, exception: Exception, source: t.Optional[str] = None) -> bool:
+        if is_debugging():
+            return False
+        try:
+            return _Hooks()._is_exception_ignored(self, exception, source) or False
+        except Exception as e:
+            _warn("Hooks._is_exception_ignored()", e)
+            return False
 
     def set_favicon(self, favicon_path: t.Union[str, Path], state: t.Optional[State] = None):
         """Change the favicon for all clients.
@@ -3122,7 +3135,8 @@ class Gui:
             with self.get_app_context(), self.__event_manager:
                 if client_id:
                     setattr(get_server_request_accessor(self).get_request_meta(), Gui.__ARG_CLIENT_ID, client_id)
-                _Hooks()._fire_event(event_name, client_id, payload)
+                with self._get_authorization():
+                    _Hooks()._fire_event(event_name, client_id, payload)
         finally:
             if this_sid:
                 get_server_request_accessor(self).set_sid(this_sid)

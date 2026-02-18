@@ -56,7 +56,7 @@ jobs:
       - name: Checks if package is already on Pypi
         id: check-version
         run: |
-          if curl https://pypi.org/simple/taipy-${{ matrix.package }} | grep -o ">taipy-${{ matrix.package }}-${{ github.event.inputs.version }}\.tar\.gz<"; then
+          if curl https://pypi.org/simple/taipy-${{ matrix.package }} | grep -o ">taipy_${{ matrix.package }}-${{ github.event.inputs.version }}\.tar\.gz<"; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -66,12 +66,16 @@ jobs:
         if: steps.check-version.outputs.exists == 'false'
         run: |
           gh release download ${{ github.event.inputs.version }}-${{ matrix.package }} --dir dist
+          for f in dist/taipy-*; do mv $f `echo $f|sed -e 's/-/_/'`; done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to PyPI
         if: steps.check-version.outputs.exists == 'false'
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+
 
   publish-main-package-to-pypi:
     permissions:
