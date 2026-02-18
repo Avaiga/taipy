@@ -32,7 +32,7 @@ The indicated version must not have extensions.""",
     )
 
     parser.add_argument(
-        "--dry_run",
+        "--dry-run",
         type=bool,
         default="True",
         help="A boolean flag indicating whether to perform a dry run (default: True). " +
