@@ -18,6 +18,9 @@ on:
         description: "Which extension to clean up. (default: dev)"
         default: "dev"
 
+permissions:
+  contents: write
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest

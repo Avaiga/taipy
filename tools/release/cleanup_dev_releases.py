@@ -120,11 +120,13 @@ def __delete_release(dry_run, github_path: str, token: str, pkg: str, release_id
     url = f"https://api.github.com/repos/{github_path}/releases/{release_id}"
     if dry_run:
         print(f'requests.delete("{url}", ' +  # noqa: T201
-              'headers={"Accept": "application/vnd.github+json", "Authorization": "Bearer ' + token +  # noqa: T201
-              '"})')  # noqa: T201
+              'headers={"Accept": "application/vnd.github+json", "Authorization": "Bearer ' + "<token>" +  # noqa: T201
+              '", "X-GitHub-Api-Version": "2022-11-28"})')  # noqa: T201
         return True
     else:
-        resp = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
+        resp = requests.delete(url, headers={"Accept": "application/vnd.github+json",
+                                             "Authorization": f"Bearer {token}",
+                                             "X-GitHub-Api-Version": "2022-11-28"})
         if resp.status_code == 204:
             print(f"Successfully deleted '{pkg}-{rel_version}'.")  # noqa: T201
             return True
@@ -137,11 +139,13 @@ def __delete_tag(dry_run, github_path: str, token: str, release_tag: str) -> boo
     url = f"https://api.github.com/repos/{github_path}/git/refs/tags/{release_tag}"
     if dry_run:
         print(f'requests.delete("{url}", ' +  # noqa: T201
-              'headers={"Accept": "application/vnd.github+json", "Authorization": "Bearer ' + token +  # noqa: T201
-              '"})')  # noqa: T201
+              'headers={"Accept": "application/vnd.github+json", "Authorization": "Bearer ' + "<token>" +  # noqa: T201
+              '", "X-GitHub-Api-Version": "2022-11-28"})')  # noqa: T201
         return True
     else:
-        resp = requests.delete(url, headers={"Accept": "application/vnd.github+json"})
+        resp = requests.delete(url, headers={"Accept": "application/vnd.github+json",
+                                             "Authorization": f"Bearer {token}",
+                                             "X-GitHub-Api-Version": "2022-11-28"})
         if resp.status_code == 204:
             print(f"Successfully deleted tag {release_tag}.")  # noqa: T201
             return True
