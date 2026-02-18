@@ -32,7 +32,7 @@ The indicated version must not have extensions.""",
     )
 
     parser.add_argument(
-        "--dry-run",
+        "--dry_run",
         type=bool,
         default="True",
         help="A boolean flag indicating whether to perform a dry run (default: True). " +
@@ -50,7 +50,7 @@ The indicated version must not have extensions.""",
     version = args.version
     dry_run = args.dry_run
     if dry_run:
-        print("Running in dry-run mode. No releases or tags will be deleted.")  # noqa: T201
+        print("Running in dry_run mode. No releases or tags will be deleted.")  # noqa: T201
     extension = args.extension
 
     github_path = Git.get_github_path()
