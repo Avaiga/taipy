@@ -6,7 +6,7 @@ on:
       version:
         description: "Taipy version to clean up without extension. Ex: 3.2.1 cleans up all dev releases 3.2.1.devX"
         required: true
-      dry_run:
+      dry-run:
         description: "Perform a dry run without actually deleting any releases (default: True)"
         required: true
         type: choice
@@ -51,5 +51,5 @@ jobs:
         run: |
           python tools/release/cleanup_dev_releases.py \
             --version ${{ github.event.inputs.version }} \
-            --dry-run ${{ github.event.inputs.dry_run }} \
+            --dry-run ${{ github.event.inputs.dry-run }} \
             --extension ${{ github.event.inputs.extension }}

@@ -49,6 +49,8 @@ The indicated version must not have extensions.""",
     args = parser.parse_args(arg_strings)
     version = args.version
     dry_run = args.dry_run
+    if dry_run:
+        print("Running in dry-run mode. No releases or tags will be deleted.")  # noqa: T201
     extension = args.extension
 
     github_path = Git.get_github_path()
