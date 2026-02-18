@@ -6,7 +6,6 @@ on:
       version:
         description: "Taipy version to clean up without extension. Ex: 3.2.1 cleans up all dev releases 3.2.1.devX"
         required: true
-
       dry_run:
         description: "Perform a dry run without actually deleting any releases (default: True)"
         required: true
@@ -15,7 +14,6 @@ on:
           - True
           - False
         default: "True"
-
       extension:
         description: "Which extension to clean up. (default: dev)"
         default: "dev"
@@ -24,6 +22,8 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Display inputs
         run: |
           echo "Version: ${{ github.event.inputs.version }}"
