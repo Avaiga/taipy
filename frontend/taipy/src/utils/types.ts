@@ -4,13 +4,13 @@ export type DisplayModel = [
     Array<[string, string, string, string]>
 ];
 
-export type DataNode = [string, string, undefined, number, boolean];
+export type DataNode = [string, string, undefined, number, boolean, string];
 export type DataNodes = Array<DataNode>;
-export type Sequence = [string, string, DataNodes, number, boolean];
+export type Sequence = [string, string, DataNodes, number, boolean, string];
 export type Sequences = Array<Sequence>;
-export type Scenario = [string, string, DataNodes | Sequences, number, boolean];
+export type Scenario = [string, string, DataNodes | Sequences, number, boolean, string];
 export type Scenarios = Array<Scenario>;
-export type Cycle = [string, string, Scenarios | DataNodes, number, boolean];
+export type Cycle = [string, string, Scenarios | DataNodes, number, boolean, string];
 export type Cycles = Array<Cycle>;
 
 export enum NodeType {

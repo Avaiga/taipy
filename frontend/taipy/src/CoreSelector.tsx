@@ -77,6 +77,7 @@ import {
 export interface EditProps {
     id: string;
     active: boolean;
+    notEditable?: string;
 }
 
 const treeSlots = { expandIcon: ChevronRight };
@@ -131,26 +132,28 @@ const CoreItem = (props: {
     hideNonPinned: boolean;
     active: boolean;
 }) => {
-    const [id, label, items, nodeType, primary] = props.item;
+    const [id, label, items, nodeType, primary, notEditable] = props.item;
     const isPinned = props.pins[0][id];
     const isShown = props.hideNonPinned ? props.pins[1][id] : true;
 
     return !props.displayCycles && nodeType === NodeType.CYCLE ? (
         <>
             {items
-                ? items.filter(v => v).map((item) => (
-                    <CoreItem
-                        key={item[0]}
-                        item={item}
-                        displayCycles={false}
-                        showPrimaryFlag={props.showPrimaryFlag}
-                        leafType={props.leafType}
-                        pins={props.pins}
-                        onPin={props.onPin}
-                        hideNonPinned={props.hideNonPinned}
-                        active={props.active}
-                    />
-                ))
+                ? items
+                      .filter((v) => v)
+                      .map((item) => (
+                          <CoreItem
+                              key={item[0]}
+                              item={item}
+                              displayCycles={false}
+                              showPrimaryFlag={props.showPrimaryFlag}
+                              leafType={props.leafType}
+                              pins={props.pins}
+                              onPin={props.onPin}
+                              hideNonPinned={props.hideNonPinned}
+                              active={props.active}
+                          />
+                      ))
                 : null}
         </>
     ) : isShown ? (
@@ -185,7 +188,7 @@ const CoreItem = (props: {
                     </Grid>
                     {props.editComponent && nodeType === props.leafType ? (
                         <Grid size="auto">
-                            <props.editComponent id={id} active={props.active} />
+                            <props.editComponent id={id} active={props.active} notEditable={notEditable} />
                         </Grid>
                     ) : null}
                     {props.onPin ? (
@@ -208,20 +211,22 @@ const CoreItem = (props: {
             // sx={nodeType === NodeType.NODE ? undefined : ParentItemSx}
         >
             {items
-                ? items.filter(v => v).map((item) => (
-                    <CoreItem
-                        key={item[0]}
-                        item={item}
-                        displayCycles={true}
-                        showPrimaryFlag={props.showPrimaryFlag}
-                        leafType={props.leafType}
-                        editComponent={props.editComponent}
-                        pins={props.pins}
-                        onPin={props.onPin}
-                        hideNonPinned={props.hideNonPinned}
-                        active={props.active}
-                    />
-                ))
+                ? items
+                      .filter((v) => v)
+                      .map((item) => (
+                          <CoreItem
+                              key={item[0]}
+                              item={item}
+                              displayCycles={true}
+                              showPrimaryFlag={props.showPrimaryFlag}
+                              leafType={props.leafType}
+                              editComponent={props.editComponent}
+                              pins={props.pins}
+                              onPin={props.onPin}
+                              hideNonPinned={props.hideNonPinned}
+                              active={props.active}
+                          />
+                      ))
                 : null}
         </TreeItem>
     ) : null;
@@ -230,7 +235,7 @@ const CoreItem = (props: {
 const findEntityAndParents = (
     id: string,
     tree: Entity[],
-    parentIds: Entity[] = []
+    parentIds: Entity[] = [],
 ): [Entity, Entity[], string[]] | undefined => {
     for (const entity of tree) {
         if (entity[0] === id) {
@@ -374,40 +379,40 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     const val = nodeId;
                     Promise.resolve().then(
                         // to avoid set state while render react errors
-                        () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar))
+                        () => dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate, lovVar)),
                     );
                     onSelect && onSelect(val);
                 }
                 return Array.isArray(nodeId) ? nodeId : nodeId ? [nodeId] : [];
             });
         },
-        [updateVarName, updateVars, onChange, onSelect, multiple, propagate, dispatch, module, lovPropertyName]
+        [updateVarName, updateVars, onChange, onSelect, multiple, propagate, dispatch, module, lovPropertyName],
     );
 
     useEffect(() => {
         if (value !== undefined && value !== null) {
             setSelectedItems(Array.isArray(value) ? value : value ? [value] : []);
-            setExpandedItems((exp) => (typeof value === "string" ? getExpandedIds(value, exp, props.entities) : exp));
+            setExpandedItems((exp) => (typeof value === "string" ? getExpandedIds(value, exp, entities) : exp));
         } else if (defaultValue) {
             try {
                 const parsedValue = JSON.parse(defaultValue);
                 if (Array.isArray(parsedValue)) {
                     setSelectedItems(parsedValue);
                     if (parsedValue.length > 1) {
-                        setExpandedItems((exp) => getExpandedIds(parsedValue[0], exp, props.entities));
+                        setExpandedItems((exp) => getExpandedIds(parsedValue[0], exp, entities));
                     }
                 } else {
                     setSelectedItems([parsedValue]);
-                    setExpandedItems((exp) => getExpandedIds(parsedValue, exp, props.entities));
+                    setExpandedItems((exp) => getExpandedIds(parsedValue, exp, entities));
                 }
             } catch {
                 setSelectedItems([defaultValue]);
-                setExpandedItems((exp) => getExpandedIds(defaultValue, exp, props.entities));
+                setExpandedItems((exp) => getExpandedIds(defaultValue, exp, entities));
             }
         } else if (value === null) {
             setSelectedItems([]);
         }
-    }, [defaultValue, value, props.entities]);
+    }, [defaultValue, value, entities]);
 
     useEffect(() => {
         if (entities && !entities.length) {
@@ -422,9 +427,9 @@ const CoreSelector = (props: CoreSelectorProps) => {
                                 module,
                                 onChange,
                                 propagate,
-                                lovVar
-                            )
-                        )
+                                lovVar,
+                            ),
+                        ),
                     );
                     return [];
                 }
@@ -441,6 +446,13 @@ const CoreSelector = (props: CoreSelectorProps) => {
         }
     }, [coreChanged, updateVars, module, dispatch, id, lovPropertyName]);
 
+    useEffect(() => {
+        if (props.authChanged) {
+            const updateVar = getUpdateVar(updateVars, lovPropertyName);
+            updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
+        }
+    }, [props.authChanged, updateVars, module, dispatch, id, lovPropertyName]);
+
     const treeViewSx = useMemo(() => ({ ...BaseTreeViewSx, maxHeight: props.height || "50vh" }), [props.height]);
 
     const onShowPinsChange = useCallback(() => setShowPinned((sp) => !sp), []);
@@ -448,13 +460,13 @@ const CoreSelector = (props: CoreSelectorProps) => {
     const onPin = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
-            if (showPins && props.entities) {
+            if (showPins && entities) {
                 const { id = "", pinned = "" } = e.currentTarget.dataset || {};
                 if (!id) {
                     return;
                 }
                 const [entity = undefined, parents = [], childIds = []] =
-                    findEntityAndParents(id, props.entities) || [];
+                    findEntityAndParents(id, entities) || [];
                 if (!entity) {
                     return;
                 }
@@ -496,7 +508,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 });
             }
         },
-        [showPins, props.entities]
+        [showPins, entities],
     );
 
     // filters
@@ -506,19 +518,22 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 ? (JSON.parse(props.filter) as Array<[string, string, string, string[], number[]]>)
                 : undefined;
             return Array.isArray(res)
-                ? res.reduce((pv, [name, id, colType, lov, params], idx) => {
-                    pv[name] = {
-                        dfid: id,
-                        title: name,
-                        type: colType,
-                        index: idx,
-                        filter: true,
-                        lov,
-                        freeLov: !!lov,
-                        params
-                    };
-                    return pv;
-                }, {} as Record<string, FilterColumnDesc>)
+                ? res.reduce(
+                      (pv, [name, id, colType, lov, params], idx) => {
+                          pv[name] = {
+                              dfid: id,
+                              title: name,
+                              type: colType,
+                              index: idx,
+                              filter: true,
+                              lov,
+                              freeLov: !!lov,
+                              params,
+                          };
+                          return pv;
+                      },
+                      {} as Record<string, FilterColumnDesc>,
+                  )
                 : undefined;
         } catch {
             return undefined;
@@ -536,15 +551,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                     if (filterVar) {
                         const lovVar = getUpdateVarNames(updateVars, lovPropertyName);
                         Promise.resolve().then(() =>
-                            dispatch(
-                                createRequestUpdateAction(
-                                    id,
-                                    module,
-                                    lovVar,
-                                    true,
-                                    { [filterVar]: filters }
-                                )
-                            )
+                            dispatch(createRequestUpdateAction(id, module, lovVar, true, { [filterVar]: filters })),
                         );
                     }
                     return filters;
@@ -552,7 +559,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 return old;
             });
         },
-        [updateVars, dispatch, id, updateCoreVars, lovPropertyName, module]
+        [updateVars, dispatch, id, updateCoreVars, lovPropertyName, module],
     );
 
     // sort
@@ -560,10 +567,13 @@ const CoreSelector = (props: CoreSelectorProps) => {
         try {
             const res = props.sort ? (JSON.parse(props.sort) as Array<[string, string, number[]]>) : undefined;
             return Array.isArray(res)
-                ? res.reduce((pv, [name, id, params], idx) => {
-                    pv[name] = { dfid: id, title: name, type: "str", index: idx, params };
-                    return pv;
-                }, {} as Record<string, SortColumnDesc>)
+                ? res.reduce(
+                      (pv, [name, id, params], idx) => {
+                          pv[name] = { dfid: id, title: name, type: "str", index: idx, params };
+                          return pv;
+                      },
+                      {} as Record<string, SortColumnDesc>,
+                  )
                 : undefined;
         } catch {
             return undefined;
@@ -585,8 +595,8 @@ const CoreSelector = (props: CoreSelectorProps) => {
                                 module,
                                 getUpdateVarNames(updateVars, lovPropertyName),
                                 true,
-                                { [sortVar]: sorts }
-                            )
+                                { [sortVar]: sorts },
+                            ),
                         );
                     }
                     return sorts;
@@ -594,7 +604,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                 return old;
             });
         },
-        [updateVars, dispatch, id, updateCoreVars, lovPropertyName, module]
+        [updateVars, dispatch, id, updateCoreVars, lovPropertyName, module],
     );
 
     useEffect(() => {
@@ -650,13 +660,18 @@ const CoreSelector = (props: CoreSelectorProps) => {
                             columns={colSorts}
                             appliedSorts={sorts}
                             onValidate={applySorts}
-                            className={className}>
-                            </TableSort>
+                            className={className}
+                        ></TableSort>
                     </Grid>
                 ) : null}
                 {showSearch ? (
                     <Grid>
-                        <IconButton onClick={onRevealSearch} size="small" sx={iconInRowSx} className={getSuffixedClassNames(className, "-search")}>
+                        <IconButton
+                            onClick={onRevealSearch}
+                            size="small"
+                            sx={iconInRowSx}
+                            className={getSuffixedClassNames(className, "-search")}
+                        >
                             {revealSearch ? (
                                 <SearchOffOutlined fontSize="inherit" />
                             ) : (
@@ -706,21 +721,21 @@ const CoreSelector = (props: CoreSelectorProps) => {
             >
                 {foundEntities
                     ? foundEntities.map((item) =>
-                        item ? (
-                            <CoreItem
-                                key={item[0]}
-                                item={item}
-                                displayCycles={displayCycles}
-                                showPrimaryFlag={showPrimaryFlag}
-                                leafType={leafType}
-                                editComponent={props.editComponent}
-                                onPin={showPins ? onPin : undefined}
-                                pins={pins}
-                                hideNonPinned={hideNonPinned}
-                                active={!!active}
-                            />
-                        ) : null
-                    )
+                          item ? (
+                              <CoreItem
+                                  key={item[0]}
+                                  item={item}
+                                  displayCycles={displayCycles}
+                                  showPrimaryFlag={showPrimaryFlag}
+                                  leafType={leafType}
+                                  editComponent={props.editComponent}
+                                  onPin={showPins ? onPin : undefined}
+                                  pins={pins}
+                                  hideNonPinned={hideNonPinned}
+                                  active={!!active}
+                              />
+                          ) : null,
+                      )
                     : null}
             </SimpleTreeView>
             {props.children}

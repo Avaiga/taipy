@@ -38,6 +38,7 @@ interface PaneProps extends TaipyActiveProps, TaipyChangeProps {
     anchor?: string;
     persistent?: boolean;
     title?: string;
+    defaultTitle?: string;
     onClose?: string;
     page?: string;
     partial?: boolean;
@@ -58,16 +59,16 @@ const getHeaderSx = (anchor: AnchorType): CSSProperties => {
             return { ...baseStyle, justifyContent: "flex-end" };
     }
 };
-const getHeaderIcon = (anchor: AnchorType): JSX.Element => {
+const getHeaderIcon = (anchor: AnchorType, open = true): JSX.Element => {
     switch (anchor) {
         case "right":
-            return <ChevronRightIcon />;
+            return open ? <ChevronRightIcon /> : <ChevronLeftIcon />;
         case "top":
-            return <ExpandLess />;
+            return open ? <ExpandLess /> : <ExpandMore />;
         case "bottom":
-            return <ExpandMore />;
+            return open ? <ExpandMore /> : <ExpandLess />;
         default:
-            return <ChevronLeftIcon />;
+            return open ? <ChevronLeftIcon /> : <ChevronRightIcon />;
     }
 };
 const getTitleSx = (anchor: AnchorType): CSSProperties => {
@@ -103,7 +104,6 @@ const Pane = (props: PaneProps) => {
     const {
         id,
         persistent = false,
-        title,
         onClose,
         page,
         partial,
@@ -121,24 +121,26 @@ const Pane = (props: PaneProps) => {
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const title = useDynamicProperty(props.title, props.defaultTitle, undefined);
     const anchor = useMemo<AnchorType>(
         () =>
             props.anchor
                 ? props.anchor.toLowerCase().startsWith("l")
                     ? "left"
                     : props.anchor.toLowerCase().startsWith("r")
-                    ? "right"
-                    : props.anchor.toLowerCase().startsWith("t")
-                    ? "top"
-                    : props.anchor.toLowerCase().startsWith("b")
-                    ? "bottom"
-                    : "left"
+                      ? "right"
+                      : props.anchor.toLowerCase().startsWith("t")
+                        ? "top"
+                        : props.anchor.toLowerCase().startsWith("b")
+                          ? "bottom"
+                          : "left"
                 : "left",
-        [props.anchor]
+        [props.anchor],
     );
     const drawerSx = useMemo(() => getDrawerSx(anchor, width, height), [width, height, anchor]);
     const headerSx = useMemo(() => getHeaderSx(anchor), [anchor]);
     const headerIcon = useMemo(() => getHeaderIcon(anchor), [anchor]);
+    const closedHeaderIcon = useMemo(() => getHeaderIcon(anchor, false), [anchor]);
     const titleSx = useMemo(() => getTitleSx(anchor), [anchor]);
     const handleClose = useCallback(() => {
         if (active) {
@@ -147,7 +149,7 @@ const Pane = (props: PaneProps) => {
                 Promise.resolve().then(() => dispatch(createSendActionNameAction(id, module, onClose, false)));
             } else if (updateVarName) {
                 Promise.resolve().then(() =>
-                    dispatch(createSendUpdateAction(updateVarName, false, module, props.onChange, propagate))
+                    dispatch(createSendUpdateAction(updateVarName, false, module, props.onChange, propagate)),
                 );
             }
         }
@@ -160,7 +162,7 @@ const Pane = (props: PaneProps) => {
                 Promise.resolve().then(() => dispatch(createSendActionNameAction(id, module, onClose, true)));
             } else if (updateVarName) {
                 Promise.resolve().then(() =>
-                    dispatch(createSendUpdateAction(updateVarName, true, module, props.onChange, propagate))
+                    dispatch(createSendUpdateAction(updateVarName, true, module, props.onChange, propagate)),
                 );
             }
         }
@@ -183,21 +185,21 @@ const Pane = (props: PaneProps) => {
         >
             {persistent ? (
                 <>
-                    <Box sx={headerSx} className={getSuffixedClassNames(className, "-header")}>
-                        {title ? <Box sx={titleSx}>{title}</Box> : null}
-                        <IconButton onClick={handleClose} disabled={!active}>
-                            {headerIcon}
-                        </IconButton>
-                    </Box>
+                    <Tooltip title={hover || ""}>
+                        <Box sx={headerSx} className={getSuffixedClassNames(className, "-header")}>
+                            {title ? <Box sx={titleSx}>{title}</Box> : null}
+                            <IconButton onClick={handleClose} disabled={!active}>
+                                {headerIcon}
+                            </IconButton>
+                        </Box>
+                    </Tooltip>
                     <Divider />
                 </>
             ) : null}
-            <Tooltip title={hover || ""}>
-                <>
-                    {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
-                    {props.children}
-                </>
-            </Tooltip>
+            <>
+                {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
+                {props.children}
+            </>
         </Drawer>
     ) : showButton ? (
         <Drawer
@@ -207,9 +209,29 @@ const Pane = (props: PaneProps) => {
             open={true}
             className={getSuffixedClassNames(className, "-button")}
         >
-            <IconButton onClick={handleOpen} disabled={!active}>
-                {headerIcon}
-            </IconButton>
+            <Tooltip
+                title={
+                    title ? (
+                        hover ? (
+                            <>
+                                {title}
+                                <br />
+                                {hover}
+                            </>
+                        ) : (
+                            title
+                        )
+                    ) : (
+                        hover || ""
+                    )
+                }
+            >
+                <span>
+                    <IconButton onClick={handleOpen} disabled={!active}>
+                        {closedHeaderIcon}
+                    </IconButton>
+                </span>
+            </Tooltip>
         </Drawer>
     ) : null;
 };
