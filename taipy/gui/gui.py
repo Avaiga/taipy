@@ -1661,9 +1661,13 @@ class Gui:
             cp_args = cp_args[:argcount]
         with self.__event_manager:
             if iscoroutinefunction(user_function):
-                return _invoke_async_callback(user_function, cp_args)
+                return _invoke_async_callback(self.__do_call_with_state, [user_function, cp_args])
             else:
-                return user_function(*cp_args)
+                return self.__do_call_with_state(user_function, cp_args)
+
+    def __do_call_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
+        with self._get_authorization():
+            return user_function(*args)
 
     def _set_module_context(self, module_context: t.Optional[str]) -> t.ContextManager[None]:
         return self._set_locals_context(module_context) if module_context is not None else contextlib.nullcontext()
