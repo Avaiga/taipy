@@ -22,11 +22,11 @@ describe("patchValue", () => {
             expect(newObj.a.b.c).toBe(2);
         });
 
-        it("should not create nested objects if they don't exist", () => {
+        it("should create nested objects if they don't exist", () => {
             const obj = {};
-            const originalObj = JSON.stringify(obj);
-            const newObj = patchValue(obj, { a: { b: { c: 1 } } });
-            expect(JSON.stringify(newObj)).toBe(originalObj);
+            const patchObj = { a: { b: { c: 1 } } };
+            const newObj = patchValue(obj, patchObj);
+            expect(JSON.stringify(newObj)).toBe(JSON.stringify(patchObj));
         });
 
         it("should handle array indices", () => {
@@ -67,11 +67,11 @@ describe("patchValue", () => {
             expect(newObj.a.b[1].d).toBe(3);
         });
 
-        it("should not create nested arrays if they don't exist", () => {
+        it("should create nested arrays if they don't exist", () => {
             const obj = {};
-            const originalObj = JSON.stringify(obj);
-            const newObj = patchValue(obj, { a: { b: { 0: 1 } } });
-            expect(JSON.stringify(newObj)).toBe(originalObj);
+            const patchObj = { a: { b: { 0: 1 } } };
+            const newObj = patchValue(obj, patchObj);
+            expect(JSON.stringify(newObj)).toBe(JSON.stringify(patchObj));
         });
 
         it("should not modify the original object if the value is the same", () => {

@@ -114,8 +114,7 @@ export const patchValue = <T>(toBePatched: T, change?: PatchChange, remove?: Pat
                             (patchedValue as Record<string, unknown>)[k] = newValue;
                         }
                     } else if (
-                        (oldValue === null || typeof oldValue !== "object") &&
-                        (v === null || typeof v !== "object")
+                        (oldValue === null || typeof oldValue !== "object")
                     ) {
                         if (patchedValue === toBePatched) {
                             patchedValue = { ...toBePatched };
