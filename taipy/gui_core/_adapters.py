@@ -111,7 +111,8 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         _get_reason(is_editable(scenario), "Scenario not editable"),
                     ]
             except Exception as e:
-                _warn(f"Access to scenario ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
+                if not _is_invalidCredentials_exception(e):
+                    _warn(f"Access to scenario ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
 
         return None
 
@@ -170,7 +171,8 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
                         ],
                     ]
             except Exception as e:
-                _warn(f"Access to scenario ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
+                if not _is_invalidCredentials_exception(e):
+                    _warn(f"Access to scenario ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
 
         return None
 
@@ -260,13 +262,17 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         else "",
                     ]
             except Exception as e:
-                _warn(f"Access to data node ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
+                if not _is_invalidCredentials_exception(e):
+                    _warn(f"Access to data node ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
 
         return None
 
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Dn"
+
+def _is_invalidCredentials_exception(e: Exception):
+    return type(e).__name__ == "InvalidCredentials"
 
 
 _operators: t.Dict[str, t.Callable] = {

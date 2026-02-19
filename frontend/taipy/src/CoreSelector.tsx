@@ -423,7 +423,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
                         dispatch(
                             createSendUpdateAction(
                                 updateVarName,
-                                multiple ? [] : "",
+                                multiple ? [] : null,
                                 module,
                                 onChange,
                                 propagate,

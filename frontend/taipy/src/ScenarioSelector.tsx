@@ -195,7 +195,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 
     useEffect(() => {
         form.setValues(
-            scenario
+            actionEdit && scenario
                 ? {
                       id: scenario[ScFProps.id],
                       config: scenario[ScFProps.config_id],
@@ -206,10 +206,10 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                 : { ...emptyScenario, config: configs?.length === 1 ? configs[0][0] : "" },
         );
         setProperties(
-            scenario ? scenario[ScFProps.properties].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : [],
+            actionEdit && scenario ? scenario[ScFProps.properties].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : [],
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [scenario, configs]);
+    }, [actionEdit, scenario, configs]);
 
     const onDeleteScenario = useCallback(() => {
         submit(actionEdit, true, { id: scenario && scenario[ScFProps.id] });

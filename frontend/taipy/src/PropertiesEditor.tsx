@@ -110,7 +110,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                 setFocusName("");
             }
         },
-        [isDefined, props.onEdit, entityId, properties, newProp, id, dispatch, module, setFocusName, updateVars]
+        [isDefined, props.onEdit, entityId, properties, newProp, id, dispatch, module, setFocusName, updateVars],
     );
     const cancelProperty = useCallback(
         (e?: MouseEvent<HTMLElement>, dataset?: DOMStringMap) => {
@@ -120,12 +120,12 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                 const property = entProperties.find(([key]) => key === propId);
                 property &&
                     setProperties((ps) =>
-                        ps.map((p) => (p.id === property[0] ? { ...p, key: property[0], value: property[1] } : p))
+                        ps.map((p) => (p.id === property[0] ? { ...p, key: property[0], value: property[1] } : p)),
                     );
                 setFocusName("");
             }
         },
-        [isDefined, entProperties, setFocusName]
+        [isDefined, entProperties, setFocusName],
     );
 
     const onKeyDown = useCallback(
@@ -142,7 +142,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                 }
             }
         },
-        [editProperty, cancelProperty]
+        [editProperty, cancelProperty],
     );
 
     const deleteProperty = useCallback(
@@ -156,11 +156,11 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                     createSendActionNameAction(id, module, props.onEdit, {
                         id: entityId,
                         deleted_properties: [property],
-                    })
+                    }),
                 );
             setFocusName("");
         },
-        [props.onEdit, entityId, id, dispatch, module, properties, setFocusName]
+        [props.onEdit, entityId, id, dispatch, module, properties, setFocusName],
     );
 
     useEffect(() => {
@@ -170,7 +170,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                     id: k,
                     key: k,
                     value: v,
-                }))
+                })),
             );
     }, [show, entProperties]);
 
@@ -232,8 +232,9 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                       data-id={property.id}
                                                       onClick={editProperty}
                                                       size="small"
+                                                      disabled={!property.key || !isDefined}
                                                   >
-                                                      <CheckCircle color="primary" />
+                                                      <CheckCircle color={disableColor("primary", !property.key || !isDefined)} />
                                                   </IconButton>
                                               </Tooltip>
                                               <Tooltip title="Cancel">
@@ -295,7 +296,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                     onClick={onFocus}
                     sx={hoverSx}
                 >
-                    {active && focusName == "new-property" ? (
+                    {active && !notEditableReason && focusName == "new-property" ? (
                         <>
                             <Grid size={4}>
                                 <TextField
@@ -318,14 +319,21 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     variant="outlined"
                                     sx={FieldNoMaxWidth}
                                     disabled={!isDefined}
-                                    slotProps={{ htmlInput: { onKeyDown, "data-enter": true }}}
+                                    slotProps={{ htmlInput: { onKeyDown, "data-enter": true } }}
                                 />
                             </Grid>
                             <Grid size={2} container alignContent="center" alignItems="center" justifyContent="center">
                                 <Tooltip title="Apply">
-                                    <IconButton sx={IconPaddingSx} onClick={editProperty} size="small">
-                                        <CheckCircle color="primary" />
-                                    </IconButton>
+                                    <span>
+                                        <IconButton
+                                            sx={IconPaddingSx}
+                                            onClick={editProperty}
+                                            size="small"
+                                            disabled={!newProp.key || !isDefined}
+                                        >
+                                            <CheckCircle color={disableColor("primary", !newProp.key || !isDefined)} />
+                                        </IconButton>
+                                    </span>
                                 </Tooltip>
                                 <Tooltip title="Cancel">
                                     <IconButton sx={IconPaddingSx} onClick={cancelProperty} size="small">
