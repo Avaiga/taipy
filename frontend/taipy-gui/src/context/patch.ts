@@ -121,6 +121,11 @@ export const patchValue = <T>(toBePatched: T, change?: PatchChange, remove?: Pat
                             patchedValue = { ...toBePatched };
                         }
                         (patchedValue as Record<string, unknown>)[k] = v;
+                    } else if (oldValue === undefined) {
+                        if (patchedValue === toBePatched) {
+                            patchedValue = { ...toBePatched };
+                        }
+                        (patchedValue as Record<string, unknown>)[k] = v;
                     }
                 }
             }

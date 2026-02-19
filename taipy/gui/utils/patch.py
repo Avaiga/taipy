@@ -27,6 +27,8 @@ def _patch_value(value: t.Any, change: t.Optional[dict] = None, remove: t.Option
                         value[k] = _patch_value(value[k], v)
                     else:
                         value[k] = v
+                else:
+                    value[k] = v
         if remove:
             for k, v in remove.items():
                 if k in value:

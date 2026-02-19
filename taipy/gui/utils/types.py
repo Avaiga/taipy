@@ -228,6 +228,8 @@ class _TaipyToJson(_TaipyBase):
                 return val.to_json()
             except Exception as e:
                 _warn("Issue while serializing 'JsonProperty'.", e)
+        elif isinstance(val, (dict, _MapDict)):
+            return val._dict if isinstance(val, _MapDict) else val
         elif method := getattr(val, "to_json", None):
             if ismethod(method):
                 try:
