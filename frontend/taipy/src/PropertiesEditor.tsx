@@ -95,16 +95,21 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                 const { id: propId = "" } = dataset || e?.currentTarget.dataset || {};
                 const property = propId ? properties.find((p) => p.id === propId) : newProp;
                 if (property) {
+                    if (!property.key) {
+                        return;
+                    }
                     const oldId = property.id;
                     const payload: PropertiesEditPayload = {
                         id: entityId,
-                        properties: [property],
+                        properties: property.key ? [property] : [],
                         error_id: getUpdateVar(updateVars, "error_id"),
                     };
                     if (oldId && oldId != property.key) {
                         payload.deleted_properties = [{ key: oldId }];
                     }
-                    dispatch(createSendActionNameAction(id, module, props.onEdit, payload));
+                    if (payload.properties?.length || payload.deleted_properties?.length) {
+                        dispatch(createSendActionNameAction(id, module, props.onEdit, payload));
+                    }
                 }
                 setNewProp((np) => ({ ...np, key: "", value: "" }));
                 setFocusName("");
