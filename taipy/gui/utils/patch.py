@@ -22,18 +22,18 @@ def _patch_value(value: t.Any, change: t.Optional[dict] = None, remove: t.Option
     if isinstance(value, dict):
         if change:
             for k, v in change.items():
-                if k in value:
-                    if isinstance(v, dict):
-                        value[k] = _patch_value(value[k], v)
-                    else:
-                        value[k] = v
+                if (
+                    isinstance(value.get(k, None), (dict, list, _MapDict))
+                    and isinstance(v, dict)
+                ):
+                    _patch_value(value[k], v)
                 else:
                     value[k] = v
         if remove:
             for k, v in remove.items():
                 if k in value:
                     if isinstance(v, dict):
-                        value[k] = _patch_value(value[k], remove=v)
+                        _patch_value(value[k], remove=v)
                     else:
                         del value[k]
     elif isinstance(value, list):
@@ -44,18 +44,18 @@ def _patch_value(value: t.Any, change: t.Optional[dict] = None, remove: t.Option
                     idx = k if k >= 0 else -1 - k
                     if idx < len(value):
                         if isinstance(v, dict):
-                            value[idx] = _patch_value(value[idx], v)
+                            _patch_value(value[idx], v)
                         if isinstance(v, list):
                             if insert:
-                                value[idx: idx] = v
+                                value[idx:idx] = v
                             else:
                                 for jdx, nv in enumerate(v, start=idx):
                                     if jdx < len(value):
-                                        value[jdx] = (
+                                        if isinstance(nv, dict):
                                             _patch_value(value[jdx], nv)
-                                            if isinstance(nv, dict)
-                                            else nv
-                                        )
+                                        else:
+                                            value[jdx] = nv
+
                                     else:
                                         value.append(nv)
                         else:
@@ -71,7 +71,7 @@ def _patch_value(value: t.Any, change: t.Optional[dict] = None, remove: t.Option
                 if isinstance(k, int) and 0 <= k < len(value):
                     v = remove[k]
                     if isinstance(v, dict):
-                        value[k] = _patch_value(value[k], remove=v)
+                        _patch_value(value[k], remove=v)
                     else:
                         del value[k]
     return original_value
