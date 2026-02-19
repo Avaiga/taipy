@@ -1182,7 +1182,7 @@ class Gui:
         for k, v in values.items():
             if isinstance(v, (_TaipyData, _TaipyContentHtml)) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
-            elif isinstance(v, _DoNotUpdate):
+            elif isinstance(v, _DoNotUpdate) and k in modified_vars:
                 modified_vars.remove(k)
         custom_page_filtered_types = _Hooks()._get_resource_handler_data_layer_supported_types()
         in_custom_page_context = _Hooks()._is_in_custom_page_context()
