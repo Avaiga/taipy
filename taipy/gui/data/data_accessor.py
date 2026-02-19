@@ -149,6 +149,12 @@ class _DataAccessors(object):
                     access = self.__access_4_type.get(type(converted_value))
                     if access is not None:
                         return access
+                for cl in self.__access_4_type.keys():
+                    if isinstance(value, cl):
+                        access = self.__access_4_type[cl]
+                        self.__access_4_type[type(value)] = access
+                        return access
+
                 _warn(f"Can't find Data Accessor for type {str(type(value))}.")
             return self.__invalid_data_accessor
         return access
