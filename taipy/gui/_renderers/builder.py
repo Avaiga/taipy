@@ -338,8 +338,9 @@ class _Builder:
         if isinstance(value, list):
             self.__set_json_attribute(_to_camel_case(f"default_{name}"), value)
         if hash := self.__hashes.get(name):
-            self.__update_vars.append(f"{name}={hash}")
-            self.__set_react_attribute(name, hash)
+            var_name = _to_camel_case(name)
+            self.__update_vars.append(f"{var_name}={hash}")
+            self.__set_react_attribute(var_name, hash)
         return self
 
     def __set_list_attribute(
