@@ -101,7 +101,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                     const oldId = property.id;
                     const payload: PropertiesEditPayload = {
                         id: entityId,
-                        properties: property.key ? [property] : [],
+                        properties: [property],
                         error_id: getUpdateVar(updateVars, "error_id"),
                     };
                     if (oldId && oldId != property.key) {
