@@ -111,7 +111,10 @@ class _GuiCoreScenarioAdapter(_TaipyBase):
                         _get_reason(is_editable(scenario), "Scenario not editable"),
                     ]
             except Exception as e:
-                _warn(f"Access to scenario ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
+                if not _is_invalidCredentials_exception(e):
+                    _warn(
+                        f"Access to scenario '{data.id}'" if hasattr(data, "id") else "Access to anonymous scenario", e
+                    )
 
         return None
 
@@ -170,7 +173,10 @@ class _GuiCoreScenarioDagAdapter(_TaipyBase):
                         ],
                     ]
             except Exception as e:
-                _warn(f"Access to scenario ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
+                if not _is_invalidCredentials_exception(e):
+                    _warn(
+                        f"Access to scenario '{data.id}'" if hasattr(data, "id") else "Access to anonymous scenario", e
+                    )
 
         return None
 
@@ -213,13 +219,7 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         json.dumps(value)
                     except Exception as e:
                         error = f"Unsupported data: {e}."
-                return (
-                    value,
-                    val_type,
-                    None,
-                    error,
-                    isinstance(dn, JSONDataNode)
-                )
+                return (value, val_type, None, error, isinstance(dn, JSONDataNode))
             except Exception as e:
                 return (None, None, None, f"read data_node: {e}")
         return (None, None, None, f"Data unavailable for {dn.get_simple_label()}")
@@ -260,13 +260,21 @@ class _GuiCoreDatanodeAdapter(_TaipyBase):
                         else "",
                     ]
             except Exception as e:
-                _warn(f"Access to data node ({data.id if hasattr(data, 'id') else 'No_id'}) failed", e)
+                if not _is_invalidCredentials_exception(e):
+                    _warn(
+                        f"Access to data node '{data.id}'" if hasattr(data, "id") else "Access to anonymous data node",
+                        e,
+                    )
 
         return None
 
     @staticmethod
     def get_hash():
         return _TaipyBase._HOLDER_PREFIX + "Dn"
+
+
+def _is_invalidCredentials_exception(e: Exception):
+    return type(e).__name__ == "InvalidCredentials"
 
 
 _operators: t.Dict[str, t.Callable] = {
@@ -568,9 +576,7 @@ class _GuiCoreDatanodeProperties(_GuiCoreProperties):
         _GuiCorePropDesc(DataNodeFilter("Last edit date", datetime, "last_edit_date"), for_sort=True),
         _GuiCorePropDesc(DataNodeFilter("Expiration date", datetime, "expiration_date"), extended=True, for_sort=True),
         _GuiCorePropDesc(DataNodeFilter("Expired", bool, "is_expired"), extended=True),
-        _GuiCorePropDesc(
-            DataNodeFilter("Rank", int, "_get_rank()", [ParamType.ScenarioConfigId]), for_sort=True
-        ),
+        _GuiCorePropDesc(DataNodeFilter("Rank", int, "_get_rank()", [ParamType.ScenarioConfigId]), for_sort=True),
     ]
     __DN_VALIDITY = None
 

@@ -763,7 +763,25 @@ const JobSelector = (props: JobSelectorProps) => {
         setJobRows(filteredJobRows);
         const jobIds = filteredJobRows.map((j) => j[JobProps.id]);
         setChecked((ids) => ids.filter((id) => jobIds.includes(id)));
-    }, [filters, props.jobs]);
+        setSelected((ids) => {
+            const newSelected = ids.filter((id) => jobIds.includes(id));
+            if (ids.length !== newSelected.length) {
+                const jobsVar = getUpdateVar(props.updateVars, "jobs");
+                dispatch(
+                    createSendUpdateAction(
+                        props.updateVarName,
+                        newSelected,
+                        module,
+                        props.onChange,
+                        propagate,
+                        jobsVar,
+                    ),
+                );
+                return newSelected;
+            }
+            return ids;
+        });
+    }, [filters, props.jobs, dispatch, module, props.onChange, props.updateVarName, props.updateVars, propagate]);
 
     useEffect(() => {
         if (props.value) {
