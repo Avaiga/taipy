@@ -222,7 +222,7 @@ class _TaipyToJson(_TaipyBase):
     def get(self):
         val = super().get()
         if not val:
-            return None
+            return val
         if isinstance(val, JsonProperty):
             try:
                 return val.to_json()
