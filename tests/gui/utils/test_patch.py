@@ -90,3 +90,12 @@ def test_update_empty_list():
     assert obj2.get("a").get("b", [])[0] == 1 # pyright: ignore[reportOptionalMemberAccess]
     assert len(obj2.get("a").get("b", [])) == 2 # pyright: ignore[reportOptionalMemberAccess]
 
+def test_update_empty_root_dict():
+    obj = {}
+    _patch_value(obj, { "a": { "b": { "c": 1 } } })
+    assert obj.get("a").get("b").get("c") == 1 # pyright: ignore[reportOptionalMemberAccess]
+
+def test_update_empty_root_list():
+    obj = []
+    _patch_value(obj, { 0: { "a": 1 } } )
+    assert obj[0].get("a") == 1 # pyright: ignore[reportOptionalMemberAccess]
