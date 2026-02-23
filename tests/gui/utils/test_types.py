@@ -190,7 +190,7 @@ def test_taipy_to_json_with_non_serializable_to_json():
         assert tb.get() is None
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning)
-        assert "Issue while serializing object." in str(w[-1].message)
+        assert "Issue while serializing object with 'hash.to_json'." in str(w[-1].message)
 
 
 def test_taipy_to_json_with_set():
