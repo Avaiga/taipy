@@ -127,3 +127,47 @@ def test_taipy_to_json_with_typed_dict():
 
     tb = _TaipyToJson(Movie(name="name", year=1928), "hash")
     assert tb.get() == {"name": "name", "year": 1928}
+
+def test_taipy_to_json_with_list():
+    tb = _TaipyToJson([], "hash")
+    assert tb.get() == []
+
+    tb = _TaipyToJson(["key", "value"], "hash")
+    assert tb.get() == ["key", "value"]
+
+def test_taipy_to_json_with_tuple():
+    tb = _TaipyToJson((), "hash")
+    assert tb.get() == ()
+
+    tb = _TaipyToJson(("key", "value"), "hash")
+    assert tb.get() == ("key", "value")
+
+def test_taipy_to_json_with_string():
+    tb = _TaipyToJson("", "hash")
+    assert tb.get() == ""
+
+    tb = _TaipyToJson("a string", "hash")
+    assert tb.get() == "a string"
+
+def test_taipy_to_json_with_non_serializable():
+    class NonSerializable:
+        pass
+
+    with warnings.catch_warnings(record=True) as w:
+        tb = _TaipyToJson(NonSerializable(), "hash")
+        assert tb.get() is None
+        assert len(w) == 1
+        assert issubclass(w[-1].category, UserWarning)
+        assert "'hash.to_json()' must be defined." in str(w[-1].message)
+
+def test_taipy_to_json_with_non_serializable_to_json():
+    class NonSerializable:
+        def to_json(self):
+            raise Exception("Serialization error")
+
+    with warnings.catch_warnings(record=True) as w:
+        tb = _TaipyToJson(NonSerializable(), "hash")
+        assert tb.get() is None
+        assert len(w) == 1
+        assert issubclass(w[-1].category, UserWarning)
+        assert "Issue while serializing object." in str(w[-1].message)
