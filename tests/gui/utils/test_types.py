@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 
+import json
 import typing as t
 import warnings
 
@@ -76,7 +77,7 @@ def test_taipy_date_range():
 
 def test_taipy_dict():
     assert _TaipyDict({"key": "value"}, "x").get() == '{"key": "value"}'
-    assert _TaipyDict(None, "x").get() == 'null'
+    assert _TaipyDict(None, "x").get() == "null"
 
 
 def test_taipy_time():
@@ -106,6 +107,18 @@ def test_taipy_to_json():
 
     assert _TaipyToJson(None, "hash").get() is None
 
+
+def test_taipy_to_json_with_to_dict():
+    class TestToDict:
+        def to_dict(self):
+            return {"value": "value"}
+
+    tb = _TaipyToJson(TestToDict(), "hash")
+    assert tb.get() == {"value": "value"}
+    assert tb.get_name() == "hash"
+    assert tb.get_hash() == "_TpTj"
+
+
 def test_taipy_to_json_with_dict():
     tb = _TaipyToJson({}, "hash")
     assert tb.get() == {}
@@ -113,12 +126,14 @@ def test_taipy_to_json_with_dict():
     tb = _TaipyToJson({"key": "value"}, "hash")
     assert tb.get() == {"key": "value"}
 
+
 def test_taipy_to_json_with_MapDict():
     tb = _TaipyToJson(_MapDict({}), "hash")
     assert tb.get() == {}
 
     tb = _TaipyToJson(_MapDict({"key": "value"}), "hash")
     assert tb.get() == {"key": "value"}
+
 
 def test_taipy_to_json_with_typed_dict():
     class Movie(t.TypedDict):
@@ -128,12 +143,14 @@ def test_taipy_to_json_with_typed_dict():
     tb = _TaipyToJson(Movie(name="name", year=1928), "hash")
     assert tb.get() == {"name": "name", "year": 1928}
 
+
 def test_taipy_to_json_with_list():
     tb = _TaipyToJson([], "hash")
     assert tb.get() == []
 
     tb = _TaipyToJson(["key", "value"], "hash")
     assert tb.get() == ["key", "value"]
+
 
 def test_taipy_to_json_with_tuple():
     tb = _TaipyToJson((), "hash")
@@ -142,12 +159,14 @@ def test_taipy_to_json_with_tuple():
     tb = _TaipyToJson(("key", "value"), "hash")
     assert tb.get() == ("key", "value")
 
+
 def test_taipy_to_json_with_string():
     tb = _TaipyToJson("", "hash")
     assert tb.get() == ""
 
     tb = _TaipyToJson("a string", "hash")
     assert tb.get() == "a string"
+
 
 def test_taipy_to_json_with_non_serializable():
     class NonSerializable:
@@ -160,6 +179,7 @@ def test_taipy_to_json_with_non_serializable():
         assert issubclass(w[-1].category, UserWarning)
         assert "'hash.to_json()' must be defined." in str(w[-1].message)
 
+
 def test_taipy_to_json_with_non_serializable_to_json():
     class NonSerializable:
         def to_json(self):
@@ -171,3 +191,11 @@ def test_taipy_to_json_with_non_serializable_to_json():
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning)
         assert "Issue while serializing object." in str(w[-1].message)
+
+
+def test_taipy_to_json_with_set():
+    tb = _TaipyToJson(set(), "hash")
+    assert tb.get() == []
+
+    tb = _TaipyToJson({"key", "value"}, "hash")
+    assert tb.get() == ["value", "key"] or tb.get() == ["key", "value"]
