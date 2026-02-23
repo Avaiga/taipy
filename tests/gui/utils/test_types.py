@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 
+import typing as t
 import warnings
 
 import pytest
@@ -118,3 +119,11 @@ def test_taipy_to_json_with_MapDict():
 
     tb = _TaipyToJson(_MapDict({"key": "value"}), "hash")
     assert tb.get() == {"key": "value"}
+
+def test_taipy_to_json_with_typed_dict():
+    class Movie(t.TypedDict):
+        name: str
+        year: int
+
+    tb = _TaipyToJson(Movie(name="name", year=1928), "hash")
+    assert tb.get() == {"name": "name", "year": 1928}
