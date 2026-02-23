@@ -13,6 +13,7 @@
 import json
 import typing as t
 from abc import ABC, abstractmethod
+from collections.abc import Iterable, Mapping
 from datetime import datetime
 from inspect import ismethod
 
@@ -221,14 +222,12 @@ class _TaipyTime(_TaipyBase):
 class _TaipyToJson(_TaipyBase):
     def get(self):
         val = super().get()
-        if not val:
-            return val
         if isinstance(val, JsonProperty):
             try:
                 return val.to_json()
             except Exception as e:
                 _warn("Issue while serializing 'JsonProperty'.", e)
-        elif isinstance(val, (dict, _MapDict)):
+        elif isinstance(val, (Mapping, Iterable)):
             return val._dict if isinstance(val, _MapDict) else val
         elif method := getattr(val, "to_json", None):
             if ismethod(method):
@@ -239,7 +238,7 @@ class _TaipyToJson(_TaipyBase):
                     _warn("Issue while serializing object.", e)
             else:
                 _warn(f"'{self._get_readable_name()}.to_json' is not a valid method.")
-        else:
+        elif val is not None:
             _warn(f"'{self._get_readable_name()}.to_json()' must be defined.")
         return None
 

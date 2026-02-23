@@ -14,6 +14,7 @@ import warnings
 
 import pytest
 
+from taipy.gui.utils._map_dict import _MapDict
 from taipy.gui.utils.date import _string_to_date
 from taipy.gui.utils.types import (
     JsonProperty,
@@ -103,3 +104,17 @@ def test_taipy_to_json():
     assert tb.get() == {"data": [], "layout": {}}
 
     assert _TaipyToJson(None, "hash").get() is None
+
+def test_taipy_to_json_with_dict():
+    tb = _TaipyToJson({}, "hash")
+    assert tb.get() == {}
+
+    tb = _TaipyToJson({"key": "value"}, "hash")
+    assert tb.get() == {"key": "value"}
+
+def test_taipy_to_json_with_MapDict():
+    tb = _TaipyToJson(_MapDict({}), "hash")
+    assert tb.get() == {}
+
+    tb = _TaipyToJson(_MapDict({"key": "value"}), "hash")
+    assert tb.get() == {"key": "value"}

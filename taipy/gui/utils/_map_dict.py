@@ -12,9 +12,10 @@
 from __future__ import annotations
 
 import typing as t
+from collections.abc import Mapping
 
 
-class _MapDict(object):
+class _MapDict(Mapping):
     """
     Provide class binding, can utilize getattr, setattr functionality
     Also perform update operation
@@ -88,7 +89,7 @@ class _MapDict(object):
     def items(self):
         return self._dict.items()
 
-    def get(self, key: t.Any, default_value: t.Optional[str] = None) -> t.Optional[t.Any]:
+    def get(self, key: t.Any, default_value: t.Optional[t.Any] = None) -> t.Optional[t.Any]:
         return self._dict.get(key, default_value)
 
     def clear(self) -> None:
