@@ -14,14 +14,21 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 
+class DictProperty(ABC):
+    @abstractmethod
+    def to_dict(self) -> dict:
+        raise NotImplementedError()
+
+
 class JsonProperty(ABC):
     @abstractmethod
-    def to_json(self) -> dict:
+    def to_json(self) -> str:
         raise NotImplementedError()
+
 
 @dataclass
 # Configuration for chart animations
-class ChartAnimation(JsonProperty):
+class ChartAnimation(DictProperty):
     # List of columns to animate
     columns: t.List[str]
     # Easing function to use for the animation
@@ -29,11 +36,9 @@ class ChartAnimation(JsonProperty):
     # Duration of the animation in milliseconds
     duration: int = 500
 
-    def to_json(self):
+    def to_dict(self) -> dict:
         return {
             "columns": self.columns,
             "easing": self.easing,
             "duration": self.duration,
         }
-
-

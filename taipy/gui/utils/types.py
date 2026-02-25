@@ -18,7 +18,7 @@ from datetime import datetime
 from inspect import ismethod
 
 from .._warnings import _warn
-from ..json_properties import JsonProperty
+from ..json_properties import DictProperty, JsonProperty
 from . import _date_to_string, _MapDict, _string_to_date, _variable_decode
 
 
@@ -222,22 +222,34 @@ class _TaipyTime(_TaipyBase):
 class _TaipyToJson(_TaipyBase):
     def get(self):
         val = super().get()
-        if isinstance(val, JsonProperty):
+        if isinstance(val, DictProperty):
             try:
-                return val.to_json()
+                return val.to_dict()
             except Exception as e:
-                _warn("Issue while serializing 'JsonProperty'.", e)
+                _warn(f"Issue while deserializing object of type {type(val).__name__} (DictProperty).", e)
+        elif isinstance(val, JsonProperty):
+            try:
+                return json.loads(val.to_json())
+            except Exception as e:
+                _warn(f"Issue while deserializing object of type {type(val).__name__} (JsonProperty).", e)
         elif isinstance(val, (Mapping, Iterable)):
             return val._dict if isinstance(val, _MapDict) else list(val) if isinstance(val, set) else val
-        elif method := getattr(val, "to_json", None) or (method := getattr(val, "to_dict", None)):
+        elif method := getattr(val, "to_dict", None):
             if ismethod(method):
                 try:
-                    json_val = method()
-                    return json.loads(json_val) if isinstance(json_val, str) else json_val
+                    return method()
                 except Exception as e:
-                    _warn(f"Issue while serializing object with '{self._get_readable_name()}.{method.__name__}'.", e)
+                    _warn(f"Issue while serializing object of type {type(val).__name__} using '{self._get_readable_name()}.to_dict()'.", e)
             else:
-                _warn(f"'{self._get_readable_name()}.{method.__name__}' is not a valid method.")
+                _warn(f"'{self._get_readable_name()}.to_dict' is not a valid method.")
+        elif method := getattr(val, "to_json", None):
+            if ismethod(method):
+                try:
+                    return json.loads(method())
+                except Exception as e:
+                    _warn(f"Issue while deserializing object of type {type(val).__name__} using '{self._get_readable_name()}.to_json()'.", e)
+            else:
+                _warn(f"'{self._get_readable_name()}.to_json' is not a valid method.")
         elif val is not None:
             _warn(f"'{self._get_readable_name()}.to_json()' must be defined.")
         return None

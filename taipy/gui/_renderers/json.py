@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 from __future__ import annotations
 
+from inspect import ismethod
 import typing as t
 from abc import ABC, abstractmethod
 from datetime import date, datetime, time, timedelta
@@ -28,12 +29,12 @@ from ..utils.singleton import _Singleton
 
 class JsonAdapter(ABC):
     """NOT DOCUMENTED"""
+
     def register(self):
         _TaipyJsonAdapter().register(self)
 
     @abstractmethod
-    def parse(self, o) -> t.Optional[t.Any]:
-        ...  # pragma: no cover
+    def parse(self, o) -> t.Optional[t.Any]: ...  # pragma: no cover
 
 
 class _DefaultJsonAdapter(JsonAdapter):
@@ -54,7 +55,14 @@ class _DefaultJsonAdapter(JsonAdapter):
             return getattr(o, "tolist", lambda: o)()
         if isinstance(o, _DoNotUpdate):
             return None
-
+        if (method := getattr(o, "to_dict", None)) or (method := getattr(o, "to_json", None)):
+            if ismethod(method):
+                try:
+                    return method()
+                except Exception as e:
+                    _warn(f"Exception while calling {method.__name__}() of {type(o).__name__}", e)
+                    raise e
+        return None
 
 class _TaipyJsonAdapter(object, metaclass=_Singleton):
     def __init__(self) -> None:

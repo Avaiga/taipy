@@ -89,11 +89,11 @@ def test_taipy_time():
 
 def test_taipy_to_json():
     class TestJson(JsonProperty):
-        def to_json(self):
-            return {"value": "value"}
+        def to_json(self) -> str:
+            return '{"key": "value"}'
 
     tb = _TaipyToJson(TestJson(), "hash")
-    assert tb.get() == {"value": "value"}
+    assert tb.get() == {"key": "value"}
     assert tb.get_name() == "hash"
     assert tb.get_hash() == "_TpTj"
 
@@ -110,10 +110,10 @@ def test_taipy_to_json():
 def test_taipy_to_json_with_to_dict():
     class TestToDict:
         def to_dict(self):
-            return {"value": "value"}
+            return {"key": "value"}
 
     tb = _TaipyToJson(TestToDict(), "hash")
-    assert tb.get() == {"value": "value"}
+    assert tb.get() == {"key": "value"}
     assert tb.get_name() == "hash"
     assert tb.get_hash() == "_TpTj"
 
@@ -189,7 +189,7 @@ def test_taipy_to_json_with_non_serializable_to_json():
         assert tb.get() is None
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning)
-        assert "Issue while serializing object with 'hash.to_json'." in str(w[-1].message)
+        assert "Issue while deserializing object" in str(w[-1].message)
 
 
 def test_taipy_to_json_with_set():

@@ -24,7 +24,7 @@ def error(message):
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description="taipy.gui.extensions entry point.")
+    parser = argparse.ArgumentParser(description="taipy.gui.extension entry point.")
     sub_parser = parser.add_subparsers(dest="command", help="Commands to run", required=True)
 
     def find_package_root_dir(args) -> str:

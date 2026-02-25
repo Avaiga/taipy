@@ -141,7 +141,7 @@ class PropertyType(Enum):
     image = _TaipyContentImage
     json = _TaipyToJson
     """
-    The property is JSON serializable.
+    The property value is JSON serializable.
     """
     dynamic_json = _TaipyToDynamicJson
     """
