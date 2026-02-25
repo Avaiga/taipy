@@ -239,7 +239,11 @@ class _TaipyToJson(_TaipyBase):
                 try:
                     return method()
                 except Exception as e:
-                    _warn(f"Issue while serializing object of type {type(val).__name__} using '{self._get_readable_name()}.to_dict()'.", e)
+                    _warn(
+                        f"Issue while serializing object of type {type(val).__name__} "
+                        + f"using '{self._get_readable_name()}.to_dict()'.",
+                        e,
+                    )
             else:
                 _warn(f"'{self._get_readable_name()}.to_dict' is not a valid method.")
         elif method := getattr(val, "to_json", None):
@@ -247,7 +251,11 @@ class _TaipyToJson(_TaipyBase):
                 try:
                     return json.loads(method())
                 except Exception as e:
-                    _warn(f"Issue while deserializing object of type {type(val).__name__} using '{self._get_readable_name()}.to_json()'.", e)
+                    _warn(
+                        f"Issue while deserializing object of type {type(val).__name__} "
+                        + f"using '{self._get_readable_name()}.to_json()'.",
+                        e,
+                    )
             else:
                 _warn(f"'{self._get_readable_name()}.to_json' is not a valid method.")
         elif val is not None:

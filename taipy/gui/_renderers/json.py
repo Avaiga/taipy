@@ -10,10 +10,10 @@
 # specific language governing permissions and limitations under the License.
 from __future__ import annotations
 
-from inspect import ismethod
 import typing as t
 from abc import ABC, abstractmethod
 from datetime import date, datetime, time, timedelta
+from inspect import ismethod
 from json import JSONEncoder
 from pathlib import Path
 
@@ -63,6 +63,7 @@ class _DefaultJsonAdapter(JsonAdapter):
                     _warn(f"Exception while calling {method.__name__}() of {type(o).__name__}", e)
                     raise e
         return None
+
 
 class _TaipyJsonAdapter(object, metaclass=_Singleton):
     def __init__(self) -> None:
