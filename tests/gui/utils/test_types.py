@@ -153,12 +153,13 @@ def test_taipy_to_jsonable_with_MapDict():
     assert tb.get() == TEST_DICT
 
 
-def test_taipy_to_jsonable_with_typed_dict():
-    class Movie(t.TypedDict):
-        name: str
-        year: int
+class TypedDictCustomClass(t.TypedDict):
+    name: str
+    year: int
 
-    tb = _TaipyToJsonable(Movie(name="name", year=1928), "hash")
+
+def test_taipy_to_jsonable_with_typed_dict():
+    tb = _TaipyToJsonable(TypedDictCustomClass(name="name", year=1928), "hash")
     assert tb.get() == {"name": "name", "year": 1928}
 
 
