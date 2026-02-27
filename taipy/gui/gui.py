@@ -98,7 +98,7 @@ from .utils import (
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
-    _TaipyToJson,
+    _TaipyToJsonable,
     _to_camel_case,
     _variable_decode,
     is_debugging,
@@ -184,7 +184,7 @@ class Gui:
     __RE_PY = re.compile(r"(.*?)\.py$")
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
-    __reserved_routes: t.List[str] = [
+    __reserved_routes: list[str] = [
         _INIT_URL,
         _JSX_URL,
         _CONTENT_ROOT,
@@ -195,11 +195,11 @@ class Gui:
 
     __LOCAL_TZ = _get_valid_timezone()
 
-    __extensions: t.Dict[str, t.List[ElementLibrary]] = {}
+    __extensions: dict[str, list[ElementLibrary]] = {}
 
-    __shared_variables: t.List[str] = []
+    __shared_variables: list[str] = []
 
-    __content_providers: t.Dict[type, t.Callable[..., str]] = {}
+    __content_providers: dict[type, t.Callable[..., str]] = {}
 
     # See set_unsupported_data_converter()
     __unsupported_data_converter: t.Optional[t.Callable] = None
@@ -211,8 +211,8 @@ class Gui:
         css_file: t.Optional[str] = None,
         path_mapping: t.Optional[dict] = None,
         env_filename: t.Optional[str] = None,
-        libraries: t.Optional[t.List[ElementLibrary]] = None,
-        script_paths: t.Union[str, Path, t.List[t.Union[str, Path]], None] = None,
+        libraries: t.Optional[list[ElementLibrary]] = None,
+        script_paths: t.Union[str, Path, list[t.Union[str, Path]], None] = None,
         server: t.Union[str, t.Any] = "flask",
     ):
         """Initialize a new Gui instance.
@@ -277,11 +277,11 @@ class Gui:
 
         # Server config
         self._server_instance: t.Any = None
-        _additional_supported_server: t.List[t.Type[_Server]] = _Hooks()._get_additional_supported_server() or []
-        _supported_server: t.List[t.Type[_Server]] = [
+        _additional_supported_server: list[type[_Server]] = _Hooks()._get_additional_supported_server() or []
+        _supported_server: list[type[_Server]] = [
             _FlaskServer,
         ] + _additional_supported_server
-        _server_class: t.Optional[t.Type[_Server]] = None
+        _server_class: t.Optional[type[_Server]] = None
         for server_class in _supported_server:
             if isinstance(server, str) and server == server_class.type:
                 _server_class = server_class
@@ -304,7 +304,7 @@ class Gui:
 
         self.__evaluator: _Evaluator = None  # type: ignore[assignment]
         self.__adapter = _Adapter()
-        self.__directory_name_of_pages: t.List[str] = []
+        self.__directory_name_of_pages: list[str] = []
         self.__favicon: t.Union[str, Path, None] = None
 
         # default actions
@@ -415,7 +415,7 @@ class Gui:
         """
 
         # sid from client_id
-        self.__client_id_2_sid: t.Dict[str, t.Set[str]] = {}
+        self.__client_id_2_sid: dict[str, set[str]] = {}
 
         # Load default config
         self._config._load(default_config)
@@ -449,7 +449,7 @@ class Gui:
         # Init Event Manager
         self.__event_manager = _EventManager()
 
-        self.__front_end_variables: t.Set[str] = set()
+        self.__front_end_variables: set[str] = set()
 
         # Init Gui Hooks
         _Hooks()._init(self)
@@ -464,7 +464,7 @@ class Gui:
             for library in libraries:
                 Gui.add_library(library)
 
-    def __load_scripts(self, script_paths: t.Union[str, Path, t.List[t.Union[str, Path]], None]):
+    def __load_scripts(self, script_paths: t.Union[str, Path, list[t.Union[str, Path]], None]):
         if script_paths is None:
             return
         else:
@@ -541,7 +541,7 @@ class Gui:
             return
         Gui.__content_providers[content_type] = content_provider
 
-    def __process_content_provider(self, state: State, path: str, query: t.Dict[str, str]):
+    def __process_content_provider(self, state: State, path: str, query: dict[str, str]):
         variable_name = query.get("variable_name")
         content = None
         if variable_name:
@@ -621,7 +621,7 @@ class Gui:
         """
         Gui.add_shared_variable(*names)
 
-    def _get_shared_variables(self) -> t.List[str]:
+    def _get_shared_variables(self) -> list[str]:
         return self.__evaluator.get_shared_variables()
 
     @staticmethod
@@ -639,16 +639,16 @@ class Gui:
     def _get_data_scope(self) -> SimpleNamespace:
         return self.__bindings._get_data_scope()
 
-    def _get_data_scope_metadata(self) -> t.Dict[str, t.Any]:
+    def _get_data_scope_metadata(self) -> dict[str, t.Any]:
         return self.__bindings._get_data_scope_metadata()
 
-    def _get_all_data_scopes(self) -> t.Dict[str, SimpleNamespace]:
+    def _get_all_data_scopes(self) -> dict[str, SimpleNamespace]:
         return self.__bindings._get_all_scopes()
 
     def _get_config(self, name: ConfigParameter, default_value: t.Any) -> t.Any:
         return self._config._get_config(name, default_value)
 
-    def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
+    def _get_themes(self) -> t.Optional[dict[str, t.Any]]:
         theme = self._get_config("theme", None)
         dark_theme = self._get_config("dark_theme", None)
         light_theme = self._get_config("light_theme", None)
@@ -693,11 +693,11 @@ class Gui:
                 sids.add(sid)
         get_server_request_accessor(self).get_request_meta().client_id = client_id
 
-    def __is_var_modified_in_context(self, var_name: str, derived_vars: t.Set[str]) -> bool:
-        modified_vars: t.Optional[t.Set[str]] = getattr(
+    def __is_var_modified_in_context(self, var_name: str, derived_vars: set[str]) -> bool:
+        modified_vars: t.Optional[set[str]] = getattr(
             get_server_request_accessor(self).get_request_meta(), "modified_vars", None
         )
-        der_vars: t.Optional[t.Set[str]] = getattr(
+        der_vars: t.Optional[set[str]] = getattr(
             get_server_request_accessor(self).get_request_meta(), "derived_vars", None
         )
         get_server_request_accessor(self).get_request_meta().update_count = (
@@ -715,10 +715,10 @@ class Gui:
         modified_vars.add(var_name)
         return False
 
-    def __clean_vars_on_exit(self) -> t.Optional[t.Set[str]]:
+    def __clean_vars_on_exit(self) -> t.Optional[set[str]]:
         update_count = getattr(get_server_request_accessor(self).get_request_meta(), "update_count", 0) - 1
         if update_count < 1:
-            derived_vars: t.Set[str] = getattr(
+            derived_vars: set[str] = getattr(
                 get_server_request_accessor(self).get_request_meta(), "derived_vars", set()
             )
             delattr(get_server_request_accessor(self).get_request_meta(), "update_count")
@@ -888,7 +888,7 @@ class Gui:
             if derived_modified is not None:
                 self.__send_var_list_update(list(derived_modified), var_name)
 
-    def _get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
+    def _get_real_var_name(self, var_name: str) -> tuple[str, str]:
         if not var_name:
             return (var_name, var_name)
         # Handle holder prefix if needed
@@ -961,7 +961,7 @@ class Gui:
         return self._server.create_http_response("", 404)
 
     def _get_user_content_url(
-        self, path: t.Optional[str] = None, query_args: t.Optional[t.Dict[str, str]] = None
+        self, path: t.Optional[str] = None, query_args: t.Optional[dict[str, str]] = None
     ) -> t.Optional[str]:
         q_args = query_args or {}
         q_args.update({Gui.__ARG_CLIENT_ID: self._get_client_id()})
@@ -969,7 +969,7 @@ class Gui:
 
     def _serve_user_content(self, path: str) -> t.Any:
         self.__set_client_id_in_context()
-        q_args: t.Dict[str, str] = {}
+        q_args: dict[str, str] = {}
         q_args.update(get_server_request_accessor(self).args(True))
         q_args.pop(Gui.__ARG_CLIENT_ID, None)
         cb_function: t.Union[t.Callable, str, None] = None
@@ -1002,7 +1002,7 @@ class Gui:
                 _warn("on_user_content() callback function has not been defined.")
         if _is_function(cb_function):
             try:
-                args: t.List[t.Any] = []
+                args: list[t.Any] = []
                 if path:
                     args.append(path)
                 if len(q_args):
@@ -1036,8 +1036,8 @@ class Gui:
     def _get_version(self) -> str:
         return f"{self.__version.get('major', 0)}.{self.__version.get('minor', 0)}.{self.__version.get('patch', 0)}"
 
-    def __append_libraries_to_status(self, status: t.Dict[str, t.Any]):
-        libraries: t.Dict[str, t.Any] = {}
+    def __append_libraries_to_status(self, status: dict[str, t.Any]):
+        libraries: dict[str, t.Any] = {}
         for libs_list in self.__extensions.values():
             for lib in libs_list:
                 if not isinstance(lib, ElementLibrary):
@@ -1046,7 +1046,7 @@ class Gui:
                 if libs is None:
                     libs = []
                     libraries[lib.get_name()] = libs
-                elements: t.List[t.Dict[str, str]] = []
+                elements: list[dict[str, str]] = []
                 libs.append({"js module": lib.get_js_module_name(), "elements": elements})
                 for element_name, elt in lib.get_elements().items():
                     if not isinstance(elt, Element):
@@ -1059,8 +1059,8 @@ class Gui:
                     elements.append(elt_dict)
         status.update({"libraries": libraries})
 
-    def _serve_status(self, template: Path) -> t.Dict[str, t.Dict[str, str]]:
-        base_json: t.Dict[str, t.Any] = {"user_status": str(self.__call_on_status() or "")}
+    def _serve_status(self, template: Path) -> dict[str, dict[str, str]]:
+        base_json: dict[str, t.Any] = {"user_status": str(self.__call_on_status() or "")}
         if self._get_config("extended_status", False):
             base_json.update(
                 {
@@ -1147,7 +1147,7 @@ class Gui:
             newvalue = str(file_path)
             if multiple and var_name:
                 value = _getscopeattr(self, var_name)  # type: ignore[arg-type]
-                if not isinstance(value, t.List):
+                if not isinstance(value, list):
                     value = [] if value is None else [value]
                 value.append(newvalue)
                 newvalue = value
@@ -1171,7 +1171,7 @@ class Gui:
 
     def __send_var_list_update(  # noqa C901
         self,
-        modified_vars: t.List[str],
+        modified_vars: list[str],
         front_var: t.Optional[str] = None,
     ):
         ws_dict = {}
@@ -1196,7 +1196,7 @@ class Gui:
             ):  # type: ignore
                 newvalue = {"__taipy_refresh": True}
             else:
-                is_json = False
+                is_jsonable = False
                 if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
                     ret_value = self.__get_content_accessor().get_info(
                         t.cast(str, front_var), newvalue.get(), isinstance(newvalue, _TaipyContentImage)
@@ -1214,16 +1214,16 @@ class Gui:
                         newvalue.get_name(), newvalue.get(), id_only=isinstance(newvalue, _TaipyLovValue)
                     )
                 elif isinstance(newvalue, _TaipyBase):
-                    is_json = isinstance(newvalue, _TaipyToJson)
+                    is_jsonable = isinstance(newvalue, _TaipyToJsonable)
                     newvalue = newvalue.get()
                 # Skip in taipy-gui, available in custom frontend
-                if isinstance(newvalue, (dict, _MapDict)) and not in_custom_page_context and not is_json:
+                if isinstance(newvalue, (dict, _MapDict)) and not in_custom_page_context and not is_jsonable:
                     continue
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
                     newvalue = None
-                if newvalue is not None and not isinstance(newvalue, str) and not is_json:
-                    debug_warnings: t.List[warnings.WarningMessage] = []
+                if newvalue is not None and not isinstance(newvalue, str) and not is_jsonable:
+                    debug_warnings: list[warnings.WarningMessage] = []
                     with warnings.catch_warnings(record=True) as warns:
                         warnings.resetwarnings()
                         json.dumps(newvalue, cls=_TaipyJsonEncoder)
@@ -1360,7 +1360,7 @@ class Gui:
             if value is not None and scope_meta_ls.get(key) != value:
                 scope_meta_ls[key] = value
 
-    def _query_local_storage(self, *keys: str) -> t.Union[str, t.Dict[str, str], None]:
+    def _query_local_storage(self, *keys: str) -> t.Union[str, dict[str, str], None]:
         if not keys:
             return None
         if len(keys) == 1:
@@ -1455,7 +1455,7 @@ class Gui:
         )
 
     def __send_ws_patch(
-        self, names: t.List[str], change: t.Optional[dict] = None, remove: t.Optional[dict] = None
+        self, names: list[str], change: t.Optional[dict] = None, remove: t.Optional[dict] = None
     ) -> None:
         self.__send_ws(
             {
@@ -1486,7 +1486,7 @@ class Gui:
     def __send_ws_navigate(
         self,
         to: str,
-        params: t.Optional[t.Dict[str, str]],
+        params: t.Optional[dict[str, str]],
         tab: t.Optional[str],
         force: bool,
     ):
@@ -1519,7 +1519,7 @@ class Gui:
             client_id,
         )
 
-    def __get_ws_receiver(self, send_back_only=False) -> t.Union[t.List[str], t.Any, None]:
+    def __get_ws_receiver(self, send_back_only=False) -> t.Union[list[str], t.Any, None]:
         if self._bindings()._is_single_client():
             return None
         sid = get_server_request_accessor(self).sid()
@@ -1530,7 +1530,7 @@ class Gui:
                 return sid
         return list(sids)
 
-    def __get_sids(self, client_id: str) -> t.Set[str]:
+    def __get_sids(self, client_id: str) -> set[str]:
         return self.__client_id_2_sid.get(client_id, set())
 
     def __get_message_grouping(self):
@@ -1644,7 +1644,7 @@ class Gui:
             return True
         return False
 
-    def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[t.List[t.Any]] = None) -> t.Any:
+    def _call_function_with_state(self, user_function: t.Callable, args: t.Optional[list[t.Any]] = None) -> t.Any:
         cp_args = [] if args is None else args.copy()
         cp_args.insert(
             0,
@@ -1665,7 +1665,7 @@ class Gui:
             else:
                 return self.__do_call_with_state(user_function, cp_args)
 
-    def __do_call_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
+    def __do_call_with_state(self, user_function: t.Callable, args: list[t.Any]) -> t.Any:
         with self._get_authorization():
             return user_function(*args)
 
@@ -1742,7 +1742,7 @@ class Gui:
         callback: t.Callable,
         args: t.Optional[t.Sequence[t.Any]] = None,
         module_context: t.Optional[str] = None,
-    ) -> t.Dict[str, t.Any]:
+    ) -> dict[str, t.Any]:
         """Invoke a callback for every client.
 
         This callback gets invoked for every client connected to the application with the appropriate
@@ -1815,7 +1815,7 @@ class Gui:
     ) -> t.Any:
         return self.__evaluator.evaluate_expr(self, expr, lazy_declare, lambda_expr)  # type: ignore[arg-type]
 
-    def _re_evaluate_expr(self, var_name: str) -> t.Set[str]:
+    def _re_evaluate_expr(self, var_name: str) -> set[str]:
         return self.__evaluator.re_evaluate_expr(self, var_name)  # type: ignore[arg-type]
 
     def _refresh_expr(self, var_name: str, holder: t.Optional[_TaipyBase]):
@@ -1824,10 +1824,10 @@ class Gui:
     def _get_expr_from_hash(self, hash_val: str) -> str:
         return self.__evaluator.get_expr_from_hash(hash_val)
 
-    def _evaluate_bind_holder(self, holder: t.Type[_TaipyBase], expr: str) -> str:
+    def _evaluate_bind_holder(self, holder: type[_TaipyBase], expr: str) -> str:
         return self.__evaluator.evaluate_bind_holder(self, holder, expr)  # type: ignore[arg-type]
 
-    def _evaluate_holders(self, expr: str) -> t.List[str]:
+    def _evaluate_holders(self, expr: str) -> list[str]:
         return self.__evaluator.evaluate_holders(self, expr)  # type: ignore[arg-type]
 
     def _is_expression(self, expr: str) -> bool:
@@ -1835,7 +1835,7 @@ class Gui:
             return False
         return self.__evaluator._is_expression(expr)
 
-    def _get_variable_dependencies(self, var_name: str) -> t.Set[str]:
+    def _get_variable_dependencies(self, var_name: str) -> set[str]:
         return self.__evaluator._get_variable_dependencies(var_name)
 
     # make components resettable
@@ -1848,9 +1848,9 @@ class Gui:
     def _get_call_method_name(self, name: str):
         return f"{Gui.__SELF_VAR}.{name}"
 
-    def __get_attributes(self, attr_json: str, hash_json: str, args_dict: t.Dict[str, t.Any]):
-        attributes: t.Dict[str, t.Any] = json.loads(unquote(attr_json))
-        hashes: t.Dict[str, str] = json.loads(unquote(hash_json))
+    def __get_attributes(self, attr_json: str, hash_json: str, args_dict: dict[str, t.Any]):
+        attributes: dict[str, t.Any] = json.loads(unquote(attr_json))
+        hashes: dict[str, str] = json.loads(unquote(hash_json))
         attributes.update({k: args_dict.get(v) for k, v in hashes.items()})
         return attributes, hashes
 
@@ -1860,7 +1860,7 @@ class Gui:
     def _get_adapted_lov(self, lov: list, var_type: str):
         return self.__adapter._get_adapted_lov(lov, var_type)
 
-    def table_on_edit(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+    def table_on_edit(self, state: State, var_name: str, payload: dict[str, t.Any]):
         """Default implementation of the `on_edit` callback for tables.
 
            This function sets the value of a specific cell in the tabular dataset stored in
@@ -1884,7 +1884,7 @@ class Gui:
             _warn("Gui.table_on_edit() failed potentially from a table's on_edit callback.", e)
 
     def table_on_add(
-        self, state: State, var_name: str, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None
+        self, state: State, var_name: str, payload: dict[str, t.Any], new_row: t.Optional[list[t.Any]] = None
     ):
         """Default implementation of the `on_add` callback for tables.
 
@@ -1904,7 +1904,7 @@ class Gui:
         except Exception as e:
             _warn("Gui.table_on_add() failed potentially from a table's on_add callback.", e)
 
-    def table_on_delete(self, state: State, var_name: str, payload: t.Dict[str, t.Any]):
+    def table_on_delete(self, state: State, var_name: str, payload: dict[str, t.Any]):
         """Default implementation of the `on_delete` callback for tables.
 
         This function removes a row from the tabular dataset stored in *var_name*.<br/>
@@ -1988,10 +1988,10 @@ class Gui:
 
     def _run_adapter(
         self, adapter: t.Optional[t.Callable], value: t.Any, var_name: str, id_only=False
-    ) -> t.Union[t.Tuple[str, ...], str, None]:
+    ) -> t.Union[tuple[str, ...], str, None]:
         return self.__adapter._run(adapter, value, var_name, id_only)
 
-    def _get_valid_adapter_result(self, value: t.Any, id_only=False) -> t.Union[t.Tuple[str, ...], str, None]:
+    def _get_valid_adapter_result(self, value: t.Any, id_only=False) -> t.Union[tuple[str, ...], str, None]:
         return self.__adapter._get_valid_result(value, id_only)
 
     def _is_ui_blocked(self):
@@ -2041,13 +2041,13 @@ class Gui:
     def _get_variable_directory_obj(self) -> _VariableDirectory:
         return self.__var_dir
 
-    def _get_locals_bind(self) -> t.Dict[str, t.Any]:
+    def _get_locals_bind(self) -> dict[str, t.Any]:
         return self.__locals_context.get_locals()
 
-    def _get_default_locals_bind(self) -> t.Dict[str, t.Any]:
+    def _get_default_locals_bind(self) -> dict[str, t.Any]:
         return self.__locals_context.get_default()
 
-    def _get_locals_bind_from_context(self, context: t.Optional[str]) -> t.Dict[str, t.Any]:
+    def _get_locals_bind_from_context(self, context: t.Optional[str]) -> dict[str, t.Any]:
         return self.__locals_context._get_locals_bind_from_context(context)
 
     def _get_locals_context(self) -> str:
@@ -2480,7 +2480,7 @@ class Gui:
     def _navigate(
         self,
         to: t.Optional[str] = "",
-        params: t.Optional[t.Dict[str, str]] = None,
+        params: t.Optional[dict[str, str]] = None,
         tab: t.Optional[str] = None,
         force: t.Optional[bool] = False,
     ):
@@ -2734,7 +2734,7 @@ class Gui:
                 )
         return _webapp_path
 
-    def _get_client_config(self) -> t.Dict[str, t.Any]:
+    def _get_client_config(self) -> dict[str, t.Any]:
         config = {
             "timeZone": self._config.get_time_zone(),
             "darkMode": self._get_config("dark_mode", True),
@@ -2909,7 +2909,7 @@ class Gui:
         """
         # --------------------------------------------------------------------------------
         # The ssl_context argument was removed just after 1.1. It was defined as:
-        # t.Union[ssl.SSLContext, t.Tuple[str, t.Optional[str]], t.Literal["adhoc"], None] = None
+        # t.Union[ssl.SSLContext, tuple[str, t.Optional[str]], t.Literal["adhoc"], None] = None
         #
         # With the doc:
         #     ssl_context (Optional[Union[ssl.SSLContext, Tuple[str, Optional[str]], t.Literal['adhoc']]]):
@@ -2977,7 +2977,7 @@ class Gui:
             """
 
         # Base global ctx is TaipyHolder classes + script modules and callables
-        glob_ctx: t.Dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
+        glob_ctx: dict[str, t.Any] = {t.__name__: t for t in _TaipyBase.__subclasses__()}
         glob_ctx[Gui.__SELF_VAR] = self
         glob_ctx["state"] = self.__state
         glob_ctx.update({k: v for k, v in locals_bind.items() if ismodule(v) or callable(v)})
@@ -3105,14 +3105,14 @@ class Gui:
     def _add_event_listener(
         event_name: str,
         listener: t.Union[
-            t.Callable[[str, t.Dict[str, t.Any]], None], t.Callable[[State, str, t.Dict[str, t.Any]], None]
+            t.Callable[[str, dict[str, t.Any]], None], t.Callable[[State, str, dict[str, t.Any]], None]
         ],
         with_state: t.Optional[bool] = False,
     ):
         _Hooks()._add_event_listener(event_name, listener, with_state)
 
     def _fire_event(
-        self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
+        self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[dict[str, t.Any]] = None
     ):
         # the event manager will take care of starting the thread
         # once the current callback (or the next one) is finished
@@ -3124,7 +3124,7 @@ class Gui:
         )
 
     def __do_fire_event(
-        self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[t.Dict[str, t.Any]] = None
+        self, event_name: str, client_id: t.Optional[str] = None, payload: t.Optional[dict[str, t.Any]] = None
     ):
         this_sid = get_server_request_accessor(self).sid()
         if this_sid:

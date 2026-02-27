@@ -76,7 +76,7 @@ class _Factory:
     __TEXT_ANCHORS = ["bottom", "top", "left", "right"]
     __TEXT_ANCHOR_NONE = "none"
 
-    __LIBRARIES: t.Dict[str, t.List["ElementLibrary"]] = {}
+    __LIBRARIES: dict[str, list["ElementLibrary"]] = {}
 
     __CONTROL_BUILDERS = {
         "alert": lambda gui, control_type, attrs: _Builder(
@@ -141,7 +141,7 @@ class _Factory:
                 ("width", PropertyType.string_or_number),
                 ("height", PropertyType.string_or_number),
                 ("layout", PropertyType.dynamic_dict),
-                ("animation", PropertyType.json),
+                ("animation", PropertyType.jsonable),
                 ("plot_config", PropertyType.dict),
                 ("on_range_change", PropertyType.function),
                 ("active", PropertyType.dynamic_boolean, True),
@@ -753,8 +753,8 @@ class _Factory:
 
     @staticmethod
     def call_builder(
-        gui: "Gui", name: str, all_properties: t.Optional[t.Dict[str, t.Any]] = None, is_html: t.Optional[bool] = False
-    ) -> t.Union[t.Any, t.Tuple[str, str], None]:
+        gui: "Gui", name: str, all_properties: t.Optional[dict[str, t.Any]] = None, is_html: t.Optional[bool] = False
+    ) -> t.Union[t.Any, tuple[str, str], None]:
         name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         built = None

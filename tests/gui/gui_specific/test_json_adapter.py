@@ -77,7 +77,7 @@ def test_custom_adapter():
             return s[::-1]
 
     class TestAdapter(JsonAdapter):
-        def parse(self, o) -> t.Optional[t.Any]:
+        def to_jsonable(self, o) -> t.Optional[t.Any]:
             if isinstance(o, TestClass):
                 return o._value
             return None

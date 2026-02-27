@@ -42,7 +42,7 @@ from ..utils import (
 )
 from ..utils.chart_config_builder import _CHART_NAMES, _build_chart_config
 from ..utils.table_col_builder import _enhance_columns, _get_name_indexed_property
-from ..utils.types import _TaipyBase, _TaipyData, _TaipyToJson
+from ..utils.types import _TaipyBase, _TaipyData, _TaipyToJson, _TaipyToJsonable
 from .json import _TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val
 
@@ -57,7 +57,7 @@ class _Builder:
     This class can only be instantiated internally by Taipy.
     """
 
-    __keys: t.Dict[str, int] = {}
+    __keys: dict[str, int] = {}
 
     __BLOCK_CONTROLS = ["dialog", "expandable", "pane", "part"]
 
@@ -85,8 +85,8 @@ class _Builder:
         gui: "Gui",
         control_type: str,
         element_name: str,
-        prop_values: t.Optional[t.Dict[str, t.Any]],
-        hash_names: t.Optional[t.Dict[str, str]] = None,
+        prop_values: t.Optional[dict[str, t.Any]],
+        hash_names: t.Optional[dict[str, str]] = None,
         default_value: t.Optional[t.Any] = "<Empty>",
         lib_name: str = "taipy",
     ):
@@ -103,7 +103,7 @@ class _Builder:
         self.__lib_name = lib_name
         self.__prop_values = prop_values or {}
         self.__hashes = hash_names.copy()
-        self.__update_vars: t.List[str] = []
+        self.__update_vars: list[str] = []
         self.__gui: Gui = gui
 
         self.__default_property_name = _Factory.get_default_property_name(control_type) or ""
@@ -140,7 +140,7 @@ class _Builder:
         self.set_attribute("key", _Builder._get_key(self.__element_name))
 
     @staticmethod
-    def __parse_attribute_value(gui: "Gui", value) -> t.Tuple:
+    def __parse_attribute_value(gui: "Gui", value) -> tuple:
         if isinstance(value, str) and gui._is_expression(value):  # type: ignore[attr-defined]
             hash_value = gui._evaluate_expr(value)  # type: ignore[attr-defined]
             try:
@@ -154,8 +154,8 @@ class _Builder:
 
     @staticmethod
     def _get_variable_hash_names(
-        gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Optional[t.Dict[str, str]] = None
-    ) -> t.Dict[str, str]:
+        gui: "Gui", attributes: dict[str, t.Any], hash_names: t.Optional[dict[str, str]] = None
+    ) -> dict[str, str]:
         if hash_names is None:
             hash_names = {}
         hashes = {}
@@ -197,7 +197,7 @@ class _Builder:
     def _reset_key() -> None:
         _Builder.__keys = {}
 
-    def get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
+    def get_name_indexed_property(self, name: str) -> dict[str, t.Any]:
         """
         TODO-undocumented
         Returns all properties defined as <property name>[<named index>] as a dict.
@@ -348,13 +348,13 @@ class _Builder:
         name: str,
         hash: t.Optional[str],
         value: t.Any,
-        elt_type: t.Type,
+        elt_type: type,
         dynamic=True,
         default_val: t.Optional[t.Any] = None,
-    ) -> t.List[str]:
+    ) -> list[str]:
         value = default_val if value is None else value
         if not hash and isinstance(value, str):
-            value = [elt_type(t.strip()) for t in value.split(";")]
+            value = [elt_type(_t.strip()) for _t in value.split(";")]
         if isinstance(value, list):
             var_name = _to_camel_case(name)
             if hash and dynamic:
@@ -366,7 +366,7 @@ class _Builder:
             _warn(f"{self.__element_name}: {name} should be a list of {elt_type}.")
         return []
 
-    def __set_dict_attribute(self, name: str, default_value: t.Optional[t.Dict[str, t.Any]] = None):
+    def __set_dict_attribute(self, name: str, default_value: t.Optional[dict[str, t.Any]] = None):
         """
         TODO-undocumented
         Defines a React attribute as a stringified json dict.
@@ -389,7 +389,7 @@ class _Builder:
                 _warn(f"{self.__element_name}: {name} should be a dict: '{str(value)}'.")
         return self
 
-    def __set_dynamic_dict_attribute(self, name: str, default_value: t.Optional[t.Dict[str, t.Any]] = None):
+    def __set_dynamic_dict_attribute(self, name: str, default_value: t.Optional[dict[str, t.Any]] = None):
         """
         TODO-undocumented
         Defines a React attribute as a stringified json dict.
@@ -482,7 +482,7 @@ class _Builder:
                 _warn(f"Error accessing List of values for '{real_var_name or property_name}'", e)
                 lov = None
 
-        default_lov: t.Optional[t.List[t.Any]] = [] if with_default or not lov_name else None
+        default_lov: t.Optional[list[t.Any]] = [] if with_default or not lov_name else None
 
         adapter = self.__prop_values.get("adapter", adapter)
         if adapter and isinstance(adapter, str):
@@ -589,7 +589,7 @@ class _Builder:
                 return name[: len(v.get_hash()) + 1]
         return name
 
-    def __filter_attributes_hashes(self, keys: t.List[str]):
+    def __filter_attributes_hashes(self, keys: list[str]):
         hash_names = [k for k in self.__hashes if k in keys]
         attr_names = [k for k in keys if k not in hash_names]
         return (
@@ -701,7 +701,7 @@ class _Builder:
         cols_description = [self.__gui._get_accessor().get_cols_description(data_hash, _TaipyData(data, data_hash))]  # type: ignore[attr-defined]
 
         if data_hash:
-            data_updates: t.List[str] = []
+            data_updates: list[str] = []
             data_idx = 1
             name_idx = f"data[{data_idx}]"
             while add_data_hash := self.__hashes.get(name_idx):
@@ -723,7 +723,7 @@ class _Builder:
         self.__set_refresh_on_update()
         return self
 
-    def _set_string_with_check(self, var_name: str, values: t.List[str], default_value: t.Optional[str] = None):
+    def _set_string_with_check(self, var_name: str, values: list[str], default_value: t.Optional[str] = None):
         value = self.__prop_values.get(var_name, default_value)
         if value is not None:
             value = str(value).lower()
@@ -833,7 +833,7 @@ class _Builder:
         var_name: str,
         value: t.Optional[t.Any] = None,
         native_type: bool = False,
-        var_type: t.Union[PropertyType, t.Type[_TaipyBase], None] = None,
+        var_type: t.Union[PropertyType, type[_TaipyBase], None] = None,
     ):
         if value is None:
             value = self.__prop_values.get(var_name)
@@ -863,7 +863,7 @@ class _Builder:
         with_update=True,
         with_default=True,
         native_type=False,
-        var_type: t.Union[PropertyType, t.Type[_TaipyBase], None] = None,
+        var_type: t.Union[PropertyType, type[_TaipyBase], None] = None,
         default_val: t.Any = None,
     ):
         """
@@ -984,10 +984,10 @@ class _Builder:
             self.set_attribute("mode", "theme")
         return self
 
-    def __get_typed_hash_name(self, hash_name: str, var_type: t.Union[PropertyType, t.Type[_TaipyBase], None]) -> str:
+    def __get_typed_hash_name(self, hash_name: str, var_type: t.Union[PropertyType, type[_TaipyBase], None]) -> str:
         if taipy_type := _get_taipy_type(var_type):
             expr = self.__gui._get_expr_from_hash(hash_name)  # type: ignore[attr-defined]
-            hash_name = self.__gui._evaluate_bind_holder(t.cast(t.Type[_TaipyBase], taipy_type), expr)  # type: ignore[attr-defined]
+            hash_name = self.__gui._evaluate_bind_holder(t.cast(type[_TaipyBase], taipy_type), expr)  # type: ignore[attr-defined]
         return hash_name
 
     def __set_dynamic_property_without_default(
@@ -1038,7 +1038,7 @@ class _Builder:
             self.__set_json_attribute(_to_camel_case(name), icons)
         return self
 
-    def set_attributes(self, attributes: t.List[tuple]):  # noqa: C901
+    def set_attributes(self, attributes: list[tuple]):  # noqa: C901
         """
         TODO-undocumented
         Sets the attributes from the property with type and default value.
@@ -1054,12 +1054,10 @@ class _Builder:
             if not isinstance(attr, tuple):
                 attr = (attr,)
             var_type = _get_tuple_val(attr, 1, PropertyType.string)
-            is_dynamic_json = False
             if var_type == PropertyType.json:
                 var_type = _TaipyToJson
-            elif var_type == PropertyType.dynamic_json:
-                var_type = _TaipyToJson
-                is_dynamic_json = True
+            elif var_type == PropertyType.jsonable:
+                var_type = _TaipyToJsonable
             if var_type == PropertyType.boolean:
                 def_val = _get_tuple_val(attr, 2, False)
                 if isinstance(def_val, bool) or self.__prop_values.get(attr[0], None) is not None:
@@ -1149,17 +1147,6 @@ class _Builder:
                     hash_name = self.__gui._evaluate_bind_holder(var_type, expr)  # type: ignore[attr-defined]
                     self.__update_vars.append(f"{prop_name}={hash_name}")
                     self.__set_react_attribute(prop_name, hash_name)
-                    if is_dynamic_json:
-                        val = self.__prop_values.get(attr[0])
-                        if val:
-                            json_val = var_type(val, "").get()  # type: ignore
-                            self.set_attribute(
-                                _to_camel_case(f"default_{prop_name}"),
-                                json.dumps(json_val),
-                            )
-                        else:
-                            # val is None
-                            ...
                 else:
                     val = self.__prop_values.get(attr[0])
                     self.set_attribute(
