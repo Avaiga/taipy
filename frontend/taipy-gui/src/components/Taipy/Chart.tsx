@@ -63,7 +63,7 @@ interface PlotlyObject {
     animate: (
         root: Root,
         frameOrGroupNameOrFrameList?: string | string[] | Partial<Frame> | Array<Partial<Frame>>,
-        opts?: Partial<AnimationOpts>
+        opts?: Partial<AnimationOpts>,
     ) => Promise<void>;
 }
 
@@ -87,7 +87,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     template_Dark_?: string;
     template_Light_?: string;
     //[key: `selected${number}`]: number[];
-    figure?: Record<string, unknown>;
+    figure?: string;
     onClick?: string;
     dataVarNames?: string;
 }
@@ -133,7 +133,7 @@ export const getValue = <T,>(
     values: TraceValueType | undefined,
     arr: T[],
     idx: number,
-    returnUndefined = false
+    returnUndefined = false,
 ): (string | number)[] | undefined => {
     const value = getValueFromCol(values, getArrayValue(arr, idx) as unknown as string);
     if (!returnUndefined || value.length) {
@@ -171,7 +171,7 @@ const getDecimatorsPayload = (
     modes: string[],
     columns: Record<string, ColumnDesc>,
     traces: string[][],
-    relayoutData?: PlotRelayoutEvent
+    relayoutData?: PlotRelayoutEvent,
 ) => {
     return decimators
         ? {
@@ -191,7 +191,7 @@ const getDecimatorsPayload = (
                             yAxis: getAxis(traces, i, columns, 1),
                             zAxis: getAxis(traces, i, columns, 2),
                             chartMode: modes[i],
-                        }
+                        },
               ),
               relayoutData: relayoutData,
           }
@@ -329,7 +329,7 @@ const getDataVarName = (updateVarName: string | undefined, dataVarNames: string[
 const getData = (
     data: Record<string, TraceValueType>,
     additionalDatas: Array<Record<string, TraceValueType>>,
-    idx: number
+    idx: number,
 ) => (idx === 0 ? data : idx <= additionalDatas.length ? additionalDatas[idx - 1] : undefined);
 
 const Chart = (props: ChartProp) => {
@@ -371,7 +371,7 @@ const Chart = (props: ChartProp) => {
     const oldAdditionalDatas = useRef<Array<Record<string, TraceValueType>>>([]);
     const additionalDatas = useMemo(() => {
         const newAdditionalDatas = dataVarNames.map(
-            (_, idx) => (props as unknown as Record<string, Record<string, TraceValueType>>)[`data${idx + 1}`]
+            (_, idx) => (props as unknown as Record<string, Record<string, TraceValueType>>)[`data${idx + 1}`],
         );
         if (newAdditionalDatas.length !== oldAdditionalDatas.current.length) {
             oldAdditionalDatas.current = newAdditionalDatas;
@@ -383,8 +383,20 @@ const Chart = (props: ChartProp) => {
 
     const refresh = useMemo(
         () => (isDataRefresh(data) || additionalDatas.some((d) => isDataRefresh(d)) ? nanoid() : false),
-        [data, additionalDatas]
+        [data, additionalDatas],
     );
+
+    const figure = useMemo(() => {
+        if (!props.figure || typeof props.figure !== "string") {
+            return undefined;
+        }
+        try {
+            return JSON.parse(props.figure) as Partial<Figure>;
+        } catch (e) {
+            console.warn(`Error while parsing Chart.figure\n${(e as Error).message || e}\nUsing empty figure instead.`);
+            return undefined;
+        }
+    }, [props.figure]);
 
     // get props.selected[i] values
     useEffect(() => {
@@ -448,10 +460,10 @@ const Chart = (props: ChartProp) => {
                                         plotRef.current,
                                         config.modes,
                                         columns,
-                                        config.traces
-                                    )
-                                )
-                            )
+                                        config.traces,
+                                    ),
+                                ),
+                            ),
                         );
                     }
                     return dtKey;
@@ -494,9 +506,9 @@ const Chart = (props: ChartProp) => {
         if (template) {
             layout.template = template;
         }
-        if (props.figure) {
-            return merge({}, props.figure.layout as Partial<Layout>, layout, {
-                title: title || layout.title || (props.figure.layout as Partial<Layout>).title,
+        if (figure) {
+            return merge({}, figure.layout as Partial<Layout>, layout, {
+                title: title || layout.title || (figure.layout as Partial<Layout>).title,
                 clickmode: "event+select",
             });
         }
@@ -529,7 +541,7 @@ const Chart = (props: ChartProp) => {
         props.template,
         props.template_Dark_,
         props.template_Light_,
-        props.figure,
+        figure,
     ]);
 
     useEffect(() => {
@@ -552,7 +564,7 @@ const Chart = (props: ChartProp) => {
                     ...toFrame,
                     layout: layout,
                 },
-                DEFAULT_ANIMATION_SETTINGS
+                DEFAULT_ANIMATION_SETTINGS,
             )
         );
     }, [layout, toFrame]);
@@ -562,12 +574,12 @@ const Chart = (props: ChartProp) => {
             height === undefined
                 ? ({ ...defaultStyle, width: width } as CSSProperties)
                 : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
-        [width, height]
+        [width, height],
     );
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
     const dataPl = useMemo(() => {
-        if (props.figure) {
+        if (figure) {
             return lastDataPl.current || [];
         }
         const dataList = dataKeys.map((_, idx) => getData(data, additionalDatas, idx));
@@ -585,7 +597,7 @@ const Chart = (props: ChartProp) => {
             }
             const dtKey = getDataKey(
                 idx < config.columns?.length ? config.columns[idx] : undefined,
-                config.decimators
+                config.decimators,
             )[1];
             if (!dataKey.startsWith(dtKey)) {
                 return currentData;
@@ -681,7 +693,7 @@ const Chart = (props: ChartProp) => {
             lastDataPl.current = newDataPl as ExtendedPlotData[];
         }
         return lastDataPl.current;
-    }, [props.figure, selected, data, additionalDatas, config, dataKeys]);
+    }, [figure, selected, data, additionalDatas, config, dataKeys]);
 
     const plotConfig = useMemo(() => {
         let plConf: Partial<Config> = {};
@@ -712,7 +724,7 @@ const Chart = (props: ChartProp) => {
             if (config.decimators && !config.types.includes("scatter3d")) {
                 const [backCols, dtKeyBase] = getDataKey(
                     config.columns?.length ? config.columns[0] : undefined,
-                    config.decimators
+                    config.decimators,
                 );
                 const dtKey = `${dtKeyBase}--${Object.entries(eventData)
                     .map(([k, v]) => `${k}=${v}`)
@@ -736,10 +748,10 @@ const Chart = (props: ChartProp) => {
                                         config.modes,
                                         config.columns?.length ? config.columns[0] : {},
                                         config.traces,
-                                        eventData
-                                    )
-                                )
-                            )
+                                        eventData,
+                                    ),
+                                ),
+                            ),
                         );
                         return [dtKey, ...oldDataKeys.slice(1)];
                     }
@@ -758,7 +770,7 @@ const Chart = (props: ChartProp) => {
             config.decimators,
             updateVarName,
             module,
-        ]
+        ],
     );
 
     const clickHandler = useCallback(
@@ -787,11 +799,11 @@ const Chart = (props: ChartProp) => {
                         y: map ? undefined : transform(yaxis, "top")(evt?.clientY),
                         lon: map ? xaxis.p2c() : undefined,
                         x: map ? undefined : transform(xaxis, "left")(evt?.clientX),
-                    })
-                )
+                    }),
+                ),
             );
         },
-        [dispatch, module, id, onClick]
+        [dispatch, module, id, onClick],
     );
 
     const onInitialized = useCallback(
@@ -804,7 +816,7 @@ const Chart = (props: ChartProp) => {
                 runAnimation()?.catch(console.error);
             }
         },
-        [onClick, clickHandler, animationData, runAnimation]
+        [onClick, clickHandler, animationData, runAnimation],
     );
 
     const getRealIndex = useCallback(
@@ -815,14 +827,14 @@ const Chart = (props: ChartProp) => {
             }
             const dtKey = dataKeys[dataIdx];
             return typeof index === "number"
-                ? props.figure
+                ? figure
                     ? index
                     : lData[dtKey].tp_index
-                    ? (lData[dtKey].tp_index[index] as number)
-                    : index
+                      ? (lData[dtKey].tp_index[index] as number)
+                      : index
                 : 0;
         },
-        [data, additionalDatas, dataKeys, props.figure]
+        [data, additionalDatas, dataKeys, figure],
     );
 
     const onSelect = useCallback(
@@ -849,8 +861,8 @@ const Chart = (props: ChartProp) => {
                                 traces,
                                 module,
                                 props.onChange,
-                                propagate
-                            )
+                                propagate,
+                            ),
                         );
                         return;
                     }
@@ -867,7 +879,7 @@ const Chart = (props: ChartProp) => {
                 }
             }
         },
-        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module]
+        [getRealIndex, dispatch, updateVars, propagate, props.onChange, config.traces.length, module],
     );
 
     useEffect(() => {
@@ -880,7 +892,8 @@ const Chart = (props: ChartProp) => {
         const toFramesData = dataPl
             .map((trace) => {
                 const traceAnimationKeys = animationKeys.filter(
-                    (key) => trace.hasOwnProperty(key) && Array.isArray(trace[key]) && Array.isArray(animationData[key])
+                    (key) =>
+                        trace.hasOwnProperty(key) && Array.isArray(trace[key]) && Array.isArray(animationData[key]),
                 );
                 if (!traceAnimationKeys.length) {
                     return undefined;
@@ -893,7 +906,7 @@ const Chart = (props: ChartProp) => {
                         }
                         return tr;
                     },
-                    { ...trace } as Record<string, unknown>
+                    { ...trace } as Record<string, unknown>,
                 ) as unknown as ExtendedPlotData;
             })
             .filter((t) => t);
@@ -936,9 +949,9 @@ const Chart = (props: ChartProp) => {
         <Tooltip title={hover || ""}>
             <Box id={props.id} className={`${className} ${getComponentClassName(props.children)}`} ref={plotRef}>
                 <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                    {props.figure?.data !== undefined ? (
+                    {figure?.data !== undefined ? (
                         <Plot
-                            data={props.figure.data as Data[]}
+                            data={figure.data}
                             layout={layout}
                             style={style}
                             onRelayout={onRelayout}

@@ -32,6 +32,7 @@ from flask import (
     send_file,
     send_from_directory,
 )
+from flask.json.provider import DefaultJSONProvider  # type: ignore[reportMissingImports]
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from kthread import KThread
@@ -41,7 +42,7 @@ import __main__
 from taipy.common.logger._taipy_logger import _TaipyLogger
 
 from ..._hook import _Hooks
-from ..._renderers.json import _TaipyJsonProvider
+from ..._renderers.json import _TaipyJsonAdapter
 from ...config import ServerConfig
 from ...utils import _is_in_notebook, _is_port_open, _RuntimeManager
 from ..server import _Server
@@ -49,6 +50,11 @@ from .request import _RequestAccessorFlask
 
 if t.TYPE_CHECKING:
     from ...gui import Gui
+
+
+class _TaipyJsonProvider(DefaultJSONProvider):
+    default = staticmethod(_TaipyJsonAdapter().to_jsonable)
+    sort_keys = False
 
 
 class _FlaskServer(_Server):
@@ -68,7 +74,7 @@ class _FlaskServer(_Server):
         self._gui = gui
         server_config = server_config or {}
         if server is None:
-            flask_config: t.Dict[str, t.Any] = {"import_name": "Taipy"}
+            flask_config: dict[str, t.Any] = {"import_name": "Taipy"}
             if "flask" in server_config and isinstance(server_config["flask"], dict):
                 flask_config.update(server_config["flask"])
             self._server = Flask(**flask_config)
@@ -87,7 +93,7 @@ class _FlaskServer(_Server):
             CORS(self._server, **cors_config)
 
         # setup socketio
-        socketio_config: t.Dict[str, t.Any] = {
+        socketio_config: dict[str, t.Any] = {
             "cors_allowed_origins": "*",
             "ping_timeout": 10,
             "ping_interval": 5,
@@ -133,10 +139,10 @@ class _FlaskServer(_Server):
         title: str,
         favicon: str,
         root_margin: str,
-        scripts: t.List[str],
-        styles: t.List[str],
+        scripts: list[str],
+        styles: list[str],
         version: str,
-        client_config: t.Dict[str, t.Any],
+        client_config: dict[str, t.Any],
         watermark: t.Optional[str],
         css_vars: str,
         base_url: str,
@@ -278,53 +284,53 @@ class _FlaskServer(_Server):
             headers = {}
         return (message, status_code, headers)
 
-    def register_routes(self, styles: t.List[str], scripts: t.List[str]):
+    def register_routes(self, styles: list[str], scripts: list[str]):
         from ...gui import Gui
 
         gui = self._gui
-        flask_blueprint: t.List[Blueprint] = []
+        flask_blueprint: list[Blueprint] = []
 
         pages_bp = Blueprint("taipy_pages", __name__)
         # Run parse markdown to force variables binding at runtime
-        pages_bp.add_url_rule(f"/{Gui._JSX_URL}/<path:page_name>", view_func=gui._render_page)
+        pages_bp.add_url_rule(f"/{Gui._JSX_URL}/<path:page_name>", view_func=gui._render_page)  # pyright: ignore[reportAttributeAccessIssue]
         # server URL Rule for flask rendered react-router
-        pages_bp.add_url_rule(f"/{Gui._INIT_URL}", view_func=gui._init_route)
+        pages_bp.add_url_rule(f"/{Gui._INIT_URL}", view_func=gui._init_route)  # pyright: ignore[reportAttributeAccessIssue]
         flask_blueprint.append(pages_bp)
 
         # server URL Rule for taipy images
         images_bp = Blueprint("taipy_images", __name__)
-        images_bp.add_url_rule(f"/{Gui._CONTENT_ROOT}/<path:path>", view_func=gui._serve_content)
+        images_bp.add_url_rule(f"/{Gui._CONTENT_ROOT}/<path:path>", view_func=gui._serve_content)  # pyright: ignore[reportAttributeAccessIssue]
         flask_blueprint.append(images_bp)
 
         # server URL for uploaded files
         upload_bp = Blueprint("taipy_upload", __name__)
-        upload_bp.add_url_rule(f"/{Gui._UPLOAD_URL}", view_func=gui._upload_files, methods=["POST"])
+        upload_bp.add_url_rule(f"/{Gui._UPLOAD_URL}", view_func=gui._upload_files, methods=["POST"])  # pyright: ignore[reportAttributeAccessIssue]
         flask_blueprint.append(upload_bp)
 
         # server URL for user content
         user_content_bp = Blueprint("taipy_user_content", __name__)
-        user_content_bp.add_url_rule(f"/{Gui._USER_CONTENT_URL}/<path:path>", view_func=gui._serve_user_content)
+        user_content_bp.add_url_rule(f"/{Gui._USER_CONTENT_URL}/<path:path>", view_func=gui._serve_user_content)  # pyright: ignore[reportAttributeAccessIssue]
         flask_blueprint.append(user_content_bp)
 
         # server URL for extension resources
         extension_bp = Blueprint("taipy_extensions", __name__)
-        extension_bp.add_url_rule(f"/{Gui._EXTENSION_ROOT}/<path:path>", view_func=gui._serve_extension)
+        extension_bp.add_url_rule(f"/{Gui._EXTENSION_ROOT}/<path:path>", view_func=gui._serve_extension)  # pyright: ignore[reportAttributeAccessIssue]
         flask_blueprint.append(extension_bp)
 
         flask_blueprint.append(
             self._get_default_handler(
-                static_folder=gui._get_webapp_path(),
-                template_folder=gui._get_webapp_path(),
-                title=gui._get_config("title", "Taipy App"),
-                favicon=gui._get_config("favicon", Gui._DEFAULT_FAVICON_URL),
-                root_margin=gui._get_config("margin", None),
+                static_folder=gui._get_webapp_path(),  # pyright: ignore[reportAttributeAccessIssue]
+                template_folder=gui._get_webapp_path(),  # pyright: ignore[reportAttributeAccessIssue]
+                title=gui._get_config("title", "Taipy App"),  # pyright: ignore[reportAttributeAccessIssue]
+                favicon=gui._get_config("favicon", Gui._DEFAULT_FAVICON_URL),  # pyright: ignore[reportAttributeAccessIssue]
+                root_margin=gui._get_config("margin", None),  # pyright: ignore[reportAttributeAccessIssue]
                 scripts=scripts,
                 styles=styles,
-                version=gui._get_version(),
-                client_config=gui._get_client_config(),
-                watermark=gui._get_config("watermark", None),
-                css_vars=gui._get_css_vars(),
-                base_url=gui._get_config("base_url", "/"),
+                version=gui._get_version(),  # pyright: ignore[reportAttributeAccessIssue]
+                client_config=gui._get_client_config(),  # pyright: ignore[reportAttributeAccessIssue]
+                watermark=gui._get_config("watermark", None),  # pyright: ignore[reportAttributeAccessIssue]
+                css_vars=gui._get_css_vars(),  # pyright: ignore[reportAttributeAccessIssue]
+                base_url=gui._get_config("base_url", "/"),  # pyright: ignore[reportAttributeAccessIssue]
             )
         )
 

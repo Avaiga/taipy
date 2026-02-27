@@ -10,10 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 from config.config import configure
-from pages import job, scenario
 
 import taipy as tp
 import taipy.gui.builder as tgb
+from pages import job, scenario
 from taipy import Gui, Orchestrator
 from taipy.gui import State
 

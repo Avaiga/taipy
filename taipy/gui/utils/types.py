@@ -15,10 +15,11 @@ import typing as t
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping
 from datetime import datetime
+from enum import Enum
 from inspect import ismethod
 
 from .._warnings import _warn
-from ..json_properties import DictProperty, JsonProperty
+from ..json_properties import JsonableProperty, JsonProperty
 from . import _date_to_string, _MapDict, _string_to_date, _variable_decode
 
 
@@ -27,8 +28,26 @@ class _DoNotUpdate:
         return "Taipy: Do not update"
 
 
+class HolderSuffixes(Enum):
+    DATA = "D"
+    BOOL = "B"
+    NUMBER = "N"
+    LO_NUMBERS = "Ln"
+    DATE = "Dt"
+    DATE_RANGE = "Dr"
+    LOV_VALUE = "Lv"
+    LOV = "L"
+    CONTENT = "C"
+    CONTENT_IMAGE = "Ci"
+    CONTENT_HTML = "Ch"
+    DICT = "Di"
+    TIME = "Tm"
+    JSONABLE = "J"
+    JSON = "Tj"
+
+
 class _TaipyBase(ABC):
-    __HOLDER_PREFIXES: t.Optional[t.List[str]] = None
+    __HOLDER_PREFIXES: t.Optional[list[str]] = None
     _HOLDER_PREFIX = "_Tp"
 
     def __init__(self, data: t.Any, hash_name: str) -> None:
@@ -62,7 +81,7 @@ class _TaipyBase(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def _get_holder_prefixes() -> t.List[str]:
+    def _get_holder_prefixes() -> list[str]:
         if _TaipyBase.__HOLDER_PREFIXES is None:
             _TaipyBase.__HOLDER_PREFIXES = [cls.get_hash() + "_" for cls in _TaipyBase.__subclasses__()]
         return _TaipyBase.__HOLDER_PREFIXES
@@ -71,7 +90,7 @@ class _TaipyBase(ABC):
 class _TaipyData(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "D"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.DATA.value
 
 
 class _TaipyBool(_TaipyBase):
@@ -83,7 +102,7 @@ class _TaipyBool(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "B"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.BOOL.value
 
 
 class _TaipyNumber(_TaipyBase):
@@ -106,7 +125,7 @@ class _TaipyNumber(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "N"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.NUMBER.value
 
 
 class _TaipyLoNumbers(_TaipyBase):
@@ -121,7 +140,7 @@ class _TaipyLoNumbers(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Ln"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.LO_NUMBERS.value
 
 
 class _TaipyDate(_TaipyBase):
@@ -140,7 +159,7 @@ class _TaipyDate(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Dt"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.DATE.value
 
 
 class _TaipyDateRange(_TaipyBase):
@@ -157,37 +176,37 @@ class _TaipyDateRange(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Dr"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.DATE_RANGE.value
 
 
 class _TaipyLovValue(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Lv"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.LOV_VALUE.value
 
 
 class _TaipyLov(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "L"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.LOV.value
 
 
 class _TaipyContent(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "C"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.CONTENT.value
 
 
 class _TaipyContentImage(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Ci"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.CONTENT_IMAGE.value
 
 
 class _TaipyContentHtml(_TaipyBase):
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Ch"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.CONTENT_HTML.value
 
 
 class _TaipyDict(_TaipyBase):
@@ -197,7 +216,7 @@ class _TaipyDict(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Di"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.DICT.value
 
 
 class _TaipyTime(_TaipyBase):
@@ -216,17 +235,17 @@ class _TaipyTime(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Tm"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.TIME.value
 
 
-class _TaipyToJson(_TaipyBase):
+class _TaipyToJsonable(_TaipyBase):
     def get(self):
         val = super().get()
-        if isinstance(val, DictProperty):
+        if isinstance(val, JsonableProperty):
             try:
-                return val.to_dict()
+                return val.to_jsonable()
             except Exception as e:
-                _warn(f"Issue while deserializing object of type {type(val).__name__} (DictProperty).", e)
+                _warn(f"Issue while deserializing object of type {type(val).__name__} (JsonableProperty).", e)
         elif isinstance(val, JsonProperty):
             try:
                 return json.loads(val.to_json())
@@ -234,37 +253,51 @@ class _TaipyToJson(_TaipyBase):
                 _warn(f"Issue while deserializing object of type {type(val).__name__} (JsonProperty).", e)
         elif isinstance(val, (Mapping, Iterable)):
             return val._dict if isinstance(val, _MapDict) else list(val) if isinstance(val, set) else val
-        elif method := getattr(val, "to_dict", None):
+        elif (method := getattr(val, "to_jsonable", None)) or (method := getattr(val, "to_dict", None)):
             if ismethod(method):
                 try:
                     return method()
                 except Exception as e:
                     _warn(
                         f"Issue while serializing object of type {type(val).__name__} "
-                        + f"using '{self._get_readable_name()}.to_dict()'.",
+                        + f"using '{self._get_readable_name()}.{method.__name__}()'.",
                         e,
                     )
             else:
-                _warn(f"'{self._get_readable_name()}.to_dict' is not a valid method.")
-        elif method := getattr(val, "to_json", None):
-            if ismethod(method):
-                try:
-                    return json.loads(method())
-                except Exception as e:
-                    _warn(
-                        f"Issue while deserializing object of type {type(val).__name__} "
-                        + f"using '{self._get_readable_name()}.to_json()'.",
-                        e,
-                    )
-            else:
-                _warn(f"'{self._get_readable_name()}.to_json' is not a valid method.")
+                _warn(f"'{self._get_readable_name()}.{method.__name__}' is not a valid method.")
+        elif val is not None:
+            _warn(f"'{self._get_readable_name()}.to_jsonable()' must be defined.")
+        return None
+
+    @staticmethod
+    def get_hash():
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.JSONABLE.value
+
+
+class _TaipyToJson(_TaipyBase):
+    def get(self):
+        val = super().get()
+        if isinstance(val, JsonProperty):
+            try:
+                return val.to_json()
+            except Exception as e:
+                _warn(f"Issue while invoking to_json() on object of type {type(val).__name__} (JsonProperty).", e)
+        elif (method := getattr(val, "to_json", None)) and ismethod(method):
+            try:
+                return method()
+            except Exception as e:
+                _warn(
+                    f"Issue while invoking to_json() on object of type {type(val).__name__} "
+                    + f"using '{self._get_readable_name()}.to_json()'.",
+                    e,
+                )
         elif val is not None:
             _warn(f"'{self._get_readable_name()}.to_json()' must be defined.")
         return None
 
     @staticmethod
     def get_hash():
-        return _TaipyBase._HOLDER_PREFIX + "Tj"
+        return _TaipyBase._HOLDER_PREFIX + HolderSuffixes.JSON.value
 
 
-class _TaipyToDynamicJson(_TaipyToJson): ...
+__all__ = ["_TaipyToJson", "_TaipyToJsonable"]
