@@ -97,7 +97,6 @@ def test_taipy_to_json():
     json_value = json.dumps(TEST_DICT)
 
     class TestJson(JsonProperty):
-        @t.override
         def to_json(self) -> str:
             return json_value
 
@@ -107,7 +106,6 @@ def test_taipy_to_json():
     assert tb.get_hash() == "_TpTj"
 
     class TestJsonable(JsonableProperty):
-        @t.override
         def to_jsonable(self):
             return {"key": "value"}
 

@@ -37,7 +37,6 @@ class JsonAdapter(ABC):
 
 
 class _DefaultJsonAdapter(JsonAdapter):
-    @t.override
     def to_jsonable(self, o):
         if isinstance(o, Icon):
             return o._to_dict()
@@ -85,6 +84,5 @@ class _TaipyJsonAdapter(object, metaclass=_Singleton):
 
 
 class _TaipyJsonEncoder(JSONEncoder):
-    @t.override
     def default(self, o):
         return _TaipyJsonAdapter().to_jsonable(o)

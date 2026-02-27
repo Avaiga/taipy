@@ -39,7 +39,6 @@ class ChartAnimation(JsonableProperty):
     # Duration of the animation in milliseconds
     duration: int = 500
 
-    @t.override
     def to_jsonable(self) -> dict:
         return {
             "columns": self.columns,
