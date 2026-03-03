@@ -29,10 +29,10 @@ import { getComponentClassName } from "./TaipyStyle";
 interface SliderProps extends LovProps<number | string | number[] | string[], number | string | number[] | string[]> {
     width?: string;
     height?: string;
-    defaultMin?: number;
     min?: number;
-    defaultMax?: number;
+    defaultMin?: number;
     max?: number;
+    defaultMax?: number;
     step?: number;
     textAnchor?: string;
     continuous?: boolean;

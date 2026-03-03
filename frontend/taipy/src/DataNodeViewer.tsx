@@ -167,8 +167,8 @@ enum DatanodeDataProps {
 interface DataNodeViewerProps extends CoreProps {
     expandable?: boolean;
     expanded?: boolean;
-    defaultDataNode?: string;
     dataNode?: DataNodeFull | Array<DataNodeFull>;
+    defaultDataNode?: string;
     onEdit?: string;
     showConfig?: boolean;
     showOwner?: boolean;

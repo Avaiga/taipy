@@ -18,12 +18,12 @@ import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 
 interface AlertProps extends TaipyBaseProps {
     severity?: "error" | "warning" | "info" | "success";
-    message?: string;
-    variant?: "filled" | "outlined";
-    render?: boolean;
-    defaultMessage?: string;
     defaultSeverity?: string;
+    message?: string;
+    defaultMessage?: string;
+    variant?: "filled" | "outlined";
     defaultVariant?: string;
+    render?: boolean;
     defaultRender?: boolean;
 }
 

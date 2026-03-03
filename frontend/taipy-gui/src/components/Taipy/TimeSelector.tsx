@@ -27,11 +27,11 @@ import { getTime } from "../../utils";
 interface TimeSelectorProps extends TaipyActiveProps, TaipyChangeProps {
   analogic?: boolean;
   format?: string;
-  defaultTime?: string;
-  defaultEditable?: boolean;
-  editable?: boolean;
-  label?: string;
   time: string;
+  defaultTime?: string;
+  editable?: boolean;
+  defaultEditable?: boolean;
+  label?: string;
   width?: string | number;
 }
 

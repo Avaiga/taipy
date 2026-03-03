@@ -37,13 +37,13 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
     format?: string;
     date: string;
+    defaultDate?: string;
     min?: string;
     defaultMin?: string;
     max?: string;
     defaultMax?: string;
-    defaultDate?: string;
-    defaultEditable?: boolean;
     editable?: boolean;
+    defaultEditable?: boolean;
     label?: string;
     width?: string | number;
     analogic? :boolean;

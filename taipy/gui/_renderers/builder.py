@@ -234,13 +234,13 @@ class _Builder:
             self.__set_boolean_attribute(default_name, value)
         if hash is not None:
             hash = self.__get_typed_hash_name(hash, PropertyType.dynamic_boolean)
-            react_name = _to_camel_case(name)
-            self.__set_react_attribute(react_name, hash, client_var_name=True)
+            cc_name = _to_camel_case(name)
+            self.__set_react_attribute(cc_name, hash, client_var_name=True)
             if with_update:
                 if update_main:
                     self.__set_update_var_name(hash)
                 else:
-                    self.__update_vars.append(f"{react_name}={hash}")
+                    self.__update_vars.append(f"{cc_name}={hash}")
 
     def __set_number_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
@@ -288,9 +288,10 @@ class _Builder:
         elif value is not None:
             _warn(f"{self.__element_name}: {var_name} value is not valid ({value}).")
         if hash := self.__hashes.get(var_name):
+            cc_name = _to_camel_case(var_name)
             hash = self.__get_typed_hash_name(hash, PropertyType.number)
-            self.__update_vars.append(f"{var_name}={hash}")
-            self.__set_react_attribute(var_name, hash)
+            self.__update_vars.append(f"{cc_name}={hash}")
+            self.__set_react_attribute(cc_name, hash)
         return self
 
     def __set_string_attribute(
@@ -338,9 +339,9 @@ class _Builder:
         if isinstance(value, list):
             self.__set_json_attribute(_to_camel_case(f"default_{name}"), value)
         if hash := self.__hashes.get(name):
-            var_name = _to_camel_case(name)
-            self.__update_vars.append(f"{var_name}={hash}")
-            self.__set_react_attribute(var_name, hash)
+            cc_name = _to_camel_case(name)
+            self.__update_vars.append(f"{cc_name}={hash}")
+            self.__set_react_attribute(cc_name, hash)
         return self
 
     def __set_list_attribute(
@@ -412,9 +413,9 @@ class _Builder:
                 _warn(f"{self.__element_name}: {name} should be a dict: '{str(value)}'.")
         if hash := self.__hashes.get(name):
             hash = self.__get_typed_hash_name(hash, PropertyType.dynamic_dict)
-            prop_name = _to_camel_case(name)
-            self.__update_vars.append(f"{prop_name}={hash}")
-            self.__set_react_attribute(prop_name, hash)
+            cc_name = _to_camel_case(name)
+            self.__update_vars.append(f"{cc_name}={hash}")
+            self.__set_react_attribute(cc_name, hash)
         return self
 
     def __set_dynamic_date_attribute(self, var_name: str, default_value: t.Optional[str] = None):
@@ -999,8 +1000,9 @@ class _Builder:
                 _warn(f"{self.__element_name}.{name} should be bound.")
         else:
             hash_name = self.__get_typed_hash_name(hash_name, property_type)
-            self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
-            self.__set_react_attribute(_to_camel_case(name), hash_name, client_var_name=True)
+            cc_name = _to_camel_case(name)
+            self.__update_vars.append(f"{cc_name}={hash_name}")
+            self.__set_react_attribute(cc_name, hash_name, client_var_name=True)
         return self
 
     def __set_html_content(self, name: str, property_name: str, property_type: PropertyType):
