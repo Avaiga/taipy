@@ -78,6 +78,33 @@ def test_assign_multiple():
     assert ms.b == 1
 
 
+def test_assign_multiple_with_args():
+    ms = MockState(Gui(""), a=1)
+    ms.assign("a", 2, b=1)
+    assert ms.a == 2
+    assert ms.b == 1
+
+
+def test_assign_no_value():
+    ms = MockState(Gui(""), a=1)
+    try:
+        ms.assign("a")
+    except ValueError as e:
+        assert str(e) == "Value must be provided when name is provided."
+    else:
+        assert False, "Expected ValueError was not raised." # noqa: B011
+
+
+def test_assign_nothing():
+    ms = MockState(Gui(""), a=1)
+    try:
+        ms.assign()
+    except ValueError as e:
+        assert str(e) == "At least one variable must be provided to assign."
+    else:
+        assert False, "Expected ValueError was not raised." # noqa: B011
+
+
 def test_refresh():
     ms = MockState(Gui(""), a=1)
     ms.refresh("a")

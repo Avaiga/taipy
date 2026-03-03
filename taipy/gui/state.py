@@ -23,7 +23,6 @@ from .utils._attributes import _attrsetter
 if t.TYPE_CHECKING:
     from .gui import Gui
 
-
 class State(SimpleNamespace, metaclass=ABCMeta):
     """Accessor to the bound variables from callbacks.
 
@@ -84,7 +83,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         """
         ...
 
-    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = None, **kwargs) -> t.Any:
+    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = ..., **kwargs) -> t.Any:
         """Assign a value to a state variable.
 
         This should be used only from within a lambda function used
@@ -98,21 +97,24 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         Returns:
             Any: The previous value of the variable(s).
         """
+        ret = []
         if name is not None:
+            if value is ...:
+                raise ValueError("Value must be provided when name is provided.")
             val = attrgetter(name)(self)
             _attrsetter(self, name, value)
-            return val
+            ret.append(val)
         if kwargs:
-            ret = []
             with self:
                 for k, v in kwargs.items():
                     val = attrgetter(k)(self)
                     _attrsetter(self, k, v)
                     ret.append(val)
-            if len(ret) == 1:
-                return ret[0]
-            return ret
-        return None
+        if not ret:
+            raise ValueError("At least one variable must be provided to assign.")
+        if len(ret) == 1:
+            return ret[0]
+        return ret
 
     def refresh(self, name: str):
         """Refresh a state variable.
