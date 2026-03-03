@@ -29,7 +29,9 @@ import { getComponentClassName } from "./TaipyStyle";
 interface SliderProps extends LovProps<number | string | number[] | string[], number | string | number[] | string[]> {
     width?: string;
     height?: string;
+    defaultMin?: number;
     min?: number;
+    defaultMax?: number;
     max?: number;
     step?: number;
     textAnchor?: string;
@@ -69,8 +71,10 @@ const Slider = (props: SliderProps) => {
     const update = props.continuous === undefined ? lovList.length === 0 : props.continuous;
     const changeDelay = typeof props.changeDelay === "number" && props.changeDelay > 0 ? props.changeDelay : 0;
 
-    const min = lovList.length ? 0 : props.min;
-    const max = lovList.length ? lovList.length - 1 : props.max;
+    const pMin = useDynamicProperty(props.min, props.defaultMin, 0);
+    const pMax = useDynamicProperty(props.max, props.defaultMax, 100);
+    const min = lovList.length ? 0 : pMin;
+    const max = lovList.length ? lovList.length - 1 : pMax;
     const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
 
     // Converts the slider value (number or array of numbers) to a proper backend value
