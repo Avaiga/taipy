@@ -71,6 +71,13 @@ def test_assign():
     assert ms.b == 1
 
 
+def test_assign_multiple():
+    ms = MockState(Gui(""), a=1)
+    ms.assign(a=2, b=1)
+    assert ms.a == 2
+    assert ms.b == 1
+
+
 def test_refresh():
     ms = MockState(Gui(""), a=1)
     ms.refresh("a")

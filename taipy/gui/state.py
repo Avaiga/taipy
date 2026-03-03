@@ -84,7 +84,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         """
         ...
 
-    def assign(self, name: str, value: t.Any) -> t.Any:
+    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = None, **kwargs) -> t.Any:
         """Assign a value to a state variable.
 
         This should be used only from within a lambda function used
@@ -93,13 +93,26 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         Arguments:
             name (str): The variable name to assign to.
             value (Any): The new variable value.
+            kwargs: The variable names and values to assign to, as keyword arguments.
 
         Returns:
-            Any: The previous value of the variable.
+            Any: The previous value of the variable(s).
         """
-        val = attrgetter(name)(self)
-        _attrsetter(self, name, value)
-        return val
+        if name is not None:
+            val = attrgetter(name)(self)
+            _attrsetter(self, name, value)
+            return val
+        if kwargs:
+            ret = []
+            with self:
+                for k, v in kwargs.items():
+                    val = attrgetter(k)(self)
+                    _attrsetter(self, k, v)
+                    ret.append(val)
+            if len(ret) == 1:
+                return ret[0]
+            return ret
+        return None
 
     def refresh(self, name: str):
         """Refresh a state variable.
