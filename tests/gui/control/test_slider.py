@@ -29,7 +29,7 @@ def test_slider_md(gui: Gui, test_client, helpers):
 def test_slider_with_min_max(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", 0)
     md_string = "<|{x}|slider|min=-10|max=10|>"
-    expected_list = ["<Slider", 'min="{!-10.0', 'max="{!10.0', 'defaultValue="{!0']
+    expected_list = ["<Slider", 'defaultMin="{!-10.0', 'defaultMax="{!10.0', 'defaultValue="{!0']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
