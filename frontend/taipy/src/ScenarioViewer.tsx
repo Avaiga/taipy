@@ -69,8 +69,8 @@ import StatusChip, { Status } from "./StatusChip";
 interface ScenarioViewerProps extends CoreProps {
     expandable?: boolean;
     expanded?: boolean;
-    defaultScenario?: string;
     scenario?: ScenarioFull | Array<ScenarioFull>;
+    defaultScenario?: string;
     onSubmit?: string;
     onEdit?: string;
     onDelete?: string;

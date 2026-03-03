@@ -184,8 +184,8 @@ const renderBoxSx = {
 interface SelectorProps extends SelTreeProps {
     dropdown?: boolean;
     mode?: string;
-    defaultSelectionMessage?: string;
     selectionMessage?: string;
+    defaultSelectionMessage?: string;
     showSelectAll?: boolean;
 }
 

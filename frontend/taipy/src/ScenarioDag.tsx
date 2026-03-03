@@ -34,8 +34,8 @@ import { CoreProps } from "./utils";
 import { TaipyDiagramModel } from "./projectstorm/models";
 
 interface ScenarioDagProps extends CoreProps {
-    defaultScenario?: string;
     scenario?: DisplayModel | DisplayModel[];
+    defaultScenario?: string;
     render?: boolean;
     defaultRender?: boolean;
     showToolbar?: boolean;

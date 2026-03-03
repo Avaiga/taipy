@@ -23,6 +23,7 @@ from .utils._attributes import _attrsetter
 if t.TYPE_CHECKING:
     from .gui import Gui
 
+
 class State(SimpleNamespace, metaclass=ABCMeta):
     """Accessor to the bound variables from callbacks.
 
@@ -86,16 +87,22 @@ class State(SimpleNamespace, metaclass=ABCMeta):
     def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = ..., **kwargs: t.Any) -> t.Any:
         """Assign a value to a state variable.
 
-        This should be used only from within a lambda function used
-        as a callback in a visual element.
+        This could be used to assign a variable when using a lambda function as a callback in a visual element.<br/>
+        For example, the following element is a button that increments the value of the variable called "var_name":
+        ```
+           <|Increment|button|on_action={lambda state: state.assign("var_name", state.var_name + 1)}|>
+        ```
 
         Arguments:
             name (str): The variable name to assign to.
             value (Any): The new variable value.
-            kwargs: The variable names and values to assign to, as keyword arguments.
+            kwargs: The variable names and values to assign to, as keyword arguments.<br/>
+                    For example, `state.assign(a=1, b=None)` would assign 1 to variable "a" and
+                    None to variable "b".
 
         Returns:
-            Any: The previous value of the variable(s).
+            Any: The previous value of the variable. If there are several variables,
+                a list of the previous values is returned in the same order as the variables in the arguments.
         """
         ret = []
         if name is not None:

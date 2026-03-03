@@ -117,8 +117,8 @@ const boxSx = { width: "100%" } as CSSProperties;
 const textFieldSx = { mb: 1, px: 1, display: "flex" };
 
 interface TreeViewProps extends SelTreeProps {
-    defaultExpanded?: string | boolean;
     expanded?: string[] | boolean;
+    defaultExpanded?: string | boolean;
     selectLeafsOnly?: boolean;
     rowHeight?: string;
 }
