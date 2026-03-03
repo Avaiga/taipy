@@ -83,7 +83,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         """
         ...
 
-    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = ..., **kwargs) -> t.Any:
+    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = ..., **kwargs: t.Any) -> t.Any:
         """Assign a value to a state variable.
 
         This should be used only from within a lambda function used
