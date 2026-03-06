@@ -18,13 +18,13 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 
-import { createSendUpdateAction } from "../../context/taipyReducers";
-import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
 import { getCssSize, getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
 import { SyntheticEvent } from "react";
 import { getComponentClassName } from "./TaipyStyle";
+import { useActions } from "../../hooks/Actions";
 
 interface SliderProps extends LovProps<number | string | number[] | string[], number | string | number[] | string[]> {
     width?: string;
@@ -58,10 +58,9 @@ const Slider = (props: SliderProps) => {
         step = 1,
     } = props;
     const [value, setValue] = useState<number | number[]>(0);
-    const dispatch = useDispatch();
+    const { sendUpdate } = useActions();
     const delayCall = useRef(-1);
     const lastVal = useRef<number | string | number[] | string[]>(0);
-    const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -86,9 +85,9 @@ const Slider = (props: SliderProps) => {
                     ? v.map((i) => (lovList.length > (i as number) ? lovList[i as number].id : lovList[0].id))
                     : v
                 : lovList.length && lovList.length > (v as number)
-                ? lovList[v as number].id
-                : v,
-        [lovList]
+                  ? lovList[v as number].id
+                  : v,
+        [lovList],
     );
 
     const handleChange = useCallback(
@@ -101,29 +100,23 @@ const Slider = (props: SliderProps) => {
                 if (changeDelay) {
                     if (delayCall.current < 0) {
                         delayCall.current = window.setTimeout(() => {
-                            dispatch(
-                                createSendUpdateAction(
-                                    updateVarName,
-                                    lastVal.current,
-                                    module,
-                                    props.onChange,
-                                    propagate,
-                                    valueById ? undefined : getUpdateVar(updateVars, "lov")
-                                )
+                            sendUpdate(
+                                updateVarName,
+                                lastVal.current,
+                                props.onChange,
+                                propagate,
+                                valueById ? undefined : getUpdateVar(updateVars, "lov"),
                             );
                             delayCall.current = -1;
                         }, changeDelay);
                     }
                 } else {
-                    dispatch(
-                        createSendUpdateAction(
-                            updateVarName,
-                            lastVal.current,
-                            module,
-                            props.onChange,
-                            propagate,
-                            valueById ? undefined : getUpdateVar(updateVars, "lov")
-                        )
+                    sendUpdate(
+                        updateVarName,
+                        lastVal.current,
+                        props.onChange,
+                        propagate,
+                        valueById ? undefined : getUpdateVar(updateVars, "lov"),
                     );
                 }
                 delayCall.current = 0;
@@ -132,15 +125,14 @@ const Slider = (props: SliderProps) => {
         [
             update,
             updateVarName,
-            dispatch,
             propagate,
             updateVars,
             valueById,
             props.onChange,
             changeDelay,
-            module,
             convertValue,
-        ]
+            sendUpdate,
+        ],
     );
 
     const handleChangeCommitted = useCallback(
@@ -148,19 +140,16 @@ const Slider = (props: SliderProps) => {
             setValue(val);
             if (!update) {
                 const converted_value = convertValue(val);
-                dispatch(
-                    createSendUpdateAction(
-                        updateVarName,
-                        converted_value,
-                        module,
-                        props.onChange,
-                        propagate,
-                        valueById ? undefined : getUpdateVar(updateVars, "lov")
-                    )
+                sendUpdate(
+                    updateVarName,
+                    converted_value,
+                    props.onChange,
+                    propagate,
+                    valueById ? undefined : getUpdateVar(updateVars, "lov"),
                 );
             }
         },
-        [update, updateVarName, dispatch, propagate, updateVars, valueById, props.onChange, module, convertValue]
+        [update, updateVarName, propagate, updateVars, valueById, props.onChange, convertValue, sendUpdate],
     );
 
     const getLabel = useCallback(
@@ -174,7 +163,7 @@ const Slider = (props: SliderProps) => {
             ) : (
                 <>{value}</>
             ),
-        [lovList]
+        [lovList],
     );
 
     const getText = useCallback(
@@ -189,7 +178,7 @@ const Slider = (props: SliderProps) => {
             }
             return null;
         },
-        [lovList, textAnchor, getLabel]
+        [lovList, textAnchor, getLabel],
     );
 
     const marks = useMemo(() => {
@@ -303,7 +292,7 @@ const Slider = (props: SliderProps) => {
                         props.value
                             .map((i) => lovList.findIndex((j) => j.id === i))
                             // Force unknown values to index 0
-                            .map((v) => (v === -1 ? 0 : v))
+                            .map((v) => (v === -1 ? 0 : v)),
                     );
                 } else {
                     const val = lovList.findIndex((item) => item.id === props.value);
