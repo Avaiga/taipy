@@ -332,6 +332,19 @@ const getData = (
     idx: number,
 ) => (idx === 0 ? data : idx <= additionalDatas.length ? additionalDatas[idx - 1] : undefined);
 
+// ─── Plotly v3 helper ───────────────────────────────────────────────────────
+// Plotly v3 requires title to be { text: string } instead of a plain string.
+// This helper safely converts any title value to the correct format.
+const toPlotlyTitle = (
+    value: string | { text?: string } | undefined,
+): { text: string } | undefined => {
+    if (typeof value === "string") {
+        return { text: value };
+    }
+    return value as { text: string } | undefined;
+};
+// ────────────────────────────────────────────────────────────────────────────
+
 const Chart = (props: ChartProp) => {
     const {
         width = "100%",
@@ -506,32 +519,50 @@ const Chart = (props: ChartProp) => {
         if (template) {
             layout.template = template;
         }
+
+        // ── FIX for Plotly v3 (lines 509-534 replacement) ──────────────────
+        // Plotly v3 no longer accepts plain strings for title, xaxis.title,
+        // and yaxis.title. They must be objects: { text: "value" }.
+        // toPlotlyTitle() safely converts strings → { text: string }
+        // and passes through objects/undefined unchanged.
         if (figure) {
+            const figTitle =
+                title || layout.title || (figure.layout as Partial<Layout>).title;
             return merge({}, figure.layout as Partial<Layout>, layout, {
-                title: title || layout.title || (figure.layout as Partial<Layout>).title,
+                title: toPlotlyTitle(figTitle as string | { text?: string } | undefined),
                 clickmode: "event+select",
             });
         }
+
+        const xTitle =
+            config.traces.length && config.traces[0].length && config.traces[0][0]
+                ? getColNameFromIndexed(config.columns[0][config.traces[0][0]]?.dfid)
+                : undefined;
+
+        const yTitle =
+            config.traces.length == 1 &&
+            config.traces[0].length > 1 &&
+            config.columns[0][config.traces[0][1]]
+                ? getColNameFromIndexed(config.columns[0][config.traces[0][1]]?.dfid)
+                : undefined;
+
+        const chartTitle = title || layout.title;
+
         return {
             ...layout,
             autosize: true,
-            title: title || layout.title,
+            title: toPlotlyTitle(chartTitle as string | { text?: string } | undefined),
             xaxis: {
-                title:
-                    config.traces.length && config.traces[0].length && config.traces[0][0]
-                        ? getColNameFromIndexed(config.columns[0][config.traces[0][0]]?.dfid)
-                        : undefined,
+                title: toPlotlyTitle(xTitle),
                 ...layout.xaxis,
             },
             yaxis: {
-                title:
-                    config.traces.length == 1 && config.traces[0].length > 1 && config.columns[0][config.traces[0][1]]
-                        ? getColNameFromIndexed(config.columns[0][config.traces[0][1]]?.dfid)
-                        : undefined,
+                title: toPlotlyTitle(yTitle),
                 ...layout.yaxis,
             },
             clickmode: "event+select",
         } as Layout;
+        // ── END FIX ─────────────────────────────────────────────────────────
     }, [
         theme.palette.mode,
         title,

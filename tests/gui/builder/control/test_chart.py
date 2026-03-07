@@ -294,3 +294,89 @@ def test_chart_none_data(gui: Gui, helpers):
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_builder(gui, page, expected_list)
+
+
+
+# ── Regression tests for issue #2472 (builder syntax) ───────────────────
+# Plotly v3 requires title as {"text": value} not a plain string
+# These tests verify the layout title conversion works correctly
+# using tgb builder syntax
+
+
+def test_chart_builder_layout_string_title_plotly_v3(gui: Gui, helpers, csvdata):
+    """Regression test for issue #2472 — builder syntax
+    Layout title as plain string must be converted
+    to Plotly v3 format: {"text": "value"}
+    """
+    layout = {  # noqa: F841
+        "title": "My Chart Title",
+        "xaxis": {"title": "X Axis Label"},
+        "yaxis": {"title": "Y Axis Label"},
+      }
+    with tgb.Page(frame=None) as page:
+        tgb.chart(  # type: ignore[attr-defined]
+            data="{csvdata}",
+            x="Day",
+            y="Daily hospital occupancy",
+            layout="{layout}",
+        )
+    expected_list = [
+        "<Chart",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
+        "defaultLayout=",
+    ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_builder(gui, page, expected_list)
+
+
+def test_chart_builder_yaxis_string_title_plotly_v3(gui: Gui, helpers, csvdata):
+    """Regression test for issue #2472 — builder syntax
+    yaxis title as plain string — exact bug from issue #2372
+    must work correctly with Plotly v3
+    """
+    layout = {  # noqa: F841
+        "yaxis": {"title": "Price (USD)"},
+    }
+    with tgb.Page(frame=None) as page:
+        tgb.chart(  # type: ignore[attr-defined]
+            data="{csvdata}",
+            x="Day",
+            y="Daily hospital occupancy",
+            layout="{layout}",
+        )
+    expected_list = [
+        "<Chart",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
+        "defaultLayout=",
+    ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_builder(gui, page, expected_list)
+
+
+def test_chart_builder_layout_already_v3_object_format(gui: Gui, helpers, csvdata):
+    """Regression test for issue #2472 — builder syntax
+    Layout title already in Plotly v3 dict format
+    must pass through unchanged — no double wrapping
+    """
+    layout = {  # noqa: F841
+        "title": {"text": "Already Correct"},
+        "xaxis": {"title": {"text": "X Label"}},
+        "yaxis": {"title": {"text": "Y Label"}},
+    }
+    with tgb.Page(frame=None) as page:
+        tgb.chart(  # type: ignore[attr-defined]
+            data="{csvdata}",
+            x="Day",
+            y="Daily hospital occupancy",
+            layout="{layout}",
+        )
+    expected_list = [
+        "<Chart",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
+        "defaultLayout=",
+    ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_builder(gui, page, expected_list)

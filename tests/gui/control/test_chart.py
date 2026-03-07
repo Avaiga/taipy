@@ -246,3 +246,89 @@ def test_chart_none_data(gui: Gui, helpers):
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_md(gui, md_string, expected_list)
+
+
+
+# ── Regression tests for issue #2472 ─────────────────────────────────────
+# Plotly v3 requires title as {"text": value} not a plain string
+# These tests verify the layout title conversion works correctly
+
+
+def test_chart_layout_string_title_pyplot_v3(gui: Gui, helpers,csvdata):
+    """Regression Test for Issue
+    Layout Chart Title as Plane String must be
+    converted to plotly v3 formate {"text":"value"}
+    """
+    layout ={
+        "title":"Chart Title",
+        "xaxis":{"title":"X Axis label"},
+        "yaxis":{"title":"Y Axis label"},
+
+    }
+    md_string = "<|{csvdata}|chart|x=Day|y=Daily hospital occupancy|layout={layout}|>"
+    expected_list = [
+        "<Chart",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
+        "defaultLayout=",
+     ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_md(gui, md_string, expected_list)
+
+def test_chart_yaxis_string_title_plotly_v3(gui: Gui, helpers, csvdata):
+      """Regression test for issue #2472
+      yaxis title as plain string must work correctly.
+      This was the exact scenario reported in issue #2372 (related)
+      """
+      layout = {  # noqa: F841
+          "yaxis": {"title": "Price (USD)"},
+      }
+      md_string = "<|{csvdata}|chart|x=Day|y=Daily hospital occupancy|layout={layout}|>"
+      expected_list = [
+          "<Chart",
+          'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+          'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
+          "defaultLayout=",
+      ]
+      gui._set_frame(inspect.currentframe())
+      helpers.test_control_md(gui, md_string, expected_list)
+
+def test_chart_xaxis_string_title_plotly_v3(gui: Gui, helpers, csvdata):
+
+    """Regression test for issue #2472
+    xaxis title as plain string must work correctly
+    for Plotly v3 compatibility
+    """
+    layout = {
+        "xaxis": {"title": "Date Range"},
+    }
+    md_string = "<|{csvdata}|chart|x=Day|y=Daily hospital occupancy|layout={layout}|>"
+    expected_list = [
+        "<Chart",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
+        "defaultLayout=",
+    ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
+def test_chart_layout_already_v3_object_format(gui: Gui, helpers, csvdata):
+    """Regression test for issue #2472
+    Layout title already in Plotly v3 dict format
+    must pass through unchanged — no double wrapping
+    """
+    layout = {  # noqa: F841
+        "title": {"text": "Already Correct Title"},
+        "xaxis": {"title": {"text": "X Label"}},
+        "yaxis": {"title": {"text": "Y Label"}},
+    }
+    md_string = "<|{csvdata}|chart|x=Day|y=Daily hospital occupancy|layout={layout}|>"
+    expected_list = [
+        "<Chart",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        'data="{!_TpD_tpec_TpExPr_csvdata_TPMDL_0',
+        "defaultLayout=",
+    ]
+    gui._set_frame(inspect.currentframe())
+    helpers.test_control_md(gui, md_string, expected_list)

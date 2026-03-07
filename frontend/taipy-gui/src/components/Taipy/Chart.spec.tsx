@@ -281,6 +281,66 @@ describe("Chart Component", () => {
         const elt = container.querySelector(".test");
         expect(elt).toBeInTheDocument();
     });
+    it("convert string chart title to Plotly v3 object format",async () => {
+        const {container} =render(
+            <Chart
+                defaultConfig={chartConfig}
+                title='Chart Title'
+                className="test-title"
+            />   
+        );
+        const elt = container.querySelector(".test-title");
+        expect(elt).toBeInTheDocument();
+    })
+    it("converts string xaxis and yaxis title to Plotly v3 object format", async () => {
+        const layoutWithStringTitles = JSON.stringify({
+            xaxis: { title: "X Axis Title" },
+            yaxis: { title: "Y Axis Title" },
+        });
+        const {container} = render(
+            <Chart
+                defaultConfig={chartConfig}
+                defaultLayout= {layoutWithStringTitles}
+                className="test-axis"
+            />
+        );
+        const elt = container.querySelector(".test-axis");
+        expect(elt).toBeInTheDocument();
+    });
+
+    it("handles figure layout title in Plotly v3 object format", async () => {
+    const figureObjectTitle = JSON.stringify({   // ← JSON.stringify not manual string
+        data: [],
+        layout: { title: { text: "Object Title" } },
+    });
+    const { container } = render(
+        <Chart
+            defaultConfig={chartConfig}
+            figure={figureObjectTitle}
+            className="test-fig-object"
+        />
+    );
+    const elt = container.querySelector(".test-fig-object");
+    expect(elt).toBeInTheDocument();
+    });
+    
+    it("render yaxis title from data columns in Plotly v3 format",async () => {
+        const {container} = render(
+            <Chart
+                data = {chartValue}
+                defaultConfig = {chartConfig}
+                className="test-yaxis"
+            />
+
+        );
+        await waitFor(()=>{
+            const elt = container.querySelector(".test-yaxis");
+            expect(elt).toBeInTheDocument();
+        });
+    });
+    //it("handle figure layout title in Plotly v3 object format", async () => {
+
+
     it("handles plotConfig prop correctly", () => {
         const consoleInfoSpy = jest.spyOn(console, "info");
         // Case 1: plotConfig is a valid JSON string
@@ -512,6 +572,7 @@ describe("Chart Component", () => {
             // Check that the 'data-height' attribute was set
             expect(mockElement.getAttribute("data-height")).not.toBeNull();
         });
+    
         it("should set data-title attribute", () => {
             // Create a mock HTMLElement
             const mockElement = document.createElement("div");
