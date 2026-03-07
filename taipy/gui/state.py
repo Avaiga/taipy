@@ -84,22 +84,44 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         """
         ...
 
-    def assign(self, name: str, value: t.Any) -> t.Any:
+    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = ..., **kwargs: t.Any) -> t.Any:
         """Assign a value to a state variable.
 
-        This should be used only from within a lambda function used
-        as a callback in a visual element.
+        This could be used to assign a variable when using a lambda function as a callback in a visual element.<br/>
+        For example, the following element is a button that increments the value of the variable called "var_name":
+        ```
+           <|Increment|button|on_action={lambda state: state.assign("var_name", state.var_name + 1)}|>
+        ```
 
         Arguments:
             name (str): The variable name to assign to.
             value (Any): The new variable value.
+            kwargs: The variable names and values to assign to, as keyword arguments.<br/>
+                    For example, `state.assign(a=1, b=None)` would assign 1 to variable "a" and
+                    None to variable "b".
 
         Returns:
-            Any: The previous value of the variable.
+            Any: The previous value of the variable. If there are several variables,
+                a list of the previous values is returned in the same order as the variables in the arguments.
         """
-        val = attrgetter(name)(self)
-        _attrsetter(self, name, value)
-        return val
+        ret = []
+        if name is not None:
+            if value is ...:
+                raise ValueError("Value must be provided when name is provided.")
+            val = attrgetter(name)(self)
+            _attrsetter(self, name, value)
+            ret.append(val)
+        if kwargs:
+            with self:
+                for k, v in kwargs.items():
+                    val = attrgetter(k)(self)
+                    _attrsetter(self, k, v)
+                    ret.append(val)
+        if not ret:
+            raise ValueError("At least one variable must be provided to assign.")
+        if len(ret) == 1:
+            return ret[0]
+        return ret
 
     def refresh(self, name: str):
         """Refresh a state variable.

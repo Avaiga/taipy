@@ -210,13 +210,13 @@
                     },
                     {
                         "name": "min",
-                        "type": "Union[int, float]",
+                        "type": "dynamic(Union[int, float])",
                         "default_value": "0",
                         "doc": "The minimum value.<br/>This is ignored when <i>lov</i> is defined."
                     },
                     {
                         "name": "max",
-                        "type": "Union[int, float]",
+                        "type": "dynamic(Union[int, float])",
                         "default_value": "100",
                         "doc": "The maximum value.<br/>This is ignored when <i>lov</i> is defined."
                     },

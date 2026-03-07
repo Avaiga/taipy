@@ -38,8 +38,8 @@ import { expandSx, getCssSize, noDisplayStyle, TaipyActiveProps } from "./utils"
 
 interface FileSelectorProps extends TaipyActiveProps {
     onAction?: string;
-    defaultLabel?: string;
     label?: string;
+    defaultLabel?: string;
     multiple?: boolean;
     selectionType?: string;
     extensions?: string;

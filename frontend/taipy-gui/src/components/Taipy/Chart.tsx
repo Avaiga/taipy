@@ -72,13 +72,13 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     defaultTitle?: string;
     width?: string | number;
     height?: string | number;
-    defaultConfig: string;
     config?: string;
+    defaultConfig: string;
     data?: Record<string, TraceValueType>;
     animationData?: Record<string, TraceValueType>;
     //data${number}?: Record<string, TraceValueType>;
-    defaultLayout?: string;
     layout?: string;
+    defaultLayout?: string;
     plotConfig?: string;
     onRangeChange?: string;
     render?: boolean;

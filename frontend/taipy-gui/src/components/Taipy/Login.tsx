@@ -38,8 +38,8 @@ let nbLogins = 0;
 interface LoginProps extends TaipyBaseProps {
     title?: string;
     onAction?: string;
-    defaultMessage?: string;
     message?: string;
+    defaultMessage?: string;
     labels?: string;
 }
 
