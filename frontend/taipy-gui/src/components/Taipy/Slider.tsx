@@ -204,15 +204,17 @@ const Slider = (props: SliderProps) => {
                     const marks: Array<{ value: number; label: string }> = [];
                     Object.keys(labels).forEach((key) => {
                         if (labels[key]) {
-                            let idx = lovList.findIndex((it) => it.id === key);
-                            if (idx == -1) {
-                                try {
-                                    idx = parseInt(key, 10);
-                                } catch {
-                                    // too bad
+                            const lovIdx = lovList.findIndex((it) => it.id === key);
+                            let idx: number | undefined;
+                            if (lovIdx !== -1) {
+                                idx = lovIdx;
+                            } else {
+                                const num = parseFloat(key);
+                                if (!isNaN(num)) {
+                                    idx = num;
                                 }
                             }
-                            if (idx != -1) {
+                            if (idx !== undefined) {
                                 marks.push({ value: idx, label: labels[key] });
                             }
                         }

@@ -309,6 +309,53 @@ describe("Slider Component", () => {
         render(<Slider defaultValue='["Item 1", "Item 2"]' />);
         expect(errorSpy).toHaveBeenCalledWith("Slider values should all be numbers");
     });
+    it("shows marks with decimal values", async () => {
+        const labels = {
+            "0": "0",
+            "0.2": "0.2",
+            "0.4": "0.4",
+            "0.6": "0.6",
+            "0.8": "0.8",
+            "1": "1",
+        };
+        const { container } = render(<Slider value={0.5} min={0} max={1} step={0.1} labels={JSON.stringify(labels)} />);
+        expect(container).toHaveTextContent("0");
+        expect(container).toHaveTextContent("0.2");
+        expect(container).toHaveTextContent("0.4");
+        expect(container).toHaveTextContent("0.6");
+        expect(container).toHaveTextContent("0.8");
+        expect(container).toHaveTextContent("1");
+    });
+    it("shows marks with negative values including -1", async () => {
+        const labels = {
+            "-2": "-2",
+            "-1": "-1",
+            "0": "0",
+            "1": "1",
+            "2": "2",
+        };
+        const { container } = render(<Slider value={0} min={-2} max={2} step={1} labels={JSON.stringify(labels)} />);
+        expect(container).toHaveTextContent("-2");
+        expect(container).toHaveTextContent("-1");
+        expect(container).toHaveTextContent("0");
+        expect(container).toHaveTextContent("1");
+        expect(container).toHaveTextContent("2");
+    });
+    it("shows marks with negative decimal values", async () => {
+        const labels = {
+            "-1.0": "-1.0",
+            "-0.5": "-0.5",
+            "0": "0",
+            "0.5": "0.5",
+            "1.0": "1.0",
+        };
+        const { container } = render(<Slider value={0} min={-1} max={1} step={0.5} labels={JSON.stringify(labels)} />);
+        expect(container).toHaveTextContent("-1.0");
+        expect(container).toHaveTextContent("-0.5");
+        expect(container).toHaveTextContent("0");
+        expect(container).toHaveTextContent("0.5");
+        expect(container).toHaveTextContent("1.0");
+    });
     it("should return number when default value is a number", async () => {
         const { container } = render(<Slider defaultValue={1} />);
         const slider = container.querySelector("div");
