@@ -34,8 +34,8 @@ import { CoreProps } from "./utils";
 import { TaipyDiagramModel } from "./projectstorm/models";
 
 interface ScenarioDagProps extends CoreProps {
-    defaultScenario?: string;
     scenario?: DisplayModel | DisplayModel[];
+    defaultScenario?: string;
     render?: boolean;
     defaultRender?: boolean;
     showToolbar?: boolean;
@@ -68,8 +68,8 @@ const getValidScenario = (scenario: DisplayModel | DisplayModel[]) =>
     scenario.length == 3 && typeof scenario[0] === "string"
         ? (scenario as DisplayModel)
         : scenario.length == 1
-        ? (scenario[0] as DisplayModel)
-        : undefined;
+          ? (scenario[0] as DisplayModel)
+          : undefined;
 
 const preventWheel = (e: Event) => e.preventDefault();
 
@@ -95,7 +95,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
             gridTemplateRows: showToolbar ? "auto 1fr" : "1fr",
             gridTemplateColumns: "1fr",
         }),
-        [props.width, props.height, showToolbar]
+        [props.width, props.height, showToolbar],
     );
 
     // Refresh on broadcast
@@ -106,9 +106,15 @@ const ScenarioDag = (props: ScenarioDagProps) => {
         }
         const tasks = coreChanged?.tasks;
         if (tasks) {
-            setTaskStatuses(tasks as TaskStatuses);
+            setTaskStatuses(tasks);
         }
     }, [coreChanged, props.updateVarName, scenarioId, module, dispatch, props.id]);
+
+    useEffect(() => {
+        if (props.authChanged) {
+            props.updateVarName && dispatch(createRequestUpdateAction(props.id, module, [props.updateVarName], true));
+        }
+    }, [props.authChanged, props.updateVarName, module, dispatch, props.id]);
 
     useEffect(() => {
         let dm: DisplayModel | undefined = undefined;
@@ -130,7 +136,7 @@ const ScenarioDag = (props: ScenarioDagProps) => {
 
     const onClick = useCallback(
         (id: string) => onAction && dispatch(createSendActionNameAction(props.id, module, onSelect, id, onAction)),
-        [props.id, onAction, onSelect, module, dispatch]
+        [props.id, onAction, onSelect, module, dispatch],
     );
 
     useEffect(() => {
@@ -149,10 +155,13 @@ const ScenarioDag = (props: ScenarioDagProps) => {
             engine
                 .getModel()
                 .getNodes()
-                .reduce((pv, nm) => {
-                    pv[nm.getID()] = nm.getPosition();
-                    return pv;
-                }, {} as Record<string, Point>);
+                .reduce(
+                    (pv, nm) => {
+                        pv[nm.getID()] = nm.getPosition();
+                        return pv;
+                    },
+                    {} as Record<string, Point>,
+                );
         const hasPos = rects && Object.keys(rects).length;
         if (hasPos) {
             model.getNodes().forEach((nm) => rects[nm.getID()] && nm.setPosition(rects[nm.getID()]));

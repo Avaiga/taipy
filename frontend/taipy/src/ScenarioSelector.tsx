@@ -37,6 +37,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useFormik } from "formik";
 
 import {
+    createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
     getComponentClassName,
@@ -173,7 +174,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                             p[name as keyof Property] = e.target.value;
                         }
                         return p;
-                    })
+                    }),
                 );
             } else {
                 setNewProp((np) => ({ ...np, [name]: e.target.value }));
@@ -194,7 +195,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 
     useEffect(() => {
         form.setValues(
-            scenario
+            actionEdit && scenario
                 ? {
                       id: scenario[ScFProps.id],
                       config: scenario[ScFProps.config_id],
@@ -202,13 +203,13 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                       date: scenario[ScFProps.creation_date],
                       properties: [],
                   }
-                : { ...emptyScenario, config: configs?.length === 1 ? configs[0][0] : "" }
+                : { ...emptyScenario, config: configs?.length === 1 ? configs[0][0] : "" },
         );
         setProperties(
-            scenario ? scenario[ScFProps.properties].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : []
+            actionEdit && scenario ? scenario[ScFProps.properties].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : [],
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [scenario, configs]);
+    }, [actionEdit, scenario, configs]);
 
     const onDeleteScenario = useCallback(() => {
         submit(actionEdit, true, { id: scenario && scenario[ScFProps.id] });
@@ -413,6 +414,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
 
 const ScenarioSelector = (props: ScenarioSelectorProps) => {
     const {
+        id,
         showAddButton = true,
         propagate = true,
         showPins = false,
@@ -421,7 +423,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         updateVars = "",
         updateScVars = "",
         showSearch = true,
-        creationNotAllowed = "",
+        creationNotAllowed,
     } = props;
     const [open, setOpen] = useState(false);
     const [actionEdit, setActionEdit] = useState<boolean>(false);
@@ -436,25 +438,25 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
         (...values: unknown[]) => {
             dispatch(
                 createSendActionNameAction(
-                    props.id,
+                    id,
                     module,
                     { action: props.onScenarioCrud, error_id: getUpdateVar(updateScVars, "error_id") },
                     props.onCreation,
                     props.updateVarName,
                     props.onChange,
-                    ...values
-                )
+                    ...values,
+                ),
             );
             if (values.length > 1 && values[1]) {
                 // delete requested => unselect current node
                 const lovVar = getUpdateVar(updateVars, "innerScenarios");
                 dispatch(
-                    createSendUpdateAction(props.updateVarName, undefined, module, props.onChange, propagate, lovVar)
+                    createSendUpdateAction(props.updateVarName, undefined, module, props.onChange, propagate, lovVar),
                 );
             }
         },
         [
-            props.id,
+            id,
             props.onScenarioCrud,
             dispatch,
             module,
@@ -464,7 +466,7 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             updateVars,
             props.onCreation,
             updateScVars,
-        ]
+        ],
     );
 
     const onDialogOpen = useCallback(() => {
@@ -488,30 +490,39 @@ const ScenarioSelector = (props: ScenarioSelectorProps) => {
             const varName = getUpdateVar(updateScVars, "sc_id");
             scId &&
                 props.onScenarioSelect &&
-                dispatch(createSendActionNameAction(props.id, module, props.onScenarioSelect, varName, scId));
+                dispatch(createSendActionNameAction(id, module, props.onScenarioSelect, varName, scId));
             setOpen(true);
             setActionEdit(true);
         },
-        [props.onScenarioSelect, props.id, dispatch, module, updateScVars]
+        [props.onScenarioSelect, id, dispatch, module, updateScVars],
     );
 
     const editScenario = useCallback(
         (props: EditProps) => (
-            <Tooltip title={props.active ? "Edit Scenario" : "Can't edit Scenario"}>
+            <Tooltip
+                title={props.active && !props.notEditable ? "Edit Scenario" : props.notEditable ? props.notEditable : "Cannot edit Scenario"}
+            >
                 <span>
                     <IconButton
                         data-id={props.id}
                         onClick={openEditDialog}
                         sx={tinyEditIconButtonSx}
-                        disabled={!props.active}
+                        disabled={!props.active || !!props.notEditable}
                     >
                         <EditOutlined />
                     </IconButton>
                 </span>
             </Tooltip>
         ),
-        [openEditDialog]
+        [openEditDialog],
     );
+
+    useEffect(() => {
+        if (props.authChanged) {
+            const updateVar = getUpdateVar(updateVars, "creationNotAllowed");
+            updateVar && dispatch(createRequestUpdateAction(id, module, [updateVar], true));
+        }
+    }, [props.authChanged, id, updateVars, module, dispatch]);
 
     return (
         <>

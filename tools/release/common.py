@@ -100,6 +100,10 @@ class Version:
             raise argparse.ArgumentTypeError(f"'{value}' is not a valid version number.") from e
         return version
 
+    def has_extension(self) -> bool:
+        """Returns True if this Version has an extension part."""
+        return self.ext is not None
+
     def validate_extension(self, ext="dev"):
         """Returns True if the extension part of this Version is the one queried."""
         return self.split_ext()[0] == ext
@@ -335,8 +339,8 @@ class Git:
         branch_name = Git.get_current_branch()
         remote_name = run_command("git", "config", f"branch.{branch_name}.remote")
         url = run_command("git", "remote", "get-url", remote_name)
-        if match := re.fullmatch(r"(?:git@github\.com:|https://github\.com/)(.*)\.git", url):
-            return match[1]
+        if match := re.fullmatch(r"(?:git@github\.com:|https://github\.com/)(.*)(?:\.git)?", url):
+            return match[1].rstrip('.git')
         print("ERROR - Could not retrieve GibHub branch path")  # noqa: T201
         return None
 

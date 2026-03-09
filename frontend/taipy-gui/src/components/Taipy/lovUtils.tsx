@@ -33,8 +33,8 @@ export interface SelTreeProps extends LovProps, TaipyLabelProps, DndProps {
 }
 
 export interface LovProps<T = string | string[], U = string> extends TaipyActiveProps, TaipyChangeProps {
-    defaultLov?: string;
     lov?: LoV;
+    defaultLov?: string;
     value?: T;
     defaultValue?: U;
     height?: string | number;

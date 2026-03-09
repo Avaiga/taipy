@@ -35,8 +35,8 @@ export interface TaipyHoverProps {
 }
 
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
-    defaultActive?: boolean;
     active?: boolean;
+    defaultActive?: boolean;
 }
 
 export interface TaipyLabelProps {

@@ -69,8 +69,8 @@ import StatusChip, { Status } from "./StatusChip";
 interface ScenarioViewerProps extends CoreProps {
     expandable?: boolean;
     expanded?: boolean;
-    defaultScenario?: string;
     scenario?: ScenarioFull | Array<ScenarioFull>;
+    defaultScenario?: string;
     onSubmit?: string;
     onEdit?: string;
     onDelete?: string;
@@ -154,7 +154,7 @@ const SequenceRow = ({
                 setValid(false);
             }
         },
-        [pLabel, label, taskIds, editSequence, isValid]
+        [pLabel, label, taskIds, editSequence, isValid],
     );
     const onCancelSequence = useCallback(
         (e?: MouseEvent<Element>) => {
@@ -163,21 +163,21 @@ const SequenceRow = ({
             setTaskIds(pTaskIds);
             setFocusName("");
         },
-        [pLabel, pTaskIds, setFocusName]
+        [pLabel, pTaskIds, setFocusName],
     );
     const onSubmitSequence = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             submitEntity(pLabel);
         },
-        [submitEntity, pLabel]
+        [submitEntity, pLabel],
     );
     const onDeleteSequence = useCallback(
         (e: MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             editSequence(pLabel, "", [], true);
         },
-        [editSequence, pLabel]
+        [editSequence, pLabel],
     );
 
     useEffect(() => setValid(isValid(pLabel, label)), [pLabel, label, isValid]);
@@ -265,7 +265,7 @@ const SequenceRow = ({
                     </Grid>
                     <Grid size={5}>
                         {taskIds.map((id) =>
-                            tasks[id] ? <Chip key={id} label={tasks[id]} variant="outlined" /> : null
+                            tasks[id] ? <Chip key={id} label={tasks[id]} variant="outlined" /> : null,
                         )}
                     </Grid>
                     <Grid size={1} alignContent="center" alignItems="center" justifyContent="center">
@@ -300,12 +300,12 @@ const SequenceRow = ({
     );
 };
 
-const getValidScenario = (scenar: ScenarioFull | ScenarioFull[]) =>
-    scenar.length == ScenarioFullLength && typeof scenar[ScFProps.id] === "string"
-        ? (scenar as ScenarioFull)
-        : scenar.length == 1
-        ? (scenar[0] as ScenarioFull)
-        : undefined;
+const getValidScenario = (scenario: ScenarioFull | ScenarioFull[]) =>
+    scenario.length == ScenarioFullLength && typeof scenario[ScFProps.id] === "string"
+        ? (scenario as ScenarioFull)
+        : scenario.length == 1
+          ? (scenario[0] as ScenarioFull)
+          : undefined;
 
 const invalidScenario: ScenarioFull = [
     "",
@@ -409,8 +409,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     undefined,
                     true,
                     true,
-                    { id: scId }
-                )
+                    { id: scId },
+                ),
             );
         }
     }, [valid, props.onDelete, scId, id, dispatch, module, updateScVars]);
@@ -426,7 +426,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     id: scId,
                     primary: true,
                     error_id: getUpdateVar(updateScVars, "error_id"),
-                })
+                }),
             );
         }
     }, [valid, props.onEdit, scId, id, dispatch, module, updateScVars]);
@@ -435,7 +435,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
     const [userExpanded, setUserExpanded] = useState(valid && expanded);
     const onExpand = useCallback(
         (e: SyntheticEvent, expand: boolean) => expandable && setUserExpanded(expand),
-        [expandable]
+        [expandable],
     );
 
     // Submission status
@@ -451,10 +451,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         sequence: label,
                         on_submission_change: props.onSubmissionChange,
                         error_id: getUpdateVar(updateScVars, "error_id"),
-                    })
+                    }),
                 );
         },
-        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module, updateScVars]
+        [scId, props.onSubmit, props.onSubmissionChange, id, dispatch, module, updateScVars],
     );
 
     const submitScenario = useCallback(
@@ -466,12 +466,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         id: scId,
                         on_submission_change: props.onSubmissionChange,
                         error_id: getUpdateVar(updateScVars, "error_id"),
-                    })
+                    }),
                 );
                 setSubmissionStatus(Status.SUBMITTED);
             }
         },
-        [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module, updateScVars]
+        [valid, props.onSubmit, props.onSubmissionChange, id, scId, dispatch, module, updateScVars],
     );
 
     // focus
@@ -492,12 +492,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         id: scId,
                         name: label,
                         error_id: getUpdateVar(updateScVars, "error_id"),
-                    })
+                    }),
                 );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, scId, label, id, dispatch, module, updateScVars]
+        [valid, props.onEdit, scId, label, id, dispatch, module, updateScVars],
     );
     const cancelLabel = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
@@ -505,7 +505,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             setLabel(scLabel);
             setFocusName("");
         },
-        [scLabel, setLabel, setFocusName]
+        [scLabel, setLabel, setFocusName],
     );
     const onLabelChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setLabel(e.target.value), []);
     const onLabelKeyDown = useCallback(
@@ -522,7 +522,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 }
             }
         },
-        [editLabel, cancelLabel]
+        [editLabel, cancelLabel],
     );
 
     // tags
@@ -536,12 +536,12 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         id: scId,
                         tags: tags,
                         error_id: getUpdateVar(updateScVars, "error_id"),
-                    })
+                    }),
                 );
                 setFocusName("");
             }
         },
-        [valid, props.onEdit, scId, tags, id, dispatch, module, updateScVars]
+        [valid, props.onEdit, scId, tags, id, dispatch, module, updateScVars],
     );
     const cancelTags = useCallback(
         (e?: MouseEvent<HTMLElement>) => {
@@ -549,7 +549,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             setTags(scTags);
             setFocusName("");
         },
-        [scTags]
+        [scTags],
     );
     const onChangeTags = useCallback((_: SyntheticEvent, tags: string[]) => setTags(tags), []);
     const onTagsKeyDown = useCallback(
@@ -560,7 +560,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 e.stopPropagation();
             }
         },
-        [cancelTags]
+        [cancelTags],
     );
 
     // sequences
@@ -577,7 +577,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             task_ids: taskIds,
                             del: !!del,
                             error_id: getUpdateVar(updateScVars, "error_id"),
-                        })
+                        }),
                     );
                 } else {
                     setSequences((seqs) => seqs.filter((seq) => seq[0]));
@@ -585,11 +585,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 setFocusName("");
             }
         },
-        [valid, id, scId, props.onEdit, dispatch, module, updateScVars]
+        [valid, id, scId, props.onEdit, dispatch, module, updateScVars],
     );
     const isValidSequence = useCallback(
         (sLabel: string, label: string) => !!label && (sLabel == label || !sequences.find((seq) => seq[0] === label)),
-        [sequences]
+        [sequences],
     );
 
     const addSequenceHandler = useCallback(() => setSequences((seq) => [...seq, ["", [], "", ""]]), []);
@@ -615,11 +615,22 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
         }
     }, [coreChanged, props.updateVarName, id, module, dispatch, scId]);
 
+    useEffect(() => {
+        if (props.authChanged) {
+            props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
+        }
+    }, [props.authChanged, props.updateVarName, module, dispatch, id]);
+
     const disabled = !valid || !active || !!scNotSubmittableReason;
 
     return (
         <>
-            <Box sx={MainBoxSx} id={id} onClick={onFocus} className={`${className} ${getComponentClassName(props.children)}`}>
+            <Box
+                sx={MainBoxSx}
+                id={id}
+                onClick={onFocus}
+                className={`${className} ${getComponentClassName(props.children)}`}
+            >
                 <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
                     <AccordionSummary
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
@@ -856,9 +867,25 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                             <Typography variant="h6">Sequences</Typography>
                                         </Grid>
                                         <Grid size={3} sx={{ ml: "auto" }}>
-                                            <Button onClick={addSequenceHandler} endIcon={<Add />}>
-                                                Add
-                                            </Button>
+                                            <Tooltip
+                                                title={
+                                                    active && !scNotEditableReason
+                                                        ? "Add Sequence"
+                                                        : scNotEditableReason
+                                                          ? scNotEditableReason
+                                                          : "Cannot add Sequence"
+                                                }
+                                            >
+                                                <span>
+                                                    <Button
+                                                        onClick={addSequenceHandler}
+                                                        endIcon={<Add />}
+                                                        disabled={!active || !!scNotEditableReason}
+                                                    >
+                                                        Add
+                                                    </Button>
+                                                </span>
+                                            </Tooltip>
                                         </Grid>
                                     </Grid>
 

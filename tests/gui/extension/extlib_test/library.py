@@ -36,3 +36,6 @@ class Library(ElementLibrary):
 
     def get_tgb_header(self) -> str:
         return "# Test Extension Library TGB Header"
+
+    def get_tgb_footer(self) -> str:
+        return "# Test Extension Library TGB Footer"

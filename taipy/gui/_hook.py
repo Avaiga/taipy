@@ -11,9 +11,9 @@
 
 import typing as t
 
-from taipy.common.logger._taipy_logger import _TaipyLogger
+from taipy.common.logger._taipy_logger import _TaipyLogger  # pyright: ignore[reportPrivateUsage]
 
-from .utils.singleton import _Singleton
+from .utils.singleton import _Singleton  # pyright: ignore[reportPrivateUsage]
 
 
 class _Hook:

@@ -29,8 +29,8 @@ from .utils import (
     _TaipyLovValue,
     _TaipyNumber,
     _TaipyTime,
-    _TaipyToDynamicJson,
     _TaipyToJson,
+    _TaipyToJsonable,
 )
 
 
@@ -141,11 +141,19 @@ class PropertyType(Enum):
     image = _TaipyContentImage
     json = _TaipyToJson
     """
-    The property is JSON serializable.
+    The property value is a JSON representation of the value and dynamic.
+
+    Although dynamic, the implementation of a *json* property does not need the React component to
+    have a "default<PropertyName>" parameter, as the JSON value is directly passed to the component
+    and not used to set an initial value.
     """
-    dynamic_json = _TaipyToDynamicJson
+    jsonable = _TaipyToJsonable
     """
-    The property is JSON serializable and dynamic.
+    The property value is JSON serializable and dynamic.
+
+    Although dynamic, the implementation of a *jsonable* property does not need the React component
+    to have a "default<PropertyName>" parameter, as the JSON value is directly passed to the
+    component and not used to set an initial value.
     """
     single_lov = "singlelov"
     lov = _TaipyLov

@@ -13,12 +13,12 @@ from __future__ import annotations
 import typing as t
 from abc import ABC, abstractmethod
 from datetime import date, datetime, time, timedelta
+from inspect import ismethod
 from json import JSONEncoder
 from pathlib import Path
 
 import numpy
 import pandas
-from flask.json.provider import DefaultJSONProvider  # type: ignore[reportMissingImports]
 
 from .._warnings import _warn
 from ..icon import Icon
@@ -28,16 +28,16 @@ from ..utils.singleton import _Singleton
 
 class JsonAdapter(ABC):
     """NOT DOCUMENTED"""
+
     def register(self):
         _TaipyJsonAdapter().register(self)
 
     @abstractmethod
-    def parse(self, o) -> t.Optional[t.Any]:
-        ...  # pragma: no cover
+    def to_jsonable(self, o) -> t.Optional[t.Any]: ...  # pragma: no cover
 
 
 class _DefaultJsonAdapter(JsonAdapter):
-    def parse(self, o):
+    def to_jsonable(self, o):
         if isinstance(o, Icon):
             return o._to_dict()
         if isinstance(o, _MapDict):
@@ -54,20 +54,28 @@ class _DefaultJsonAdapter(JsonAdapter):
             return getattr(o, "tolist", lambda: o)()
         if isinstance(o, _DoNotUpdate):
             return None
+        if (method := getattr(o, "to_jsonable", None)) and ismethod(method):
+            return method()
+        # This is a fallback for objects that have a to_dict method but not a to_jsonable method.
+        # This improves interoperability with user-defined classes that implement to_dict for their
+        # own purposes - à-la Pandas.
+        if (method := getattr(o, "to_dict", None)) and ismethod(method):
+            return method()
+        return None
 
 
 class _TaipyJsonAdapter(object, metaclass=_Singleton):
     def __init__(self) -> None:
-        self._adapters: t.List[JsonAdapter] = []
+        self._adapters: list[JsonAdapter] = []
         self.register(_DefaultJsonAdapter())
 
     def register(self, adapter: JsonAdapter):
         self._adapters.append(adapter)
 
-    def parse(self, o):
+    def to_jsonable(self, o):
         try:
             for adapter in reversed(self._adapters):
-                if (output := adapter.parse(o)) is not None:
+                if (output := adapter.to_jsonable(o)) is not None:
                     return output
             raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable (value: {o}).")
         except Exception as e:
@@ -77,9 +85,4 @@ class _TaipyJsonAdapter(object, metaclass=_Singleton):
 
 class _TaipyJsonEncoder(JSONEncoder):
     def default(self, o):
-        return _TaipyJsonAdapter().parse(o)
-
-
-class _TaipyJsonProvider(DefaultJSONProvider):
-    default = staticmethod(_TaipyJsonAdapter().parse)
-    sort_keys = False
+        return _TaipyJsonAdapter().to_jsonable(o)

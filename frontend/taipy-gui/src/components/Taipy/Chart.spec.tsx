@@ -119,10 +119,10 @@ const useGetRealIndex = (data: Data, dataKey: DataKey, props: Props) => {
                 ? props.figure
                     ? index
                     : data[dataKey] && data[dataKey].tp_index
-                    ? data[dataKey]!.tp_index![index]
-                    : index
+                      ? data[dataKey]!.tp_index![index]
+                      : index
                 : 0,
-        [data, dataKey, props.figure]
+        [data, dataKey, props.figure],
     );
 };
 
@@ -138,7 +138,9 @@ describe("Chart Component", () => {
         expect(elt).toBeInTheDocument();
     });
     it("is disabled", async () => {
-        const { container } = render(<Chart data={chartValue} defaultConfig={chartConfig} active={false} className="test" />);
+        const { container } = render(
+            <Chart data={chartValue} defaultConfig={chartConfig} active={false} className="test" />,
+        );
         const elt = container.querySelector(".test");
         expect(elt?.querySelector(".modebar")).toBeNull();
     });
@@ -148,7 +150,9 @@ describe("Chart Component", () => {
         await waitFor(() => expect(elt?.querySelector(".modebar")).not.toBeNull());
     });
     it("is enabled by active", async () => {
-        const { container } = render(<Chart data={undefined} defaultConfig={chartConfig} active={true} className="test" />);
+        const { container } = render(
+            <Chart data={undefined} defaultConfig={chartConfig} active={true} className="test" />,
+        );
         const elt = container.querySelector(".test");
         await waitFor(() => expect(elt?.querySelector(".modebar")).not.toBeNull());
     });
@@ -166,24 +170,26 @@ describe("Chart Component", () => {
                     updateVars="varName=varName"
                     {...selProps}
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: { id: "chart", names: ["varName"], refresh: false },
             type: "REQUEST_UPDATE",
         });
-        await waitFor(() => expect(dispatch).toHaveBeenCalledWith({
-            name: "data_var",
-            payload: {
-                alldata: true,
-                pagekey: "Day-Daily hospital occupancy",
-                columns: ["Day", "Daily hospital occupancy"],
-                decimatorPayload: undefined,
-                id: "chart",
-            },
-            type: "REQUEST_DATA_UPDATE",
-        }));
+        await waitFor(() =>
+            expect(dispatch).toHaveBeenCalledWith({
+                name: "data_var",
+                payload: {
+                    alldata: true,
+                    pagekey: "Day-Daily hospital occupancy",
+                    columns: ["Day", "Daily hospital occupancy"],
+                    decimatorPayload: undefined,
+                    id: "chart",
+                },
+                type: "REQUEST_DATA_UPDATE",
+            }),
+        );
     });
     it("dispatch a well formed message on selection", async () => {
         const dispatch = jest.fn();
@@ -191,7 +197,7 @@ describe("Chart Component", () => {
         const { container } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Chart data={undefined} updateVarName="data_var" defaultConfig={chartConfig} className="test" />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         const elt = container.querySelector(".test");
         await waitFor(() => expect(elt?.querySelector(".modebar")).not.toBeNull());
@@ -220,7 +226,7 @@ describe("Chart Component", () => {
                     defaultConfig={chartConfig}
                     updateVars="varName=varName"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         const newState = { ...state, data: { ...state.data, table: chartValue } };
         rerender(
@@ -232,7 +238,7 @@ describe("Chart Component", () => {
                     defaultConfig={chartConfig}
                     updateVars="varName=varName"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         const elt = getByLabelText("Go to next page");
         await userEvent.click(elt);
@@ -252,7 +258,7 @@ describe("Chart Component", () => {
     });
     xit("displays the received data", async () => {
         const { getAllByText, rerender } = render(
-            <Chart data={undefined} defaultConfig={chartConfig} updateVars="varName=varName" />
+            <Chart data={undefined} defaultConfig={chartConfig} updateVars="varName=varName" />,
         );
         rerender(<Chart data={chartValue} defaultConfig={chartConfig} updateVars="varName=varName" />);
         const elements = getAllByText("Austria");
@@ -260,7 +266,7 @@ describe("Chart Component", () => {
         expect(elements[0].tagName).toBe("TD");
     });
     it("Chart renders correctly", () => {
-        const figure = { data: [], layout: { title: "Mock Title" } };
+        const figure = '{ data: [], layout: { title: "Mock Title" } }';
         const { container } = render(
             <Chart
                 id="table"
@@ -270,7 +276,7 @@ describe("Chart Component", () => {
                 updateVars="varName=varName"
                 figure={figure}
                 className="test"
-            />
+            />,
         );
         const elt = container.querySelector(".test");
         expect(elt).toBeInTheDocument();
@@ -283,7 +289,7 @@ describe("Chart Component", () => {
         // Case 2: plotConfig is not a valid JSON string
         render(<Chart plotConfig="not a valid json" defaultConfig={chartConfig} />);
         expect(consoleInfoSpy).toHaveBeenCalledWith(
-            "Error while parsing Chart.plot_config\nUnexpected token 'o', \"not a valid json\" is not valid JSON"
+            "Error while parsing Chart.plot_config\nUnexpected token 'o', \"not a valid json\" is not valid JSON",
         );
         // Case 3: plotConfig is not an object
         render(<Chart plotConfig='"not an object"' defaultConfig={chartConfig} />);
@@ -305,7 +311,9 @@ describe("Chart Component", () => {
 
     describe("as Map", () => {
         it("renders", async () => {
-            const { container } = render(<Chart data={mapValue} defaultConfig={mapConfig} layout={mapLayout} className="test" />);
+            const { container } = render(
+                <Chart data={mapValue} defaultConfig={mapConfig} layout={mapLayout} className="test" />,
+            );
             const elt = container.querySelector(".test");
             await waitFor(() => expect(elt?.querySelector(".modebar")).not.toBeNull());
         });

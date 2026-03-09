@@ -167,8 +167,8 @@ enum DatanodeDataProps {
 interface DataNodeViewerProps extends CoreProps {
     expandable?: boolean;
     expanded?: boolean;
-    defaultDataNode?: string;
     dataNode?: DataNodeFull | Array<DataNodeFull>;
+    defaultDataNode?: string;
     onEdit?: string;
     showConfig?: boolean;
     showOwner?: boolean;
@@ -288,7 +288,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
     const dtValue = dnData[DatanodeDataProps.value] ?? (dtType == "float" || dtTypeIsNull ? null : undefined);
     const dtTabular = dnData[DatanodeDataProps.tabular] ?? false;
     const dtError = dnData[DatanodeDataProps.error];
-    const dtIsJson = dnData[DatanodeDataProps.isJson] && (dtTypeIsNull ||dtType === "dict" || dtType === "list") ? true : false;
+    const dtIsJson =
+        dnData[DatanodeDataProps.isJson] && (dtTypeIsNull || dtType === "dict" || dtType === "list") ? true : false;
 
     const theme = useTheme();
 
@@ -621,7 +622,10 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
         [dtValue, dtType, dnId, id, dispatch, module, props.onLock, updateDnVars],
     );
     const onDataValueChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setDataValue(e.target.value), []);
-    const onDataValueSwitchChange = useCallback((e: ChangeEvent<HTMLInputElement>) => setDataValue(e.target.checked), []);
+    const onDataValueSwitchChange = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => setDataValue(e.target.checked),
+        [],
+    );
     const onDataValueDateChange = useCallback((d: Date | null) => d && setDataValue(d), []);
     useEffect(() => {
         if (dtValue !== undefined) {
@@ -705,6 +709,12 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
             props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
         }
     }, [coreChanged, props.updateVarName, id, module, dispatch, dnId]);
+
+    useEffect(() => {
+        if (props.authChanged) {
+            props.updateVarName && dispatch(createRequestUpdateAction(id, module, [props.updateVarName], true));
+        }
+    }, [props.authChanged, props.updateVarName, module, dispatch, id]);
 
     return (
         <>

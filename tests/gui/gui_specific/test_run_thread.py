@@ -16,7 +16,7 @@ from urllib.request import urlopen
 from taipy.gui import Gui
 
 
-# this hangs in github
+# Hangs in github
 def test_run_thread(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page("page1", "# first page")

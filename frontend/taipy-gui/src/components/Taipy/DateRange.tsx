@@ -35,8 +35,8 @@ interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
     format?: string;
     dates: string[];
     defaultDates?: string;
-    defaultEditable?: boolean;
     editable?: boolean;
+    defaultEditable?: boolean;
     labelStart?: string;
     labelEnd?: string;
     separator?: string;

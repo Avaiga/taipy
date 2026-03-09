@@ -28,8 +28,8 @@ interface PartProps extends TaipyBaseProps, DndProps {
     page?: string;
     defaultPage?: string;
     children?: ReactNode;
-    defaultPartial?: boolean;
     partial?: boolean;
+    defaultPartial?: boolean;
     height?: string;
     defaultHeight?: string;
     width?: string | number;
