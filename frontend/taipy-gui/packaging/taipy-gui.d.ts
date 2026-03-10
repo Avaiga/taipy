@@ -11,11 +11,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import * as React from "react"
-
 import { PaletteMode } from "@mui/material";
 import { Theme } from "@mui/material/styles";
 import { ComponentType, Dispatch, ReactNode } from "react";
+import { FallbackProps } from "react-error-boundary";
 import { Socket } from "socket.io-client";
 
 export interface TaipyBaseProps {
@@ -36,8 +35,8 @@ export interface TaipyHoverProps {
     defaultHoverText?: string;
 }
 export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
-    defaultActive?: boolean;
     active?: boolean;
+    defaultActive?: boolean;
 }
 export interface TaipyMultiSelectProps {
     selected?: number[];
@@ -97,6 +96,7 @@ export interface MenuProps extends TaipyBaseProps {
     lov?: LovItem[];
     active?: boolean;
     selected?: string[];
+    expanded?: boolean;
 }
 export declare const getLocalStorageValue: <T = string>(key: string, defaultValue: T, values?: T[]) => T;
 export declare const storeClientId: (id: string) => void;
@@ -121,7 +121,8 @@ export type WsMessageType =
     | "GA"
     | "FV"
     | "BC"
-    | "LS";
+    | "LS"
+    | "PT";
 export interface WsMessage {
     type: WsMessageType;
     name: string;
@@ -139,7 +140,7 @@ export declare const sendWsMessage: (
     id: string,
     moduleContext?: string,
     propagate?: boolean,
-    serverAck?: (val: unknown) => void
+    serverAck?: (val: unknown) => void,
 ) => string;
 declare enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -165,6 +166,7 @@ declare enum Types {
     Broadcast = "BROADCAST",
     LocalStorage = "LOCAL_STORAGE",
     RefreshThemes = "REFRESH_THEMES",
+    Patch = "PATCH",
 }
 interface TaipyState {
     socket?: Socket;
@@ -246,7 +248,7 @@ export declare const createSendUpdateAction: (
     context: string | undefined,
     onChange?: string,
     propagate?: boolean,
-    relName?: string
+    relName?: string,
 ) => TaipyAction;
 /**
  * Create an *action* `Action` that will be used to update `Context`.
@@ -294,7 +296,7 @@ export declare const createRequestDataUpdateAction: (
     pageKey: string,
     payload: Record<string, unknown>,
     allData?: boolean,
-    library?: string
+    library?: string,
 ) => TaipyAction;
 /**
  * Create a *request update* `Action` that will be used to update the `Context`.
@@ -312,7 +314,7 @@ export declare const createRequestUpdateAction: (
     context: string | undefined,
     names: string[],
     forceRefresh?: boolean,
-    stateContext?: Record<string, unknown>
+    stateContext?: Record<string, unknown>,
 ) => TaipyAction;
 export declare const createRefreshThemesAction: () => TaipyBaseAction;
 /**
@@ -363,6 +365,8 @@ export interface ColumnDesc {
     headers?: string[];
     /** The index of the multi index if exists. */
     multi?: number;
+    /** If true or not set, line breaks are transformed into <BR>. */
+    lineBreak?: boolean;
 }
 /**
  * A cell value type.
@@ -417,13 +421,15 @@ export interface FilterDesc {
 }
 export interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     title?: string;
+    defaultTitle?: string;
     width?: string | number;
     height?: string | number;
-    defaultConfig: string;
     config?: string;
+    defaultConfig: string;
     data?: Record<string, TraceValueType>;
-    defaultLayout?: string;
+    animationData?: Record<string, TraceValueType>;
     layout?: string;
+    defaultLayout?: string;
     plotConfig?: string;
     onRangeChange?: string;
     render?: boolean;
@@ -431,12 +437,12 @@ export interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     template?: string;
     template_Dark_?: string;
     template_Light_?: string;
-    figure?: Array<Record<string, unknown>>;
+    figure?: string;
     onClick?: string;
     dataVarNames?: string;
 }
 export type TraceValueType = Record<string, (string | number)[]>;
-export declare const Chart: (props: ChartProp) => React.JSX.Element | null;
+export declare const Chart: (props: ChartProp) => import("react/jsx-runtime").JSX.Element | null;
 export interface DialogProps extends TaipyActiveProps {
     title: string;
     onAction?: string;
@@ -454,11 +460,11 @@ export interface DialogProps extends TaipyActiveProps {
     defaultRefId?: string;
     popup?: boolean;
 }
-export declare const Dialog: (props: DialogProps) => React.JSX.Element;
+export declare const Dialog: (props: DialogProps) => import("react/jsx-runtime").JSX.Element;
 export interface FileSelectorProps extends TaipyActiveProps {
     onAction?: string;
-    defaultLabel?: string;
     label?: string;
+    defaultLabel?: string;
     multiple?: boolean;
     selectionType?: string;
     extensions?: string;
@@ -470,20 +476,20 @@ export interface FileSelectorProps extends TaipyActiveProps {
     onUploadAction?: string;
     uploadData?: string;
 }
-export declare const FileSelector: (props: FileSelectorProps) => React.JSX.Element;
+export declare const FileSelector: (props: FileSelectorProps) => import("react/jsx-runtime").JSX.Element;
 export interface LoginProps extends TaipyBaseProps {
     title?: string;
     onAction?: string;
-    defaultMessage?: string;
     message?: string;
+    defaultMessage?: string;
     labels?: string;
 }
-export declare const Login: (props: LoginProps) => React.JSX.Element | null;
-export declare const Router: () => React.JSX.Element;
+export declare const Login: (props: LoginProps) => import("react/jsx-runtime").JSX.Element | null;
+export declare const Router: () => import("react/jsx-runtime").JSX.Element;
 export interface TableProps extends TaipyPaginatedTableProps {
     autoLoading?: boolean;
 }
-export declare const Table: ({ autoLoading, ...rest }: TableProps) => React.JSX.Element;
+export declare const Table: ({ autoLoading, ...rest }: TableProps) => import("react/jsx-runtime").JSX.Element;
 export interface FilterColumnDesc extends ColumnDesc {
     params?: number[];
 }
@@ -497,7 +503,7 @@ export interface TableFilterProps {
     className?: string;
     filteredCount: number;
 }
-export declare const TableFilter: (props: TableFilterProps) => React.JSX.Element;
+export declare const TableFilter: (props: TableFilterProps) => import("react/jsx-runtime").JSX.Element;
 export interface SortDesc {
     col: string;
     order: boolean;
@@ -515,7 +521,7 @@ export interface TableSortProps {
     appliedSorts?: Array<SortDesc>;
     className?: string;
 }
-export declare const TableSort: (props: TableSortProps) => React.JSX.Element;
+export declare const TableSort: (props: TableSortProps) => import("react/jsx-runtime").JSX.Element;
 /**
  * A function that retrieves the dynamic className associated
  * to an instance of component through the style property
@@ -550,7 +556,7 @@ export interface MetricProps extends TaipyBaseProps, TaipyHoverProps {
     template_Dark_?: string;
     template_Light_?: string;
 }
-export declare const Metric: (props: MetricProps) => React.JSX.Element;
+export declare const Metric: (props: MetricProps) => import("react/jsx-runtime").JSX.Element;
 /**
  * A LoV (list of value) element.
  *
@@ -584,11 +590,51 @@ interface TaipyStore {
  *
  * The type of this variable is `React.Context<Store>`.
  */
-export declare const TaipyContext: React.Context<TaipyStore>;
+export declare const TaipyContext: import("react").Context<TaipyStore>;
 export interface PageStore {
     module?: string;
 }
-export declare const PageContext: React.Context<PageStore>;
+export declare const PageContext: import("react").Context<PageStore>;
+/**
+ * A React hook that provides actions for updating data and triggering backend functions.
+ *
+ * The `sendUpdate` function allows to update a variable on the backend and trigger an `on_change` function.
+ * The `sendAction` function allows to trigger an `on_action` function on the backend with a custom payload.
+ * The `requestUpdateOnFirstRender` function allows to request an update from the backend for every dynamic property of the element.
+ *
+ * @returns An object containing the following keys:
+ * - *sendUpdate* is a function that can be used to update a variable on the backend and trigger the
+ *   `on_change` callback. It takes the following parameters:
+ *   - *name*: The name of the variable to update on the backend.
+ *   - *value*: The new value for the variable.
+ *   - *onChange*: The name of the `on_change` callback function to trigger.</br>
+ *     If not provided, the default `on_change` callback will be triggered if it exists.
+ *   - *propagate*: Whether to propagate the update to other components.
+ *   - *relName*: The name of the related variable.
+ * - *sendAction* is a function that can be used to trigger a backend callback with a custom payload.
+ *   This function takes the following parameters:
+ *   - *name*: The name of the action to trigger on the backend.
+ *   - *context*: The name of execution context.
+ *   - *value*: The value to send as payload for the action.
+ *   - *args*: Additional arguments to send as payload for the action.
+ * - *requestUpdateOnFirstRender* is a function that requests an update from the backend for every
+ *   dynamic property of the element. This function takes the following parameters:
+ *   - *id*: The identifier of the element.
+ *   - *updateVars*: The content of the property *updateVars*.
+ *   - *varName*: The default property backend provided variable (through property `updateVarName`).
+ *   - *forceRefresh*: Should Taipy re-evaluate the variables or use the current values.
+ */
+export declare const useActions: () => {
+    sendAction: (name: string | undefined, value: unknown, ...args: unknown[]) => void;
+    sendUpdate: (
+        name: string | undefined,
+        value: unknown,
+        onChange?: string,
+        propagate?: boolean,
+        relName?: string,
+    ) => void;
+    requestUpdateOnFirstRender: (id?: string, updateVars?: string, varName?: string, forceRefresh?: boolean) => void;
+};
 /**
  * A React hook to manage a dynamic scalar property.
  *
@@ -604,7 +650,7 @@ export declare const useDynamicProperty: <T>(
     defaultValue: T,
     defaultStatic: T,
     checkType?: string,
-    nullToDefault?: boolean
+    nullToDefault?: boolean,
 ) => T;
 /**
  * A React hook to manage a dynamic dict property (prev. useDynamicJsonProperty).
@@ -619,7 +665,7 @@ export declare const useDynamicProperty: <T>(
 export declare const useDynamicDictProperty: <T>(
     value: string | undefined,
     defaultValue: string,
-    defaultStatic: T
+    defaultStatic: T,
 ) => T;
 /**
  * A React hook that requests an update for every dynamic property of the element.
@@ -636,7 +682,7 @@ export declare const useDispatchRequestUpdateOnFirstRender: (
     context?: string,
     updateVars?: string,
     varName?: string,
-    forceRefresh?: boolean
+    forceRefresh?: boolean,
 ) => void;
 /**
  * A React hook that returns the *dispatch* function.
@@ -671,17 +717,13 @@ export declare const uploadFile: (
     files: FileList,
     progressCallback: (val: number) => void,
     id: string,
-    uploadUrl?: string
+    uploadUrl?: string,
 ) => Promise<string>;
 export declare const emptyArray: never[];
-export interface ErrorFallBackProps {
-    error: Error;
-    resetErrorBoundary: () => void;
-}
-export declare const ErrorFallback: (props: ErrorFallBackProps) => React.JSX.Element;
-export declare const getRegisteredComponents: () => Record<string, ComponentType<object>>;
-export declare const unregisteredRender: (tagName?: string, error?: string) => React.JSX.Element;
-export declare const renderError: (props: { error: string }) => React.JSX.Element;
+export declare const ErrorFallback: (props: FallbackProps) => import("react/jsx-runtime").JSX.Element;
+export declare const getRegisteredComponents: () => Record<string, ComponentType<unknown>>;
+export declare const unregisteredRender: (tagName?: string, error?: string) => import("react/jsx-runtime").JSX.Element;
+export declare const renderError: (props: { error: string }) => import("react/jsx-runtime").JSX.Element;
 
 export { TaipyBaseAction as Action, TaipyContext as Context, TaipyState as State, TaipyStore as Store };
 

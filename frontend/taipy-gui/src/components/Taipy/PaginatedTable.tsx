@@ -185,7 +185,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
-                    newCols
+                    newCols,
                 );
                 const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
                 const headersInfo = [];
@@ -322,7 +322,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             aggregates,
             cellClassNames,
             tooltips,
-            formats
+            formats,
         );
         if (refresh || !props.data || props.data[pageKey.current] === undefined) {
             setLoading(true);
@@ -356,8 +356,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     updateVars && getUpdateVar(updateVars, "comparedatas"),
                     typeof userData == "object"
                         ? (userData as Record<string, Record<string, unknown>>).context
-                        : undefined
-                )
+                        : undefined,
+                ),
             );
         } else {
             setValue(props.data[pageKey.current]);
@@ -398,14 +398,14 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 setOrderBy(col);
             }
         },
-        [orderBy, order]
+        [orderBy, order],
     );
 
     const handleChangePage = useCallback(
         (event: unknown, newPage: number) => {
             setStartIndex(newPage * rowsPerPage);
         },
-        [rowsPerPage]
+        [rowsPerPage],
     );
 
     const handleChangeRowsPerPage = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -435,9 +435,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     action: onAdd,
                     index: startIndex,
                     user_data: userData,
-                })
+                }),
             ),
-        [startIndex, dispatch, updateVarName, onAdd, module, userData]
+        [startIndex, dispatch, updateVarName, onAdd, module, userData],
     );
 
     const onDownload = useCallback(
@@ -446,9 +446,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 createSendActionNameAction(updateVarName, module, {
                     action: DownloadAction,
                     user_data: userData,
-                })
+                }),
             ),
-        [dispatch, updateVarName, module, userData]
+        [dispatch, updateVarName, module, userData],
     );
 
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
@@ -459,13 +459,17 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             try {
                 psOptions = JSON.parse(pageSizeOptions);
             } catch (e) {
-                console.log("PaginatedTable pageSizeOptions is wrong ", pageSizeOptions, e);
+                console.warn(
+                    "PaginatedTable pageSizeOptions is invalid. It must be a list of page sizes as integer values.",
+                    pageSizeOptions,
+                    e,
+                );
             }
         }
         if (
             pageSize > 0 &&
             !psOptions.some((ps) =>
-                typeof ps === "number" ? ps === pageSize : typeof ps.value === "number" ? ps.value === pageSize : false
+                typeof ps === "number" ? ps === pageSize : typeof ps.value === "number" ? ps.value === pageSize : false,
             )
         ) {
             psOptions.push({ value: pageSize, label: "" + pageSize });
@@ -512,9 +516,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     user_value: userValue,
                     tz: tz,
                     user_data: userData,
-                })
+                }),
             ),
-        [dispatch, updateVarName, onEdit, rows, startIndex, module, userData]
+        [dispatch, updateVarName, onEdit, rows, startIndex, module, userData],
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
@@ -524,9 +528,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     action: onDelete,
                     index: rows ? getRowIndex(rows[rowIndex], rowIndex, startIndex) : startIndex,
                     user_data: userData,
-                })
+                }),
             ),
-        [dispatch, updateVarName, onDelete, rows, startIndex, module, userData]
+        [dispatch, updateVarName, onDelete, rows, startIndex, module, userData],
     );
 
     const onRowSelection: OnRowSelection = useCallback(
@@ -539,9 +543,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     value,
                     reason: value === undefined ? "click" : "button",
                     user_data: userData,
-                })
+                }),
             ),
-        [dispatch, updateVarName, onAction, rows, startIndex, module, userData]
+        [dispatch, updateVarName, onAction, rows, startIndex, module, userData],
     );
 
     const onRowClick: OnRowClick = useCallback(
@@ -552,7 +556,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 onRowSelection(rowIndex);
             }
         },
-        [onRowSelection]
+        [onRowSelection],
     );
 
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
@@ -564,7 +568,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                       .filter((col) => columns[col].multi !== undefined)
                       .map((col) => {
                           const values = rows.map((r, idx) =>
-                              idx > 0 && rows[idx - 1][col] == r[col] ? undefined : r[col]
+                              idx > 0 && rows[idx - 1][col] == r[col] ? undefined : r[col],
                           );
                           return values.map((value, idx) => {
                               if (value === undefined) {
@@ -576,7 +580,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                           });
                       })
                 : [],
-        [colsOrder, columns, rows]
+        [colsOrder, columns, rows],
     );
 
     return (
@@ -584,7 +588,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             id={id}
             sx={boxSx}
             className={`${className} ${getSuffixedClassNames(className, "-paginated")} ${getComponentClassName(
-                props.children
+                props.children,
             )}`}
         >
             <Paper sx={paperSx}>
@@ -607,17 +611,20 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                             key={`head${columns[col].dfid}`}
                                                             sx={
                                                                 columns[col].width
-                                                                    ? { minWidth: columns[col].width, maxWidth: columns[col].width }
+                                                                    ? {
+                                                                          minWidth: columns[col].width,
+                                                                          maxWidth: columns[col].width,
+                                                                      }
                                                                     : calcWidth
-                                                                    ? { width: calcWidth }
-                                                                    : undefined
+                                                                      ? { width: calcWidth }
+                                                                      : undefined
                                                             }
                                                             className={
                                                                 col === "EDIT_COL"
                                                                     ? getSuffixedClassNames(className, "-action")
                                                                     : getSuffixedClassNames(
                                                                           className,
-                                                                          generateHeaderClassName(columns[col].dfid)
+                                                                          generateHeaderClassName(columns[col].dfid),
                                                                       )
                                                             }
                                                         >
@@ -639,17 +646,20 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                         sortDirection={orderBy === columns[col].dfid && order}
                                                         sx={
                                                             columns[col].width
-                                                                ? { minWidth: columns[col].width, maxWidth: columns[col].width }
+                                                                ? {
+                                                                      minWidth: columns[col].width,
+                                                                      maxWidth: columns[col].width,
+                                                                  }
                                                                 : calcWidth
-                                                                ? { width: calcWidth }
-                                                                : undefined
+                                                                  ? { width: calcWidth }
+                                                                  : undefined
                                                         }
                                                         className={
                                                             col === "EDIT_COL"
                                                                 ? getSuffixedClassNames(className, "-action")
                                                                 : getSuffixedClassNames(
                                                                       className,
-                                                                      generateHeaderClassName(columns[col].dfid)
+                                                                      generateHeaderClassName(columns[col].dfid),
                                                                   )
                                                         }
                                                     >
@@ -747,7 +757,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         Promise.resolve().then(
                                             () =>
                                                 selectedRowRef.current?.scrollIntoView &&
-                                                selectedRowRef.current.scrollIntoView({ block: "center" })
+                                                selectedRowRef.current.scrollIntoView({ block: "center" }),
                                         );
                                     }
                                     return (
@@ -762,7 +772,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                             onClick={active && onAction ? onRowClick : undefined}
                                         >
                                             {colsOrder.map((col, idx) => {
-                                                const rowSpan = idx < rowSpans.length && index < rowSpans[idx].length ? rowSpans[idx][index] : 1;
+                                                const rowSpan =
+                                                    idx < rowSpans.length && index < rowSpans[idx].length
+                                                        ? rowSpans[idx][index]
+                                                        : 1;
                                                 return (
                                                     <EditableCell
                                                         key={`cell${index}${columns[col].dfid}`}

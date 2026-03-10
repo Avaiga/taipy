@@ -29,5 +29,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # types generation
+packaging/taipy-gui.gen.d.ts
 /extension-types
 .env

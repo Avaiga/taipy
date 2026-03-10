@@ -91,19 +91,26 @@ export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefin
 /**
  * Extracts the backend name of a property.
  *
- * @param updateVars - The value held by the property *updateVars*.
+ * @param updateVars - The value held by the property *updateVars* of a component.
  * @param name - The name of a bound property.
  * @returns The backend-generated variable name.
  */
 export const getUpdateVar = (updateVars: string, name: string) => {
-    const sel = updateVars && updateVars.split(";").find((uv) => uv && uv.startsWith(name + "="));
-    if (sel) {
-        return sel.substring(name.length + 1);
-    }
-    return sel;
+    // updateVars is a string of the form "prop1=var1;prop2=var2;..."
+    // We want to extract the var corresponding to the prop name.
+    const selected = updateVars?.split(";").find((updateVar) => updateVar?.startsWith(`${name}=`));
+    return selected?.substring(name.length + 1);
 };
 
+/**
+ * Extracts the backend names of all properties.
+ *
+ * @param updateVars - The value held by the property *updateVars* of a component.
+ * @returns An array of backend-generated variable names.
+ */
 export const getUpdateVars = (updateVars?: string) =>
+    // updateVars is a string of the form "prop1=var1;prop2=var2;..."
+    // We want to extract all the vars corresponding to the prop names, in an array.
     updateVars
         ? updateVars
               .split(";")
@@ -152,8 +159,8 @@ export const getProps = (p: DateProps, start: boolean, val: Date | null, withTim
             ? "minDateTime"
             : "maxDateTime"
         : start
-        ? "minDate"
-        : "maxDate";
+          ? "minDate"
+          : "maxDate";
     if (p[propName] == val) {
         return p;
     }

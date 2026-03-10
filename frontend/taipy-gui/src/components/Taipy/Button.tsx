@@ -20,7 +20,7 @@ import { getCssSize, getSuffixedClassNames, TaipyActiveProps } from "./utils";
 import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { stringIcon, Icon, IconAvatar } from "../../utils/icon";
 import { getComponentClassName } from "./TaipyStyle";
-import { useActions } from "../../hooks/Actions";
+import { useActions } from "../../hooks";
 
 interface ButtonProps extends TaipyActiveProps {
     onAction?: string;

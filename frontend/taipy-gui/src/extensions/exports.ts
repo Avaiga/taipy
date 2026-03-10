@@ -28,6 +28,7 @@ import { getUpdateVar, getSuffixedClassNames } from "../components/Taipy/utils";
 import { ColumnDesc, RowType, RowValue } from "../components/Taipy/tableUtils";
 import { TaipyContext, TaipyStore, PageContext } from "../context/taipyContext";
 import { TaipyBaseAction, TaipyState } from "../context/taipyReducers";
+import { useActions } from "../hooks";
 import {
     useClassNames,
     useDispatchRequestUpdateOnFirstRender,
@@ -61,6 +62,7 @@ export {
     getComponentClassName,
     getSuffixedClassNames,
     getUpdateVar,
+    useActions,
     useClassNames,
     useDispatchRequestUpdateOnFirstRender,
     useDispatch,

@@ -24,7 +24,7 @@ import { getCssSize, getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
 import { SyntheticEvent } from "react";
 import { getComponentClassName } from "./TaipyStyle";
-import { useActions } from "../../hooks/Actions";
+import { useActions } from "../../hooks";
 
 interface SliderProps extends LovProps<number | string | number[] | string[], number | string | number[] | string[]> {
     width?: string;

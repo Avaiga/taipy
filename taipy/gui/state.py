@@ -84,7 +84,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         """
         ...
 
-    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = ..., **kwargs: t.Any) -> t.Any:
+    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = ..., **kwargs: dict[str, t.Any]) -> t.Any:
         """Assign a value to a state variable.
 
         This could be used to assign a variable when using a lambda function as a callback in a visual element.<br/>
@@ -200,7 +200,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         state.patch("data", change={"y": {4: "something"}}) # change the 4th index of the y list
         state.patch("data", change={"y": {4: ["something", "else"]}}) # change the 4th and 5th indices of the y list
         state.patch("data", change={"y": {4: [{"b": "patch object in list", "c": "else"}]}})
-            # patch the 4th and 5th indices of the y list which is a list of object
+            # patch the 4th and 5th indices of the y list which is a list of objects
         state.patch("data", remove={"y": None}) # remove the y value of the data dict
         state.patch("data", change={"a": {-1: [1,2]}}) # insert 2 elements at index 0 of list
         state.patch("data", change={"a": {-10: [1,2]}})

@@ -12,17 +12,53 @@
  */
 
 import { useCallback } from "react";
+import { getUpdateVars } from "../components/Taipy/utils";
 
-import { createSendActionNameAction, createSendUpdateAction } from "../context/taipyReducers";
+import {
+    createRequestUpdateAction,
+    createSendActionNameAction,
+    createSendUpdateAction,
+} from "../context/taipyReducers";
 import { useDispatch, useModule } from "../utils/hooks";
 
+/**
+ * A React hook that provides actions for updating data and triggering backend functions.
+ *
+ * The `sendUpdate` function allows to update a variable on the backend and trigger an `on_change` function.
+ * The `sendAction` function allows to trigger an `on_action` function on the backend with a custom payload.
+ * The `requestUpdateOnFirstRender` function allows to request an update from the backend for every dynamic property of the element.
+ *
+ * @returns An object containing the following keys:
+ * - *sendUpdate* is a function that can be used to update a variable on the backend and trigger the
+ *   `on_change` callback. It takes the following parameters:
+ *   - *name*: The name of the variable to update on the backend.
+ *   - *value*: The new value for the variable.
+ *   - *onChange*: The name of the `on_change` callback function to trigger.</br>
+ *     If not provided, the default `on_change` callback will be triggered if it exists.
+ *   - *propagate*: Whether to propagate the update to other components.
+ *   - *relName*: The name of the related variable (used when the variable is a value in a list of
+ *     values).
+ * - *sendAction* is a function that can be used to trigger a backend callback with a custom payload.
+ *   This function takes the following parameters:
+ *   - *action*: The name of the callback function to trigger on the backend.</br>
+ *     If not provided, the default `on_action` callback will be triggered if it exists.
+ *   - *args*: Additional arguments sent to the backend in the `payload.args` array of the callback
+ *     function.
+ * - *requestUpdateOnFirstRender* is a function that requests an update from the backend for every
+ *   dynamic property of the element. This function takes the following parameters:
+ *   - *id*: The identifier of the element.
+ *   - *updateVars*: The content of the property *updateVars*.
+ *   - *varName*: The default property backend provided variable (typically the `updateVarName`
+ *     property of the component).
+ *   - *forceRefresh*: If true, Taipy re-evaluates the variables. If false, it uses the current values.
+ */
 export const useActions = () => {
     const dispatch = useDispatch();
     const module = useModule();
 
     const sendAction = useCallback(
-        (name: string | undefined, value: unknown, ...args: unknown[]) => {
-            dispatch(createSendActionNameAction(name, module, value, ...args));
+        (id: string | undefined, action: string | undefined, ...args: unknown[]) => {
+            dispatch(createSendActionNameAction(id, module, action, ...args));
         },
         [dispatch, module],
     );
@@ -33,6 +69,13 @@ export const useActions = () => {
         },
         [dispatch, module],
     );
-
-    return { sendAction, sendUpdate };
+    const requestUpdateOnFirstRender = useCallback(
+        (id?: string, updateVars?: string, varName?: string, forceRefresh?: boolean) => {
+            const updateArray = getUpdateVars(updateVars).filter((uv) => !uv.includes(","));
+            varName && !updateArray.includes(varName) && updateArray.push(varName);
+            updateArray.length && dispatch(createRequestUpdateAction(id, module, updateArray, forceRefresh));
+        },
+        [dispatch, module],
+    );
+    return { sendAction, sendUpdate, requestUpdateOnFirstRender };
 };
