@@ -461,7 +461,6 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             } catch (e) {
                 console.warn(
                     "PaginatedTable pageSizeOptions is invalid. It must be a list of page sizes as integer values.",
-                    pageSizeOptions,
                     e,
                 );
             }

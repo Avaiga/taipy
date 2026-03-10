@@ -75,13 +75,15 @@ export const sendWsMessage = (
 // Starting with ES2019, we could use a more elegant way with:
 //   Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined));
 export const lightenPayload = (payload: Record<string, unknown>) => {
-    return Object.keys(payload).reduce(
-        (pv, key) => {
-            if (payload[key] !== undefined) {
-                pv[key] = payload[key];
-            }
-            return pv;
-        },
-        {} as typeof payload,
-    );
+    return payload
+        ? Object.keys(payload).reduce(
+              (pv, key) => {
+                  if (payload[key] !== undefined) {
+                      pv[key] = payload[key];
+                  }
+                  return pv;
+              },
+              {} as typeof payload,
+          )
+        : {};
 };

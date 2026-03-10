@@ -180,7 +180,7 @@ const styledColumns = JSON.stringify({
         type: "int64",
         style: "some style function",
         tooltip: "some tooltip",
-        formatFn: "someFormat"
+        formatFn: "someFormat",
     },
 });
 
@@ -192,7 +192,7 @@ describe("PaginatedTable Component", () => {
     });
     it("displays the right info for class", async () => {
         const { getByText } = render(
-            <PaginatedTable data={undefined} defaultColumns={tableColumns} className="taipy-table" />
+            <PaginatedTable data={undefined} defaultColumns={tableColumns} className="taipy-table" />,
         );
         const elt = getByText("Entity").closest("table");
         expect(elt?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-table", "taipy-table-paginated");
@@ -209,7 +209,7 @@ describe("PaginatedTable Component", () => {
     });
     it("is enabled by active", async () => {
         const { getByText, getAllByTestId } = render(
-            <PaginatedTable data={undefined} defaultColumns={tableColumns} active={true} />
+            <PaginatedTable data={undefined} defaultColumns={tableColumns} active={true} />,
         );
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
@@ -217,21 +217,21 @@ describe("PaginatedTable Component", () => {
     });
     it("Hides sort icons when not active", async () => {
         const { queryByTestId } = render(
-            <PaginatedTable data={undefined} defaultColumns={tableColumns} active={false} />
+            <PaginatedTable data={undefined} defaultColumns={tableColumns} active={false} />,
         );
         expect(queryByTestId("ArrowDownwardIcon")).toBeNull();
     });
     it("Hides sort icons when not sortable", async () => {
         const { queryByTestId } = render(
-            <PaginatedTable data={undefined} defaultColumns={tableColumns} sortable={false} />
+            <PaginatedTable data={undefined} defaultColumns={tableColumns} sortable={false} />,
         );
         expect(queryByTestId("ArrowDownwardIcon")).toBeNull();
     });
     it("set width if requested", async () => {
         const { getByText } = render(<PaginatedTable data={undefined} defaultColumns={tableWidthColumns} />);
         const header = getByText("Entity").closest("tr");
-        expect(header?.firstChild).toHaveStyle({"min-width": "100px"});
-        expect(header?.lastChild).toHaveStyle({"width": "100%"});
+        expect(header?.firstChild).toHaveStyle({ "min-width": "100px" });
+        expect(header?.lastChild).toHaveStyle({ width: "100%" });
     });
     it("dispatch 2 well formed messages at first render", async () => {
         const dispatch = jest.fn();
@@ -244,7 +244,7 @@ describe("PaginatedTable Component", () => {
                     defaultColumns={tableColumns}
                     updateVars="varname=varname"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
@@ -274,7 +274,7 @@ describe("PaginatedTable Component", () => {
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} defaultColumns={tableColumns} />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         const elt = getByText("Entity");
         await userEvent.click(elt);
@@ -305,7 +305,7 @@ describe("PaginatedTable Component", () => {
                     defaultColumns={tableColumns}
                     updateVars="varname=varname"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         const newState = { ...state, data: { ...state.data, table: tableValue } };
         rerender(
@@ -316,7 +316,7 @@ describe("PaginatedTable Component", () => {
                     defaultColumns={tableColumns}
                     updateVars="varname=varname"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         const elt = getByLabelText("Go to next page");
         await userEvent.click(elt);
@@ -343,13 +343,13 @@ describe("PaginatedTable Component", () => {
         const { getAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} defaultColumns={tableColumns} />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         rerender(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={tableValue as TableValueType} defaultColumns={tableColumns} />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         const elts = getAllByText("Austria");
         expect(elts.length).toBeGreaterThan(1);
@@ -361,20 +361,20 @@ describe("PaginatedTable Component", () => {
         const { getAllByText, rerender, queryByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} defaultColumns={tableColumns} />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         rerender(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={tableValue as TableValueType} defaultColumns={tableColumns} />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         expect(getAllByText("Austria").length).toBeGreaterThan(1);
 
         rerender(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={changedValue as TableValueType} defaultColumns={tableColumns} />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         expect(queryByText("Austria")).toBeNull();
         expect(getAllByText("Australia").length).toBe(1);
@@ -386,18 +386,18 @@ describe("PaginatedTable Component", () => {
         const { findAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} defaultColumns={tableColumns} />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         rerender(
             <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
                 <PaginatedTable selected={selected} data={tableValue as TableValueType} defaultColumns={tableColumns} />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         const elts = await waitFor(() => findAllByText("Austria"));
         elts.forEach((elt: HTMLElement, idx: number) =>
             selected.indexOf(idx) == -1
                 ? expect(elt.parentElement?.parentElement?.parentElement?.parentElement).not.toHaveClass("Mui-selected")
-                : expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("Mui-selected")
+                : expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("Mui-selected"),
         );
         expect(document.querySelectorAll(".Mui-selected")).toHaveLength(selected.length);
     });
@@ -414,7 +414,7 @@ describe("PaginatedTable Component", () => {
                         onEdit="onEdit"
                         showAll={true}
                     />
-                </TaipyContext.Provider>
+                </TaipyContext.Provider>,
             );
 
             rerender(
@@ -426,7 +426,7 @@ describe("PaginatedTable Component", () => {
                         onEdit="onEdit"
                         showAll={true}
                     />
-                </TaipyContext.Provider>
+                </TaipyContext.Provider>,
             );
 
             expect(document.querySelectorAll(".MuiSwitch-root")).not.toHaveLength(0);
@@ -446,7 +446,7 @@ describe("PaginatedTable Component", () => {
                         onEdit="onEdit"
                         showAll={true}
                     />
-                </TaipyContext.Provider>
+                </TaipyContext.Provider>,
             );
 
             rerender(
@@ -458,7 +458,7 @@ describe("PaginatedTable Component", () => {
                         onEdit="onEdit"
                         showAll={true}
                     />
-                </TaipyContext.Provider>
+                </TaipyContext.Provider>,
             );
 
             const edits = getAllByTestId("EditIcon");
@@ -550,7 +550,7 @@ describe("PaginatedTable Component", () => {
                     editable={true}
                     onAdd="onAdd"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         dispatch.mockClear();
@@ -578,7 +578,7 @@ describe("PaginatedTable Component", () => {
                     editable={true}
                     onDelete="onDelete"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         rerender(
@@ -590,7 +590,7 @@ describe("PaginatedTable Component", () => {
                     showAll={true}
                     onDelete="onDelete"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         let deleteButtons = getAllByTestId("DeleteIcon");
@@ -639,7 +639,7 @@ describe("PaginatedTable Component", () => {
         const { getByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onAction="onSelect" />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         rerender(
@@ -650,7 +650,7 @@ describe("PaginatedTable Component", () => {
                     showAll={true}
                     onAction="onSelect"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         dispatch.mockClear();
@@ -675,17 +675,13 @@ describe("PaginatedTable Component", () => {
         const { getByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onAction="onSelect" />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         rerender(
             <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
-                <PaginatedTable
-                    data={buttonImgValue as TableValueType}
-                    defaultColumns={buttonColumns}
-                    showAll={true}
-                />
-            </TaipyContext.Provider>
+                <PaginatedTable data={buttonImgValue as TableValueType} defaultColumns={buttonColumns} showAll={true} />
+            </TaipyContext.Provider>,
         );
 
         dispatch.mockClear();
@@ -701,7 +697,7 @@ describe("PaginatedTable Component", () => {
                     showAll={true}
                     onAction="onSelect"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         dispatch.mockClear();
@@ -727,17 +723,13 @@ describe("PaginatedTable Component", () => {
         const { getByAltText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} defaultColumns={editableColumns} showAll={true} onAction="onSelect" />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         rerender(
             <TaipyContext.Provider value={{ state: { ...state }, dispatch }}>
-                <PaginatedTable
-                    data={buttonImgValue as TableValueType}
-                    defaultColumns={buttonColumns}
-                    showAll={true}
-                />
-            </TaipyContext.Provider>
+                <PaginatedTable data={buttonImgValue as TableValueType} defaultColumns={buttonColumns} showAll={true} />
+            </TaipyContext.Provider>,
         );
 
         dispatch.mockClear();
@@ -752,7 +744,7 @@ describe("PaginatedTable Component", () => {
                     showAll={true}
                     onAction="onSelect"
                 />
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
 
         dispatch.mockClear();
@@ -783,7 +775,7 @@ describe("PaginatedTable Component", () => {
                         defaultColumns={styledColumns}
                         rowClassName={"class_name=rows-bordered"}
                     />
-                </TaipyContext.Provider>
+                </TaipyContext.Provider>,
             );
         });
         const elt = document.querySelector('table[aria-labelledby="tableTitle"]');
@@ -805,14 +797,12 @@ describe("PaginatedTable Component", () => {
         fireEvent.mouseDown(rowsPerPageDropdown);
         const option = queryByRole("option", { selected: false, name: "50" });
         fireEvent.click(option as Element);
-        const table = document.querySelector(
-            'table[aria-labelledby="tableTitle"].MuiTable-root.MuiTable-stickyHeader'
-        );
+        const table = document.querySelector('table[aria-labelledby="tableTitle"].MuiTable-root.MuiTable-stickyHeader');
         expect(table).toBeInTheDocument();
     });
     it("should allow all rows", async () => {
         const { getByRole, queryByRole } = render(
-            <PaginatedTable data={tableValue} defaultColumns={tableColumns} allowAllRows={true} />
+            <PaginatedTable data={tableValue} defaultColumns={tableColumns} allowAllRows={true} />,
         );
         const rowsPerPageDropdown = getByRole("combobox");
         fireEvent.mouseDown(rowsPerPageDropdown);
@@ -825,7 +815,7 @@ describe("PaginatedTable Component", () => {
                 data={tableValue}
                 defaultColumns={tableColumns}
                 pageSizeOptions={JSON.stringify([10, 20, 30])}
-            />
+            />,
         );
         const rowsPerPageDropdown = getByRole("combobox");
         fireEvent.mouseDown(rowsPerPageDropdown);
@@ -834,14 +824,13 @@ describe("PaginatedTable Component", () => {
     });
     it("logs error when pageSizeOptions prop is invalid", () => {
         // Create a spy on console.log
-        const logSpy = jest.spyOn(console, "log");
+        const logSpy = jest.spyOn(console, "warn");
         // Render the component with invalid pageSizeOptions prop
         render(<PaginatedTable data={tableValue} defaultColumns={tableColumns} pageSizeOptions={"not a valid json"} />);
         // Check if console.log was called with the expected arguments
         expect(logSpy).toHaveBeenCalledWith(
-            "PaginatedTable pageSizeOptions is wrong ",
-            "not a valid json",
-            expect.any(Error)
+            "PaginatedTable pageSizeOptions is invalid. It must be a list of page sizes as integer values.",
+            expect.any(Error),
         );
         // Clean up the spy
         logSpy.mockRestore();

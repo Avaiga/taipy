@@ -167,8 +167,8 @@ const getLovItemsFromStr = (value: string | string[] | undefined, lovList: LovIt
             ? value
             : [value]
         : Array.isArray(value) && value.length
-        ? value[0]
-        : value;
+          ? value[0]
+          : value;
     return Array.isArray(val)
         ? (val.map((v) => lovList.find((item) => item.id == "" + v)).filter((i) => i) as LovItem[])
         : (val && lovList.find((item) => item.id == "" + val)) || null;
@@ -231,12 +231,12 @@ const Selector = (props: SelectorProps) => {
     const dragData = useDynamicDictProperty(
         props.dragData,
         props.defaultDragData || "",
-        undefined as Record<string, unknown> | undefined
+        undefined as Record<string, unknown> | undefined,
     );
     const dropData = useDynamicDictProperty(
         props.dropData,
         props.defaultDropData || "",
-        undefined as Record<string, unknown> | undefined
+        undefined as Record<string, unknown> | undefined,
     );
     const dropTypes = useMemo(() => {
         if (props.allowedDragTypes) {
@@ -258,7 +258,7 @@ const Selector = (props: SelectorProps) => {
             sourceItemId?: string,
             sourceData?: Record<string, unknown>,
             sourceVarName?: string,
-            targetItemId?: string
+            targetItemId?: string,
         ) => {
             dispatch(
                 createSendActionNameAction(id, module, {
@@ -272,10 +272,10 @@ const Selector = (props: SelectorProps) => {
                     target_item_id: targetItemId,
                     target_data: dropData,
                     target_var_name: lovVarName,
-                })
+                }),
             );
         },
-        [props.onAction, dispatch, module, id, lovVarName, dropData]
+        [props.onAction, dispatch, module, id, lovVarName, dropData],
     );
 
     const [isDraggedOver] = useDrop(listRef, dropTypes, undefined, dropHandler);
@@ -284,9 +284,9 @@ const Selector = (props: SelectorProps) => {
         () =>
             expandSx(
                 { bgcolor: "transparent", overflowY: "auto", width: "100%", maxWidth: width },
-                isDraggedOver ? droppableSx : undefined
+                isDraggedOver ? droppableSx : undefined,
             ),
-        [width, isDraggedOver]
+        [width, isDraggedOver],
     );
     const heightSx = useMemo(() => {
         if (!height) {
@@ -316,7 +316,7 @@ const Selector = (props: SelectorProps) => {
             maxWidth: "unset",
             "& .MuiInputBase-root": { minHeight: 48, "& input": { minHeight: "unset" } },
         }),
-        [width]
+        [width],
     );
 
     const autoCompleteSx = useMemo(
@@ -330,7 +330,7 @@ const Selector = (props: SelectorProps) => {
                 "& .MuiInputBase-root": { minHeight: 48, "& input": { minHeight: "unset" } },
             },
         }),
-        [width]
+        [width],
     );
 
     useEffect(() => {
@@ -367,8 +367,8 @@ const Selector = (props: SelectorProps) => {
                             module,
                             props.onChange,
                             propagate,
-                            valueById ? undefined : lovVarName
-                        )
+                            valueById ? undefined : lovVarName,
+                        ),
                     );
                     return newKeys;
                 } else {
@@ -379,14 +379,14 @@ const Selector = (props: SelectorProps) => {
                             module,
                             props.onChange,
                             propagate,
-                            valueById ? undefined : lovVarName
-                        )
+                            valueById ? undefined : lovVarName,
+                        ),
                     );
                     return [key];
                 }
             });
         },
-        [updateVarName, dispatch, multiple, propagate, lovVarName, valueById, props.onChange, module]
+        [updateVarName, dispatch, multiple, propagate, lovVarName, valueById, props.onChange, module],
     );
 
     const clickHandler = useCallback(
@@ -396,7 +396,7 @@ const Selector = (props: SelectorProps) => {
                 selectHandler(key);
             }
         },
-        [active, selectHandler]
+        [active, selectHandler],
     );
 
     const changeHandler = useCallback(
@@ -406,7 +406,7 @@ const Selector = (props: SelectorProps) => {
                 selectHandler(key);
             }
         },
-        [active, selectHandler]
+        [active, selectHandler],
     );
 
     const handleChange = useCallback(
@@ -422,11 +422,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : lovVarName
-                )
+                    valueById ? undefined : lovVarName,
+                ),
             );
         },
-        [dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
+        [dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module],
     );
 
     const handleCheckAllChange = useCallback(
@@ -440,11 +440,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : lovVarName
-                )
+                    valueById ? undefined : lovVarName,
+                ),
             );
         },
-        [lovList, dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
+        [lovList, dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module],
     );
 
     const [autoValue, setAutoValue] = useState<LovItem | LovItem[] | null>(() => (multiple ? [] : null));
@@ -459,11 +459,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : lovVarName
-                )
+                    valueById ? undefined : lovVarName,
+                ),
             );
         },
-        [dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
+        [dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module],
     );
     const handleCheckAllAutoChange = useCallback(
         (event: SelectChangeEvent<HTMLInputElement>, checked: boolean) => {
@@ -478,11 +478,11 @@ const Selector = (props: SelectorProps) => {
                     module,
                     props.onChange,
                     propagate,
-                    valueById ? undefined : lovVarName
-                )
+                    valueById ? undefined : lovVarName,
+                ),
             );
         },
-        [lovList, dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module]
+        [lovList, dispatch, updateVarName, propagate, lovVarName, valueById, props.onChange, module],
     );
     const renderAutoInput = useCallback(
         (params: AutocompleteRenderInputParams) => {
@@ -506,7 +506,7 @@ const Selector = (props: SelectorProps) => {
                         active={active}
                         handleCheckAllChange={handleCheckAllAutoChange}
                         key="selectAll"
-                    />
+                    />,
                 );
             } else {
                 console.log("selector autocomplete needs to update params for slotProps.input.startAdornment");
@@ -523,7 +523,7 @@ const Selector = (props: SelectorProps) => {
             lovList.length,
             active,
             handleCheckAllAutoChange,
-        ]
+        ],
     );
 
     const handleDelete = useCallback(
@@ -539,13 +539,13 @@ const Selector = (props: SelectorProps) => {
                             module,
                             props.onChange,
                             propagate,
-                            valueById ? undefined : lovVarName
-                        )
+                            valueById ? undefined : lovVarName,
+                        ),
                     );
                     return keys;
                 });
         },
-        [updateVarName, propagate, dispatch, lovVarName, valueById, props.onChange, module]
+        [updateVarName, propagate, dispatch, lovVarName, valueById, props.onChange, module],
     );
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
@@ -565,14 +565,27 @@ const Selector = (props: SelectorProps) => {
                         module,
                         props.onChange,
                         propagate,
-                        valueById ? undefined : lovVarName
-                    )
+                        valueById ? undefined : lovVarName,
+                    ),
                 );
                 e.preventDefault();
                 e.stopPropagation();
             }
         },
-        [multiple, filter, lovList, searchValue, setSelectedValue, dispatch, updateVarName, module, props.onChange, propagate, valueById, lovVarName]
+        [
+            multiple,
+            filter,
+            lovList,
+            searchValue,
+            setSelectedValue,
+            dispatch,
+            updateVarName,
+            module,
+            props.onChange,
+            propagate,
+            valueById,
+            lovVarName,
+        ],
     );
 
     const dropdownValue = ((dropdown || isRadio) &&
@@ -688,7 +701,7 @@ const Selector = (props: SelectorProps) => {
                                                 .filter((it) =>
                                                     Array.isArray(selected)
                                                         ? selected.includes(it.id)
-                                                        : selected === it.id
+                                                        : selected === it.id,
                                                 )
                                                 .map((item, idx) => {
                                                     if (multiple) {
@@ -834,7 +847,7 @@ const Selector = (props: SelectorProps) => {
                                                 onDrop={dropHandler}
                                                 draggedData={dragData}
                                             />
-                                        )
+                                        ),
                                     )}
                             </List>
                         </Paper>

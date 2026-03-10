@@ -98,8 +98,8 @@ export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefin
 export const getUpdateVar = (updateVars: string, name: string) => {
     // updateVars is a string of the form "prop1=var1;prop2=var2;..."
     // We want to extract the var corresponding to the prop name.
-    const selected = updateVars?.split(";").find((updateVar) => updateVar?.startsWith(`${name}=`));
-    return selected?.substring(name.length + 1);
+    const selected = updateVars && updateVars.split(";").find((updateVar) => updateVar?.startsWith(`${name}=`));
+    return selected ? selected.substring(name.length + 1) : selected;
 };
 
 /**
