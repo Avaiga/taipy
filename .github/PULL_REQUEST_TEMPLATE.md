@@ -1,50 +1,17 @@
-## What type of PR is this? (Check all that apply)
+## Architectural Overview
+<!-- Provide a high-level summary of the logical and architectural changes. -->
 
-- [ ] 🛠 Refactor
-- [ ] ✨ Feature
-- [ ] 🐛 Bug Fix
-- [ ] ⚡ Optimization
-- [ ] 📝 Documentation Update
+### CodeRabbit AI Pre-flight Guidelines
+- [ ] Has the CodeRabbit AI bot been allowed to complete its initial AST code review?
+- [ ] Have all `coderabbitai` automated feedback points been addressed or technically acknowledged?
+- [ ] Were any new external dependencies introduced in `Pipfile` or `package.json`? (If yes, explicitly append your operational justification due to the zero-trust policy).
 
-## Description
-<!-- Provide a clear and concise description of the changes introduced in this PR. -->
+### Telemetry & Infrastructure 
+- [ ] Does this PR modify orchestration constraints or workflow nodes?
+- [ ] Are logs/metrics scaled properly to reflect new telemetry datapoints for debugging?
 
-## Related Tickets & Documents
-
-<!--
-For pull requests that relate to or close an issue, please include them below.
-Following [GitHub's guidance on linking issues](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) helps with automation.
-
-Example:
-- Closes #1234
-- Related to #5678
--->
-
-- Related Issue #
-- Closes #
-
-## How to reproduce the issue
-
-<!-- Provide step-by-step instructions to reproduce the issue or test the feature. -->
-
-## Backporting
-<!-- Specify any branches or releases this change needs to be backported to. -->
-_This change should be backported to:_
-- [ ] 3.0
-- [ ] 3.1
-- [ ] 4.0
-- [ ] develop
-
-## Checklist
-_We encourage keeping the code coverage percentage at **80% or above**._
-
-- [ ] ✅ This solution meets the acceptance criteria of the related issue.
-- [ ] 📝 The related issue checklist is completed.
-- [ ] 🧪 This PR includes **unit tests** for the developed code.
-    If not, explain why:
-- [ ] 🔄 **End-to-End tests** have been added or updated.
-    If not, explain why:
-- [ ] 📚 The **documentation** has been updated, or a dedicated issue has been created.
-    If not, explain why:
-- [ ] 📌 The **release notes** have been updated.
-    If not, explain why:
+### Taipy Quality Assurance Matrix
+- [ ] Backend tests passing (`pipenv run pytest`).
+- [ ] Frontend JavaScript builds cleanly (`npm run build`).
+- [ ] The `pre-commit` hooks executed correctly on this branch.
+- [ ] Branch naming convention `<type>/#<issueId>[IssueSummary]` was followed.

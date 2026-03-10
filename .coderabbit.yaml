@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://coderabbit.ai/export/schema.json
+language: "en-US"
+version: 2
+reviews:
+  profile: "assertive"
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  path_instructions:
+    - path: "**/*.py"
+      instructions: |
+        - Ensure strict PEP 8 compliance and PEP 484 type hints.
+        - Verify performance implications for orchestration nodes, prioritizing zero-trust data constraints.
+        - Taipy strictly forbids unnecessary external dependencies; flag any new imports.
+        - Assess telemetry density: ensure logs map effectively to existing observability matrices.
+    - path: "frontend/**/*.ts"
+      instructions: |
+        - Enforce TypeScript ESLint rules and maintain strict typing.
+        - Ensure React hooks are optimized and watch for unoptimized DOM re-renders.
+  auto_review:
+    enabled: true
+    drafts: false
