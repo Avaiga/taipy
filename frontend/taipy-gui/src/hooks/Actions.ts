@@ -67,5 +67,5 @@ export const useActions = () => {
  *   - *varName*: The default property backend provided variable (typically the `updateVarName`
  *     property of the component).
  *   - *forceRefresh*: If true, Taipy re-evaluates the variables. If false, it uses the current values.
- * But a useCallback that uses the useEffect woudn't work...
+ * But a useCallback that uses the useEffect wouldn't work...
  */
