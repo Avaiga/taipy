@@ -85,26 +85,4 @@ describe("useActions", () => {
             payload: { value: 12345, on_change: "test_on_change", relvar: "rel_test_var_name" },
         });
     });
-
-    it("dispatches a RequestUpdate action from requestUpdateOnFirstRender without duplicate varName", () => {
-        const dispatch = jest.fn();
-        const wrapper = ({ children }: PropsWithChildren) => (
-            <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch }}>
-                <PageContext.Provider value={{ module: "test_module" }}>{children}</PageContext.Provider>
-            </TaipyContext.Provider>
-        );
-
-        const { result } = renderHook(() => useActions(), { wrapper });
-
-        act(() => {
-            result.current.requestUpdateOnFirstRender("test_id", "p1=var1;p2=var2");
-        });
-
-        expect(dispatch).toHaveBeenCalledWith({
-            type: "REQUEST_UPDATE",
-            name: "",
-            context: "test_module",
-            payload: { id: "test_id", names: ["var1", "var2"], refresh: false },
-        });
-    });
 });

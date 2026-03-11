@@ -12,13 +12,8 @@
  */
 
 import { useCallback } from "react";
-import { getUpdateVars } from "../components/Taipy/utils";
 
-import {
-    createRequestUpdateAction,
-    createSendActionNameAction,
-    createSendUpdateAction,
-} from "../context/taipyReducers";
+import { createSendActionNameAction, createSendUpdateAction } from "../context/taipyReducers";
 import { useDispatch, useModule } from "../utils/hooks";
 
 /**
@@ -44,13 +39,6 @@ import { useDispatch, useModule } from "../utils/hooks";
  *     If not provided, the default `on_action` callback will be triggered if it exists.
  *   - *args*: Additional arguments sent to the backend in the `payload.args` array of the callback
  *     function.
- * - *requestUpdateOnFirstRender* is a function that requests an update from the backend for every
- *   dynamic property of the element. This function takes the following parameters:
- *   - *id*: The identifier of the element.
- *   - *updateVars*: The content of the property *updateVars*.
- *   - *varName*: The default property backend provided variable (typically the `updateVarName`
- *     property of the component).
- *   - *forceRefresh*: If true, Taipy re-evaluates the variables. If false, it uses the current values.
  */
 export const useActions = () => {
     const dispatch = useDispatch();
@@ -69,13 +57,15 @@ export const useActions = () => {
         },
         [dispatch, module],
     );
-    const requestUpdateOnFirstRender = useCallback(
-        (id?: string, updateVars?: string, varName?: string, forceRefresh?: boolean) => {
-            const updateArray = getUpdateVars(updateVars).filter((uv) => !uv.includes(","));
-            varName && !updateArray.includes(varName) && updateArray.push(varName);
-            updateArray.length && dispatch(createRequestUpdateAction(id, module, updateArray, forceRefresh));
-        },
-        [dispatch, module],
-    );
-    return { sendAction, sendUpdate, requestUpdateOnFirstRender };
+    return { sendAction, sendUpdate };
 };
+/* I would have loved to add:
+ * - *requestUpdateOnFirstRender* is a function that requests an update from the backend for every
+ *   dynamic property of the element. This function takes the following parameters:
+ *   - *id*: The identifier of the element.
+ *   - *updateVars*: The content of the property *updateVars*.
+ *   - *varName*: The default property backend provided variable (typically the `updateVarName`
+ *     property of the component).
+ *   - *forceRefresh*: If true, Taipy re-evaluates the variables. If false, it uses the current values.
+ * But a useCallback that uses the useEffect woudn't work...
+ */
