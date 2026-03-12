@@ -11,14 +11,10 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 
-import { getUpdateVars } from "../components/Taipy/utils";
-import {
-    createRequestUpdateAction,
-    createSendActionNameAction,
-    createSendUpdateAction,
-} from "../context/taipyReducers";
+import { useDispatchRequestUpdateOnFirstRender } from "../utils/hooks";
+import { createSendActionNameAction, createSendUpdateAction } from "../context/taipyReducers";
 import { useDispatch, useModule } from "../utils/hooks";
 
 /**
@@ -86,9 +82,5 @@ export function useRequestUpdateOnFirstRender(
     const dispatch = useDispatch();
     const module = useModule();
 
-    useEffect(() => {
-        const updateArray = getUpdateVars(updateVars).filter((uv) => !uv.includes(","));
-        varName && updateArray.push(varName);
-        updateArray.length && dispatch(createRequestUpdateAction(id, module, updateArray, forceRefresh));
-    }, [updateVars, dispatch, id, module, varName, forceRefresh]);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, module, updateVars, varName, forceRefresh);
 }
