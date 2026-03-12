@@ -200,7 +200,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         state.patch("data", change={"y": {4: "something"}}) # change the 4th index of the y list
         state.patch("data", change={"y": {4: ["something", "else"]}}) # change the 4th and 5th indices of the y list
         state.patch("data", change={"y": {4: [{"b": "patch object in list", "c": "else"}]}})
-            # patch the 4th and 5th indices of the y list which is a list of object
+            # patch the 4th and 5th indices of the y list which is a list of objects
         state.patch("data", remove={"y": None}) # remove the y value of the data dict
         state.patch("data", change={"a": {-1: [1,2]}}) # insert 2 elements at index 0 of list
         state.patch("data", change={"a": {-10: [1,2]}})
@@ -323,7 +323,7 @@ class _GuiState(State):
         return nullcontext()
 
     def _notebook_context(self, gui: "Gui"):
-        return gui.get_app_context() if not gui._server.has_server_context() and _is_in_notebook() else nullcontext()
+        return gui.get_app_context() if not gui._server.has_server_context() and _is_in_notebook() else nullcontext()  # type: ignore[attr-defined]
 
     def _get_placeholder(self, name: str):
         if name in _GuiState.__placeholder_attrs:

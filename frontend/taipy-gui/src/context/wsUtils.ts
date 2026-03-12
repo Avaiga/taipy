@@ -12,7 +12,7 @@
  */
 
 import { Socket } from "socket.io-client";
-import { nanoid } from 'nanoid'
+import { nanoid } from "nanoid";
 
 export const TAIPY_CLIENT_ID = "TaipyClientId";
 export const TAIPY_GUI_ADDR = "TaipyGuiAddr";
@@ -55,7 +55,7 @@ export const sendWsMessage = (
     id: string,
     moduleContext = "",
     propagate = true,
-    serverAck?: (val: unknown) => void
+    serverAck?: (val: unknown) => void,
 ): string => {
     const ackId = nanoid();
     const msg: WsMessage = {
@@ -71,11 +71,19 @@ export const sendWsMessage = (
     return ackId;
 };
 
+// Remove all keys with undefined values from the payload to avoid errors on the backend
+// Starting with ES2019, we could use a more elegant way with:
+//   Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined));
 export const lightenPayload = (payload: Record<string, unknown>) => {
-    return Object.keys(payload || {}).reduce((pv, key) => {
-        if (payload[key] !== undefined) {
-            pv[key] = payload[key];
-        }
-        return pv;
-    }, {} as typeof payload);
+    return payload
+        ? Object.keys(payload).reduce(
+              (pv, key) => {
+                  if (payload[key] !== undefined) {
+                      pv[key] = payload[key];
+                  }
+                  return pv;
+              },
+              {} as typeof payload,
+          )
+        : {};
 };

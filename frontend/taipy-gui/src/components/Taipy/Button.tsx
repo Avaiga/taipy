@@ -16,11 +16,11 @@ import CardHeader from "@mui/material/CardHeader";
 import MuiButton from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 
-import { createSendActionNameAction } from "../../context/taipyReducers";
 import { getCssSize, getSuffixedClassNames, TaipyActiveProps } from "./utils";
-import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty } from "../../utils/hooks";
 import { stringIcon, Icon, IconAvatar } from "../../utils/icon";
 import { getComponentClassName } from "./TaipyStyle";
+import { useActions } from "../../hooks";
 
 interface ButtonProps extends TaipyActiveProps {
     onAction?: string;
@@ -39,8 +39,7 @@ const Button = (props: ButtonProps) => {
     // TODO: Allow default value for auto_repeat in the builder
     const { id, onAction = "", defaultLabel, size = "medium", variant = "outlined" } = props;
     const [value, setValue] = useState<stringIcon>("");
-    const dispatch = useDispatch();
-    const module = useModule();
+    const { sendAction } = useActions();
     const autoRepeatInitialRef = useRef<number | null>(null);
     const autoRepeatIntervalRef = useRef<number | null>(null);
 
@@ -50,8 +49,8 @@ const Button = (props: ButtonProps) => {
     const buttonSx = useMemo(() => (props.width ? { width: getCssSize(props.width) } : undefined), [props.width]);
 
     const handleClick = useCallback(() => {
-        dispatch(createSendActionNameAction(id, module, onAction));
-    }, [id, onAction, dispatch, module]);
+        sendAction(id, onAction);
+    }, [id, onAction, sendAction]);
 
     // Handle auto-repeat
     const autoRepeatDelay = useMemo(() => {

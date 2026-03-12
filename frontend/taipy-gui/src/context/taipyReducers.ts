@@ -20,7 +20,7 @@ import { nanoid } from "nanoid";
 
 import { FilterDesc } from "../components/Taipy/tableUtils";
 import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
-import { patchValue, PatchChange, PatchRemove} from "./patch"
+import { patchValue, PatchChange, PatchRemove } from "./patch";
 import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
@@ -195,7 +195,7 @@ const getUserTheme = (mode: PaletteMode) => {
                     },
                 },
             },
-        })
+        }),
     );
 };
 
@@ -241,7 +241,7 @@ export const messageToAction = (message: WsMessage) => {
                 (message as unknown as NavigateMessage).to,
                 (message as unknown as NavigateMessage).params,
                 (message as unknown as NavigateMessage).tab,
-                (message as unknown as NavigateMessage).force
+                (message as unknown as NavigateMessage).force,
             );
         } else if (message.type === "ID") {
             return createIdAction((message as unknown as IdMessage).id);
@@ -444,7 +444,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             return {
                 ...state,
                 notifications: state.notifications.filter(
-                    (notification) => notification.snackbarId !== deleteNotificationAction.snackbarId
+                    (notification) => notification.snackbarId !== deleteNotificationAction.snackbarId,
                 ),
             };
         case Types.SetBlock:
@@ -596,7 +596,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 action.payload,
                 state.id,
                 action.context,
-                action.propagate
+                action.propagate,
             );
             break;
         case Types.Action:
@@ -649,7 +649,7 @@ export const createSendUpdateAction = (
     context: string | undefined,
     onChange?: string,
     propagate = true,
-    relName?: string
+    relName?: string,
 ): TaipyAction => ({
     type: Types.SendUpdate,
     name: name,
@@ -674,26 +674,32 @@ export const getPayload = (value: unknown, onChange?: string, relName?: string) 
  *
  * This action will trigger the invocation of the `on_action` Python function on the backend,
  * providing all the parameters as a payload.
- * @param name - The name of the action function on the backend.
- * @param context - The execution context.
- * @param value - The value associated with the action. This can be an object or
- *   any type of value.
- * @param args - Additional information associated to the action.
+ * @param id - The identifier of the element that triggers the action.
+ * @param module - The name of the module.
+ * @param action - The name of the action callback to be triggered on the backend.
+ * @param args - Additional information related to the action.
  * @returns The action fed to the reducer.
- */
+ *
+ * Note: if *action* is an object, it's *action* key is used as the name of the callback function to
+ * be triggered on the backend.
+ *
+ * The additional *args* parameters will be sent as an array in the *args* key of the payload
+ * received on the backend, where each element of the array corresponds to the additional parameters
+ * provided when creating the action.
+ * */
 export const createSendActionNameAction = (
-    name: string | undefined,
-    context: string | undefined,
-    value: unknown,
+    id: string | undefined,
+    module: string | undefined,
+    action: unknown,
     ...args: unknown[]
 ): TaipyAction => ({
     type: Types.Action,
-    name: name || "",
-    context: context,
+    name: id || "",
+    context: module,
     payload:
-        typeof value === "object" && !Array.isArray(value) && value !== null
-            ? { ...(value as object), args: args }
-            : { action: value, args: args },
+        typeof action === "object" && !Array.isArray(action) && action !== null
+            ? { ...(action as object), args: args }
+            : { action: action, args: args },
 });
 
 export const createRequestChartUpdateAction = (
@@ -702,7 +708,7 @@ export const createRequestChartUpdateAction = (
     context: string | undefined,
     columns: string[],
     pageKey: string,
-    decimatorPayload: unknown | undefined
+    decimatorPayload: unknown | undefined,
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -713,7 +719,7 @@ export const createRequestChartUpdateAction = (
         {
             decimatorPayload: decimatorPayload,
         },
-        true
+        true,
     );
 
 export const createRequestTableUpdateAction = (
@@ -735,7 +741,7 @@ export const createRequestTableUpdateAction = (
     filters?: Array<FilterDesc>,
     compare?: string,
     compareDatas?: string,
-    stateContext?: Record<string, unknown>
+    stateContext?: Record<string, unknown>,
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -758,7 +764,7 @@ export const createRequestTableUpdateAction = (
             compare,
             compare_datas: compareDatas,
             state_context: stateContext,
-        })
+        }),
     );
 
 export const createRequestInfiniteTableUpdateAction = (
@@ -781,7 +787,7 @@ export const createRequestInfiniteTableUpdateAction = (
     compare?: string,
     compareDatas?: string,
     stateContext?: Record<string, unknown>,
-    reverse?: boolean
+    reverse?: boolean,
 ): TaipyAction =>
     createRequestDataUpdateAction(
         name,
@@ -806,7 +812,7 @@ export const createRequestInfiniteTableUpdateAction = (
             compare_datas: compareDatas,
             state_context: stateContext,
             reverse: !!reverse,
-        })
+        }),
     );
 
 /**
@@ -837,7 +843,7 @@ export const createRequestDataUpdateAction = (
     pageKey: string,
     payload: Record<string, unknown>,
     allData = false,
-    library?: string
+    library?: string,
 ): TaipyAction => {
     payload = payload || {};
     if (id !== undefined) {
@@ -875,7 +881,7 @@ export const createRequestUpdateAction = (
     context: string | undefined,
     names: string[],
     forceRefresh = false,
-    stateContext?: Record<string, unknown>
+    stateContext?: Record<string, unknown>,
 ): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
@@ -953,7 +959,7 @@ export const createNavigateAction = (
     to?: string,
     params?: Record<string, string>,
     tab?: string,
-    force?: boolean
+    force?: boolean,
 ): TaipyNavigateAction => ({
     type: Types.Navigate,
     to,
