@@ -47,7 +47,7 @@ export interface TaipyChangeProps {
 /**
  * Extracts the backend name of a property.
  *
- * @param updateVars - The value held by the property *updateVars*.
+ * @param updateVars - The value held by the property *updateVars* of a component.
  * @param name - The name of a bound property.
  * @returns The backend-generated variable name.
  */
@@ -255,17 +255,23 @@ export declare const createSendUpdateAction: (
  *
  * This action will trigger the invocation of the `on_action` Python function on the backend,
  * providing all the parameters as a payload.
- * @param name - The name of the action function on the backend.
- * @param context - The execution context.
- * @param value - The value associated with the action. This can be an object or
- *   any type of value.
- * @param args - Additional information associated to the action.
+ * @param id - The identifier of the element that triggers the action.
+ * @param module - The name of the module.
+ * @param action - The name of the action callback to be triggered on the backend.
+ * @param args - Additional information related to the action.
  * @returns The action fed to the reducer.
- */
+ *
+ * Note: if *action* is an object, it's *action* key is used as the name of the callback function to
+ * be triggered on the backend.
+ *
+ * The additional *args* parameters will be sent as an array in the *args* key of the payload
+ * received on the backend, where each element of the array corresponds to the additional parameters
+ * provided when creating the action.
+ * */
 export declare const createSendActionNameAction: (
-    name: string | undefined,
-    context: string | undefined,
-    value: unknown,
+    id: string | undefined,
+    module: string | undefined,
+    action: unknown,
     ...args: unknown[]
 ) => TaipyAction;
 /**
@@ -598,9 +604,10 @@ export declare const PageContext: import("react").Context<PageStore>;
 /**
  * A React hook that provides actions for updating data and triggering backend functions.
  *
- * The `sendUpdate` function allows to update a variable on the backend and trigger an `on_change` function.
- * The `sendAction` function allows to trigger an `on_action` function on the backend with a custom payload.
- * The `requestUpdateOnFirstRender` function allows to request an update from the backend for every dynamic property of the element.
+ * The `sendUpdate` function allows to update a variable on the backend and trigger the `on_change`
+ * callback.<br/>
+ * The `sendAction` function allows to trigger an `on_action` callback on the backend with a custom
+ * payload.
  *
  * @returns An object containing the following keys:
  * - *sendUpdate* is a function that can be used to update a variable on the backend and trigger the
@@ -610,22 +617,17 @@ export declare const PageContext: import("react").Context<PageStore>;
  *   - *onChange*: The name of the `on_change` callback function to trigger.</br>
  *     If not provided, the default `on_change` callback will be triggered if it exists.
  *   - *propagate*: Whether to propagate the update to other components.
- *   - *relName*: The name of the related variable.
+ *   - *relName*: The name of the related variable (used when the variable is a value in a list of
+ *     values).
  * - *sendAction* is a function that can be used to trigger a backend callback with a custom payload.
  *   This function takes the following parameters:
- *   - *name*: The name of the action to trigger on the backend.
- *   - *context*: The name of execution context.
- *   - *value*: The value to send as payload for the action.
- *   - *args*: Additional arguments to send as payload for the action.
- * - *requestUpdateOnFirstRender* is a function that requests an update from the backend for every
- *   dynamic property of the element. This function takes the following parameters:
- *   - *id*: The identifier of the element.
- *   - *updateVars*: The content of the property *updateVars*.
- *   - *varName*: The default property backend provided variable (through property `updateVarName`).
- *   - *forceRefresh*: Should Taipy re-evaluate the variables or use the current values.
+ *   - *action*: The name of the callback function to trigger on the backend.</br>
+ *     If not provided, the default `on_action` callback will be triggered if it exists.
+ *   - *args*: Additional arguments sent to the backend in the `payload.args` array of the callback
+ *     function.
  */
-export declare const useActions: () => {
-    sendAction: (name: string | undefined, value: unknown, ...args: unknown[]) => void;
+export declare function useActions(): {
+    sendAction: (id: string | undefined, action: string | undefined, ...args: unknown[]) => void;
     sendUpdate: (
         name: string | undefined,
         value: unknown,
@@ -633,8 +635,23 @@ export declare const useActions: () => {
         propagate?: boolean,
         relName?: string,
     ) => void;
-    requestUpdateOnFirstRender: (id?: string, updateVars?: string, varName?: string, forceRefresh?: boolean) => void;
 };
+/**
+ * A React hook that requests an update from the backend for every dynamic property of the element
+ * on its first render.
+ *
+ * @param id - The identifier of the element.
+ * @param updateVars - The content of the property *updateVars* of the component.
+ * @param varName - The default property backend provided variable (typically the *updateVarName*
+ *        property of the component).
+ * @param forceRefresh - If true, Taipy re-evaluates the variables. If false, it uses the current values.
+ */
+export declare function useRequestUpdateOnFirstRender(
+    id?: string,
+    updateVars?: string,
+    varName?: string,
+    forceRefresh?: boolean,
+): void;
 /**
  * A React hook to manage a dynamic scalar property.
  *

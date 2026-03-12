@@ -84,7 +84,7 @@ class State(SimpleNamespace, metaclass=ABCMeta):
         """
         ...
 
-    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = ..., **kwargs: dict[str, t.Any]) -> t.Any:
+    def assign(self, name: t.Optional[str] = None, value: t.Optional[t.Any] = ..., **kwargs: t.Any) -> t.Any:
         """Assign a value to a state variable.
 
         This could be used to assign a variable when using a lambda function as a callback in a visual element.<br/>
@@ -323,7 +323,7 @@ class _GuiState(State):
         return nullcontext()
 
     def _notebook_context(self, gui: "Gui"):
-        return gui.get_app_context() if not gui._server.has_server_context() and _is_in_notebook() else nullcontext()
+        return gui.get_app_context() if not gui._server.has_server_context() and _is_in_notebook() else nullcontext()  # type: ignore[attr-defined]
 
     def _get_placeholder(self, name: str):
         if name in _GuiState.__placeholder_attrs:

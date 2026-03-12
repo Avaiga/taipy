@@ -14,7 +14,7 @@
 import { PropsWithChildren } from "react";
 import { act, renderHook } from "@testing-library/react";
 
-import { useActions } from "./Actions";
+import { useActions, useRequestUpdateOnFirstRender } from "./Actions";
 import { INITIAL_STATE } from "../context/taipyReducers";
 import { PageContext, TaipyContext } from "../context/taipyContext";
 
@@ -83,6 +83,33 @@ describe("useActions", () => {
             context: "test_module",
             propagate: false,
             payload: { value: 12345, on_change: "test_on_change", relvar: "rel_test_var_name" },
+        });
+    });
+});
+
+describe("useRequestUpdateOnFirstRender", () => {
+    it("dispatches a RequestUpdate action on first render", () => {
+        const dispatch = jest.fn();
+        const wrapper = ({ children }: PropsWithChildren) => (
+            <TaipyContext.Provider value={{ state: INITIAL_STATE, dispatch }}>
+                <PageContext.Provider value={{ module: "test_module" }}>{children}</PageContext.Provider>
+            </TaipyContext.Provider>
+        );
+
+        renderHook(() => useRequestUpdateOnFirstRender("test_id", "first=var_a;second=var_b", "var_c", true), {
+            wrapper,
+        });
+
+        expect(dispatch).toHaveBeenCalledTimes(1);
+        expect(dispatch).toHaveBeenCalledWith({
+            type: "REQUEST_UPDATE",
+            name: "",
+            context: "test_module",
+            payload: {
+                id: "test_id",
+                names: ["var_a", "var_b", "var_c"],
+                refresh: true,
+            },
         });
     });
 });

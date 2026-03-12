@@ -12,6 +12,6 @@
  */
 
 import { useLocalStorageWithEvent } from "./useLocalStorageWithEvent";
-import { useActions } from "./Actions";
+import { useActions, useRequestUpdateOnFirstRender } from "./Actions";
 
-export { useLocalStorageWithEvent, useActions };
+export { useLocalStorageWithEvent, useActions, useRequestUpdateOnFirstRender };

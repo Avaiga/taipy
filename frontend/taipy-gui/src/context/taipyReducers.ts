@@ -676,15 +676,16 @@ export const getPayload = (value: unknown, onChange?: string, relName?: string) 
  * providing all the parameters as a payload.
  * @param id - The identifier of the element that triggers the action.
  * @param module - The name of the module.
- * @param action - The name of the action callback to be triggered on the backend.<br/>
+ * @param action - The name of the action callback to be triggered on the backend.
  * @param args - Additional information related to the action.
  * @returns The action fed to the reducer.
  *
- * Note: if *action* is an object, it's *action* key is used as the name of the action callback to
+ * Note: if *action* is an object, it's *action* key is used as the name of the callback function to
  * be triggered on the backend.
  *
- * The additional *args* parameters will be sent as an object in the *args* key of the payload
- * received on the backend.
+ * The additional *args* parameters will be sent as an array in the *args* key of the payload
+ * received on the backend, where each element of the array corresponds to the additional parameters
+ * provided when creating the action.
  * */
 export const createSendActionNameAction = (
     id: string | undefined,

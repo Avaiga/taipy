@@ -11,17 +11,23 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
-import { createSendActionNameAction, createSendUpdateAction } from "../context/taipyReducers";
+import { getUpdateVars } from "../components/Taipy/utils";
+import {
+    createRequestUpdateAction,
+    createSendActionNameAction,
+    createSendUpdateAction,
+} from "../context/taipyReducers";
 import { useDispatch, useModule } from "../utils/hooks";
 
 /**
  * A React hook that provides actions for updating data and triggering backend functions.
  *
- * The `sendUpdate` function allows to update a variable on the backend and trigger an `on_change` function.
- * The `sendAction` function allows to trigger an `on_action` function on the backend with a custom payload.
- * The `requestUpdateOnFirstRender` function allows to request an update from the backend for every dynamic property of the element.
+ * The `sendUpdate` function allows to update a variable on the backend and trigger the `on_change`
+ * callback.<br/>
+ * The `sendAction` function allows to trigger an `on_action` callback on the backend with a custom
+ * payload.
  *
  * @returns An object containing the following keys:
  * - *sendUpdate* is a function that can be used to update a variable on the backend and trigger the
@@ -40,7 +46,7 @@ import { useDispatch, useModule } from "../utils/hooks";
  *   - *args*: Additional arguments sent to the backend in the `payload.args` array of the callback
  *     function.
  */
-export const useActions = () => {
+export function useActions() {
     const dispatch = useDispatch();
     const module = useModule();
 
@@ -57,15 +63,32 @@ export const useActions = () => {
         },
         [dispatch, module],
     );
+
     return { sendAction, sendUpdate };
-};
-/* I would have loved to add:
- * - *requestUpdateOnFirstRender* is a function that requests an update from the backend for every
- *   dynamic property of the element. This function takes the following parameters:
- *   - *id*: The identifier of the element.
- *   - *updateVars*: The content of the property *updateVars*.
- *   - *varName*: The default property backend provided variable (typically the `updateVarName`
- *     property of the component).
- *   - *forceRefresh*: If true, Taipy re-evaluates the variables. If false, it uses the current values.
- * But a useCallback that uses the useEffect wouldn't work...
+}
+
+/**
+ * A React hook that requests an update from the backend for every dynamic property of the element
+ * on its first render.
+ *
+ * @param id - The identifier of the element.
+ * @param updateVars - The content of the property *updateVars* of the component.
+ * @param varName - The default property backend provided variable (typically the *updateVarName*
+ *        property of the component).
+ * @param forceRefresh - If true, Taipy re-evaluates the variables. If false, it uses the current values.
  */
+export function useRequestUpdateOnFirstRender(
+    id?: string,
+    updateVars?: string,
+    varName?: string,
+    forceRefresh?: boolean,
+) {
+    const dispatch = useDispatch();
+    const module = useModule();
+
+    useEffect(() => {
+        const updateArray = getUpdateVars(updateVars).filter((uv) => !uv.includes(","));
+        varName && updateArray.push(varName);
+        updateArray.length && dispatch(createRequestUpdateAction(id, module, updateArray, forceRefresh));
+    }, [updateVars, dispatch, id, module, varName, forceRefresh]);
+}
