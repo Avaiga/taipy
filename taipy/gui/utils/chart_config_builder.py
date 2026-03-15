@@ -129,37 +129,36 @@ def _build_chart_config(  # noqa: C901
         trace[_Chart_iprops.xaxis.value] = "x"
     if not trace[_Chart_iprops.yaxis.value]:
         trace[_Chart_iprops.yaxis.value] = "y"
-    #_layout = attributes.get("layout") or {}
 
-    # NEW: Extract layout and fix titles for Plotly v3 compatibility
-    # Plotly v3 requires title as {"text": "value"} not plain string
+    # Extract layout and normalize title fields for Plotly v3 compatibility.
+    # Plotly v3 requires title as {"text": "value"} not a plain string.
     _layout = attributes.get("layout") or {}
     if isinstance(_layout, _MapDict):
         _layout = dict(_layout)
-    _axis_layout: t.Dict[str,t.any]={}
+    _axis_layout: t.Dict[str, t.Any] = {}
 
-    #Fix yaxis Title format
-    _yaxis_val=_layout.get("yaxis", {})
+    # Fix yaxis title format
+    _yaxis_val = _layout.get("yaxis", {})
     if isinstance(_yaxis_val, dict):
         _yaxis_title = _yaxis_val.get("title")
         if isinstance(_yaxis_title, str):
-            _yaxis_val['title'] = {"text": _yaxis_title}
-            _axis_layout['yaxis'] = _yaxis_val
+            _yaxis_val["title"] = {"text": _yaxis_title}
+        _axis_layout["yaxis"] = _yaxis_val
 
-    #Fix xaxis Title format
-    _xaxis_val=_layout.get("xaxis", {})
+    # Fix xaxis title format
+    _xaxis_val = _layout.get("xaxis", {})
     if isinstance(_xaxis_val, dict):
         _xaxis_title = _xaxis_val.get("title")
         if isinstance(_xaxis_title, str):
-            _xaxis_val['title']={"text": _xaxis_title}
-        _axis_layout['xaxis'] = _xaxis_val
+            _xaxis_val["title"] = {"text": _xaxis_title}
+        _axis_layout["xaxis"] = _xaxis_val
 
-    #Fix chart title format
-    _chart_title=_layout.get("title")
+    # Fix chart title format
+    _chart_title = _layout.get("title")
     if isinstance(_chart_title, str):
-        _axis_layout['title'] = {"text": _chart_title}
+        _axis_layout["title"] = {"text": _chart_title}
     elif isinstance(_chart_title, dict):
-        _axis_layout['title'] = _chart_title
+        _axis_layout["title"] = _chart_title
 
     # Indexed properties: Check for arrays
     for prop in _Chart_iprops:

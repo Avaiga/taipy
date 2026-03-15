@@ -338,8 +338,6 @@ describe("Chart Component", () => {
             expect(elt).toBeInTheDocument();
         });
     });
-    //it("handle figure layout title in Plotly v3 object format", async () => {
-
 
     it("handles plotConfig prop correctly", () => {
         const consoleInfoSpy = jest.spyOn(console, "info");
