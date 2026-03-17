@@ -1067,7 +1067,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the button if it has one.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul><li><i><i>action:</i>: the name of the action that triggered this callback.</li><li><i>args</i>: a list of two elements: <i>args[0]</i> reflects the <i>name</i> property and <i>args[1]</i> holds the file URL.</li></ul></li></ul>",
+                        "doc":  "A function or the name of a function that is triggered when the download is terminated (or on user action if <i>content</i> is None).<br/>This function is invoked with the following parameters:\n<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the button if it has one.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>\nThis dictionary has two keys:\n<ul><li><i>action</i>: the name of the action that triggered this callback.</li><li><i>args</i>: a list of two elements:\n<ul><li><i>args[0]</i>: reflects the <i>name</i> property</li><li><i>args[1]</i>: holds the file URL</li></ul></li></ul></li></ul>",
                         "signature": [
                             ["state", "State"],
                             ["id", "str"],
