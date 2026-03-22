@@ -11,11 +11,12 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 import { createDownloadAction, createSendActionNameAction, FileDownloadProps } from "../../context/taipyReducers";
-import { useDispatch, useModule } from "../../utils/hooks";
+import { useModule } from "../../utils/hooks";
 import { runXHR } from "../../utils/downloads";
+import { TaipyContext } from "../../context/taipyContext";
 
 interface GuiDownloadProps {
     download?: FileDownloadProps;
@@ -23,15 +24,16 @@ interface GuiDownloadProps {
 
 const GuiDownload = ({ download }: GuiDownloadProps) => {
     const { name = "", onAction, content, context } = download || {};
-    const dispatch = useDispatch();
+    const { dispatch, serverUrl, config } = useContext(TaipyContext);
     const module = useModule();
 
     useEffect(() => {
         if (content) {
-            runXHR(undefined, content, name, onAction ? (() => dispatch(createSendActionNameAction("Gui.download", context || module, onAction, name, content))) : undefined);
+            const url = content.startsWith("http") ? content : (serverUrl ? serverUrl + content : content);
+            runXHR(undefined, url, name, onAction ? (() => dispatch(createSendActionNameAction("Gui.download", context || module, onAction, name, content))) : undefined);
             dispatch(createDownloadAction());
         }
-    }, [content, name, dispatch, onAction, module, context]);
+    }, [content, name, dispatch, onAction, module, context, serverUrl, config]);
 
     return null;
 };

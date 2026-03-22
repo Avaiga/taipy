@@ -29,20 +29,20 @@ import { LovProps, useLovListMemo, LovImage } from "./lovUtils";
 import { useClassNames, useDynamicProperty, useIsMobile } from "../../utils/hooks";
 import { TaipyContext } from "../../context/taipyContext";
 import { LovItem } from "../../utils/lov";
-import { getBaseURL } from "../../utils";
 import { getComponentClassName } from "./TaipyStyle";
 
 const boxSx = { borderBottom: 1, borderColor: "divider", width: "fit-content" };
 
 const NavBar = (props: LovProps) => {
     const { id } = props;
-    const { state } = useContext(TaipyContext);
+    const { state, config } = useContext(TaipyContext);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const location = useLocation();
     const navigate = useNavigate();
     const isMobile = useIsMobile();
     const [opened, setOpened] = useState(false);
 
+    const baseUrl = config?.baseURL || "/";
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const lovList = useLovListMemo(props.lov, props.defaultLov || "");
@@ -58,15 +58,15 @@ const NavBar = (props: LovProps) => {
     const linkChange = useCallback(
         (evt: React.SyntheticEvent, val: string) => {
             if (Object.keys(state.locations || {}).some((route) => val === route)) {
-                navigate(getBaseURL() + val.substring(1));
+                navigate(baseUrl + val.substring(1));
             } else {
                 window.open(val, "_blank")?.focus();
             }
         },
-        [state.locations, navigate],
+        [state.locations, navigate, baseUrl],
     );
 
-    const selectedVal = lov.find((it) => getBaseURL() + it.id.substring(1) === location.pathname)?.id || "";
+    const selectedVal = lov.find((it) => baseUrl + it.id.substring(1) === location.pathname)?.id || "";
 
     return isMobile ? (
         <>

@@ -109,7 +109,7 @@ class _FlaskServer(_Server):
 
         # set json encoder (for Taipy specific types)
         self._server.json_provider_class = _TaipyJsonProvider
-        self._server.json = self._server.json_provider_class(self._server)
+        self._server.json = self._server.json_provider_class(self.get_server_instance())
 
         self.__path_mapping = path_mapping or {}
         self.__ssl_context = server_config.get("ssl_context", None)
@@ -166,13 +166,9 @@ class _FlaskServer(_Server):
                         "index.html",
                         title=title,
                         favicon=f"{favicon}?version={version}",
-                        root_margin=root_margin,
-                        watermark=watermark,
                         config=client_config,
                         scripts=scripts,
                         styles=styles,
-                        version=version,
-                        css_vars=css_vars,
                         base_url=base_url,
                     )
                 except Exception:
@@ -295,6 +291,8 @@ class _FlaskServer(_Server):
         pages_bp.add_url_rule(f"/{Gui._JSX_URL}/<path:page_name>", view_func=gui._render_page)  # pyright: ignore[reportAttributeAccessIssue]
         # server URL Rule for flask rendered react-router
         pages_bp.add_url_rule(f"/{Gui._INIT_URL}", view_func=gui._init_route)  # pyright: ignore[reportAttributeAccessIssue]
+        # server URL Rule for taipy config
+        pages_bp.add_url_rule(f"/{Gui._CONFIG_URL}", view_func=gui._config_route)  # pyright: ignore[reportAttributeAccessIssue]
         flask_blueprint.append(pages_bp)
 
         # server URL Rule for taipy images

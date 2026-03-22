@@ -9,29 +9,11 @@
     <link rel="apple-touch-icon" href="favicon.png" />
     <title>{{title}}</title>
     <script>{%- if config -%}
-    window.taipyConfig={{config|tojson|safe}};{% endif %}
-    {%- if version -%}
-    window.taipyVersion="{{version}}";
-    {% endif %}</script>
-    <style>{%- if root_margin -%}
-    #root{margin:{{root_margin}};}{% endif %}
-    .__tgb_inline{display:inline-block;}{%- if watermark -%}
-    .__tp_watermark{position:fixed;bottom:1em;opacity:0.4;color:gray;left:50%;transform:translateX(-50%);font-size:0.7em;}{% endif %}{%- if css_vars -%}
-    :root{
-      {{css_vars|safe}}
-    }
-    {% endif %}</style>
+    window.taipyConfig={{config|tojson|safe}};{% endif %}</script>
     <!-- Taipy Gui js <%= htmlWebpackPlugin.options.frontend_version %> <%= htmlWebpackPlugin.options.frontend_build_date %> <%= htmlWebpackPlugin.options.frontend_build_mode %> -->
   </head>
   <body >
-    {% for script in scripts %}
-      <script defer src="{{script}}" ></script>
-    {% endfor %}
-    {% for css in styles %}
-      <link rel="stylesheet" href="{{css}}" />
-    {% endfor %}
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    {%- if watermark -%}<span class="taipy-watermark __tp_watermark">{{watermark}}</span>{% endif %}
   </body>
 </html>

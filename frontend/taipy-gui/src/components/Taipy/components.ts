@@ -45,10 +45,11 @@ import TaipyStyle from "./TaipyStyle";
 import Toggle from "./Toggle";
 import TimeSelector from "./TimeSelector";
 import TreeView from "./TreeView";
+import { TaipyConfig } from "../../utils";
 
 const registeredComponents: Record<string, ComponentType<object>> = {};
 
-export const getRegisteredComponents = () => {
+export const getRegisteredComponents = (config?: TaipyConfig) => {
     if (registeredComponents.TreeView === undefined) {
         Object.entries({
             a: Link,
@@ -84,14 +85,14 @@ export const getRegisteredComponents = () => {
             TreeView,
             Progress,
         }).forEach(([name, comp]) => (registeredComponents[name] = comp as ComponentType));
-        if (window.taipyConfig?.extensions) {
-            Object.entries(window.taipyConfig.extensions).forEach(([libName, elements]) => {
-                if (elements && elements.length) {
+        if (config?.extensions) {
+            Object.entries(config.extensions).forEach(([libName, description]) => {
+                if (description.loaded && description.components && description.components.length) {
                     const libParts = libName.split("/");
                     const modName = libParts.length > 2 ? libParts[2] : libName;
                     const mod: Record<string, ComponentType> = window[modName] as Record<string, ComponentType>;
                     if (mod) {
-                        elements.forEach((elt) => {
+                        description.components.forEach((elt) => {
                             const comp = mod[elt];
                             if (comp) {
                                 registeredComponents[modName + "_" + elt] = comp;
@@ -102,6 +103,12 @@ export const getRegisteredComponents = () => {
                     } else {
                         console.error("module '", modName, "' cannot be loaded.");
                     }
+                } else if (!description.loaded) {
+                    console.warn(
+                        "extension '",
+                        libName,
+                        "' is not loaded yet, components won't be registered until its script(s) are loaded.",
+                    );
                 }
             });
         }

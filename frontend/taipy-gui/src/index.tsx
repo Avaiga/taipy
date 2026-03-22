@@ -13,10 +13,10 @@
 
 import React from "react";
 import { createRoot } from "react-dom/client"
-import Router from "./components/Router";
+import Taipy from "./components/Taipy";
 
 const container = document.getElementById("root");
 if (container) {
     const root = createRoot(container)
-    root.render(<Router />);
+    root.render(<Taipy />);
 }

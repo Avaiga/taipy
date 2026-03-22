@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { ErrorBoundary } from "react-error-boundary";
 import { Helmet } from "react-helmet-async";
@@ -19,9 +19,8 @@ import { useLocation } from "react-router";
 
 import { PageContext, TaipyContext } from "../../context/taipyContext";
 import { createPartialAction } from "../../context/taipyReducers";
-import { getBaseURL } from "../../utils";
 import ErrorFallback from "../../utils/ErrorBoundary";
-import { getRegisteredComponents } from "../Taipy";
+import { getRegisteredComponents } from "../Taipy/components";
 import { parseJSX } from "../../jsx/parser";
 
 interface TaipyRenderedProps {
@@ -83,9 +82,9 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
     const location = useLocation();
     const [pageState, setPageState] = useState<PageState>({});
     const [head, setHead] = useState<HeadProps[]>([]);
-    const { state, dispatch } = useContext(TaipyContext);
+    const { state, dispatch, serverUrl, config } = useContext(TaipyContext);
 
-    const baseURL = getBaseURL();
+    const baseURL = config?.baseURL || "/";
     const pathname = baseURL == "/" ? location.pathname : location.pathname.replace(baseURL, "/");
     const path =
         props.path || (state.locations && pathname in state.locations && state.locations[pathname]) || pathname;
@@ -98,8 +97,8 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
             const searchParams = new URLSearchParams(location.search);
             const params = Object.fromEntries(searchParams.entries());
             axios
-                .get<AxiosRenderer>(`taipy-jsx${path}`, {
-                    params: { ...params, client_id: state.id || "", v: window.taipyVersion },
+                .get<AxiosRenderer>(serverUrl ? `${serverUrl}${baseURL}taipy-jsx${path}` : `taipy-jsx${path}`, {
+                    params: { ...params, client_id: state.id || "", v: config?.version },
                 })
                 .then((result) => {
                     // set rendered JSX and CSS style from fetch result
@@ -126,7 +125,9 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [path, state.id, dispatch, partial, fromBlock, baseURL]);
+    }, [path, state.id, dispatch, partial, fromBlock, baseURL, config?.version]);
+
+    const components = useMemo(() => getRegisteredComponents(config!), [config]);
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -139,14 +140,14 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 {/* <JsxParser
                     disableKeyGeneration={true}
                     bindings={state.data}
-                    components={getRegisteredComponents()}
+                    components={components}
                     jsx={pageState.jsx}
                     renderUnrecognized={unregisteredRender}
                     allowUnknownElements={false}
                     renderError={renderError}
                     blacklistedAttrs={emptyArray}
                 /> */}
-                {parseJSX(pageState.jsx || "", state.data, getRegisteredComponents())}
+                {parseJSX(pageState.jsx || "", state.data, components)}
             </PageContext.Provider>
         </ErrorBoundary>
     );

@@ -11,17 +11,18 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import FileDownloadIco from "@mui/icons-material/FileDownload";
 
-import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../../utils/hooks";
+import { useClassNames, useDynamicProperty, useModule } from "../../utils/hooks";
 import { getCssSize, noDisplayStyle, TaipyActiveProps } from "./utils";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { runXHR } from "../../utils/downloads";
 import { getComponentClassName } from "./TaipyStyle";
+import { TaipyContext } from "../../context/taipyContext";
 
 interface FileDownloadProps extends TaipyActiveProps {
     content?: string;
@@ -40,7 +41,7 @@ interface FileDownloadProps extends TaipyActiveProps {
 const FileDownload = (props: FileDownloadProps) => {
     const { id, auto, name = "", bypassPreview = true, onAction, label, defaultLabel = "" } = props;
     const aRef = useRef<HTMLAnchorElement>(null);
-    const dispatch = useDispatch();
+    const { dispatch, serverUrl } = useContext(TaipyContext);
     const module = useModule();
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -56,13 +57,14 @@ const FileDownload = (props: FileDownloadProps) => {
         if (!url || url.startsWith("data:")) {
             return [url, name || true];
         }
+        const fullUrl = url.startsWith("http") ? url : (serverUrl ? serverUrl + url : url);
         const usp = new URLSearchParams("");
         if (bypassPreview) {
             usp.append("bypass", "");
         }
         const ret = usp.toString();
-        return [ret.length ? url + "?" + ret : url, bypassPreview && (name || true)];
-    }, [props.content, bypassPreview, name, props.defaultContent]);
+        return [ret.length ? fullUrl + "?" + ret : fullUrl, bypassPreview && (name || true)];
+    }, [props.content, bypassPreview, name, props.defaultContent, serverUrl]);
 
     useEffect(() => {
         if (auto && aRef.current && active && render) {

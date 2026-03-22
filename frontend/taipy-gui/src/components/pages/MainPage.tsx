@@ -11,11 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 
 import TaipyRendered from "./TaipyRendered";
-import { getBaseURL } from "../../utils";
+import { TaipyContext } from "../../extensions/exports";
 
 interface MainPageProps {
     path: string;
@@ -23,14 +23,16 @@ interface MainPageProps {
 }
 
 const MainPage = (props: MainPageProps) => {
+    const { config } = useContext(TaipyContext);
     const navigate = useNavigate();
     const location = useLocation();
+    const baseUrl = config?.baseURL || "/";
 
     useEffect(() => {
-        if (props.route && getBaseURL().includes(location.pathname)) {
+        if (props.route && baseUrl.includes(location.pathname)) {
            navigate(props.route.substring(1));
         }
-    }, [location.pathname, navigate, props.route]);
+    }, [location.pathname, navigate, props.route, baseUrl]);
 
     return <TaipyRendered path={props.path} />;
 };

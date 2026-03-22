@@ -21,7 +21,7 @@ import { nanoid } from "nanoid";
 import { FilterDesc } from "../components/Taipy/tableUtils";
 import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
 import { patchValue, PatchChange, PatchRemove } from "./patch";
-import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
+import { getBaseURL, TaipyConfig, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 import { changeFavicon, getLocalStorageValue, IdMessage, storeClientId } from "./utils";
@@ -178,11 +178,11 @@ export interface FormatConfig {
     number: string;
 }
 
-const getUserTheme = (mode: PaletteMode) => {
-    const tkTheme = (window.taipyConfig?.stylekit && stylekitTheme()) || {};
-    const tkModeTheme = (window.taipyConfig?.stylekit && stylekitModeThemes()[mode]) || {};
-    const userTheme = window.taipyConfig?.themes?.base || {};
-    const modeTheme = (window.taipyConfig?.themes && window.taipyConfig.themes[mode]) || {};
+const getUserTheme = (mode: PaletteMode, config: TaipyConfig) => {
+    const tkTheme = (config.stylekit && stylekitTheme(config)) || {};
+    const tkModeTheme = (config.stylekit && stylekitModeThemes(config)[mode]) || {};
+    const userTheme = config.themes?.base || {};
+    const modeTheme = (config.themes && config.themes[mode]) || {};
     return createTheme(
         merge(tkTheme, tkModeTheme, userTheme, modeTheme, {
             palette: {
@@ -199,32 +199,28 @@ const getUserTheme = (mode: PaletteMode) => {
     );
 };
 
-const themes = {
-    light: getUserTheme("light"),
-    dark: getUserTheme("dark"),
-};
-
 export const INITIAL_STATE: TaipyState = {
     data: {},
-    themes: themes,
-    theme: window.taipyConfig?.darkMode ? themes.dark : themes.light,
     locations: {},
-    timeZone: window.taipyConfig?.timeZone
-        ? window.taipyConfig.timeZone === "client"
-            ? TIMEZONE_CLIENT
-            : window.taipyConfig.timeZone
-        : undefined,
+    themes: {} as Record<PaletteMode, Theme>,
+    theme: {} as Theme,
     id: getLocalStorageValue(TAIPY_CLIENT_ID, ""),
     menu: {},
     ackList: [],
     notifications: [],
 };
 
-export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
-    ...initialState,
-    isSocketConnected: false,
-    socket: io("/", { autoConnect: false, path: `${getBaseURL()}socket.io` }),
-});
+export const taipyInitialize = (initialState: TaipyState, config: TaipyConfig, serverUrl?: string): TaipyState => {
+    const themes = {light: getUserTheme("light", config), dark: getUserTheme("dark", config)};
+    return {
+        ...initialState,
+        themes: themes,
+        theme: config.darkMode ? themes.dark : themes.light,
+        timeZone: config.timeZone ? (config.timeZone === "client" ? TIMEZONE_CLIENT : config.timeZone) : undefined,
+        isSocketConnected: false,
+        socket: io(serverUrl ? `${serverUrl}/` : "/", { autoConnect: false, path: `${config.baseURL}socket.io` }),
+    };
+};
 
 export const messageToAction = (message: WsMessage) => {
     if (message.type) {
@@ -496,8 +492,8 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         }
         case Types.RefreshThemes: {
             const tempThemes = {
-                light: getUserTheme("light"),
-                dark: getUserTheme("dark"),
+                light: getUserTheme("light", window.taipyConfig!),
+                dark: getUserTheme("dark", window.taipyConfig!),
             };
             return {
                 ...state,
