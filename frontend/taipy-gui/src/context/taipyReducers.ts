@@ -482,7 +482,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 mode = getLocalStorageValue("theme", mode, ["light", "dark"]);
             }
             localStorage && localStorage.setItem("theme", mode);
-            if (mode !== state.theme.palette.mode) {
+            if (state.theme?.palette?.mode && mode !== state.theme.palette.mode) {
                 return {
                     ...state,
                     theme: state.themes[mode],
