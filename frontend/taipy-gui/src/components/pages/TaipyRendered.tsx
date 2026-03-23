@@ -125,7 +125,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [path, state.id, dispatch, partial, fromBlock, baseURL, config?.version]);
+    }, [path, state.id, dispatch, partial, fromBlock, baseURL, config?.version, serverUrl]);
 
     const components = useMemo(() => getRegisteredComponents(config!), [config]);
 

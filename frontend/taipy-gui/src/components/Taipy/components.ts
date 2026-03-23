@@ -88,20 +88,18 @@ export const getRegisteredComponents = (config?: TaipyConfig) => {
         if (config?.extensions) {
             Object.entries(config.extensions).forEach(([libName, description]) => {
                 if (description.loaded && description.components && description.components.length) {
-                    const libParts = libName.split("/");
-                    const modName = libParts.length > 2 ? libParts[2] : libName;
-                    const mod: Record<string, ComponentType> = window[modName] as Record<string, ComponentType>;
+                    const mod: Record<string, ComponentType> = window[libName] as Record<string, ComponentType>;
                     if (mod) {
                         description.components.forEach((elt) => {
                             const comp = mod[elt];
                             if (comp) {
-                                registeredComponents[modName + "_" + elt] = comp;
+                                registeredComponents[libName + "_" + elt] = comp;
                             } else {
-                                console.error("module '", modName, "' doesn't export component '", elt, "'");
+                                console.error("module '", libName, "' doesn't export component '", elt, "'");
                             }
                         });
                     } else {
-                        console.error("module '", modName, "' cannot be loaded.");
+                        console.error("module '", libName, "' cannot be loaded.");
                     }
                 } else if (!description.loaded) {
                     console.warn(

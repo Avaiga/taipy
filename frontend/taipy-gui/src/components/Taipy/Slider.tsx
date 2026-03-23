@@ -59,7 +59,7 @@ const Slider = (props: SliderProps) => {
     } = props;
     const [value, setValue] = useState<number | number[]>(0);
     const { sendUpdate } = useActions();
-    const delayCall = useRef<ReturnType<typeof setTimeout>>(null);
+    const delayCall = useRef<ReturnType<typeof setTimeout>| null>(null);
     const lastVal = useRef<number | string | number[] | string[]>(0);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -119,7 +119,7 @@ const Slider = (props: SliderProps) => {
                         valueById ? undefined : getUpdateVar(updateVars, "lov"),
                     );
                 }
-                delayCall.current = null;
+                // delayCall.current = null;
             }
         },
         [

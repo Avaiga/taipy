@@ -222,5 +222,5 @@ export const getInitials = (value: string, max = 2): string =>
         .toUpperCase();
 
 export const TIMEZONE_CLIENT = Intl.DateTimeFormat().resolvedOptions().timeZone;
-export const getBaseURL = () => document.head.querySelector("base")?.getAttribute("href") || "/";
+export const getBaseURL = () => document.head.querySelector("meta[name='taipy-base']")?.getAttribute("content") || "/";
 export const emptyArray = [];

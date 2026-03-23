@@ -108,6 +108,7 @@
         "eslint-plugin-tsdoc": "^0.4.0",
         "eslint-webpack-plugin": "^5.0.0",
         "generate-json-webpack-plugin": "^2.0.0",
+        "generate-package-json-webpack-plugin": "^2.7.0",
         "html-webpack-plugin": "^5.5.0",
         "husky": "^9.0.11",
         "jest": "^29.0.3",
@@ -124,6 +125,7 @@
         "typedoc-plugin-markdown": "^4.5.2",
         "typescript": "^5.7.2",
         "webpack": "^5.61.0",
-        "webpack-cli": "^6.0.1"
+        "webpack-cli": "^6.0.1",
+        "webpack-node-externals": "^3.0.0"
     }
 }

@@ -15,7 +15,7 @@ import React, { useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 
 import TaipyRendered from "./TaipyRendered";
-import { TaipyContext } from "../../extensions/exports";
+import { TaipyContext } from "../../context/taipyContext";
 
 interface MainPageProps {
     path: string;

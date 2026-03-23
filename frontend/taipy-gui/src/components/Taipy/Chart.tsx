@@ -57,7 +57,7 @@ import { ColumnDesc } from "./tableUtils";
 import { getComponentClassName } from "./TaipyStyle";
 import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
 
-const Plot = lazy(() => import("react-plotly.js"));
+const Plot = lazy(() => import(/* webpackChunkName: "react-plotly" */"react-plotly.js"));
 
 interface PlotlyObject {
     animate: (

@@ -57,7 +57,7 @@ import { getComponentClassName } from "./TaipyStyle";
 import { noDisplayStyle } from "./utils";
 import { toDataUrl } from "../../utils/image";
 
-const Markdown = lazy(() => import("react-markdown"));
+const Markdown = lazy(() => import(/* webpackChunkName: "react-markdown" */"react-markdown"));
 
 interface ChatProps extends TaipyActiveProps {
     messages?: TableValueType;

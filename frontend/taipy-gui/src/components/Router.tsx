@@ -36,7 +36,7 @@ import {
     taipyInitialize,
     taipyReducer,
 } from "../context/taipyReducers";
-import { getBaseURL, TaipyConfig } from "../utils";
+import { TaipyConfig } from "../utils";
 import ErrorFallback from "../utils/ErrorBoundary";
 import UIBlocker from "./Taipy/UIBlocker";
 import Navigate from "./Taipy/Navigate";
@@ -77,9 +77,9 @@ interface RouterProps {
     config: TaipyConfig;
 }
 
-const Router = ({ serverUrl, config }: RouterProps) => {
+const Router = ({ serverUrl, config = window.taipyConfig! }: RouterProps) => {
     const [taipyConfig, setTaipyConfig] = useState<TaipyConfig>(config);
-    const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, (state) => taipyInitialize(state, taipyConfig));
+    const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, (state) => taipyInitialize(state, taipyConfig, serverUrl));
     const [routes, setRoutes] = useState<Record<string, string>>({});
     const refresh = !!Object.keys(routes).length;
     const themeClass = "taipy-" + state.theme.palette.mode;
@@ -141,8 +141,8 @@ const Router = ({ serverUrl, config }: RouterProps) => {
     );
 
     const contextStore = useMemo<TaipyStore>(
-        () => ({ state, dispatch, serverUrl, config: config }),
-        [state, dispatch, serverUrl, config],
+        () => ({ state, dispatch, serverUrl, config: taipyConfig }),
+        [state, dispatch, serverUrl, taipyConfig],
     );
 
     const style = useMemo(() => {
@@ -269,50 +269,4 @@ const Router = ({ serverUrl, config }: RouterProps) => {
     );
 };
 
-interface TaipyProps {
-    serverUrl?: string;
-}
-
-const Taipy = ({ serverUrl }: TaipyProps) => {
-    const [taipyConfig, setTaipyConfig] = useState<TaipyConfig | undefined>(window.taipyConfig);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<Error>();
-    const needConfig = !taipyConfig;
-
-    useEffect(() => {
-        if (!needConfig) {
-            return;
-        }
-        setLoading(true);
-        const baseURL = getBaseURL();
-        // Fetch Flask Rendered JSX React Router
-        axios
-            .get<TaipyConfig>(serverUrl ? `${serverUrl}${baseURL}taipy-config` : "taipy-config")
-            .then((result) => {
-                setTaipyConfig((conf) => conf || result.data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                // Fallback router if there is any error
-                console.log(error);
-                setError(error);
-            });
-    }, [needConfig, serverUrl]);
-
-    return loading && needConfig ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-            {error ? (
-                <Typography color="error">{error.message}</Typography>
-            ) : (
-                <>
-                    <Typography component="h1" color="title">Loading Taipy...</Typography>
-                    <CircularProgress />
-                </>
-            )}
-        </Box>
-    ) : (
-        <Router serverUrl={serverUrl} config={taipyConfig!} />
-    );
-};
-
-export default Taipy;
+export default Router;

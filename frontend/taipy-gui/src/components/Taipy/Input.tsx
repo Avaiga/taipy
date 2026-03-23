@@ -76,7 +76,7 @@ const Input = (props: TaipyInputProps) => {
 
     const [value, setValue] = useState(defaultValue);
     const dispatch = useDispatch();
-    const delayCall = useRef<ReturnType<typeof setTimeout>>(null);
+    const delayCall = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [actionKeys] = useState(() => getActionKeys(props.actionKeys));
     const module = useModule();
 

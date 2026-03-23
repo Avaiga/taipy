@@ -187,11 +187,12 @@ class Gui:
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
     __reserved_routes: list[str] = [
+        _CONFIG_URL,
+        _CONTENT_ROOT,
+        _EXTENSION_ROOT,
         _INIT_URL,
         _JSX_URL,
-        _CONTENT_ROOT,
         _UPLOAD_URL,
-        _EXTENSION_ROOT,
         _USER_CONTENT_URL,
     ]
 
@@ -216,6 +217,7 @@ class Gui:
         libraries: t.Optional[list[ElementLibrary]] = None,
         script_paths: t.Union[str, Path, list[t.Union[str, Path]], None] = None,
         server: t.Union[str, t.Any] = "flask",
+        fred_libraries: t.Optional[list[str]] = None,
     ):
         """Initialize a new Gui instance.
 
@@ -262,6 +264,8 @@ class Gui:
             server (Union[str, Any]): The server to use for the application.<br/>
                 It can be a string representing the type of the server or a server instance.<br/>
                 The default value is `flask`.<br/>
+            fred_libraries (Optional[List[str]]): An optional list of library names that will be loaded.
+                All libraries are loaded if not present.
         """
         # store suspected local containing frame
         self.__frame = t.cast(FrameType, t.cast(FrameType, currentframe()).f_back)
@@ -465,6 +469,7 @@ class Gui:
         if libraries is not None:
             for library in libraries:
                 Gui.add_library(library)
+        self.__fred_libraries = fred_libraries
 
     def __load_scripts(self, script_paths: t.Union[str, Path, list[t.Union[str, Path]], None]):
         if script_paths is None:
@@ -2518,9 +2523,6 @@ class Gui:
                         _warn("Exception raised in on_init()", e)
         return self._render_route()
 
-    def _config_route(self):
-        return self._server.direct_render_json(self._get_client_config())
-
     def _call_on_exception(self, function: t.Any, exception: Exception) -> bool:
         if hasattr(self, "on_exception") and _is_function(self.on_exception):
             function_name = _function_name(function) if callable(function) else str(function)
@@ -2765,7 +2767,9 @@ class Gui:
                 config["extensions"][""] = no_ext
             for libs in self.__extensions.values():
                 for lib in libs:
-                    name = f"./{Gui._EXTENSION_ROOT}/{lib.get_js_module_name()}"
+                    name = lib.get_js_module_name()
+                    if self.__fred_libraries and name not in self.__fred_libraries:
+                        continue
                     ext = {}
                     comps = [
                         e._get_js_name(n)
@@ -2858,7 +2862,7 @@ class Gui:
         for name, libs in Gui.__extensions.items():
             for lib in libs:
                 if isinstance(lib, ElementLibrary):
-                    scripts[f"./{Gui._EXTENSION_ROOT}/{lib.get_js_module_name()}"] = [
+                    scripts[lib.get_js_module_name()] = [
                         s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
                         for s in lib._do_get_relative_paths(lib.get_scripts())
                     ]
@@ -2872,7 +2876,7 @@ class Gui:
         for name, libs in Gui.__extensions.items():
             for lib in libs:
                 if isinstance(lib, ElementLibrary):
-                    styles[f"./{Gui._EXTENSION_ROOT}/{lib.get_js_module_name()}"] = [
+                    styles[lib.get_js_module_name()] = [
                         s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
                         for s in lib._do_get_relative_paths(lib.get_styles())
                     ]

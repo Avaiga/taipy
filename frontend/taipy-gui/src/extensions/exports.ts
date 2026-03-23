@@ -11,7 +11,6 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import Taipy from "../components/Taipy";
 import Chart from "../components/Taipy/Chart";
 import Dialog from "../components/Taipy/Dialog";
 import FileSelector from "../components/Taipy/FileSelector";
@@ -50,7 +49,6 @@ export {
     Dialog,
     FileSelector,
     Login,
-    Taipy,
     Table,
     TableFilter,
     TableSort,

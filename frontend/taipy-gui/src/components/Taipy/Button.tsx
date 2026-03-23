@@ -66,7 +66,7 @@ const Button = (props: ButtonProps) => {
             return;
         }
         handleClick(); // Trigger immediately
-        autoRepeatIntervalRef.current = setTimeout(() => {
+        autoRepeatInitialRef.current = setTimeout(() => {
             autoRepeatIntervalRef.current = setInterval(handleClick, autoRepeatDelay);
             autoRepeatInitialRef.current = null;
         }, initialRepeatDelay);

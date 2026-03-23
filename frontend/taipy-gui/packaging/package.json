@@ -1,6 +1,7 @@
 {
   "name": "taipy-gui",
-  "version": "4.2.0",
+  "version": "0",
+  "description": "This is only used by taipy-dom and should not be copied by webpack",
   "private": true,
   "main": "./taipy-gui.js",
   "types": "./taipy-gui.d.ts"

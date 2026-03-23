@@ -19,20 +19,21 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const AddAssetHtmlPlugin = require("add-asset-html-webpack-plugin");
 const ESLintPlugin = require("eslint-webpack-plugin");
 const GenerateJsonPlugin = require("generate-json-webpack-plugin");
+const GeneratePackageJsonPlugin = require("generate-package-json-webpack-plugin");
 
-const resolveApp = relativePath => path.resolve(__dirname, relativePath);
+const resolveApp = (relativePath) => path.resolve(__dirname, relativePath);
 
 const reactBundle = "taipy-gui-deps";
 const taipyBundle = "taipy-gui";
 
-const reactBundleName = "TaipyGuiDependencies"
-const taipyBundleName = "TaipyGui"
+const reactBundleName = "TaipyGuiDependencies";
+const taipyBundleName = "TaipyGui";
 
 const basePath = "../../taipy/gui/webapp";
 const webAppPath = resolveApp(basePath);
 const reactManifestPath = resolveApp(basePath + "/" + reactBundle + "-manifest.json");
-const reactDllPath = resolveApp(basePath + "/" + reactBundle + ".dll.js")
-const taipyDllPath = resolveApp(basePath + "/" + taipyBundle + ".js")
+const reactDllPath = resolveApp(basePath + "/" + reactBundle + ".dll.js");
+const taipyDllPath = resolveApp(basePath + "/" + taipyBundle + ".js");
 
 module.exports = (env, options) => {
     const envVariables = {
@@ -41,12 +42,21 @@ module.exports = (env, options) => {
         frontend_build_mode: options.mode,
     };
 
-    return [{
+    return [
+        {
             mode: options.mode, //'development', //'production',
             name: reactBundleName,
-            entry: ["react", "react-dom", "date-fns",
-            "@emotion/react","@emotion/styled",
-            "@mui/icons-material","@mui/material","@mui/x-date-pickers", "@mui/x-tree-view"],
+            entry: [
+                "react",
+                "react-dom",
+                "date-fns",
+                "@emotion/react",
+                "@emotion/styled",
+                "@mui/icons-material",
+                "@mui/material",
+                "@mui/x-date-pickers",
+                "@mui/x-tree-view",
+            ],
             output: {
                 filename: reactBundle + ".dll.js",
                 path: webAppPath,
@@ -56,9 +66,9 @@ module.exports = (env, options) => {
             plugins: [
                 new webpack.DllPlugin({
                     name: reactBundleName,
-                    path: reactManifestPath
-                })
-            ]
+                    path: reactManifestPath,
+                }),
+            ],
         },
         {
             mode: options.mode, //'development', //'production',
@@ -146,7 +156,7 @@ module.exports = (env, options) => {
                 new CopyWebpackPlugin({
                     patterns: [
                         { from: "../public", filter: (name) => !name.endsWith(".html") },
-                        { from: "../packaging", filter: (name) => !name.includes(".gen.") },
+                        { from: "*.d.ts", context: "../packaging" },
                     ],
                 }),
                 new HtmlWebpackPlugin({
@@ -164,13 +174,25 @@ module.exports = (env, options) => {
                     name: reactBundleName,
                     manifest: reactManifestPath,
                 }),
-                new AddAssetHtmlPlugin([{
-                    filepath: reactDllPath,
-                    hash: true,
-                }, {
-                    filepath: taipyDllPath,
-                    hash: true,
-                }]),
+                new AddAssetHtmlPlugin([
+                    {
+                        filepath: reactDllPath,
+                        hash: true,
+                    },
+                    {
+                        filepath: taipyDllPath,
+                        hash: true,
+                    },
+                ]),
+                new GeneratePackageJsonPlugin({
+                    name: taipyBundle,
+                    version: envVariables.frontend_version,
+                    description: "Taipy GUI",
+                    private: true,
+                    main: `./${taipyBundle}.js`,
+                    types: `./${taipyBundle}.d.ts`,
+                }),
             ],
-    }];
+        },
+    ];
 };

@@ -291,8 +291,6 @@ class _FlaskServer(_Server):
         pages_bp.add_url_rule(f"/{Gui._JSX_URL}/<path:page_name>", view_func=gui._render_page)  # pyright: ignore[reportAttributeAccessIssue]
         # server URL Rule for flask rendered react-router
         pages_bp.add_url_rule(f"/{Gui._INIT_URL}", view_func=gui._init_route)  # pyright: ignore[reportAttributeAccessIssue]
-        # server URL Rule for taipy config
-        pages_bp.add_url_rule(f"/{Gui._CONFIG_URL}", view_func=gui._config_route)  # pyright: ignore[reportAttributeAccessIssue]
         flask_blueprint.append(pages_bp)
 
         # server URL Rule for taipy images

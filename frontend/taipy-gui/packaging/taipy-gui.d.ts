@@ -252,9 +252,12 @@ export interface TaipyConfig {
     darkMode: boolean;
     themes: Record<string, Record<string, unknown>>;
     timeZone: string;
-    extensions: Record<string, string[]>;
     stylekit?: StyleKit;
     baseURL: string;
+    waterMark?: string;
+    rootMargin?: string;
+    cssVars?: string;
+    version?: string;
 }
 export declare const INITIAL_STATE: TaipyState;
 export declare const taipyInitialize: (initialState: TaipyState, config: TaipyConfig, serverUrl?: string) => TaipyState;
