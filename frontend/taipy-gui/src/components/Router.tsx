@@ -74,7 +74,7 @@ const mathJaxConfig = {
 
 interface RouterProps {
     serverUrl?: string;
-    config: TaipyConfig;
+    config?: TaipyConfig;
 }
 
 const Router = ({ serverUrl, config = window.taipyConfig! }: RouterProps) => {

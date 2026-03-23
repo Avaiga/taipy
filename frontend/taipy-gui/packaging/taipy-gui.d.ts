@@ -529,11 +529,8 @@ export interface LoginProps extends TaipyBaseProps {
     labels?: string;
 }
 export declare const Login: (props: LoginProps) => import("react/jsx-runtime").JSX.Element;
-export interface TaipyProps {
-    serverUrl?: string;
-}
 
-export const Taipy = (props: TaipyProps) => import("react/jsx-runtime").JSX.Element;
+export declare const Router = () => import("react/jsx-runtime").JSX.Element;
 export interface TableProps extends TaipyPaginatedTableProps {
     autoLoading?: boolean;
 }
