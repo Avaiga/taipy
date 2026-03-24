@@ -64,10 +64,11 @@ def test_margin_3(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=False, margin="10rem", stylekit=True)
     page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
-    margin = page.evaluate(
-        'window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")'
-    )
+    style = page.locator('style[data-href="taipy-style"]')
+    style.wait_for(state="attached")
+    rootDiv = page.locator("#root")
+    rootDiv.wait_for()
+    margin = rootDiv.evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
     assert margin == "160px"
 
 
@@ -81,7 +82,7 @@ def test_margin_4(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=False, stylekit={"root_margin": "20rem"})
     page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
+    page.wait_for_selector('style[data-href="taipy-style"]')
     margin = page.evaluate(
         'window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")'
     )
@@ -98,7 +99,7 @@ def test_margin_5(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=False, stylekit={"root_margin": "20rem"}, margin="10rem")
     page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
+    page.wait_for_selector('style[data-href="taipy-style"]')
     margin = page.evaluate(
         'window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")'
     )
