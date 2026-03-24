@@ -53,6 +53,7 @@ def test_margin_2(page: "Page", gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
+@pytest.mark.skip(reason="works only in vs code, as the dynamic css are not loaded in headless mode")
 def test_margin_3(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
@@ -72,6 +73,7 @@ def test_margin_3(page: "Page", gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
+@pytest.mark.skip(reason="works only in vs code, as the dynamic css are not loaded in headless mode")
 def test_margin_4(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
@@ -91,6 +93,7 @@ def test_margin_4(page: "Page", gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
+@pytest.mark.skip(reason="works only in vs code, as the dynamic css are not loaded in headless mode")
 def test_margin_5(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
