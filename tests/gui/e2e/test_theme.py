@@ -15,7 +15,7 @@ from importlib import util
 import pytest
 
 if util.find_spec("playwright"):
-    from playwright._impl._page import Page
+    from playwright.sync_api import Page
 
 from taipy.gui import Gui
 
@@ -30,7 +30,7 @@ def test_theme_light(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=False)
     page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
+    page.locator("#text1").wait_for()
     background_color = page.evaluate(
         'window.getComputedStyle(document.querySelector("main"), null).getPropertyValue("background-color")'
     )
@@ -47,7 +47,7 @@ def test_theme_dark(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=True)
     page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
+    page.locator("#text1").wait_for()
     background_color = page.evaluate(
         'window.getComputedStyle(document.querySelector("main"), null).getPropertyValue("background-color")'
     )

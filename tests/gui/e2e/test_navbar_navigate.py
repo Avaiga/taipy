@@ -16,8 +16,7 @@ from importlib import util
 import pytest
 
 if util.find_spec("playwright"):
-    from playwright._impl._page import Page
-    from playwright.sync_api import expect
+    from playwright.sync_api import Page, expect
 
 from taipy.gui import Gui
 
