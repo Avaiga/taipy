@@ -217,7 +217,7 @@ class Gui:
         libraries: t.Optional[list[ElementLibrary]] = None,
         script_paths: t.Union[str, Path, list[t.Union[str, Path]], None] = None,
         server: t.Union[str, t.Any] = "flask",
-        fred_libraries: t.Optional[list[str]] = None,
+        init_library_names: t.Optional[list[str]] = None,
     ):
         """Initialize a new Gui instance.
 
@@ -264,7 +264,7 @@ class Gui:
             server (Union[str, Any]): The server to use for the application.<br/>
                 It can be a string representing the type of the server or a server instance.<br/>
                 The default value is `flask`.<br/>
-            fred_libraries (Optional[List[str]]): An optional list of library names that will be loaded.
+            init_library_names (Optional[List[str]]): An optional list of library names that will be loaded.
                 All libraries are loaded if not present.
         """
         # store suspected local containing frame
@@ -469,7 +469,7 @@ class Gui:
         if libraries is not None:
             for library in libraries:
                 Gui.add_library(library)
-        self.__fred_libraries = fred_libraries
+        self.__init_library_names = init_library_names
 
     def __load_scripts(self, script_paths: t.Union[str, Path, list[t.Union[str, Path]], None]):
         if script_paths is None:
@@ -2768,7 +2768,7 @@ class Gui:
             for libs in self.__extensions.values():
                 for lib in libs:
                     name = lib.get_js_module_name()
-                    if self.__fred_libraries is not None and name not in self.__fred_libraries:
+                    if self.__init_library_names is not None and name not in self.__init_library_names:
                         continue
                     ext = {}
                     comps = [

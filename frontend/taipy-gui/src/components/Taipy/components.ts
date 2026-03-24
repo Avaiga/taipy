@@ -107,7 +107,7 @@ export const getRegisteredComponents = (extensions?: Record<string, ExtensionCon
                     }
                 } else if (!description.loaded) {
                     console.warn(
-                        "extension '",
+                        "extension library'",
                         libName,
                         "' is not loaded yet, components won't be registered until its script(s) are loaded.",
                     );
