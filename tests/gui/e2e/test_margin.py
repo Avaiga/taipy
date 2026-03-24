@@ -21,75 +21,85 @@ from taipy.gui import Gui
 
 
 @pytest.mark.teste2e
-def test_margin_1(page: "Page", gui: Gui, helpers):
+async def test_margin_1(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
 """
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, dark_mode=False, margin="10rem")
-    page.goto("./")
+    await page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
-    margin = page.evaluate('window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")')
+    await page.wait_for_selector("#text1")
+    margin = await page.evaluate(
+        'window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")'
+    )
     assert margin == "160px"
 
 
 @pytest.mark.teste2e
-def test_margin_2(page: "Page", gui: Gui, helpers):
+async def test_margin_2(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
 """
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, dark_mode=False)
-    page.goto("./")
+    await page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
-    margin = page.evaluate('window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")')
+    await page.wait_for_selector("#text1")
+    margin = await page.evaluate(
+        'window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")'
+    )
     assert margin == "16px"
 
 
 @pytest.mark.teste2e
-def test_margin_3(page: "Page", gui: Gui, helpers):
+async def test_margin_3(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
 """
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, dark_mode=False, margin="10rem", stylekit=True)
-    page.goto("./")
+    await page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
-    margin = page.evaluate('window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")')
+    await page.wait_for_selector("#text1")
+    margin = await page.evaluate(
+        'window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")'
+    )
     assert margin == "160px"
 
 
 @pytest.mark.teste2e
-def test_margin_4(page: "Page", gui: Gui, helpers):
+async def test_margin_4(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
 """
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, dark_mode=False, stylekit={"root_margin": "20rem"})
-    page.goto("./")
+    await page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
-    margin = page.evaluate('window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")')
+    await page.wait_for_selector("#text1")
+    margin = await page.evaluate(
+        'window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")'
+    )
     assert margin == "320px"
 
 
 @pytest.mark.teste2e
-def test_margin_5(page: "Page", gui: Gui, helpers):
+async def test_margin_5(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
 """
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, dark_mode=False, stylekit={"root_margin": "20rem"}, margin="10rem")
-    page.goto("./")
+    await page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
-    margin = page.evaluate('window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")')
+    await page.wait_for_selector("#text1")
+    margin = await page.evaluate(
+        'window.getComputedStyle(document.querySelector("#root"), null).getPropertyValue("margin")'
+    )
     assert margin == "320px"
