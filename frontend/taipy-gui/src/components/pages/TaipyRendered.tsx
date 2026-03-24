@@ -127,7 +127,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [path, state.id, dispatch, partial, fromBlock, baseURL, config?.version, serverUrl]);
 
-    const components = useMemo(() => getRegisteredComponents(config!), [config]);
+    const tree = useMemo(() => parseJSX(pageState.jsx || "", state.data, getRegisteredComponents(config?.extensions)), [pageState.jsx, state.data, config?.extensions]);
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -147,7 +147,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                     renderError={renderError}
                     blacklistedAttrs={emptyArray}
                 /> */}
-                {parseJSX(pageState.jsx || "", state.data, components)}
+                {tree}
             </PageContext.Provider>
         </ErrorBoundary>
     );

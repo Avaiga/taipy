@@ -14,8 +14,8 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
 import CssBaseline from "@mui/material/CssBaseline";
+import Typography from "@mui/material/Typography";
 import { ThemeProvider } from "@mui/system";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -181,7 +181,7 @@ const Router = ({ serverUrl, config = window.taipyConfig! }: RouterProps) => {
         });
     }, [serverUrl, baseURL, taipyConfig?.extensions, onScriptLoad]);
 
-    return (
+    return taipyConfig ?
         <TaipyContext.Provider value={contextStore}>
             <style href="taipy-style" precedence="medium">
                 {style}
@@ -190,8 +190,8 @@ const Router = ({ serverUrl, config = window.taipyConfig! }: RouterProps) => {
             <>
                 {Object.values(taipyConfig?.extensions || {})
                     .flatMap((ext) => ext.styles)
-                    .map((src) => (
-                        <link key={src} rel="stylesheet" href={serverUrl ? `${serverUrl}${baseURL}${src}` : src} />
+                    .map((src, idx) => (
+                        <link key={idx} rel="stylesheet" href={serverUrl ? `${serverUrl}${baseURL}${src}` : src} />
                     ))}
                 <HelmetProvider>
                     <ThemeProvider theme={state.theme}>
@@ -265,8 +265,8 @@ const Router = ({ serverUrl, config = window.taipyConfig! }: RouterProps) => {
                 </HelmetProvider>
                 {config?.waterMark ? <span className="taipy-watermark __tp_watermark">{config.waterMark}</span> : null}
             </>
-        </TaipyContext.Provider>
-    );
+        </TaipyContext.Provider>: <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <Typography color="error">Taipy is not configured properly (check Taipy configuration)</Typography></Box>;
 };
 
 export default Router;

@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import { sprintf } from "sprintf-js";
 import { FormatConfig } from "../context/taipyReducers";
 
-interface ExtensionConfig {
+export interface ExtensionConfig {
     components?: string[];
     scripts?: string[];
     styles?: string[];

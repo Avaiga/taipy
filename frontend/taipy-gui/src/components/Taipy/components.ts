@@ -45,11 +45,11 @@ import TaipyStyle from "./TaipyStyle";
 import Toggle from "./Toggle";
 import TimeSelector from "./TimeSelector";
 import TreeView from "./TreeView";
-import { TaipyConfig } from "../../utils";
+import { ExtensionConfig } from "../../utils";
 
 const registeredComponents: Record<string, ComponentType<object>> = {};
 
-export const getRegisteredComponents = (config?: TaipyConfig) => {
+export const getRegisteredComponents = (extensions?: Record<string, ExtensionConfig>) => {
     if (registeredComponents.TreeView === undefined) {
         Object.entries({
             a: Link,
@@ -85,21 +85,25 @@ export const getRegisteredComponents = (config?: TaipyConfig) => {
             TreeView,
             Progress,
         }).forEach(([name, comp]) => (registeredComponents[name] = comp as ComponentType));
-        if (config?.extensions) {
-            Object.entries(config.extensions).forEach(([libName, description]) => {
+    }
+    if (extensions) {
+        Object.entries(extensions).forEach(([libName, description]) => {
+            if (libName) {
                 if (description.loaded && description.components && description.components.length) {
-                    const mod: Record<string, ComponentType> = window[libName] as Record<string, ComponentType>;
-                    if (mod) {
-                        description.components.forEach((elt) => {
-                            const comp = mod[elt];
-                            if (comp) {
-                                registeredComponents[libName + "_" + elt] = comp;
-                            } else {
-                                console.error("module '", libName, "' doesn't export component '", elt, "'");
-                            }
-                        });
-                    } else {
-                        console.error("module '", libName, "' cannot be loaded.");
+                    if (registeredComponents[libName + "_" + description.components[0]] === undefined) {
+                        const mod: Record<string, ComponentType> = window[libName] as Record<string, ComponentType>;
+                        if (mod) {
+                            description.components.forEach((elt) => {
+                                const comp = mod[elt];
+                                if (comp) {
+                                    registeredComponents[libName + "_" + elt] = comp;
+                                } else {
+                                    console.error("module '", libName, "' doesn't export component '", elt, "'");
+                                }
+                            });
+                        } else {
+                            console.error("module '", libName, "' cannot be loaded.");
+                        }
                     }
                 } else if (!description.loaded) {
                     console.warn(
@@ -108,8 +112,9 @@ export const getRegisteredComponents = (config?: TaipyConfig) => {
                         "' is not loaded yet, components won't be registered until its script(s) are loaded.",
                     );
                 }
-            });
-        }
+            }
+        });
     }
-    return registeredComponents  as Record<string, ComponentType<unknown>>;
+
+    return registeredComponents as Record<string, ComponentType<unknown>>;
 };

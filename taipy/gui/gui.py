@@ -2768,7 +2768,7 @@ class Gui:
             for libs in self.__extensions.values():
                 for lib in libs:
                     name = lib.get_js_module_name()
-                    if self.__fred_libraries and name not in self.__fred_libraries:
+                    if self.__fred_libraries is not None and name not in self.__fred_libraries:
                         continue
                     ext = {}
                     comps = [

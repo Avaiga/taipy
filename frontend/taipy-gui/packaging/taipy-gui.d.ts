@@ -248,10 +248,17 @@ interface StyleKit {
     // Height in css size unit for inputs and buttons
     inputButtonHeight: string;
 }
+export interface ExtensionConfig {
+    components?: string[];
+    scripts?: string[];
+    styles?: string[];
+    loaded?: boolean;
+}
 export interface TaipyConfig {
     darkMode: boolean;
     themes: Record<string, Record<string, unknown>>;
     timeZone: string;
+    extensions: Record<string, ExtensionConfig>;
     stylekit?: StyleKit;
     baseURL: string;
     waterMark?: string;
@@ -259,6 +266,7 @@ export interface TaipyConfig {
     cssVars?: string;
     version?: string;
 }
+
 export declare const INITIAL_STATE: TaipyState;
 export declare const taipyInitialize: (initialState: TaipyState, config: TaipyConfig, serverUrl?: string) => TaipyState;
 export declare const initializeWebSocket: (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>) => void;
@@ -783,7 +791,7 @@ export declare const uploadFile: (
 ) => Promise<string>;
 export declare const emptyArray: never[];
 export declare const ErrorFallback: (props: FallbackProps) => import("react/jsx-runtime").JSX.Element;
-export declare const getRegisteredComponents: (config: TaipyConfig) => Record<string, ComponentType<unknown>>;
+export declare const getRegisteredComponents: (extensions?: Record<string, ExtensionConfig>) => Record<string, ComponentType<unknown>>;
 export declare const unregisteredRender: (tagName?: string, error?: string) => import("react/jsx-runtime").JSX.Element;
 export declare const renderError: (props: { error: string }) => import("react/jsx-runtime").JSX.Element;
 

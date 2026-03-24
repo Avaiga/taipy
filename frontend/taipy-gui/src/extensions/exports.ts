@@ -11,6 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
+import Router from "../components/Router";
 import Chart from "../components/Taipy/Chart";
 import Dialog from "../components/Taipy/Dialog";
 import FileSelector from "../components/Taipy/FileSelector";
@@ -28,7 +29,7 @@ import { ColumnDesc, RowType, RowValue } from "../components/Taipy/tableUtils";
 import { TaipyContext, TaipyStore, PageContext } from "../context/taipyContext";
 import { TaipyBaseAction, TaipyState } from "../context/taipyReducers";
 import { useActions, useRequestUpdateOnFirstRender } from "../hooks";
-import { TaipyConfig } from "../utils";
+import { TaipyConfig, ExtensionConfig } from "../utils";
 import {
     useClassNames,
     useDispatchRequestUpdateOnFirstRender,
@@ -45,6 +46,7 @@ import {
 } from "../context/taipyReducers";
 
 export {
+    Router,
     Chart,
     Dialog,
     FileSelector,
@@ -86,7 +88,8 @@ export type {
     TaipyStore as Store,
     TaipyState as State,
     TaipyBaseAction as Action,
-    TaipyConfig
+    TaipyConfig,
+    ExtensionConfig,
 };
 
 // For Taipy Custom Package (Designer)
