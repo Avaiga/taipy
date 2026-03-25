@@ -201,6 +201,18 @@ class Gui:
 
     __content_providers: dict[type, t.Callable[..., str]] = {}
 
+    # Global callback names that can be set as attributes on the Gui instance
+    __GLOBAL_CALLBACKS = {
+        "on_action",
+        "on_change",
+        "on_init",
+        "on_page_load",
+        "on_navigate",
+        "on_exception",
+        "on_status",
+        "on_user_content",
+    }
+
     # See set_unsupported_data_converter()
     __unsupported_data_converter: t.Optional[t.Callable] = None
 
@@ -214,6 +226,7 @@ class Gui:
         libraries: t.Optional[list[ElementLibrary]] = None,
         script_paths: t.Union[str, Path, list[t.Union[str, Path]], None] = None,
         server: t.Union[str, t.Any] = "flask",
+        **kwargs,
     ):
         """Initialize a new Gui instance.
 
@@ -261,6 +274,21 @@ class Gui:
                 It can be a string representing the type of the server or a server instance.<br/>
                 The default value is `flask`.<br/>
         """
+        # Check for global callback names passed as keyword arguments
+        _callback_args = {k for k in kwargs if k in Gui.__GLOBAL_CALLBACKS}
+        if _callback_args:
+            _cb_list = ", ".join(sorted(_callback_args))
+            raise TypeError(
+                f"Gui.__init__() got unexpected keyword argument(s): {_cb_list}. "
+                f"Global callbacks cannot be passed to the Gui constructor. "
+                f"Please assign them after creating the Gui instance, for example: "
+                f"gui.{next(iter(sorted(_callback_args)))} = {next(iter(sorted(_callback_args)))}"
+            )
+        if kwargs:
+            _unknown = ", ".join(sorted(kwargs))
+            raise TypeError(
+                f"Gui.__init__() got unexpected keyword argument(s): {_unknown}"
+            )
         # store suspected local containing frame
         self.__frame = t.cast(FrameType, t.cast(FrameType, currentframe()).f_back)
         self.__default_module_name = _get_module_name_from_frame(self.__frame)
@@ -2938,6 +2966,18 @@ class Gui:
                 "run_in_thread": run_in_thread,
                 "async_mode": async_mode,
             }
+
+        # Warn if global callback names are passed as keyword arguments to run()
+        _callback_kwargs = {k for k in kwargs if k in Gui.__GLOBAL_CALLBACKS}
+        if _callback_kwargs:
+            _cb_list = ", ".join(sorted(_callback_kwargs))
+            _first_cb = next(iter(sorted(_callback_kwargs)))
+            _warn(
+                f"Gui.run() received global callback argument(s): {_cb_list}. "
+                f"These arguments are not supported by Gui.run() and will be ignored. "
+                f"Please assign them to the Gui instance directly, for example: "
+                f"gui.{_first_cb} = {_first_cb}"
+            )
 
         # Load application config from multiple sources (env files, kwargs, command line)
         self._config._build_config(run_root_dir, self.__env_filename, kwargs)
