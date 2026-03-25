@@ -18,7 +18,9 @@ import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { DeleteOutline, CheckCircle, Cancel } from "@mui/icons-material";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import Cancel from "@mui/icons-material/Cancel";
 
 import { createSendActionNameAction, getUpdateVar, useDispatch, useModule } from "taipy-gui";
 
