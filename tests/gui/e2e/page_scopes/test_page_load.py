@@ -18,7 +18,7 @@ import pytest
 from taipy.gui import Gui
 
 if util.find_spec("playwright"):
-    from playwright._impl._page import Page
+    from playwright.sync_api import Page
 
 from .assets6_page_load.page1 import page as page1
 
@@ -49,5 +49,7 @@ def test_page_scopes(page: "Page", gui: Gui, helpers):
         logging.getLogger().debug(f"Function evaluation timeout.\n{e}")
     if not function_evaluated:
         return
-    assert page.query_selector("#text_a").inner_text() == "20"
-    assert page.query_selector("#text_x").inner_text() == "30"
+    text_a = page.locator("#text_a")
+    text_x = page.locator("#text_x")
+    assert text_a.inner_text() == "20"
+    assert text_x.inner_text() == "30"

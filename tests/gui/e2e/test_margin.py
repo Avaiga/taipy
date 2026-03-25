@@ -30,12 +30,9 @@ def test_margin_1(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=False, margin="10rem")
     page.goto("./")
     page.expect_websocket()
-    style = page.locator('style[data-href="taipy-style"]')
-    style.wait_for(state="attached")
+    page.locator('style[data-href="taipy-style"]').wait_for(state="attached")
     page.locator("#text1").wait_for()
-    rootDiv = page.locator("#root")
-    rootDiv.wait_for()
-    margin = rootDiv.evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
+    margin = page.locator("#root").evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
     assert margin == "160px"
 
 
@@ -49,16 +46,14 @@ def test_margin_2(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=False)
     page.goto("./")
     page.expect_websocket()
-    style = page.locator('style[data-href="taipy-style"]')
-    style.wait_for(state="attached")
+    page.locator('style[data-href="taipy-style"]').wait_for(state="attached")
     page.locator("#text1").wait_for()
-    rootDiv = page.locator("#root")
-    rootDiv.wait_for()
-    margin = rootDiv.evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
+    margin = page.locator("#root").evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
     assert margin == "16px"
 
 
 @pytest.mark.teste2e
+@pytest.mark.skip(reason="works only in vs code, as the dynamic css are not loaded in headless mode")
 def test_margin_3(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
@@ -68,16 +63,17 @@ def test_margin_3(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=False, margin="10rem", stylekit=True)
     page.goto("./")
     page.expect_websocket()
-    style = page.locator('style[data-href="taipy-style"]')
-    style.wait_for(state="attached")
+    page.locator('style[data-href="taipy-style"]').wait_for(state="attached")
     page.locator("#text1").wait_for()
-    rootDiv = page.locator("#root")
-    rootDiv.wait_for()
-    margin = rootDiv.evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
+    margin = page.locator("#root").evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
+    if margin != "160px":
+        page.wait_for_timeout(1000)
+        margin = page.locator("#root").evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
     assert margin == "160px"
 
 
 @pytest.mark.teste2e
+@pytest.mark.skip(reason="works only in vs code, as the dynamic css are not loaded in headless mode")
 def test_margin_4(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
@@ -87,16 +83,17 @@ def test_margin_4(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=False, stylekit={"root_margin": "20rem"})
     page.goto("./")
     page.expect_websocket()
-    style = page.locator('style[data-href="taipy-style"]')
-    style.wait_for(state="attached")
+    page.locator('style[data-href="taipy-style"]').wait_for(state="attached")
     page.locator("#text1").wait_for()
-    rootDiv = page.locator("#root")
-    rootDiv.wait_for()
-    margin = rootDiv.evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
+    margin = page.locator("#root").evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
+    if margin != "320px":
+        page.wait_for_timeout(1000)
+        margin = page.locator("#root").evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
     assert margin == "320px"
 
 
 @pytest.mark.teste2e
+@pytest.mark.skip(reason="works only in vs code, as the dynamic css are not loaded in headless mode")
 def test_margin_5(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Just a page|id=text1|>
@@ -106,10 +103,10 @@ def test_margin_5(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui, dark_mode=False, stylekit={"root_margin": "20rem"}, margin="10rem")
     page.goto("./")
     page.expect_websocket()
-    style = page.locator('style[data-href="taipy-style"]')
-    style.wait_for(state="attached")
+    page.locator('style[data-href="taipy-style"]').wait_for(state="attached")
     page.locator("#text1").wait_for()
-    rootDiv = page.locator("#root")
-    rootDiv.wait_for()
-    margin = rootDiv.evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
+    margin = page.locator("#root").evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
+    if margin != "320px":
+        page.wait_for_timeout(1000)
+        margin = page.locator("#root").evaluate("el => getComputedStyle(el).getPropertyValue('margin')")
     assert margin == "320px"

@@ -178,11 +178,11 @@ export interface FormatConfig {
     number: string;
 }
 
-const getUserTheme = (mode: PaletteMode, config: TaipyConfig) => {
-    const tkTheme = (config.stylekit && stylekitTheme(config)) || {};
-    const tkModeTheme = (config.stylekit && stylekitModeThemes(config)[mode]) || {};
-    const userTheme = config.themes?.base || {};
-    const modeTheme = (config.themes && config.themes[mode]) || {};
+const getUserTheme = (mode: PaletteMode, config?: TaipyConfig) => {
+    const tkTheme = (config?.stylekit && stylekitTheme(config)) || {};
+    const tkModeTheme = (config?.stylekit && stylekitModeThemes(config)[mode]) || {};
+    const userTheme = config?.themes?.base || {};
+    const modeTheme = (config?.themes && config.themes[mode]) || {};
     return createTheme(
         merge(tkTheme, tkModeTheme, userTheme, modeTheme, {
             palette: {
@@ -210,15 +210,15 @@ export const INITIAL_STATE: TaipyState = {
     notifications: [],
 };
 
-export const taipyInitialize = (initialState: TaipyState, config: TaipyConfig, serverUrl?: string): TaipyState => {
+export const taipyInitialize = (initialState: TaipyState, config?: TaipyConfig, serverUrl?: string): TaipyState => {
     const themes = {light: getUserTheme("light", config), dark: getUserTheme("dark", config)};
     return {
         ...initialState,
         themes: themes,
-        theme: config.darkMode ? themes.dark : themes.light,
-        timeZone: config.timeZone ? (config.timeZone === "client" ? TIMEZONE_CLIENT : config.timeZone) : undefined,
+        theme: config?.darkMode ? themes.dark : themes.light,
+        timeZone: config?.timeZone ? (config.timeZone === "client" ? TIMEZONE_CLIENT : config.timeZone) : undefined,
         isSocketConnected: false,
-        socket: io(serverUrl ? `${serverUrl}/` : "/", { autoConnect: false, path: `${config.baseURL}socket.io` }),
+        socket: io(serverUrl ? `${serverUrl}/` : "/", { autoConnect: false, path: `${config?.baseURL || ""}socket.io` }),
     };
 };
 
