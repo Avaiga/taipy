@@ -29,7 +29,9 @@ interface TaipyStyleProps {
 export const getComponentClassName = (children: ReactNode) =>
     (
         React.Children.map(children, (element) =>
-            React.isValidElement(element) && element.type == TaipyStyle ? (element.props as Record<string, unknown>).className : undefined
+            React.isValidElement(element) && element.type == TaipyStyle
+                ? (element.props as Record<string, unknown>).className
+                : undefined,
         )?.filter((v) => v) || []
     ).join(" ");
 
@@ -37,13 +39,13 @@ export const getStyle = (style: Record<string, unknown>): string =>
     Object.entries(style)
         .map(
             ([k, v]) =>
-                `${k}${v &&
-                          typeof v == "object" &&
-                          !Array.isArray(v) ?
-                          `{${Object.entries(v as Record<string, unknown>)
+                `${k}${
+                    v && typeof v == "object" && !Array.isArray(v)
+                        ? `{${Object.entries(v as Record<string, unknown>)
                               .map(([vk, vv]) => (typeof vv == "string" ? `${vk}:${vv}` : getStyle({ [vk]: vv })))
-                              .join(";")}}` : `:${v}`
-                }`
+                              .join(";")}}`
+                        : `:${v}`
+                }`,
         )
         .join("\n");
 
@@ -56,7 +58,7 @@ const TaipyStyle = (props: TaipyStyleProps) => {
             </Helmet>
         );
     } catch (e) {
-        console.log("TaipyStyle", props, e);
+        console.log("Style used in getStyle() is invalid", props, e);
         return null;
     }
 };

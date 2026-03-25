@@ -35,6 +35,7 @@ import {
     retrieveBlockUi,
     taipyInitialize,
     taipyReducer,
+    createSendUpdateAction,
 } from "../context/taipyReducers";
 import { TaipyConfig } from "../utils";
 import ErrorFallback from "../utils/ErrorBoundary";
@@ -75,11 +76,14 @@ const mathJaxConfig = {
 interface RouterProps {
     serverUrl?: string;
     config?: TaipyConfig;
+    state?: Record<string, unknown>;
 }
 
-const Router = ({ serverUrl, config = window.taipyConfig! }: RouterProps) => {
+const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges }: RouterProps) => {
     const [taipyConfig, setTaipyConfig] = useState<TaipyConfig>(config);
-    const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, (state) => taipyInitialize(state, taipyConfig, serverUrl));
+    const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, (state) =>
+        taipyInitialize(state, taipyConfig, serverUrl),
+    );
     const [routes, setRoutes] = useState<Record<string, string>>({});
     const refresh = !!Object.keys(routes).length;
     const themeClass = "taipy-" + state.theme.palette.mode;
@@ -127,6 +131,14 @@ const Router = ({ serverUrl, config = window.taipyConfig! }: RouterProps) => {
         });
         document.body.className = classes.join(" ");
     }, [themeClass]);
+
+    useEffect(() => {
+        if (stateChanges) {
+            Object.entries(stateChanges).forEach(([key, value]) => {
+                dispatch(createSendUpdateAction(key, value, undefined));
+            });
+        }
+    }, [stateChanges]);
 
     const onScriptLoad = useCallback(
         (name: string) => {
@@ -181,7 +193,7 @@ const Router = ({ serverUrl, config = window.taipyConfig! }: RouterProps) => {
         });
     }, [serverUrl, baseURL, taipyConfig?.extensions, onScriptLoad]);
 
-    return taipyConfig ?
+    return taipyConfig ? (
         <TaipyContext.Provider value={contextStore}>
             <style href="taipy-style" precedence="medium">
                 {style}
@@ -265,8 +277,12 @@ const Router = ({ serverUrl, config = window.taipyConfig! }: RouterProps) => {
                 </HelmetProvider>
                 {config?.waterMark ? <span className="taipy-watermark __tp_watermark">{config.waterMark}</span> : null}
             </>
-        </TaipyContext.Provider>: <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-            <Typography color="error">Taipy is not configured properly (check Taipy configuration)</Typography></Box>;
+        </TaipyContext.Provider>
+    ) : (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+            <Typography color="error">Taipy is not configured properly (check Taipy configuration)</Typography>
+        </Box>
+    );
 };
 
 export default Router;
