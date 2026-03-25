@@ -37,6 +37,7 @@ import {
     taipyReducer,
     createSendUpdateAction,
     OnAction,
+    createCleanAckListAction,
 } from "../context/taipyReducers";
 import { TaipyConfig } from "../utils";
 import ErrorFallback from "../utils/ErrorBoundary";
@@ -87,6 +88,7 @@ const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, 
         taipyInitialize(state, taipyConfig, serverUrl, onAction),
     );
     const [routes, setRoutes] = useState<Record<string, string>>({});
+    const ackTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const refresh = !!Object.keys(routes).length;
     const themeClass = "taipy-" + state.theme.palette.mode;
     const baseURL = taipyConfig?.baseURL || "/";
@@ -194,6 +196,25 @@ const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, 
             });
         });
     }, [serverUrl, baseURL, taipyConfig?.extensions, onScriptLoad]);
+
+    useEffect(() => {
+        if (ackTimerRef.current) {
+            clearTimeout(ackTimerRef.current);
+            ackTimerRef.current = null;
+        }
+        if (state.ackList.length) {
+            // set a timeout on the last acknowledgement received to clear the ack list
+            ackTimerRef.current = setTimeout(() => {
+                dispatch(createCleanAckListAction());
+            }, 20000);
+        }
+        return () => {
+            if (ackTimerRef.current) {
+                clearTimeout(ackTimerRef.current);
+                ackTimerRef.current = null;
+            }
+        }
+    }, [state.ackList.length]);
 
     return taipyConfig ? (
         <TaipyContext.Provider value={contextStore}>

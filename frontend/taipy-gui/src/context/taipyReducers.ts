@@ -52,6 +52,7 @@ export enum Types {
     LocalStorage = "LOCAL_STORAGE",
     RefreshThemes = "REFRESH_THEMES",
     Patch = "PATCH",
+    CleanAckList = "CLEAN_ACK_LIST",
 }
 
 export interface OnAction {
@@ -215,7 +216,12 @@ export const INITIAL_STATE: TaipyState = {
     notifications: [],
 };
 
-export const taipyInitialize = (initialState: TaipyState, config?: TaipyConfig, serverUrl?: string, onAction?: OnAction): TaipyState => {
+export const taipyInitialize = (
+    initialState: TaipyState,
+    config?: TaipyConfig,
+    serverUrl?: string,
+    onAction?: OnAction,
+): TaipyState => {
     const themes = { light: getUserTheme("light", config), dark: getUserTheme("dark", config) };
     return {
         ...initialState,
@@ -485,6 +491,15 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.Acknowledgement:
             const ackList = state.ackList.filter((v) => v !== (action as unknown as TaipyAckAction).id);
             return ackList.length < state.ackList.length ? { ...state, ackList } : state;
+        case Types.CleanAckList:
+            if (state.ackList.length === 0) {
+                return state;
+            }
+            console.log(
+                "Acknowledgement list cleaned without receiving expected acknowledgements for ids:",
+                state.ackList.join(", "),
+            );
+            return { ...state, ackList: [] };
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
             if (action.payload.fromBackend) {
@@ -665,6 +680,10 @@ export const createSendUpdateAction = (
     context: context,
     propagate: propagate,
     payload: getPayload(value, onChange, relName),
+});
+
+export const createCleanAckListAction = (): TaipyBaseAction => ({
+    type: Types.CleanAckList,
 });
 
 export const getPayload = (value: unknown, onChange?: string, relName?: string) => {
