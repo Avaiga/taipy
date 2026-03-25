@@ -54,6 +54,10 @@ export enum Types {
     Patch = "PATCH",
 }
 
+export interface OnAction {
+    (id: string, payload?: Record<string, unknown>, context?: string): void;
+}
+
 /**
  * The state of the underlying Taipy application.
  */
@@ -78,6 +82,7 @@ export interface TaipyState {
     menu: MenuProps;
     download?: FileDownloadProps;
     ackList: string[];
+    onAction?: OnAction;
 }
 
 /**
@@ -210,15 +215,19 @@ export const INITIAL_STATE: TaipyState = {
     notifications: [],
 };
 
-export const taipyInitialize = (initialState: TaipyState, config?: TaipyConfig, serverUrl?: string): TaipyState => {
-    const themes = {light: getUserTheme("light", config), dark: getUserTheme("dark", config)};
+export const taipyInitialize = (initialState: TaipyState, config?: TaipyConfig, serverUrl?: string, onAction?: OnAction): TaipyState => {
+    const themes = { light: getUserTheme("light", config), dark: getUserTheme("dark", config) };
     return {
         ...initialState,
         themes: themes,
         theme: config?.darkMode ? themes.dark : themes.light,
         timeZone: config?.timeZone ? (config.timeZone === "client" ? TIMEZONE_CLIENT : config.timeZone) : undefined,
         isSocketConnected: false,
-        socket: io(serverUrl ? `${serverUrl}/` : "/", { autoConnect: false, path: `${config?.baseURL || ""}socket.io` }),
+        socket: io(serverUrl ? `${serverUrl}/` : "/", {
+            autoConnect: false,
+            path: `${config?.baseURL || ""}socket.io`,
+        }),
+        onAction: onAction,
     };
 };
 
@@ -596,6 +605,10 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             );
             break;
         case Types.Action:
+            if (state.onAction) {
+                const onAction = state.onAction;
+                setTimeout(() => onAction(action.name, action.payload, action.context), 0);
+            }
             ackId = sendWsMessage(state.socket, "A", action.name, action.payload, state.id, action.context);
             break;
         case Types.RequestDataUpdate:

@@ -36,6 +36,7 @@ import {
     taipyInitialize,
     taipyReducer,
     createSendUpdateAction,
+    OnAction,
 } from "../context/taipyReducers";
 import { TaipyConfig } from "../utils";
 import ErrorFallback from "../utils/ErrorBoundary";
@@ -77,12 +78,13 @@ interface RouterProps {
     serverUrl?: string;
     config?: TaipyConfig;
     state?: Record<string, unknown>;
+    onAction?: OnAction;
 }
 
-const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges }: RouterProps) => {
+const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, onAction }: RouterProps) => {
     const [taipyConfig, setTaipyConfig] = useState<TaipyConfig>(config);
     const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, (state) =>
-        taipyInitialize(state, taipyConfig, serverUrl),
+        taipyInitialize(state, taipyConfig, serverUrl, onAction),
     );
     const [routes, setRoutes] = useState<Record<string, string>>({});
     const refresh = !!Object.keys(routes).length;
