@@ -112,3 +112,26 @@ def test_on_action_call(gui: Gui):
     with gui.get_app_context():
         gui._Gui__on_action(an_id, a_non_action_payload)  # type: ignore[attr-defined]
         gui._Gui__on_action(an_id, an_action_payload)  # type: ignore[attr-defined]
+
+
+def test_init_rejects_global_callback_with_helpful_message():
+    with pytest.raises(TypeError, match="Global callbacks cannot be passed to the Gui constructor"):
+        Gui(page="# test", on_change=lambda s, v, val: None)
+
+
+def test_init_rejects_multiple_global_callbacks_with_helpful_message():
+    with pytest.raises(TypeError, match="Global callbacks cannot be passed to the Gui constructor") as exc_info:
+        Gui(page="# test", on_change=lambda s, v, val: None, on_init=lambda s: None)
+    msg = str(exc_info.value)
+    assert "on_change" in msg
+    assert "on_init" in msg
+
+
+def test_init_rejects_unknown_kwargs():
+    with pytest.raises(TypeError, match="unexpected keyword argument"):
+        Gui(page="# test", unknown_param=42)
+
+
+def test_run_warns_on_global_callback_kwargs(gui: Gui):
+    with pytest.warns(UserWarning, match="Gui.run\\(\\) received global callback argument"):
+        gui.run(run_server=False, on_change=lambda s, v, val: None)
