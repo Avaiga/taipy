@@ -179,22 +179,38 @@ const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, 
     }, [taipyConfig?.rootMargin, taipyConfig?.waterMark, taipyConfig?.cssVars]);
 
     useEffect(() => {
-        Object.entries(taipyConfig?.extensions || {}).map(([name, extension]) => {
-            return extension.scripts?.map((src) => {
-                const id = `taipy-${name}-${src}`;
-                if (extension.loaded || document.getElementById(id)) {
-                    return;
-                }
-                const extensionScript = document.createElement("script");
-                extensionScript.type = "text/javascript";
-                extensionScript.id = id;
-                extensionScript.src = serverUrl ? `${serverUrl}${baseURL}${src}` : src;
-                extensionScript.defer = true;
-                extensionScript.onload = () => onScriptLoad(name);
-                extensionScript.onerror = console.error;
-                document.head.appendChild(extensionScript);
-            });
+        setTaipyConfig((config) => {
+            if (config) {
+                let found = false;
+                config.extensions &&
+                    Object.entries(config.extensions)
+                        .filter(([name, extension]) => !extension.loaded && (serverUrl || !name))
+                        .forEach(([, extension]) => {
+                            found = true;
+                            extension.loaded = true;
+                        });
+                return found ? { ...config, extensions: { ...config.extensions } } : config;
+            }
+            return config;
         });
+        Object.entries(taipyConfig?.extensions || {})
+            .filter(([name, extension]) => !extension.loaded && (!serverUrl || !name))
+            .forEach(([name, extension]) => {
+                extension.scripts?.forEach((src) => {
+                    const id = `taipy-${name}-${src}`;
+                    if (document.getElementById(id)) {
+                        return;
+                    }
+                    const extensionScript = document.createElement("script");
+                    extensionScript.type = "text/javascript";
+                    extensionScript.id = id;
+                    extensionScript.src = src;
+                    extensionScript.defer = true;
+                    name && (extensionScript.onload = () => onScriptLoad(name));
+                    extensionScript.onerror = console.error;
+                    document.head.appendChild(extensionScript);
+                });
+            });
     }, [serverUrl, baseURL, taipyConfig?.extensions, onScriptLoad]);
 
     useEffect(() => {
@@ -213,7 +229,7 @@ const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, 
                 clearTimeout(ackTimerRef.current);
                 ackTimerRef.current = null;
             }
-        }
+        };
     }, [state.ackList.length]);
 
     return taipyConfig ? (
