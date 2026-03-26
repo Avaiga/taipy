@@ -241,8 +241,13 @@ const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, 
             <>
                 {Object.values(taipyConfig?.extensions || {})
                     .flatMap((ext) => ext.styles)
+                    .filter((src) => !!src)
                     .map((src, idx) => (
-                        <link key={idx} rel="stylesheet" href={serverUrl ? `${serverUrl}${baseURL}${src}` : src} />
+                        <link
+                            key={idx}
+                            rel="stylesheet"
+                            href={serverUrl && !src?.startsWith("http") ? `${serverUrl}${baseURL}${src}` : src}
+                        />
                     ))}
                 <HelmetProvider>
                     <ThemeProvider theme={state.theme}>
