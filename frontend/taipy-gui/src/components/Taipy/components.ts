@@ -101,12 +101,13 @@ export const getRegisteredComponents = (extensions?: Record<string, ExtensionCon
                                     console.error("module '", libName, "' doesn't export component '", elt, "'");
                                 }
                             });
+                            console.debug("module '", libName, "' is loaded.");
                         } else {
-                            console.error("module '", libName, "' cannot be loaded.");
+                            console.debug("module '", libName, "' cannot be loaded yet.");
                         }
                     }
                 } else if (!description.loaded) {
-                    console.warn(
+                    console.debug(
                         "extension library'",
                         libName,
                         "' is not loaded yet, components won't be registered until its script(s) are loaded.",

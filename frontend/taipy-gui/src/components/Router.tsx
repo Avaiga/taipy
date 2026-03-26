@@ -118,7 +118,7 @@ const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, 
             .catch((error) => {
                 // Fallback router if there is any error
                 setRoutes({ "/": "/TaiPy_root_page" });
-                console.log(error);
+                console.error(error);
             });
     }, [refresh, state.isSocketConnected, state.id, serverUrl, baseURL, taipyConfig?.version]);
 
@@ -149,7 +149,7 @@ const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, 
             const extension = taipyConfig.extensions?.[name];
             if (extension && !extension.loaded) {
                 extension.loaded = true;
-                console.log(`Extension '${name}' is loaded.`);
+                console.debug("Extension script '", name, "' is loaded.");
                 setTaipyConfig({ ...taipyConfig });
             }
         },
