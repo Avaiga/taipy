@@ -400,7 +400,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     headersInfo,
                 ];
             } catch (e) {
-                console.info("ATable.columns: " + ((e as Error).message || e));
+                console.info("ATable.columns: ", e);
             }
         }
         return [

@@ -302,7 +302,7 @@ const Chat = (props: ChatProps) => {
                         });
                         fileInputRef.current && (fileInputRef.current.value = "");
                     })
-                    .catch(console.log);
+                    .catch(console.debug);
             }
         },
         [imagePreview, updateVarName, onAction, senderId, id, dispatch, module]

@@ -246,7 +246,7 @@ const Selector = (props: SelectorProps) => {
                     return drops as string[];
                 }
             } catch (e) {
-                console.error("Error parsing dropTypes: ", e);
+                console.error("Error parsing dropTypes:", e);
             }
         }
         return undefined;
@@ -509,8 +509,7 @@ const Selector = (props: SelectorProps) => {
                     />,
                 );
             } else {
-                console.log("selector autocomplete needs to update params for slotProps.input.startAdornment");
-                console.log("renderAutoInput", params);
+                console.log("selector autocomplete needs to update params for slotProps.input.startAdornment\nrenderAutoInput", params);
             }
             return <TextField {...params} label={props.label} margin="dense" />;
         },

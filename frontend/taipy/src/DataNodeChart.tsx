@@ -227,7 +227,7 @@ const getBaseConfig = (defaultConfig?: string, chartConfigs?: string, configId?:
                             return config;
                         }
                     } catch (e) {
-                        console.warn(`chart_configs property is not a valid config.\n${e}`);
+                        console.warn("chart_configs property is not a valid config.", e);
                     }
                 }
                 return baseConfig;

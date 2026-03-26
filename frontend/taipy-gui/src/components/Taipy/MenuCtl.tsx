@@ -56,8 +56,8 @@ const MenuCtl = (props: MenuCtlProps) => {
         } else if (props.defaultInactiveIds) {
             try {
                 return JSON.parse(props.defaultInactiveIds) as string[];
-            } catch {
-                console.error("Failed to parse defaultInactiveIds");
+            } catch (error) {
+                console.error("Failed to parse defaultInactiveIds:", error);
             }
         }
         return [] as string[];

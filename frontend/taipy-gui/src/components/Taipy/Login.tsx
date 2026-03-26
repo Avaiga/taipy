@@ -70,7 +70,7 @@ const Login = (props: LoginProps) => {
             try {
                 return JSON.parse(props.labels) as string[];
             } catch (e) {
-                console.info(`Error parsing login.labels\n${(e as Error).message || e}`);
+                console.info("Error parsing login.labels", e);
             }
         }
         return [];

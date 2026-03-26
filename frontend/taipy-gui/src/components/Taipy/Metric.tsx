@@ -96,7 +96,7 @@ const Metric = (props: MetricProps) => {
                     .filter((item) => item.color !== null);
             }
         } catch (e) {
-            console.info(`Error parsing color_map value (metric).\n${(e as Error).message || e}`);
+            console.info("Error parsing color_map value (metric).", e);
         }
         return undefined;
     }, [props.colorMap, props.max]);
@@ -185,7 +185,7 @@ const Metric = (props: MetricProps) => {
                     : props.template_Light_ && JSON.parse(props.template_Light_);
             template = tpl ? (tplTheme ? { ...tpl, ...tplTheme } : tpl) : tplTheme ? tplTheme : undefined;
         } catch (e) {
-            console.info(`Error while parsing Metric.template\n${(e as Error).message || e}`);
+            console.info("Error while parsing Metric.template.", e);
         }
         if (template) {
             layout.template = template;

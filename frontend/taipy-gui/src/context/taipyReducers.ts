@@ -284,7 +284,7 @@ export const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
                     values.forEach((val, idx) => (payloads[idx].payload.value = val));
                     dispatch(messageToAction(message));
                 })
-                .catch(console.warn);
+                .catch(console.debug);
             return;
         } else if (message.type === "MS" && Array.isArray(message.payload)) {
             (message.payload as WsMessage[]).forEach((msg) => dispatchWsMessage(msg));
@@ -495,7 +495,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             if (state.ackList.length === 0) {
                 return state;
             }
-            console.log(
+            console.debug(
                 "Acknowledgement list cleaned without receiving expected acknowledgements for ids:",
                 state.ackList.join(", "),
             );

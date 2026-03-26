@@ -255,7 +255,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     headersInfo,
                 ];
             } catch (e) {
-                console.info("PaginatedTable.columns: ", (e as Error).message || e);
+                console.info("PaginatedTable.columns: ", e);
             }
         }
         return [
