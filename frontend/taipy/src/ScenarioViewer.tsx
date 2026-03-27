@@ -633,7 +633,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
             >
                 <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
                     <Stack direction="row" justifyContent="space-between" width="100%" alignItems="baseline">
-                        <Stack direction="row" spacing={1}>
+                        <Stack direction="row" spacing={1} width="100%">
                             <AccordionSummary
                                 expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                                 sx={AccordionSummarySx}
