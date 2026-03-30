@@ -245,7 +245,8 @@ describe("Dialog Component", () => {
     it("should log an error when labels prop is not a valid JSON string", () => {
         const consoleSpy = jest.spyOn(console, "info");
         render(<Dialog title={"Dialog-Test-Title"} labels={"not a valid JSON string"} />);
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Error parsing dialog.labels"));
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Error parsing dialog.labels"),
+            expect.any(SyntaxError),);
     });
     it("should apply width and height styles when they are provided", async () => {
         const { findByRole } = render(<Dialog title="Dialog-Test-Title" width="500px" height="300px" open={true} />);

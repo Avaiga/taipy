@@ -190,7 +190,10 @@ describe("Metric Component", () => {
         const consoleSpy = jest.spyOn(console, "info");
         const malformedJson = "{ key: 'value'";
         render(<Metric template={malformedJson} />);
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Error while parsing Metric.template"));
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining("Error while parsing Metric.template"),
+            expect.any(SyntaxError),
+        );
         consoleSpy.mockRestore();
     });
 
@@ -198,7 +201,10 @@ describe("Metric Component", () => {
         const consoleSpy = jest.spyOn(console, "info");
         const malformedJson = "{ key: 'value'"; // missing closing brace
         render(<Metric colorMap={malformedJson} />);
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Error parsing color_map value (metric)"));
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining("Error parsing color_map value (metric)"),
+            expect.any(SyntaxError),
+        );
         consoleSpy.mockRestore();
     });
 
@@ -385,7 +391,6 @@ describe("Metric Component", () => {
         });
     });
 
-
     it("processes type prop correctly when type is none (string)", async () => {
         const { container } = render(<Metric type="none" />);
         await waitFor(() => {
@@ -449,14 +454,20 @@ describe("Metric Component", () => {
     it.skip("logs an error when template_Dark_ prop is not a valid JSON string", () => {
         const consoleSpy = jest.spyOn(console, "info");
         render(<Metric template_Dark_="not a valid JSON string" />);
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Error while parsing Metric.template"));
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining("Error while parsing Metric.template"),
+            expect.any(SyntaxError),
+        );
         consoleSpy.mockRestore();
     }); // TODO: Not working at the moment, need to fix
 
     it("logs an error when template_Light_ prop is not a valid JSON string", () => {
         const consoleSpy = jest.spyOn(console, "info");
         render(<Metric template_Light_="not a valid JSON string" />);
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Error while parsing Metric.template"));
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining("Error while parsing Metric.template"),
+            expect.any(SyntaxError),
+        );
         consoleSpy.mockRestore();
     });
 });
