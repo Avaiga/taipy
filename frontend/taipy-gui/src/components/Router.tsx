@@ -38,6 +38,7 @@ import {
     createSendUpdateAction,
     OnAction,
     createCleanAckListAction,
+    shutdownWebSocket,
 } from "../context/taipyReducers";
 import { TaipyConfig } from "../utils";
 import ErrorFallback from "../utils/ErrorBoundary";
@@ -125,11 +126,7 @@ const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, 
     useEffect(() => {
         const socket = state.socket;
         initializeWebSocket(socket, dispatch);
-        return () => {
-            if (socket) {
-                socket.close();
-            }
-        };
+        return () => shutdownWebSocket(socket);
     }, [state.socket]);
 
     useEffect(() => {

@@ -277,6 +277,7 @@ export const messageToAction = (message: WsMessage) => {
 
 export const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
     const dispatchWsMessage = (message: WsMessage) => {
+        console.debug("Received WebSocket message:", message);
         if (message.type === "MU" && Array.isArray(message.payload)) {
             const payloads = message.payload as NamePayload[];
             Promise.all(payloads.map((pl) => parseData(pl.payload.value as Record<string, unknown>)))
@@ -332,6 +333,17 @@ const checkGuiAddr = (guiAddr: string) => {
 
 let lastReasonServer = false;
 
+export const shutdownWebSocket = (socket: Socket | undefined) => {
+    if (socket) {
+        console.debug("Shutting down WebSocket connection...");
+        socket.close();
+        socket.off("connect");
+        socket.off("connect_error");
+        socket.off("disconnect");
+        socket.off("message");
+    }
+};
+
 // web socket
 export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
     if (socket) {
@@ -355,6 +367,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         });
         // try to reconnect on server disconnection
         socket.on("disconnect", (reason) => {
+            console.debug("WebSocket disconnected:", reason);
             if (reason === "io server disconnect") {
                 lastReasonServer = true;
                 socket.connect();
