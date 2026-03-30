@@ -629,40 +629,48 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 sx={MainBoxSx}
                 id={id}
                 onClick={onFocus}
-                className={`${className} ${getComponentClassName(props.children)}`}
+                className={`${className} ${getComponentClassName(props.children)} taipy-expandable`}
             >
                 <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
-                    <Stack direction="row" justifyContent="space-between" width="100%" alignItems="baseline">
-                        <Stack direction="row" spacing={1} width="100%">
-                            <AccordionSummary
-                                expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
-                                sx={AccordionSummarySx}
-                            >
-                                {scLabel}
-                            </AccordionSummary>
-                            {scPrimary ? (
-                                <Chip color="primary" label={<FlagOutlined sx={FlagSx} />} size="small" sx={ChipSx} />
+                    <AccordionSummary
+                        component="div"
+                        expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
+                        sx={AccordionSummarySx}
+                    >
+                        <Stack direction="row" justifyContent="space-between" width="100%" alignItems="baseline">
+                            <Stack direction="row" spacing={1}>
+                                <Typography>{scLabel}</Typography>
+                                {scPrimary ? (
+                                    <Chip
+                                        color="primary"
+                                        label={<FlagOutlined sx={FlagSx} />}
+                                        size="small"
+                                        sx={ChipSx}
+                                    />
+                                ) : null}
+                                {submissionStatus > -1 ? <StatusChip status={submissionStatus} sx={ChipSx} /> : null}
+                            </Stack>
+                            {showSubmit ? (
+                                <Tooltip
+                                    title={
+                                        disabled
+                                            ? scNotSubmittableReason || "Cannot submit Scenario"
+                                            : "Submit Scenario"
+                                    }
+                                >
+                                    <span>
+                                        <Button
+                                            onClick={submitScenario}
+                                            disabled={disabled}
+                                            endIcon={<Send fontSize="medium" color={disableColor("info", disabled)} />}
+                                        >
+                                            Submit
+                                        </Button>
+                                    </span>
+                                </Tooltip>
                             ) : null}
-                            {submissionStatus > -1 ? <StatusChip status={submissionStatus} sx={ChipSx} /> : null}
                         </Stack>
-                        {showSubmit ? (
-                            <Tooltip
-                                title={
-                                    disabled ? scNotSubmittableReason || "Cannot submit Scenario" : "Submit Scenario"
-                                }
-                            >
-                                <span>
-                                    <Button
-                                        onClick={submitScenario}
-                                        disabled={disabled}
-                                        endIcon={<Send fontSize="medium" color={disableColor("info", disabled)} />}
-                                    >
-                                        Submit
-                                    </Button>
-                                </span>
-                            </Tooltip>
-                        ) : null}
-                    </Stack>
+                    </AccordionSummary>
                     <AccordionDetails>
                         <Grid container rowSpacing={2}>
                             {showConfig ? (

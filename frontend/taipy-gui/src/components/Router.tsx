@@ -123,7 +123,13 @@ const Router = ({ serverUrl, config = window.taipyConfig!, state: stateChanges, 
     }, [refresh, state.isSocketConnected, state.id, serverUrl, baseURL, taipyConfig?.version]);
 
     useEffect(() => {
-        initializeWebSocket(state.socket, dispatch);
+        const socket = state.socket;
+        initializeWebSocket(socket, dispatch);
+        return () => {
+            if (socket) {
+                socket.close();
+            }
+        };
     }, [state.socket]);
 
     useEffect(() => {
