@@ -17,3 +17,15 @@ const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 dotenv.config({ path: './.env.test' });
+
+global.ResizeObserver = class ResizeObserver {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  observe(target) {
+    // Optionally trigger the callback once to simulate initial layout
+    // this.callback([{ contentRect: { width: 1024, height: 768 } }], this);
+  }
+  unobserve() {}
+  disconnect() {}
+};

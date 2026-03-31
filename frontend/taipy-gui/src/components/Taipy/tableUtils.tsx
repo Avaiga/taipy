@@ -30,7 +30,7 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Input from "@mui/material/Input";
 import Switch from "@mui/material/Switch";
-import TableCell, { TableCellProps } from "@mui/material/TableCell";
+import TableCell, { TableCellBaseProps, TableCellProps } from "@mui/material/TableCell";
 import TextField from "@mui/material/TextField";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -228,6 +228,7 @@ interface EditableCellProps {
     useCheckbox?: boolean;
     formattedVal?: string;
     rowSpan?: number;
+    component?: React.ElementType<TableCellBaseProps>;
 }
 
 export interface FilterDesc {
@@ -422,6 +423,7 @@ export const EditableCell = (props: EditableCellProps) => {
         useCheckbox = false,
         formattedVal: formattedValue,
         rowSpan = 1,
+        component,
     } = props;
     const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
@@ -605,7 +607,7 @@ export const EditableCell = (props: EditableCellProps) => {
                       }`
                     : undefined
             }
-            component={colDesc.multi !== undefined ? "th" : undefined}
+            component={component || (colDesc.multi !== undefined ? "th" : undefined)}
             rowSpan={rowSpan}
         >
             <Badge
