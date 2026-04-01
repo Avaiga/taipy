@@ -25,6 +25,7 @@ module.exports = {
         "./test-config/intersectionObserver.js",
         "./test-config/nanoid.js",
     ],
+    coverageProvider: "v8",
     coverageReporters: ["json", "html", "text"],
     modulePathIgnorePatterns: ["<rootDir>/packaging/"],
     moduleNameMapper: {"react-markdown": "<rootDir>/test-config/markdown.tsx",
