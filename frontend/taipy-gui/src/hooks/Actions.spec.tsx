@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import { PropsWithChildren } from "react";
+import React, { PropsWithChildren } from "react";
 import { act, renderHook } from "@testing-library/react";
 
 import { useActions, useRequestUpdateOnFirstRender } from "./Actions";

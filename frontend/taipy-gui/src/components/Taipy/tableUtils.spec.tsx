@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import React, { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -75,6 +75,7 @@ describe("Editable cell", () => {
         });
     });
     describe("Editable mode", () => {
+        // @ts-ignore
         const onValidation = (value: RowValue, rowIndex: number, colName: string, userValue: string, tz?: string) => {};
         it("show a boolean as a switch", async () => {
             const { getByRole, getByTestId } = render(
