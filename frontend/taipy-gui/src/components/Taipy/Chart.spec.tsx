@@ -289,7 +289,8 @@ describe("Chart Component", () => {
         // Case 2: plotConfig is not a valid JSON string
         render(<Chart plotConfig="not a valid json" defaultConfig={chartConfig} />);
         expect(consoleInfoSpy).toHaveBeenCalledWith(
-            "Error while parsing Chart.plot_config\nUnexpected token 'o', \"not a valid json\" is not valid JSON",
+            expect.stringContaining("Error while parsing Chart.plot_config"),
+            expect.any(SyntaxError),
         );
         // Case 3: plotConfig is not an object
         render(<Chart plotConfig='"not an object"' defaultConfig={chartConfig} />);

@@ -57,7 +57,7 @@ import { ColumnDesc } from "./tableUtils";
 import { getComponentClassName } from "./TaipyStyle";
 import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
 
-const Plot = lazy(() => import("react-plotly.js"));
+const Plot = lazy(() => import(/* webpackChunkName: "react-plotly" */ "react-plotly.js"));
 
 interface PlotlyObject {
     animate: (
@@ -393,7 +393,7 @@ const Chart = (props: ChartProp) => {
         try {
             return JSON.parse(props.figure) as Partial<Figure>;
         } catch (e) {
-            console.warn(`Error while parsing Chart.figure\n${(e as Error).message || e}\nUsing empty figure instead.`);
+            console.warn("Error while parsing Chart.figure\n", e, "\nUsing empty figure instead.");
             return undefined;
         }
     }, [props.figure]);
@@ -501,7 +501,7 @@ const Chart = (props: ChartProp) => {
                     : props.template_Light_ && JSON.parse(props.template_Light_);
             template = tpl ? (tplTheme ? { ...tpl, ...tplTheme } : tpl) : tplTheme ? tplTheme : undefined;
         } catch (e) {
-            console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
+            console.info("Error while parsing Chart.template", e);
         }
         if (template) {
             layout.template = template;
@@ -595,12 +595,11 @@ const Chart = (props: ChartProp) => {
             if (!lData || isDataRefresh(lData) || !Object.keys(lData).length) {
                 return currentData;
             }
-            const dtKey = getDataKey(
-                idx < config.columns?.length ? config.columns[idx] : undefined,
-                config.decimators,
-            )[1];
-            if (!dataKey.startsWith(dtKey)) {
-                return currentData;
+            if (idx < config.columns?.length && config.columns[idx]) {
+                const dtKey = getDataKey(config.columns[idx], config.decimators)[1];
+                if (!dataKey.startsWith(dtKey)) {
+                    return currentData;
+                }
             }
             changed = true;
             const datum = lData[dataKey];
@@ -701,7 +700,7 @@ const Chart = (props: ChartProp) => {
             try {
                 plConf = JSON.parse(props.plotConfig);
             } catch (e) {
-                console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
+                console.info("Error while parsing Chart.plot_config", e);
             }
             if (typeof plConf !== "object" || plConf === null || Array.isArray(plConf)) {
                 console.info("Error Chart.plot_config is not a dictionary");

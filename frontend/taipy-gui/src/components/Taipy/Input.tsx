@@ -76,7 +76,7 @@ const Input = (props: TaipyInputProps) => {
 
     const [value, setValue] = useState(defaultValue);
     const dispatch = useDispatch();
-    const delayCall = useRef(-1);
+    const delayCall = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [actionKeys] = useState(() => getActionKeys(props.actionKeys));
     const module = useModule();
 
@@ -120,11 +120,11 @@ const Input = (props: TaipyInputProps) => {
                 });
                 return;
             }
-            if (delayCall.current > 0) {
+            if (delayCall.current !== null) {
                 clearTimeout(delayCall.current);
             }
-            delayCall.current = window.setTimeout(() => {
-                delayCall.current = -1;
+            delayCall.current = setTimeout(() => {
+                delayCall.current = null;
                 dispatch(createSendUpdateAction(updateVarName, value, module, onChange, propagate));
             }, changeDelay);
         },
@@ -154,11 +154,11 @@ const Input = (props: TaipyInputProps) => {
                     );
                 });
             }
-            if (delayCall.current > 0) {
+            if (delayCall.current !== null) {
                 clearTimeout(delayCall.current);
             }
-            delayCall.current = window.setTimeout(() => {
-                delayCall.current = -1;
+            delayCall.current = setTimeout(() => {
+                delayCall.current = null;
                 dispatch(
                     createSendUpdateAction(updateVarName, valToNumber(val, numberType), module, onChange, propagate),
                 );
@@ -182,10 +182,10 @@ const Input = (props: TaipyInputProps) => {
                     val = max;
                 }
             }
-            if (delayCall.current > 0 || changeDelay === -1) {
-                if (changeDelay > 0) {
+            if (delayCall.current !== null || changeDelay === -1) {
+                if (delayCall.current !== null && changeDelay > 0) {
                     clearTimeout(delayCall.current);
-                    delayCall.current = -1;
+                    delayCall.current = null;
                 }
                 dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
             }
@@ -231,9 +231,9 @@ const Input = (props: TaipyInputProps) => {
                           : Number(evt.currentTarget.querySelector("input")?.value)
                       : evt.currentTarget.querySelector("input")?.value;
 
-                if (changeDelay > 0 && delayCall.current > 0) {
+                if (changeDelay > 0 && delayCall.current !== null) {
                     clearTimeout(delayCall.current);
-                    delayCall.current = -1;
+                    delayCall.current = null;
                     dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));
                 } else if (changeDelay === -1) {
                     dispatch(createSendUpdateAction(updateVarName, val, module, onChange, propagate));

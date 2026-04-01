@@ -100,7 +100,10 @@ describe("StatusList Component", () => {
         const invalidDefaultValue = "{invalidJson}";
         const consoleSpy = jest.spyOn(console, "info").mockImplementation(() => {});
         const { getByText } = render(<StatusList value={undefined!} defaultValue={invalidDefaultValue} />);
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Cannot parse status value"));
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining("Cannot parse status value"),
+            expect.any(SyntaxError),
+        );
         const elt = getByText("No Status");
         expect(elt).toBeInTheDocument();
         consoleSpy.mockRestore();
@@ -120,14 +123,15 @@ describe("StatusList Component", () => {
             { status: "warning", message: "Warning" },
         ];
 
-        const content = "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='8' fill='red'/></svg>"
+        const content =
+            "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><circle cx='8' cy='8' r='8' fill='red'/></svg>";
 
-        const { container } = render(<StatusList value={statuses} useIcon={JSON.stringify({warning: content, info: true})} />);
-
+        const { container } = render(
+            <StatusList value={statuses} useIcon={JSON.stringify({ warning: content, info: true })} />,
+        );
 
         // Check if the SVG is rendered for the warning status
         const svg = container.querySelector("svg");
         expect(svg).toBeInTheDocument();
     });
-
 });

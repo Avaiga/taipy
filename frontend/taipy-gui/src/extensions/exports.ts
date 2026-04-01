@@ -11,11 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 
+import Router from "../components/Router";
 import Chart from "../components/Taipy/Chart";
 import Dialog from "../components/Taipy/Dialog";
 import FileSelector from "../components/Taipy/FileSelector";
 import Login from "../components/Taipy/Login";
-import Router from "../components/Router";
 import Table from "../components/Taipy/Table";
 import TableFilter, { FilterColumnDesc } from "../components/Taipy/TableFilter";
 import { FilterDesc } from "../components/Taipy/tableUtils";
@@ -29,6 +29,7 @@ import { ColumnDesc, RowType, RowValue } from "../components/Taipy/tableUtils";
 import { TaipyContext, TaipyStore, PageContext } from "../context/taipyContext";
 import { TaipyBaseAction, TaipyState } from "../context/taipyReducers";
 import { useActions, useRequestUpdateOnFirstRender } from "../hooks";
+import { TaipyConfig, ExtensionConfig } from "../utils";
 import {
     useClassNames,
     useDispatchRequestUpdateOnFirstRender,
@@ -45,11 +46,11 @@ import {
 } from "../context/taipyReducers";
 
 export {
+    Router,
     Chart,
     Dialog,
     FileSelector,
     Login,
-    Router,
     Table,
     TableFilter,
     TableSort,
@@ -87,6 +88,8 @@ export type {
     TaipyStore as Store,
     TaipyState as State,
     TaipyBaseAction as Action,
+    TaipyConfig,
+    ExtensionConfig,
 };
 
 // For Taipy Custom Package (Designer)
@@ -96,9 +99,8 @@ import { uploadFile } from "../workers/fileupload";
 import { WsMessage, WsMessageType } from "../context/wsUtils";
 import { IdMessage, storeClientId, getLocalStorageValue } from "../context/utils";
 
-import { emptyArray } from "../utils";
 import ErrorFallback from "../utils/ErrorBoundary";
-import { getRegisteredComponents } from "../components/Taipy";
+import { getRegisteredComponents } from "../components/Taipy/components";
 import { renderError, unregisteredRender } from "../components/Taipy/Unregistered";
 import {
     createRefreshThemesAction,
@@ -116,7 +118,6 @@ export {
     storeClientId,
     PageContext,
     TaipyContext,
-    emptyArray,
     ErrorFallback,
     getRegisteredComponents,
     renderError,

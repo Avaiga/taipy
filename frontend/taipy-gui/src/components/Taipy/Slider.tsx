@@ -59,7 +59,7 @@ const Slider = (props: SliderProps) => {
     } = props;
     const [value, setValue] = useState<number | number[]>(0);
     const { sendUpdate } = useActions();
-    const delayCall = useRef(-1);
+    const delayCall = useRef<ReturnType<typeof setTimeout>| null>(null);
     const lastVal = useRef<number | string | number[] | string[]>(0);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
@@ -98,8 +98,8 @@ const Slider = (props: SliderProps) => {
                 // Similar invocations of createSendUpdateAction(), but they happen at different
                 // points in time.
                 if (changeDelay) {
-                    if (delayCall.current < 0) {
-                        delayCall.current = window.setTimeout(() => {
+                    if (delayCall.current === null) {
+                        delayCall.current = setTimeout(() => {
                             sendUpdate(
                                 updateVarName,
                                 lastVal.current,
@@ -107,7 +107,7 @@ const Slider = (props: SliderProps) => {
                                 propagate,
                                 valueById ? undefined : getUpdateVar(updateVars, "lov"),
                             );
-                            delayCall.current = -1;
+                            delayCall.current = null;
                         }, changeDelay);
                     }
                 } else {
@@ -119,7 +119,7 @@ const Slider = (props: SliderProps) => {
                         valueById ? undefined : getUpdateVar(updateVars, "lov"),
                     );
                 }
-                delayCall.current = 0;
+                // delayCall.current = null;
             }
         },
         [

@@ -45,10 +45,11 @@ import TaipyStyle from "./TaipyStyle";
 import Toggle from "./Toggle";
 import TimeSelector from "./TimeSelector";
 import TreeView from "./TreeView";
+import { ExtensionConfig } from "../../utils";
 
 const registeredComponents: Record<string, ComponentType<object>> = {};
 
-export const getRegisteredComponents = () => {
+export const getRegisteredComponents = (extensions?: Record<string, ExtensionConfig>) => {
     if (registeredComponents.TreeView === undefined) {
         Object.entries({
             a: Link,
@@ -84,27 +85,37 @@ export const getRegisteredComponents = () => {
             TreeView,
             Progress,
         }).forEach(([name, comp]) => (registeredComponents[name] = comp as ComponentType));
-        if (window.taipyConfig?.extensions) {
-            Object.entries(window.taipyConfig.extensions).forEach(([libName, elements]) => {
-                if (elements && elements.length) {
-                    const libParts = libName.split("/");
-                    const modName = libParts.length > 2 ? libParts[2] : libName;
-                    const mod: Record<string, ComponentType> = window[modName] as Record<string, ComponentType>;
-                    if (mod) {
-                        elements.forEach((elt) => {
-                            const comp = mod[elt];
-                            if (comp) {
-                                registeredComponents[modName + "_" + elt] = comp;
-                            } else {
-                                console.error("module '", modName, "' doesn't export component '", elt, "'");
-                            }
-                        });
-                    } else {
-                        console.error("module '", modName, "' cannot be loaded.");
-                    }
-                }
-            });
-        }
     }
-    return registeredComponents  as Record<string, ComponentType<unknown>>;
+    if (extensions) {
+        Object.entries(extensions).forEach(([libName, description]) => {
+            if (libName) {
+                if (description.loaded && description.components && description.components.length) {
+                    if (registeredComponents[libName + "_" + description.components[0]] === undefined) {
+                        const mod: Record<string, ComponentType> = window[libName] as Record<string, ComponentType>;
+                        if (mod) {
+                            description.components.forEach((elt) => {
+                                const comp = mod[elt];
+                                if (comp) {
+                                    registeredComponents[libName + "_" + elt] = comp;
+                                } else {
+                                    console.error("module '", libName, "' doesn't export component '", elt, "'");
+                                }
+                            });
+                            console.debug("module '", libName, "' is loaded.");
+                        } else {
+                            console.debug("module '", libName, "' cannot be loaded yet.");
+                        }
+                    }
+                } else if (!description.loaded) {
+                    console.debug(
+                        "extension library'",
+                        libName,
+                        "' is not loaded yet, components won't be registered until its script(s) are loaded.",
+                    );
+                }
+            }
+        });
+    }
+
+    return registeredComponents as Record<string, ComponentType<unknown>>;
 };

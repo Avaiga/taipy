@@ -14,7 +14,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import { Theme, Tooltip, alpha } from "@mui/material";
-import { Add, Close, DeleteOutline, EditOutlined } from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import Close from "@mui/icons-material/Close";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import EditOutlined from "@mui/icons-material/EditOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";

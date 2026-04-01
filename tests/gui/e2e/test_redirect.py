@@ -15,7 +15,7 @@ from importlib import util
 import pytest
 
 if util.find_spec("playwright"):
-    from playwright._impl._page import Page
+    from playwright.sync_api import Page
 
 from taipy.gui import Gui
 
@@ -30,6 +30,6 @@ def test_redirect(page: "Page", gui: Gui, helpers):
     helpers.run_e2e(gui)
     page.goto("./")
     page.expect_websocket()
-    page.wait_for_selector("#text1")
-    text1 = page.query_selector("#text1")
-    assert text1.inner_text() == "Redirect Successfully"
+    text = page.locator("#text1")
+    text.wait_for()
+    assert text.inner_text() == "Redirect Successfully"

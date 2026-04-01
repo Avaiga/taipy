@@ -629,10 +629,11 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                 sx={MainBoxSx}
                 id={id}
                 onClick={onFocus}
-                className={`${className} ${getComponentClassName(props.children)}`}
+                className={`${className} ${getComponentClassName(props.children)} taipy-expandable`}
             >
                 <Accordion defaultExpanded={expanded} expanded={userExpanded} onChange={onExpand} disabled={!valid}>
                     <AccordionSummary
+                        component="div"
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >

@@ -34,7 +34,7 @@ interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
 
 const unsetWeightSx = { fontWeight: "unset" };
 
-const Markdown = lazy(() => import("react-markdown"));
+const Markdown = lazy(() => import(/* webpackChunkName: "react-markdown" */"react-markdown"));
 
 const Field = (props: TaipyFieldProps) => {
     const { id, dataType, format, defaultValue, raw } = props;

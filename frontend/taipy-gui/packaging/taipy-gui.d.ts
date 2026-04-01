@@ -221,8 +221,54 @@ export interface FileDownloadProps {
     onAction?: string;
     context?: string;
 }
+interface StyleKit {
+    // Primary and secondary colors
+    colorPrimary: string;
+    colorSecondary: string;
+    // Contextual color
+    colorError: string;
+    colorWarning: string;
+    colorSuccess: string;
+    // Background and elevation color for LIGHT MODE
+    colorBackgroundLight: string;
+    colorPaperLight: string;
+    // Background and elevation color for DARK MODE
+    colorBackgroundDark: string;
+    colorPaperDark: string;
+    // DEFINING FONTS
+    // Set main font family
+    fontFamily: string;
+    // DEFINING ROOT STYLES
+    // Set root margin
+    rootMargin: string;
+    // DEFINING SHAPES
+    // Base border radius in px
+    borderRadius: number;
+    // DEFINING MUI COMPONENTS STYLES
+    // Height in css size unit for inputs and buttons
+    inputButtonHeight: string;
+}
+export interface ExtensionConfig {
+    components?: string[];
+    scripts?: string[];
+    styles?: string[];
+    loaded?: boolean;
+}
+export interface TaipyConfig {
+    darkMode: boolean;
+    themes: Record<string, Record<string, unknown>>;
+    timeZone: string;
+    extensions: Record<string, ExtensionConfig>;
+    stylekit?: StyleKit;
+    baseURL: string;
+    waterMark?: string;
+    rootMargin?: string;
+    cssVars?: string;
+    version?: string;
+}
+
 export declare const INITIAL_STATE: TaipyState;
-export declare const taipyInitialize: (initialState: TaipyState) => TaipyState;
+export declare const taipyInitialize: (initialState: TaipyState, config: TaipyConfig, serverUrl?: string) => TaipyState;
 export declare const initializeWebSocket: (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>) => void;
 export declare const taipyReducer: (state: TaipyState, baseAction: TaipyBaseAction) => TaipyState;
 /**
@@ -490,8 +536,9 @@ export interface LoginProps extends TaipyBaseProps {
     defaultMessage?: string;
     labels?: string;
 }
-export declare const Login: (props: LoginProps) => import("react/jsx-runtime").JSX.Element | null;
-export declare const Router: () => import("react/jsx-runtime").JSX.Element;
+export declare const Login: (props: LoginProps) => import("react/jsx-runtime").JSX.Element;
+
+export declare const Router = () => import("react/jsx-runtime").JSX.Element;
 export interface TableProps extends TaipyPaginatedTableProps {
     autoLoading?: boolean;
 }
@@ -590,6 +637,12 @@ interface TaipyStore {
     state: TaipyState;
     /** The React *dispatch* function. */
     dispatch: Dispatch<TaipyBaseAction>;
+    /** The URL of the Taipy server. */
+    serverUrl?: string;
+    /** The Taipy configuration. */
+    config?: TaipyConfig;
+    /** The Taipy version. */
+    version?: string;
 }
 /**
  * The Taipy-specific React context.
@@ -738,7 +791,7 @@ export declare const uploadFile: (
 ) => Promise<string>;
 export declare const emptyArray: never[];
 export declare const ErrorFallback: (props: FallbackProps) => import("react/jsx-runtime").JSX.Element;
-export declare const getRegisteredComponents: () => Record<string, ComponentType<unknown>>;
+export declare const getRegisteredComponents: (extensions?: Record<string, ExtensionConfig>) => Record<string, ComponentType<unknown>>;
 export declare const unregisteredRender: (tagName?: string, error?: string) => import("react/jsx-runtime").JSX.Element;
 export declare const renderError: (props: { error: string }) => import("react/jsx-runtime").JSX.Element;
 

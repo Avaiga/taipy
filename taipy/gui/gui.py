@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import contextlib
 import importlib
+import itertools
 import json
 import math
 import os
@@ -163,6 +164,7 @@ class Gui:
     __ON_INIT_NAME = "TaipyOnInit"
     __ARG_CLIENT_ID = "client_id"
     _INIT_URL = "taipy-init"
+    _CONFIG_URL = "taipy-config"
     _JSX_URL = "taipy-jsx"
     _CONTENT_ROOT = "taipy-content"
     _UPLOAD_URL = "taipy-uploads"
@@ -185,11 +187,12 @@ class Gui:
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
     __reserved_routes: list[str] = [
+        _CONFIG_URL,
+        _CONTENT_ROOT,
+        _EXTENSION_ROOT,
         _INIT_URL,
         _JSX_URL,
-        _CONTENT_ROOT,
         _UPLOAD_URL,
-        _EXTENSION_ROOT,
         _USER_CONTENT_URL,
     ]
 
@@ -214,6 +217,7 @@ class Gui:
         libraries: t.Optional[list[ElementLibrary]] = None,
         script_paths: t.Union[str, Path, list[t.Union[str, Path]], None] = None,
         server: t.Union[str, t.Any] = "flask",
+        init_library_names: t.Optional[list[str]] = None,
     ):
         """Initialize a new Gui instance.
 
@@ -260,6 +264,8 @@ class Gui:
             server (Union[str, Any]): The server to use for the application.<br/>
                 It can be a string representing the type of the server or a server instance.<br/>
                 The default value is `flask`.<br/>
+            init_library_names (Optional[List[str]]): An optional list of library names that will be loaded.
+                All libraries are loaded if not present.
         """
         # store suspected local containing frame
         self.__frame = t.cast(FrameType, t.cast(FrameType, currentframe()).f_back)
@@ -463,6 +469,7 @@ class Gui:
         if libraries is not None:
             for library in libraries:
                 Gui.add_library(library)
+        self.__init_library_names = init_library_names
 
     def __load_scripts(self, script_paths: t.Union[str, Path, list[t.Union[str, Path]], None]):
         if script_paths is None:
@@ -2739,18 +2746,44 @@ class Gui:
             "timeZone": self._config.get_time_zone(),
             "darkMode": self._get_config("dark_mode", True),
             "baseURL": self._config._get_config("base_url", "/"),
+            "cssVars": self._get_css_vars(),
+            "waterMark": self._get_config("watermark", None),
+            "version": self._get_version(),
         }
+        if rootMargin := self._get_config("margin", None):
+            config["rootMargin"] = rootMargin
         if themes := self._get_themes():
             config["themes"] = themes
         if len(self.__extensions):
+            scripts = self.__get_scripts()
+            styles = self.__get_styles()
             config["extensions"] = {}
+            no_ext = {}
+            if ne_script := scripts.get("", []):
+                no_ext["scripts"] = ne_script
+            if ne_style := styles.get("", []):
+                no_ext["styles"] = ne_style
+            if no_ext:
+                config["extensions"][""] = no_ext
             for libs in self.__extensions.values():
                 for lib in libs:
-                    config["extensions"][f"./{Gui._EXTENSION_ROOT}/{lib.get_js_module_name()}"] = [
+                    name = lib.get_js_module_name()
+                    if self.__init_library_names is not None and name not in self.__init_library_names:
+                        continue
+                    ext = {}
+                    comps = [
                         e._get_js_name(n)
                         for n, e in lib.get_elements().items()
                         if isinstance(e, Element) and not e._is_server_only()
                     ]
+                    if comps:
+                        ext["components"] = comps
+                    if ext_scripts := scripts.get(name, []):
+                        ext["scripts"] = ext_scripts
+                    if ext_styles := styles.get(name, []):
+                        ext["styles"] = ext_styles
+                    if ext:
+                        config["extensions"][name] = ext
         if stylekit := self._get_config("stylekit", _default_stylekit):
             config["stylekit"] = {_to_camel_case(k): v for k, v in stylekit.items()}
         return config
@@ -2760,7 +2793,7 @@ class Gui:
         if stylekit := self._get_config("stylekit", _default_stylekit):
             for k, v in stylekit.items():
                 css_vars.append(f"--{k.replace('_', '-')}:{_get_css_var_value(v)};")
-        return " ".join(css_vars)
+        return "".join(css_vars)
 
     def __init_server(self):
         app_config = self._config.config
@@ -2824,6 +2857,38 @@ class Gui:
             self.__bind_local_func("on_status")
             self.__bind_local_func("on_user_content")
 
+    def __get_scripts(self) -> dict[str, list[str]]:
+        scripts: dict[str, list[str]] = {"": []}
+        for name, libs in Gui.__extensions.items():
+            for lib in libs:
+                if isinstance(lib, ElementLibrary):
+                    scripts[lib.get_js_module_name()] = [
+                        s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+                        for s in lib._do_get_relative_paths(lib.get_scripts())
+                    ]
+        if self.__script_files:
+            scripts[""].extend(self.__script_files)
+
+        return scripts
+
+    def __get_styles(self) -> dict[str, list[str]]:
+        styles: dict[str, list[str]] = {"": []}
+        for name, libs in Gui.__extensions.items():
+            for lib in libs:
+                if isinstance(lib, ElementLibrary):
+                    styles[lib.get_js_module_name()] = [
+                        s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
+                        for s in lib._do_get_relative_paths(lib.get_styles())
+                    ]
+        if self._get_config("stylekit", True):  # noqa codespell
+            styles[""].append("stylekit/stylekit.css")
+        else:
+            styles[""].append(Gui.__ROBOTO_FONT)
+        if self.__css_file:
+            styles[""].append(f"{self.__css_file}")
+
+        return styles
+
     def __register_blueprint(self):
         # add en empty main page if it is not defined
         if Gui.__root_page_name not in self._config.routes:
@@ -2833,29 +2898,9 @@ class Gui:
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 
-        scripts = [
-            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
-            for name, libs in Gui.__extensions.items()
-            for lib in libs
-            for s in (lib._do_get_relative_paths(lib.get_scripts()))
-        ]
-        styles = [
-            s if bool(urlparse(s).netloc) else f"{Gui._EXTENSION_ROOT}/{name}/{s}{lib.get_query(s)}"
-            for name, libs in Gui.__extensions.items()
-            for lib in libs
-            for s in (lib._do_get_relative_paths(lib.get_styles()))
-        ]
-        if self._get_config("stylekit", True):  # noqa codespell
-            styles.append("stylekit/stylekit.css")
-        else:
-            styles.append(Gui.__ROBOTO_FONT)
-        if self.__css_file:
-            styles.append(f"{self.__css_file}")
-
-        if self.__script_files:
-            scripts.extend(self.__script_files)
-
-        self._server.register_routes(styles, scripts)
+        self._server.register_routes(
+            list(itertools.chain(*self.__get_styles().values())), list(itertools.chain(*self.__get_scripts().values()))
+        )
 
     def _get_accessor(self):
         if self.__accessors is None:
@@ -3104,9 +3149,7 @@ class Gui:
     @staticmethod
     def _add_event_listener(
         event_name: str,
-        listener: t.Union[
-            t.Callable[[str, dict[str, t.Any]], None], t.Callable[[State, str, dict[str, t.Any]], None]
-        ],
+        listener: t.Union[t.Callable[[str, dict[str, t.Any]], None], t.Callable[[State, str, dict[str, t.Any]], None]],
         with_state: t.Optional[bool] = False,
     ):
         _Hooks()._add_event_listener(event_name, listener, with_state)

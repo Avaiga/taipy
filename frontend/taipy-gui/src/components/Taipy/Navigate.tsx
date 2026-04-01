@@ -17,7 +17,6 @@ import { useLocation, useNavigate } from "react-router";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createNavigateAction } from "../../context/taipyReducers";
-import { getBaseURL } from "../../utils";
 
 interface NavigateProps {
     to?: string;
@@ -27,15 +26,16 @@ interface NavigateProps {
 }
 
 const Navigate = ({ to, params, tab, force }: NavigateProps) => {
-    const { dispatch, state } = useContext(TaipyContext);
+    const { dispatch, state, serverUrl, config } = useContext(TaipyContext);
     const navigate = useNavigate();
     const location = useLocation();
     const SPECIAL_PARAMS = ["tp_reload_all", "tp_reload_same_route_only", "tprh"];
 
     useEffect(() => {
         if (to) {
+            const baseUrl = config?.baseURL || "/";
             const tos = to === "/" ? to : "/" + to;
-            const navigatePath = getBaseURL() + tos.slice(1)
+            const navigatePath = baseUrl + tos.slice(1);
             const filteredParams = params
                 ? Object.keys(params).reduce((acc, key) => {
                       if (!SPECIAL_PARAMS.includes(key)) {
@@ -68,7 +68,7 @@ const Navigate = ({ to, params, tab, force }: NavigateProps) => {
                     // Handle Resource Handler Id
                     const tprh = params?.tprh;
                     if (tprh !== undefined) {
-                        axios.post(`taipy-rh`, { tprh, is_secure: window.location.protocol.includes("https") }).then(() => {
+                        axios.post(serverUrl ? `${serverUrl}${baseUrl}taipy-rh` : `taipy-rh`, { tprh, is_secure: window.location.protocol.includes("https") }).then(() => {
                             localStorage.setItem("tprh", tprh);
                             navigate(0);
                         }).catch((error) => {

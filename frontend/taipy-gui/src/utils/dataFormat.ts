@@ -35,7 +35,7 @@ export const parseData = (data: Record<string, unknown>): Promise<Record<string,
         const orient = data.orient;
         const pData = multi ? (data.data as Array<unknown>) : [data.data];
         return new Promise((resolve, reject) => {
-            import("apache-arrow").then(({tableFromIPC}) => {
+            import(/* webpackChunkName: "apache-arrow" */"apache-arrow").then(({tableFromIPC}) => {
                 const res = pData.map((d) => {
                     const arrowData = tableFromIPC(new Uint8Array(d as ArrayBuffer));
                     const tableHeading = arrowData.schema.fields.map((f) => f.name);

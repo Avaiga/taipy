@@ -25,6 +25,7 @@ const dispatch = jest.fn();
 
 beforeEach(() => {
     state = INITIAL_STATE;
+    state.theme.palette = {} as any;
     state.theme.palette.mode = "light";
     dispatch.mockClear();
 });

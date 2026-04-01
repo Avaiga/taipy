@@ -132,7 +132,7 @@ const getFilterDesc = (
                 params: columns[colId].params,
             } as FilterDesc;
         } catch (e) {
-            console.info("Could not parse value ", val, e);
+            console.info("Could not parse value", val, e);
         }
     }
 };
