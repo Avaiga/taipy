@@ -20,8 +20,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import TimeSelector from "./TimeSelector";
-// @ts-ignore
-import { getClientServerTimeZoneOffset } from "../../utils";
 
 jest.mock("../../utils", () => {
     const originalModule = jest.requireActual("../../utils");
@@ -55,7 +53,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-    // @ts-ignore
+    // @ts-expect-error
     delete window.matchMedia;
 });
 

@@ -23,8 +23,6 @@ import { stringIcon } from "../../utils/icon";
 import { TableValueType } from "./tableUtils";
 import { LoVElt } from "./lovUtils";
 
-// @ts-ignore
-import { toDataUrl } from "../../utils/image";
 jest.mock('../../utils/image', () => ({
     toDataUrl: (url: string) => new Promise((resolve) => resolve(url)),
   }));
