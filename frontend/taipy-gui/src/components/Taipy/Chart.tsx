@@ -57,7 +57,7 @@ import { ColumnDesc } from "./tableUtils";
 import { getComponentClassName } from "./TaipyStyle";
 import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
 
-const Plot = lazy(() => import(/* webpackChunkName: "react-plotly" */"react-plotly.js"));
+const Plot = lazy(() => import(/* webpackChunkName: "react-plotly" */ "react-plotly.js"));
 
 interface PlotlyObject {
     animate: (
@@ -595,12 +595,11 @@ const Chart = (props: ChartProp) => {
             if (!lData || isDataRefresh(lData) || !Object.keys(lData).length) {
                 return currentData;
             }
-            const dtKey = getDataKey(
-                idx < config.columns?.length ? config.columns[idx] : undefined,
-                config.decimators,
-            )[1];
-            if (!dataKey.startsWith(dtKey)) {
-                return currentData;
+            if (idx < config.columns?.length && config.columns[idx]) {
+                const dtKey = getDataKey(config.columns[idx], config.decimators)[1];
+                if (!dataKey.startsWith(dtKey)) {
+                    return currentData;
+                }
             }
             changed = true;
             const datum = lData[dataKey];
