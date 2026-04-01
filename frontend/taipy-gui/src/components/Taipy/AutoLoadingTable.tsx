@@ -81,6 +81,7 @@ import {
 } from "./tableUtils";
 import { getComponentClassName } from "./TaipyStyle";
 import { getCssSize, getSuffixedClassNames, getUpdateVar } from "./utils";
+import { TableBody } from "@mui/material";
 
 interface RowData {
     colsOrder: string[];
@@ -423,7 +424,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         sortable,
     ]);
 
-    const boxBodySx = useMemo(() => ({ height: height }), [height]);
+    const boxBodySx = useMemo(() => ({ height: height, display: "flex" }), [height]);
 
     useEffect(() => {
         selected.length && listRef.current?.scrollToRow({ index: selected[0] });
@@ -826,7 +827,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                 })}
                             </TableHead>
                         </MuiTable>
-                        <Box sx={boxBodySx}>
+                        <TableBody component="div" sx={boxBodySx}>
                             <List
                                 rowCount={rowCount}
                                 rowHeight={getRowHeight(size)}
@@ -835,7 +836,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                 rowComponent={Row}
                                 rowProps={rowData}
                             ></List>
-                        </Box>
+                        </TableBody>
                     </TableContainer>
                 </Tooltip>
             </Paper>
