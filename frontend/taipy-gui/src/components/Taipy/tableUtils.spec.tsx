@@ -76,8 +76,7 @@ describe("Editable cell", () => {
         });
     });
     describe("Editable mode", () => {
-        // @ts-ignore
-        const onValidation = (value: RowValue, rowIndex: number, colName: string, userValue: string, tz?: string) => {};
+        const onValidation = (_value: RowValue, _rowIndex: number, _colName: string, _userValue: string, _tz?: string) => {};
         it("show a boolean as a switch", async () => {
             const { getByRole, getByTestId } = render(
                 <EditableCell
