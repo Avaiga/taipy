@@ -79,6 +79,7 @@ jobs:
           working-directory: "./frontend/taipy-gui"
           skip-step: install
           annotations: failed-tests
+          output: comment, report-markdown
           # use if you want to avoid errors on the base branch coverage (ie no coverage and no comparison but as it fails anyway as it uses npm install)
           # base-coverage-file: ./report.json
 
@@ -167,5 +168,6 @@ jobs:
           working-directory: "./frontend/taipy"
           skip-step: install
           annotations: failed-tests
+          output: comment, report-markdown
           # use if you want to avoid errors on the base branch coverage (ie no coverage and no comparison but as it fails anyway as it uses npm install)
           # base-coverage-file: ./report.json
