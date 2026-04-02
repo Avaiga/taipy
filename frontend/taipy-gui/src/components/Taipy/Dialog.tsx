@@ -30,7 +30,8 @@ import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../..
 import { getComponentClassName } from "./TaipyStyle";
 
 interface DialogProps extends TaipyActiveProps {
-    title: string;
+    title?: string;
+    defaultTitle?: string;
     onAction?: string;
     closeLabel?: string;
     labels?: string;
@@ -110,7 +111,7 @@ const Dialog = (props: DialogProps) => {
                 dispatch(createSendActionNameAction(id, module, onAction, parseInt(idx, 10)));
             }
         },
-        [dispatch, id, onAction, module, localAction]
+        [dispatch, id, onAction, module, localAction],
     );
 
     const labels = useMemo(() => {
