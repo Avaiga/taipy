@@ -88,12 +88,12 @@ class _Renderer(Page, ABC):
             encoding = "utf-8"
             if self._encoding is not None:
                 encoding = self._encoding
-                _TaipyLogger._get_logger().info(f"'{encoding}' encoding was used to decode file '{content}'.")
+                _TaipyLogger._get_logger().info("'%s' encoding was used to decode file '%s'.", encoding, content)
             elif (detected_encoding := t.cast(str, detect(file_content).get("encoding"))) is not None:
                 encoding = detected_encoding
-                _TaipyLogger._get_logger().info(f"Detected '{encoding}' encoding for file '{content}'.")
+                _TaipyLogger._get_logger().info("Detected '%s' encoding for file '%s'.", encoding, content)
             else:
-                _TaipyLogger._get_logger().info(f"Using default '{encoding}' encoding for file '{content}'.")
+                _TaipyLogger._get_logger().info("Using default '%s' encoding for file '%s'.", encoding, content)
             self._content = self.__sanitize_content(file_content.decode(encoding))
             # Save file path for error handling
             self._filepath = content

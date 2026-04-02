@@ -59,7 +59,8 @@ class _DataScopes:
             return self.__scopes[_DataScopes._GLOBAL_ID], self.__scopes_metadata[_DataScopes._GLOBAL_ID]
         if client_id not in self.__scopes:
             _TaipyLogger._get_logger().debug(
-                f"Session id {client_id} not found in data scope. Taipy will automatically create a scope for this session id but you may have to reload your page."  # noqa: E501
+                "Session id '%s' not found in data scope. Taipy will automatically create a scope for this session id but you may have to reload your page.",  # noqa: E501
+                client_id,
             )
             self.create_scope(client_id)
         return self.__scopes[client_id], self.__scopes_metadata[client_id]

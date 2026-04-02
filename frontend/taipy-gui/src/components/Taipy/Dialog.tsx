@@ -81,7 +81,6 @@ const popoverAnchor: PopoverOrigin = {
 const Dialog = (props: DialogProps) => {
     const {
         id,
-        title,
         defaultOpen,
         open,
         onAction = "",
@@ -100,6 +99,7 @@ const Dialog = (props: DialogProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const refId = useDynamicProperty(props.refId, props.defaultRefId, undefined);
+    const title = useDynamicProperty(props.title, props.defaultTitle, "");
 
     const handleAction = useCallback(
         (evt: MouseEvent<HTMLElement>) => {

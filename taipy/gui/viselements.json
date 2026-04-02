@@ -1798,6 +1798,12 @@
                         "doc": "If True, the dialog is visible. If False, it is hidden."
                     },
                     {
+                        "name": "title",
+                        "type": "dynamic(str)",
+                        "default_value": "None",
+                        "doc": "The title of the dialog, displayed at the top of the dialog."
+                    },
+                    {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
                         "doc": "A function or the name of a function triggered when a button is pressed.<br/>This function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the dialog if it has one.</li><li><i>payload</i> (dict): the details on this callback's invocation.<br/>This dictionary has the following keys:\n<ul><li><i>action:</i>: the name of the action that triggered this callback.</li><li><i>args:</i>: a list where the first element contains the index of the selected label.</li></ul></li></ul>",

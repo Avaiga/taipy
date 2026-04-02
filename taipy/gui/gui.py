@@ -1195,7 +1195,7 @@ class Gui:
         in_custom_page_context = _Hooks()._is_in_custom_page_context()
         for _var in modified_vars:
             if not self.__is_front_end_variable(_var) and not in_custom_page_context:
-                _TaipyLogger._get_logger().debug(f"Skipping variable '{_var}' not in front-end.")
+                _TaipyLogger._get_logger().debug("Skipping variable '%s' not in front-end.", _var)
                 continue
             newvalue = values.get(_var)
             if isinstance(newvalue, (_TaipyData)) or (
@@ -2826,7 +2826,7 @@ class Gui:
         if hasattr(self, "_ngrok"):
             # Keep the ngrok instance if token has not changed
             if app_config.get("ngrok_token") == self._ngrok[1]:
-                _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
+                _TaipyLogger._get_logger().info(" * NGROK Public Url: %s", self._ngrok[0].public_url)
                 return
             # Close the old tunnel so new tunnel can open for new token
             ngrok.disconnect(self._ngrok[0].public_url)  # type: ignore[reportPossiblyUnboundVariable]
@@ -2835,7 +2835,7 @@ class Gui:
                 raise RuntimeError("Cannot use ngrok as pyngrok package is not installed.")
             ngrok.set_auth_token(token)  # type: ignore[reportPossiblyUnboundVariable]
             self._ngrok = (ngrok.connect(app_config.get("port"), "http"), token)  # type: ignore[reportPossiblyUnboundVariable]
-            _TaipyLogger._get_logger().info(f" * NGROK Public Url: {self._ngrok[0].public_url}")
+            _TaipyLogger._get_logger().info(" * NGROK Public Url: %s", self._ngrok[0].public_url)
 
     def __bind_default_function(self):
         with self.get_app_context():
