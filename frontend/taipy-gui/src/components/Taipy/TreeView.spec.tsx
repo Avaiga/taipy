@@ -121,7 +121,7 @@ describe("TreeView Component", () => {
     });
     //multiple
     it("selects 2 items", async () => {
-        const { queryAllByRole } = render(<TreeView lov={lov} multiple={true} value={["id1", "id2"]} />);
+        render(<TreeView lov={lov} multiple={true} value={["id1", "id2"]} />);
         expect(document.querySelectorAll(".Mui-selected")).toHaveLength(2);
     });
     it("dispatch a well formed message for multiple", async () => {

@@ -21,9 +21,8 @@ import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
 import { TaipyContext } from "../../context/taipyContext";
 import { stringIcon } from "../../utils/icon";
 import { TableValueType } from "./tableUtils";
-
-import { toDataUrl } from "../../utils/image";
 import { LoVElt } from "./lovUtils";
+
 jest.mock('../../utils/image', () => ({
     toDataUrl: (url: string) => new Promise((resolve) => resolve(url)),
   }));

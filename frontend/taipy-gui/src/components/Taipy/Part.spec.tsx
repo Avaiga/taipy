@@ -14,7 +14,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import userEvent from "@testing-library/user-event";
 
 import Part from "./Part";
 import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";

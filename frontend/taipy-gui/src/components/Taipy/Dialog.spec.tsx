@@ -62,7 +62,7 @@ describe("Dialog Component", () => {
         expect(divs[0].childElementCount).toBe(0);
     });
     it("displays the right info for class", async () => {
-        const wrapper = render(
+        render(
             <HelmetProvider>
                 <Dialog title="Dialog-Test-Title" page="page" open={true} className="taipy-dialog" />
             </HelmetProvider>
@@ -279,8 +279,8 @@ describe("Dialog Component", () => {
                 <div>Outside</div>
             </>
         );
-        const Hello = getByText("Hello");
-        const Outside = getByText("Outside");
+        getByText("Hello");
+        getByText("Outside");
         await userEvent.keyboard("{Escape}")
         expect(localActionMock).toHaveBeenCalledWith(-1);
     });

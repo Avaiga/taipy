@@ -80,8 +80,8 @@ describe("NavBar Component", () => {
         const { getByText, queryAllByRole } = render(<TaipyContext.Provider value={{ state, dispatch }}>
                 <BrowserRouter><NavBar lov={undefined as unknown as LoV}/></BrowserRouter>
             </TaipyContext.Provider>);
-        const elt = getByText("loc1");
-        const elt2 = getByText("loc2");
+        getByText("loc1");
+        getByText("loc2");
         expect(queryAllByRole("tab")).toHaveLength(2);
     });
 });

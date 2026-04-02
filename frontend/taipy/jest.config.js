@@ -25,6 +25,7 @@ module.exports = {
         "./test-config/nanoid.js",
         "./test-config/guiMock.js"
     ],
+    coverageProvider: "v8",
     coverageReporters: ["json", "html", "text"],
     modulePathIgnorePatterns: ["<rootDir>/packaging/"],
     moduleNameMapper: {},
