@@ -30,7 +30,8 @@ import { useClassNames, useDispatch, useDynamicProperty, useModule } from "../..
 import { getComponentClassName } from "./TaipyStyle";
 
 interface DialogProps extends TaipyActiveProps {
-    title: string;
+    title?: string;
+    defaultTitle?: string;
     onAction?: string;
     closeLabel?: string;
     labels?: string;
@@ -81,7 +82,6 @@ const popoverAnchor: PopoverOrigin = {
 const Dialog = (props: DialogProps) => {
     const {
         id,
-        title,
         defaultOpen,
         open,
         onAction = "",
@@ -100,6 +100,7 @@ const Dialog = (props: DialogProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const refId = useDynamicProperty(props.refId, props.defaultRefId, undefined);
+    const title = useDynamicProperty(props.title, props.defaultTitle, "");
 
     const handleAction = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
@@ -110,7 +111,7 @@ const Dialog = (props: DialogProps) => {
                 dispatch(createSendActionNameAction(id, module, onAction, parseInt(idx, 10)));
             }
         },
-        [dispatch, id, onAction, module, localAction]
+        [dispatch, id, onAction, module, localAction],
     );
 
     const labels = useMemo(() => {

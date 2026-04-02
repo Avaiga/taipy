@@ -86,12 +86,13 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
         library_name = library.get_name()
         if self.__module is None:
             _TaipyLogger._get_logger().info(
-                f"Python API for extension library '{library_name}' is not available. To fix this, import 'taipy.gui.builder' before importing the extension library."  # noqa: E501
+                "Python API for extension library '%s' is not available. To fix this, import 'taipy.gui.builder' before importing the extension library.",  # noqa: E501
+                library_name,
             )
             return
         library_module = sys.modules[library.__module__]
         if not library_module.__package__:
-            _TaipyLogger._get_logger().info(f"Cannot locate package for extension library `{library_name}`.")
+            _TaipyLogger._get_logger().info("Cannot locate package for extension library '%s'.", library_name)
             return
         package_module = sys.modules[library_module.__package__]
         for element_name, element in library.get_elements().items():
@@ -105,7 +106,9 @@ class _ElementApiGenerator(object, metaclass=_Singleton):
             # Allow element to be accessed from this module (taipy.gui.builder)
             if hasattr(self.__module, element_name):
                 _TaipyLogger._get_logger().info(
-                    f"Can't add element `{element_name}` of library `{library_name}` to the root of Builder API as another element with the same name already exists."  # noqa: E501
+                    "Can't add element '%s' of library '%s' to the root of Builder API as another element with the same name already exists.",  # noqa: E501
+                    element_name,
+                    library_name,
                 )
             else:
                 setattr(self.__module, element_name, element_api)
