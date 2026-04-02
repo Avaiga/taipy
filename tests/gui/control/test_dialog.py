@@ -22,7 +22,7 @@ def test_dialog_md_1(gui: Gui, helpers):
         "<Dialog",
         'onAction="validate_action"',
         'page="page_test"',
-        'title="This is a Dialog"',
+        'defaultTitle="This is a Dialog"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
@@ -33,11 +33,13 @@ def test_dialog_md_2(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     partial = gui.add_partial(Markdown("# A partial"))  # noqa: F841
     dialog_open = False  # noqa: F841
-    md_string = "<|dialog|title=Another Dialog|open={dialog_open}|partial={partial}|on_action=validate_action|>"
+    title = "Another Dialog"  # noqa: F841
+    md_string = "<|dialog|title={title}|open={dialog_open}|partial={partial}|on_action=validate_action|>"
     expected_list = [
         "<Dialog",
         'page="TaiPy_partials',
-        'title="Another Dialog"',
+        'defaultTitle="Another Dialog"',
+        'title="{!',
         'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
@@ -54,7 +56,7 @@ def test_dialog_labels_md(gui: Gui, helpers):
     expected_list = [
         "<Dialog",
         'page="page_test"',
-        'title="Another Dialog"',
+        'defaultTitle="Another Dialog"',
         'labels="[&quot;Cancel&quot;, &quot;Validate&quot;]"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'closeLabel="MYClose"',
@@ -72,7 +74,7 @@ def test_dialog_html_1(gui: Gui, helpers):
     expected_list = [
         "<Dialog",
         'page="page1"',
-        'title="This is a Dialog"',
+        'defaultTitle="This is a Dialog"',
         'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
@@ -90,7 +92,7 @@ def test_dialog_html_2(gui: Gui, helpers):
     expected_list = [
         "<Dialog",
         'page="TaiPy_partials',
-        'title="Another Dialog"',
+        'defaultTitle="Another Dialog"',
         'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
@@ -107,7 +109,7 @@ def test_dialog_labels_html(gui: Gui, helpers):
     expected_list = [
         "<Dialog",
         'page="page_test"',
-        'title="Another Dialog"',
+        'defaultTitle="Another Dialog"',
         'labels="[&quot;Cancel&quot;, &quot;Validate&quot;]"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
