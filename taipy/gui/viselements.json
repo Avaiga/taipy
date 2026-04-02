@@ -1801,7 +1801,7 @@
                         "name": "title",
                         "type": "dynamic(str)",
                         "default_value": "None",
-                        "doc": "The title of the dialog, displayed at the top of the dialog."
+                        "doc": "The title displayed at the top of the dialog. If None, no title is shown."
                     },
                     {
                         "name": "on_action",
