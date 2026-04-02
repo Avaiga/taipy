@@ -44,7 +44,7 @@ class _Hooks(object, metaclass=_Singleton):
                         raise Exception(f"'{name}' hook is not callable")
                     res = func(*args, **kwargs)
                 except Exception as e:
-                    _TaipyLogger._get_logger().exception("Error while calling hook '%s':", name)
+                    _TaipyLogger._get_logger().exception("Error while calling hook '%s':", name, exc_info=e)
                     return
                 # check if the hook returns True -> stop the chain
                 if res is True:
