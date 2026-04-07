@@ -36,7 +36,9 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
 
 
 def _get_columns_dict_from_list(
-    col_list: t.Union[t.List[str], t.Tuple[str]], cols_description: t.Dict[str, t.Dict[str, str]]
+    col_list: t.Union[t.List[str], t.Tuple[str]],
+    cols_description: t.Dict[str, t.Dict[str, str]],
+    no_warning: t.Optional[bool] = False,
 ):
     col_dict: t.Dict[str, t.Dict[str, t.Any]] = {}
     idx = 0
@@ -46,7 +48,8 @@ def _get_columns_dict_from_list(
             col_dict[col]["index"] = idx
             idx += 1
         elif col and col not in cols_description:
-            _warn(f'Column "{col}" is not present. Available columns: {list(cols_description)}.')
+            if not no_warning:
+                _warn(f'Column "{col}" is not present. Available columns: {list(cols_description)}.')
     return col_dict
 
 
@@ -56,15 +59,18 @@ def _get_columns_dict(  # noqa: C901
     date_format: t.Optional[str] = None,
     number_format: t.Optional[str] = None,
     opt_columns: t.Optional[t.Set[str]] = None,
+    no_warning: t.Optional[bool] = False,
 ):
     if cols_description is None:
         return None
     col_types_keys = [str(c) for c in cols_description.keys()]
     col_dict: t.Optional[dict] = None
     if isinstance(columns, str):
-        col_dict = _get_columns_dict_from_list([s.strip() for s in columns.split(";")], cols_description)
+        col_dict = _get_columns_dict_from_list(
+            [s.strip() for s in columns.split(";")], cols_description, no_warning=no_warning
+        )
     elif isinstance(columns, (list, tuple)):
-        col_dict = _get_columns_dict_from_list(columns, cols_description)
+        col_dict = _get_columns_dict_from_list(columns, cols_description, no_warning=no_warning)
     elif isinstance(columns, _MapDict):
         col_dict = columns._dict.copy()
     elif isinstance(columns, dict):

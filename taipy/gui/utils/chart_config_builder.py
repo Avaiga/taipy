@@ -208,6 +208,7 @@ def _build_chart_config(  # noqa: C901
             list(columns[idx] if idx < len(columns) else columns[0]),
             cols_description,
             opt_columns=opt_cols[idx] if idx < len(opt_cols) else opt_cols[0],
+            no_warning= idx > 0
         ):
             col_dicts.append(add_col_dict)
 
