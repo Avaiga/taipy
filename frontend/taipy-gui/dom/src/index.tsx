@@ -18,5 +18,5 @@ import { Router } from "taipy-gui";
 const container = document.getElementById("root");
 if (container) {
     const root = createRoot(container);
-    root.render(<Router />);
+    root.render(<React.StrictMode><Router /></React.StrictMode>);
 }
