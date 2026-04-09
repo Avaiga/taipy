@@ -14,6 +14,7 @@
 const webpack = require("webpack");
 const path = require("path");
 const ESLintPlugin = require("eslint-webpack-plugin");
+const { defineReactCompilerLoaderOption, reactCompilerLoader } = require("react-compiler-webpack");
 require("dotenv").config();
 
 module.exports = (_env, options) => {
@@ -44,9 +45,17 @@ module.exports = (_env, options) => {
         module: {
             rules: [
                 {
-                    test: /\.tsx?$/,
-                    use: "ts-loader",
+                    test: /\.tsx?$/i,
                     exclude: /node_modules/,
+                    use: [
+                        {
+                            loader: reactCompilerLoader,
+                            options: defineReactCompilerLoaderOption({
+                                // React Compiler options goes here
+                            }),
+                        },
+                        { loader: "ts-loader" },
+                    ],
                 },
             ],
         },
@@ -57,7 +66,7 @@ module.exports = (_env, options) => {
                 // If this file is moved, this path must be updated
                 manifest: path.resolve(
                     __dirname,
-                    `${process.env.TAIPY_DIR}/taipy/gui/webapp/taipy-gui-deps-manifest.json`
+                    `${process.env.TAIPY_DIR}/taipy/gui/webapp/taipy-gui-deps-manifest.json`,
                 ),
                 name: "TaipyGuiDependencies",
             }),

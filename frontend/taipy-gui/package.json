@@ -94,6 +94,7 @@
         "@typescript-eslint/parser": "^8.5.0",
         "add-asset-html-webpack-plugin": "^6.0.0",
         "autoprefixer": "^10.4.0",
+        "babel-plugin-react-compiler": "^1.0.0",
         "copy-webpack-plugin": "^14.0.0",
         "cross-env": "^10.0.0",
         "css-loader": "^7.1.0",
