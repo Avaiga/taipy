@@ -38,7 +38,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+import { DateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
 
 import { FormatConfig } from "../../context/taipyReducers";
@@ -395,7 +395,7 @@ export const getColumnHeader = (columns: Record<string, ColumnDesc>, columnKey: 
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
-const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps;
+const textFieldProps = { textField: { margin: "dense" } } as DateTimePickerSlotProps<boolean>;
 
 const filter = createFilterOptions<string>();
 const getOptionKey = (option: string) => (Array.isArray(option) ? option[0] : option);

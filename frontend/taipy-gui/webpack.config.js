@@ -20,6 +20,7 @@ const AddAssetHtmlPlugin = require("add-asset-html-webpack-plugin");
 const ESLintPlugin = require("eslint-webpack-plugin");
 const GenerateJsonPlugin = require("generate-json-webpack-plugin");
 const GeneratePackageJsonPlugin = require("generate-package-json-webpack-plugin");
+const { defineReactCompilerLoaderOption, reactCompilerLoader } = require("react-compiler-webpack");
 
 const resolveApp = (relativePath) => path.resolve(__dirname, relativePath);
 
@@ -92,9 +93,17 @@ module.exports = (env, options) => {
             module: {
                 rules: [
                     {
-                        test: /\.tsx?$/,
-                        use: "ts-loader",
+                        test: /\.tsx?$/i,
                         exclude: /node_modules/,
+                        use: [
+                            {
+                                loader: reactCompilerLoader,
+                                options: defineReactCompilerLoaderOption({
+                                    // React Compiler options goes here
+                                }),
+                            },
+                            { loader: "ts-loader" },
+                        ],
                     },
                     {
                         // added to resolve apache-arrow library (don't really understand the problem tbh)
@@ -145,9 +154,9 @@ module.exports = (env, options) => {
             module: {
                 rules: [
                     {
-                        test: /\.tsx?$/,
-                        use: "ts-loader",
+                        test: /\.tsx?$/i,
                         exclude: /node_modules/,
+                        use: [{ loader: "ts-loader" }],
                     },
                 ],
             },
