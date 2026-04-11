@@ -284,7 +284,7 @@ const Chat = (props: ChatProps) => {
                     .then((dataUrl) => {
                         dispatch(
                             createSendActionNameAction(
-                                id,
+                                updateVarName,
                                 module,
                                 onAction,
                                 reason,
@@ -305,7 +305,7 @@ const Chat = (props: ChatProps) => {
                     .catch(console.debug);
             }
         },
-        [imagePreview, updateVarName, onAction, senderId, id, dispatch, module]
+        [imagePreview, updateVarName, onAction, senderId, dispatch, module]
     );
 
     const handleAction = useCallback(

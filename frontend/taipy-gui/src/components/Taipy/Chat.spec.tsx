@@ -140,7 +140,7 @@ describe("Chat Component", () => {
         await userEvent.keyboard("new message{Enter}");
         expect(dispatch).toHaveBeenCalledWith({
             type: "SEND_ACTION_ACTION",
-            name: "",
+            name: "varName",
             context: undefined,
             payload: {
                 action: undefined,
@@ -162,7 +162,7 @@ describe("Chat Component", () => {
         await userEvent.click(getByRole("button", { name: /send message/i }));
         expect(dispatch).toHaveBeenCalledWith({
             type: "SEND_ACTION_ACTION",
-            name: "",
+            name: "varName",
             context: undefined,
             payload: {
                 action: undefined,
