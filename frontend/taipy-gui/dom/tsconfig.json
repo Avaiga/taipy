@@ -22,7 +22,7 @@
     "isolatedModules": true,
     "noEmit": false,
     "jsx": "react-jsx",
-    "types": ["node", "react", "react-dom"]
+    "types": ["node"]
   },
   "include": [
     "src"
