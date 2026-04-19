@@ -55,8 +55,7 @@ class ScatterDecimator(Decimator):
         # apply_decimator (Optional[Callable]): an user-defined function that is executed when the decimator
         #     is applied to modify the data.
         super().__init__(threshold, zoom)
-        binning_ratio = binning_ratio if binning_ratio is not None else 1
-        self._binning_ratio = binning_ratio if binning_ratio > 0 else 1
+        self._binning_ratio = binning_ratio if binning_ratio is not None and binning_ratio > 0 else 1
         self._max_overlap_points = max_overlap_points if max_overlap_points is not None else 3
 
     def _decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
@@ -70,33 +69,38 @@ class ScatterDecimator(Decimator):
         mask.fill(False)
         grid_x, grid_y = round(width / self._binning_ratio), round(height / self._binning_ratio)
         x_col, y_col = data[:, 0], data[:, 1]
-        min_x: float = np.amin(x_col)
-        max_x: float = np.amax(x_col)
-        min_y: float = np.amin(y_col)
-        max_y: float = np.amax(y_col)
+        min_x: float = np.nanmin(x_col)
+        max_x: float = np.nanmax(x_col)
+        min_y: float = np.nanmin(y_col)
+        max_y: float = np.nanmax(y_col)
         min_max_x_diff, min_max_y_diff = max_x - min_x, max_y - min_y
-        x_grid_map = np.rint((x_col - min_x) * grid_x / min_max_x_diff).astype(int)
-        y_grid_map = np.rint((y_col - min_y) * grid_y / min_max_y_diff).astype(int)
+        # set nan as negative integer so that they are put outside the grid
+        # and automatically filtered out by the algorithm
+        x_grid_map = np.rint((np.nan_to_num(x_col, nan=- 1000) - min_x) * grid_x / min_max_x_diff).astype(int)
+        y_grid_map = np.rint((np.nan_to_num(y_col, nan=- 1000) - min_y) * grid_y / min_max_y_diff).astype(int)
         z_grid_map = None
         grid_shape = (grid_x + 1, grid_y + 1)
         if len(data[0]) == 3:
             grid_z = grid_x
             grid_shape = (grid_x + 1, grid_y + 1, grid_z + 1)  # type: ignore[assignment]
             z_col = data[:, 2]
-            min_z: float = np.amin(z_col)
-            max_z: float = np.amax(z_col)
+            min_z: float = np.nanmin(z_col)
+            max_z: float = np.nanmax(z_col)
             min_max_z_diff = max_z - min_z
-            z_grid_map = np.rint((z_col - min_z) * grid_z / min_max_z_diff).astype(int)
+            z_grid_map = np.rint((np.nan_to_num(z_col, nan=- 1000) - min_z) * grid_z / min_max_z_diff).astype(int)
         grid = np.empty(grid_shape, dtype=int)
         grid.fill(0)
         if z_grid_map is not None:
             for i in np.arange(n_rows):
-                if grid[x_grid_map[i], y_grid_map[i], z_grid_map[i]] < self._max_overlap_points:
-                    grid[x_grid_map[i], y_grid_map[i], z_grid_map[i]] += 1
+                x, y, z = x_grid_map[i], y_grid_map[i], z_grid_map[i]
+                if x >= 0 and y >= 0 and z >= 0 and grid[x, y, z] < self._max_overlap_points:
+                    grid[x, y, z] += 1
                     mask[i] = True
         else:
             for i in np.arange(n_rows):
-                if grid[x_grid_map[i], y_grid_map[i]] < self._max_overlap_points:
-                    grid[x_grid_map[i], y_grid_map[i]] += 1
+                x = x_grid_map[i]
+                y = y_grid_map[i]
+                if x >= 0 and y >= 0 and grid[x, y] < self._max_overlap_points:
+                    grid[x, y] += 1
                     mask[i] = True
         return mask
