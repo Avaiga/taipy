@@ -663,7 +663,7 @@ class _GuiCoreContext(_CoreEventConsumerBase):
             filtered_list = [
                 e
                 if isinstance(e, DataNode)
-                else self.filter_entities(d, t.cast(str, col), col_type, False, action, val, col_fn)
+                else self.filter_entities(t.cast(list, d), t.cast(str, col), col_type, False, action, val, col_fn)
                 for e in filtered_list
                 for d in (t.cast(list, t.cast(list, e)[2]) if isinstance(e, list) else [e])
             ]
