@@ -107,7 +107,7 @@ def test_cannot_exec_task_that_update_config():
 
     task_updating_cfg = _create_task(update_config_fct)
     cfg_as_str = _TomlSerializer()._serialize(Config._applied_config)
-    res = _TaskFunctionWrapper("job_id", task_updating_cfg).execute(config_as_string=cfg_as_str)
+    res = _TaskFunctionWrapper("job_id", task_updating_cfg)(config_as_string=cfg_as_str)
 
     assert len(res) == 1
     assert isinstance(res[0], ConfigurationUpdateBlocked)
