@@ -67,10 +67,8 @@ class MinMaxDecimator(Decimator):
         cc_min = np.argmin(y_temp, axis=1)
         rr = np.arange(0, num_bins)
         # compute the flat index to where these are
-        flat_max = cc_max + rr * pts_per_bin
-        flat_max[-1] = min(flat_max[-1], x.size - 1)
-        flat_min = cc_min + rr * pts_per_bin
-        flat_min[-1] = min(flat_min[-1], x.size - 1)
+        flat_max = np.clip(cc_max + rr * pts_per_bin, a_min=None, a_max=x.size - 1)
+        flat_min = np.clip(cc_min + rr * pts_per_bin, a_min=None, a_max=x.size - 1)
         mm_mask = np.full((x.size,), False)
         mm_mask[flat_max] = True
         mm_mask[flat_min] = True
