@@ -76,8 +76,8 @@ class ScatterDecimator(Decimator):
         min_max_x_diff, min_max_y_diff = max_x - min_x, max_y - min_y
         # set nan as negative integer so that they are put outside the grid
         # and automatically filtered out by the algorithm
-        x_grid_map = np.rint((np.nan_to_num(x_col, nan=- 1000) - min_x) * grid_x / min_max_x_diff).astype(int)
-        y_grid_map = np.rint((np.nan_to_num(y_col, nan=- 1000) - min_y) * grid_y / min_max_y_diff).astype(int)
+        x_grid_map = np.rint((np.nan_to_num(x_col, nan=-1000) - min_x) * grid_x / min_max_x_diff).astype(int)
+        y_grid_map = np.rint((np.nan_to_num(y_col, nan=-1000) - min_y) * grid_y / min_max_y_diff).astype(int)
         z_grid_map = None
         grid_shape = (grid_x + 1, grid_y + 1)
         if len(data[0]) == 3:
@@ -87,7 +87,7 @@ class ScatterDecimator(Decimator):
             min_z: float = np.nanmin(z_col)
             max_z: float = np.nanmax(z_col)
             min_max_z_diff = max_z - min_z
-            z_grid_map = np.rint((np.nan_to_num(z_col, nan=- 1000) - min_z) * grid_z / min_max_z_diff).astype(int)
+            z_grid_map = np.rint((np.nan_to_num(z_col, nan=-1000) - min_z) * grid_z / min_max_z_diff).astype(int)
         grid = np.empty(grid_shape, dtype=int)
         grid.fill(0)
         if z_grid_map is not None:
@@ -98,8 +98,7 @@ class ScatterDecimator(Decimator):
                     mask[i] = True
         else:
             for i in np.arange(n_rows):
-                x = x_grid_map[i]
-                y = y_grid_map[i]
+                x, y = x_grid_map[i], y_grid_map[i]
                 if x >= 0 and y >= 0 and grid[x, y] < self._max_overlap_points:
                     grid[x, y] += 1
                     mask[i] = True
