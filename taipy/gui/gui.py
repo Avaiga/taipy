@@ -1608,6 +1608,11 @@ class Gui:
                 The first parameter of this function **must** be a `State^`.
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
             module_context (Optional[str]): The name of the module that will be used.
+
+        Returns:
+            (Any): The value returned by the callback, when actually invoked.<br/>
+                None is returned if the callback is not a function, or if an exception is raised
+                when invoking the callback.
         """  # noqa: E501
         this_sid = None
         if request:
