@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2018",
     "lib": [
       "dom",
       "dom.iterable",
@@ -22,6 +22,7 @@
     "isolatedModules": true,
     "noEmit": false,
     "jsx": "react-jsx",
+    "types": ["node"]
   },
   "include": [
     "src"
