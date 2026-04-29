@@ -1718,6 +1718,11 @@ class Gui:
                 The first parameter of this function **must** be a `State^`.
             args (Optional[Sequence]): The remaining arguments, as a List or a Tuple.
             module_context (Optional[str]): The name of the module that will be used.
+
+        Returns:
+            (Any): The value returned by the callback, when actually invoked.<br/>
+                None is returned if the callback is not a function, or if an exception is raised
+                when invoking the callback.
         """  # noqa: E501
         this_sid = get_server_request_accessor(self).sid()
         if this_sid:
@@ -2683,13 +2688,14 @@ class Gui:
     def get_flask_app(self):
         raise RuntimeError("'get_flask_app()' is deprecated. Use 'get_server_instance()' instead.")
 
-    def get_server_instance(self):
+    def get_server_instance(self) -> t.Any:
         """Get the internal server application.
 
         This method must be called **after** `(Gui.)run()^` was invoked.
 
         Returns:
-            The server instance used.
+            (Any): The server instance used.<br/>If the Flask web framework is used, this method
+                returns the `Flask` app instance.
         """
         if hasattr(self, "_server"):
             return self._server.get_server_instance()
