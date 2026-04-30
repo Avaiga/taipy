@@ -367,7 +367,7 @@ class ElementLibrary(ABC):
         base = (Path(".") if module_obj is None else Path(module_obj.__file__).parent).resolve()  # type: ignore
         base = base if base.exists() else Path(".").resolve()
         file = (base / name).resolve()
-        if str(file).startswith(str(base)) and file.exists():
+        if file.is_relative_to(base) and file.exists():
             return file
         else:
             raise FileNotFoundError(f"Cannot access resource {file}.")
