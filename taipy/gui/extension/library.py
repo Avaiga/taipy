@@ -371,7 +371,7 @@ class ElementLibrary(ABC):
         """  # noqa: E501
         base = self.__get_class_folder()
         file = (base / name).resolve()
-        if str(file).startswith(str(base)) and file.exists():
+        if file.is_relative_to(base) and file.exists():
             return file
         else:
             raise FileNotFoundError(f"Cannot access resource {file}.")
