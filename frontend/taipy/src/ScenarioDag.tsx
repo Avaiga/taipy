@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
-import { ZoomIn } from "@mui/icons-material";
+import ZoomIn from "@mui/icons-material/ZoomIn";
 import createEngine from "@projectstorm/react-diagrams";
 import deepEqual from "fast-deep-equal/es6";
 

@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -140,7 +140,7 @@ describe("Table Filter Component", () => {
         expect(validate).not.toBeDisabled();
     });
     it("behaves on date column", async () => {
-        const { getByTestId, getAllByTestId, findByRole, getByText, getByPlaceholderText } = render(
+        const { getByTestId, getAllByTestId, findByRole, getByText } = render(
             <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={jest.fn()} filteredCount={0} />
         );
         const elt = getByTestId("FilterListIcon");

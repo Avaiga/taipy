@@ -20,7 +20,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import TimeSelector from "./TimeSelector";
-import { getClientServerTimeZoneOffset } from "../../utils";
 
 jest.mock("../../utils", () => {
     const originalModule = jest.requireActual("../../utils");
@@ -54,7 +53,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-    // @ts-ignore
+    // @ts-expect-error
     delete window.matchMedia;
 });
 
@@ -70,7 +69,7 @@ describe("TimeSelector component", () => {
             const { getByTestId } = render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={curDateStr} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const elt = getByTestId("ClockIcon");
             expect(elt.parentElement?.tagName).toBe("BUTTON");
@@ -80,12 +79,12 @@ describe("TimeSelector component", () => {
             const { getByTestId } = render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={curDateStr} className="taipy-time" />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const elt = getByTestId("ClockIcon");
             expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-time-picker");
             expect(elt.parentElement?.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass(
-                "taipy-time"
+                "taipy-time",
             );
         });
 
@@ -93,7 +92,7 @@ describe("TimeSelector component", () => {
             const { getByText } = render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={undefined as unknown as string} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const hour = getByText("hh");
             expect(hour).toBeInTheDocument();
@@ -108,7 +107,7 @@ describe("TimeSelector component", () => {
             render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector defaultTime="2001-01-01T01:01:01" time={undefined as unknown as string} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -122,7 +121,7 @@ describe("TimeSelector component", () => {
                         time={undefined as unknown as string}
                         format="hh aa"
                     />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -132,7 +131,7 @@ describe("TimeSelector component", () => {
             render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={curDateStr} active={false} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -142,7 +141,7 @@ describe("TimeSelector component", () => {
             render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={curDateStr} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -152,7 +151,7 @@ describe("TimeSelector component", () => {
             render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={curDateStr} active={true} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -162,10 +161,10 @@ describe("TimeSelector component", () => {
 
     describe("TimeSelector component with analogue time picker", () => {
         it("renders", async () => {
-            const { getByTestId } = render(
+            render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={curDateStr} analogic={true} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -178,7 +177,7 @@ describe("TimeSelector component", () => {
                         time={undefined as unknown as string}
                         analogic={true}
                     />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -193,7 +192,7 @@ describe("TimeSelector component", () => {
                         analogic={true}
                         format="hh aa"
                     />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -204,7 +203,7 @@ describe("TimeSelector component", () => {
             render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={curDateStr} active={false} analogic={true} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -214,7 +213,7 @@ describe("TimeSelector component", () => {
             render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={curDateStr} analogic={true} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();
@@ -224,7 +223,7 @@ describe("TimeSelector component", () => {
             render(
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimeSelector time={curDateStr} active={true} analogic={true} />
-                </LocalizationProvider>
+                </LocalizationProvider>,
             );
             const input = document.querySelector("input");
             expect(input).toBeInTheDocument();

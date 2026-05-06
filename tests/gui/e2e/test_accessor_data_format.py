@@ -15,7 +15,7 @@ from importlib import util
 import pytest
 
 if util.find_spec("playwright"):
-    from playwright._impl._page import Page
+    from playwright.sync_api import Locator, Page
 
 from taipy.gui import Gui
 
@@ -31,8 +31,10 @@ def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
     helpers.run_e2e(gui, use_arrow=False)
     page.goto("./test")
     page.expect_websocket()
-    page.wait_for_selector("#table1 tr:nth-child(32)")  # wait for data to be loaded (30 rows of skeleton while loading)
-    assert_table_content(page)
+    table = page.locator("#table1")
+    table.wait_for()
+    table.locator("tr:nth-child(32)").wait_for()  # wait for data to be loaded (30 rows of skeleton while loading)
+    assert_table_content(table)
 
 
 @pytest.mark.teste2e
@@ -47,13 +49,13 @@ def test_accessor_arrow(page: "Page", gui: Gui, csvdata, helpers):
         helpers.run_e2e(gui, use_arrow=True)
         page.goto("./test")
         page.expect_websocket()
-        page.wait_for_selector(
-            "#table1 tr:nth-child(32)"
-        )  # wait for data to be loaded (30 rows of skeleton while loading)
-        assert_table_content(page)
+        table = page.locator("#table1")
+        table.wait_for()
+        table.locator("tr:nth-child(32)").wait_for()  # wait for data to be loaded (30 rows of skeleton while loading)
+        assert_table_content(table)
 
 
-def assert_table_content(page: "Page"):
+def assert_table_content(table: "Locator"):
     # assert page.query_selector("#table1 tbody tr:nth-child(1) td:nth-child(1)").inner_text() == "Wed 01 Apr 2020"
-    assert page.query_selector("#table1 tbody tr:nth-child(1) td:nth-child(2)").inner_text() == "Austria"
-    assert page.query_selector("#table1 tbody tr:nth-child(1) td:nth-child(4)").inner_text() == "856"
+    assert table.locator("tbody tr:nth-child(1) td:nth-child(2)").inner_text() == "Austria"
+    assert table.locator("tbody tr:nth-child(1) td:nth-child(4)").inner_text() == "856"

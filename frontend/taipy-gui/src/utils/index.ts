@@ -16,17 +16,28 @@ import { format } from "date-fns";
 import { sprintf } from "sprintf-js";
 import { FormatConfig } from "../context/taipyReducers";
 
+export interface ExtensionConfig {
+    components?: string[];
+    scripts?: string[];
+    styles?: string[];
+    loaded?: boolean;
+}
+export interface TaipyConfig {
+    darkMode: boolean;
+    themes: Record<string, Record<string, unknown>>;
+    timeZone: string;
+    extensions: Record<string, ExtensionConfig>;
+    stylekit?: StyleKit;
+    baseURL: string;
+    waterMark?: string;
+    rootMargin?: string;
+    cssVars?: string;
+    version?: string;
+}
+
 declare global {
     interface Window {
-        taipyConfig: {
-            darkMode: boolean;
-            themes: Record<string, Record<string, unknown>>;
-            timeZone: string;
-            extensions: Record<string, string[]>;
-            stylekit?: StyleKit;
-            baseURL: string;
-        };
-        taipyVersion: string;
+        taipyConfig?: TaipyConfig;
         [key: string]: unknown;
     }
 }
@@ -114,7 +125,7 @@ export const getDateTimeString = (
     datetimeformat: string | undefined,
     formatConf: FormatConfig,
     tz?: string,
-    withTime: boolean = true
+    withTime: boolean = true,
 ): string => {
     const dateVal = getDateTime(value);
     try {
@@ -123,7 +134,7 @@ export const getDateTimeString = (
                 dateVal || "",
                 formatConf.forceTZ || !tz ? formatConf.timeZone : tz,
                 datetimeformat || formatConf.dateTime,
-                { useAdditionalDayOfYearTokens: true }
+                { useAdditionalDayOfYearTokens: true },
             );
         }
         return format(dateVal || 0, datetimeformat || formatConf.date, { useAdditionalDayOfYearTokens: true });
@@ -170,7 +181,7 @@ export const formatWSValue = (
     value: string | number,
     dataType: string | undefined,
     dataFormat: string | undefined,
-    formatConf: FormatConfig
+    formatConf: FormatConfig,
 ): string => {
     dataType = dataType || typeof value;
     switch (dataType) {
@@ -211,9 +222,5 @@ export const getInitials = (value: string, max = 2): string =>
         .toUpperCase();
 
 export const TIMEZONE_CLIENT = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-export const getBaseURL = (): string => {
-    return window.taipyConfig?.baseURL || "/";
-};
-
+export const getBaseURL = () => document.head.querySelector("meta[name='taipy-base']")?.getAttribute("content") || "/";
 export const emptyArray = [];

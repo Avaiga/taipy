@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { getByLabelText, getByPlaceholderText, render } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -34,7 +34,7 @@ describe("Login Component", () => {
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByText, getByLabelText } = render(
+        const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Login id="logg" onAction="action" />
             </TaipyContext.Provider>

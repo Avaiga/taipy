@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-import React, { CSSProperties, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
@@ -28,9 +28,8 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Tooltip from "@mui/material/Tooltip";
 import { visuallyHidden } from "@mui/utils";
-import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList, ListOnItemsRenderedProps } from "react-window";
-import InfiniteLoader from "react-window-infinite-loader";
+import { List, type RowComponentProps, useListRef } from "react-window";
+import { useInfiniteLoader } from "react-window-infinite-loader";
 
 import {
     createRequestInfiniteTableUpdateAction,
@@ -82,6 +81,7 @@ import {
 } from "./tableUtils";
 import { getComponentClassName } from "./TaipyStyle";
 import { getCssSize, getSuffixedClassNames, getUpdateVar } from "./utils";
+import { TableBody } from "@mui/material";
 
 interface RowData {
     colsOrder: string[];
@@ -106,30 +106,24 @@ interface RowData {
 const Row = ({
     index,
     style: rowSx,
-    data: {
-        colsOrder,
-        columns,
-        rows,
-        classes,
-        tableClassName,
-        cellProps,
-        isItemLoaded,
-        selection,
-        formatConfig,
-        onValidation,
-        onDeletion,
-        onRowSelection,
-        onRowClick,
-        rowClassName,
-        nanValue,
-        compRows,
-        useCheckbox,
-    },
-}: {
-    index: number;
-    style: CSSProperties;
-    data: RowData;
-}) =>
+    colsOrder,
+    columns,
+    rows,
+    classes,
+    tableClassName,
+    cellProps,
+    isItemLoaded,
+    selection,
+    formatConfig,
+    onValidation,
+    onDeletion,
+    onRowSelection,
+    onRowClick,
+    rowClassName,
+    nanValue,
+    compRows,
+    useCheckbox,
+}: RowComponentProps<RowData>) =>
     isItemLoaded(index) ? (
         <TableRow
             hover
@@ -137,9 +131,9 @@ const Row = ({
             key={`row${index}`}
             component="div"
             sx={rowSx}
-            className={(classes && classes.row) + " " + getClassName(rows[index], rowClassName)}
+            className={[classes?.row, getClassName(rows[index], rowClassName)].filter(Boolean).join(" ")}
             data-index={index}
-            selected={selection.indexOf(index) > -1}
+            selected={selection.includes(index)}
             onClick={onRowClick}
         >
             {colsOrder.map((col, cIdx) => (
@@ -160,6 +154,7 @@ const Row = ({
                     tooltip={getTooltip(rows[index], columns[col].tooltip, col)}
                     comp={compRows && compRows[index] && compRows[index][col]}
                     useCheckbox={useCheckbox}
+                    component="div"
                 />
             ))}
         </TableRow>
@@ -215,9 +210,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const [orderBy, setOrderBy] = useState("");
     const [order, setOrder] = useState<Order>("asc");
     const [appliedFilters, setAppliedFilters] = useState<FilterDesc[]>([]);
-    const [visibleStartIndex, setVisibleStartIndex] = useState(0);
     const [aggregates, setAggregates] = useState<string[]>([]);
-    const infiniteLoaderRef = useRef<InfiniteLoader>(null);
+    const listRef = useListRef(null);
     const headerRow = useRef<HTMLTableRowElement>(null);
     const formatConfig = useFormatConfig();
     const module = useModule();
@@ -238,7 +232,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             setFilteredCount(
                 newValue.fullrowcount && newValue.rowcount != newValue.fullrowcount
                     ? newValue.fullrowcount - newValue.rowcount
-                    : 0
+                    : 0,
             );
             const nr = newValue.data as RowType[];
             if (Array.isArray(nr) && nr.length > newValue.start) {
@@ -262,16 +256,16 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 setOrder(isAsc ? "desc" : "asc");
                 setOrderBy(col);
                 setRows([]);
-                Promise.resolve().then(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true)); // So that the state can be changed
+                //                Promise.resolve().then(() => listRef.current?.resetloadMoreItemsCache(true)); // So that the state can be changed
             }
         },
-        [orderBy, order]
+        [orderBy, order],
     );
 
     useEffect(() => {
         if (refresh) {
             setRows([]);
-            Promise.resolve().then(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true)); // So that the state can be changed
+            //            Promise.resolve().then(() => listRef.current?.resetloadMoreItemsCache(true)); // So that the state can be changed
         }
     }, [refresh]);
 
@@ -316,9 +310,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     }
                     filter = filter || nDesc.filter;
                     if (typeof nDesc.notEditable == "boolean") {
-                        nDesc.notEditable = !editable;
-                    } else {
                         partialEditable = partialEditable || !nDesc.notEditable;
+                    } else {
+                        nDesc.notEditable = !editable;
                     }
                     if (nDesc.tooltip === undefined) {
                         nDesc.tooltip = props.tooltip;
@@ -334,7 +328,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     (active && partialEditable && (onAdd || onDelete) ? 1 : 0) +
                         (active && filter ? 1 : 0) +
                         (active && downloadable ? 1 : 0),
-                    newCols
+                    newCols,
                 );
                 const colsOrder = Object.keys(newCols).sort(getSortByIndex(newCols));
                 const headersInfo = [];
@@ -400,7 +394,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     headersInfo,
                 ];
             } catch (e) {
-                console.info("ATable.columns: " + ((e as Error).message || e));
+                console.info("ATable.columns: ", e);
             }
         }
         return [
@@ -430,14 +424,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         sortable,
     ]);
 
-    const boxBodySx = useMemo(() => ({ height: height }), [height]);
+    const boxBodySx = useMemo(() => ({ height: height, display: "flex" }), [height]);
 
     useEffect(() => {
-        selected.length &&
-            infiniteLoaderRef.current &&
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (infiniteLoaderRef.current as any)._listRef.scrollToItem(selected[0]);
-    }, [selected]);
+        selected.length && listRef.current?.scrollToRow({ index: selected[0] });
+    }, [selected, listRef]);
 
     useEffect(() => {
         if (headerRow.current) {
@@ -465,7 +456,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     aggregates,
                     cellClassNames,
                     tooltips,
-                    formats
+                    formats,
                 );
                 page.current = {
                     key: key,
@@ -501,8 +492,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         updateVars && getUpdateVar(updateVars, "comparedatas"),
                         typeof userData == "object"
                             ? (userData as Record<string, Record<string, unknown>>).context
-                            : undefined
-                    )
+                            : undefined,
+                    ),
                 );
             });
         },
@@ -525,7 +516,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             dispatch,
             module,
             userData,
-        ]
+        ],
     );
 
     const onAddRowClick = useCallback(
@@ -533,11 +524,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             dispatch(
                 createSendActionNameAction(updateVarName, module, {
                     action: onAdd,
-                    index: visibleStartIndex,
+                    index: 0,
                     user_data: userData,
-                })
+                }),
             ),
-        [visibleStartIndex, dispatch, updateVarName, onAdd, module, userData]
+        [dispatch, updateVarName, onAdd, module, userData],
     );
 
     const onDownload = useCallback(
@@ -546,9 +537,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 createSendActionNameAction(updateVarName, module, {
                     action: DownloadAction,
                     user_data: userData,
-                })
+                }),
             ),
-        [dispatch, updateVarName, module, userData]
+        [dispatch, updateVarName, module, userData],
     );
 
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
@@ -564,9 +555,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     user_value: userValue,
                     tz: tz,
                     user_data: userData,
-                })
+                }),
             ),
-        [dispatch, updateVarName, onEdit, rows, module, userData]
+        [dispatch, updateVarName, onEdit, rows, module, userData],
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
@@ -576,9 +567,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     action: onDelete,
                     index: getRowIndex(rows[rowIndex], rowIndex),
                     user_data: userData,
-                })
+                }),
             ),
-        [dispatch, updateVarName, onDelete, rows, module, userData]
+        [dispatch, updateVarName, onDelete, rows, module, userData],
     );
 
     const onRowSelection: OnRowSelection = useCallback(
@@ -591,9 +582,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     value,
                     reason: value === undefined ? "click" : "button",
                     user_data: userData,
-                })
+                }),
             ),
-        [dispatch, updateVarName, onAction, rows, module, userData]
+        [dispatch, updateVarName, onAction, rows, module, userData],
     );
 
     const onRowClick = useCallback(
@@ -604,16 +595,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 onRowSelection(rowIndex);
             }
         },
-        [onRowSelection]
-    );
-
-    const onTaipyItemsRendered = useCallback(
-        (onItemsR: (props: ListOnItemsRenderedProps) => undefined) =>
-            ({ visibleStartIndex, visibleStopIndex }: { visibleStartIndex: number; visibleStopIndex: number }) => {
-                setVisibleStartIndex(visibleStartIndex);
-                onItemsR({ visibleStartIndex, visibleStopIndex } as ListOnItemsRenderedProps);
-            },
-        []
+        [onRowSelection],
     );
 
     const rowData: RowData = useMemo(
@@ -641,7 +623,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 nanValue: props.nanValue,
                 compRows: compRows,
                 useCheckbox: useCheckbox,
-            } as RowData),
+            }) as RowData,
         [
             rows,
             compRows,
@@ -665,17 +647,24 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             props.rowClassName,
             props.nanValue,
             size,
-        ]
+        ],
     );
 
     const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
+
+    const onRowsRendered = useInfiniteLoader({
+        isRowLoaded: isItemLoaded,
+        rowCount: rowCount,
+        loadMoreRows: loadMoreItems,
+        minimumBatchSize: pageSize,
+    });
 
     return (
         <Box
             id={id}
             sx={boxSx}
             className={`${className} ${getSuffixedClassNames(className, "-autoloading")} ${getComponentClassName(
-                props.children
+                props.children,
             )}`}
         >
             <Paper sx={paperSx}>
@@ -698,17 +687,20 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                             key={`head${columns[col].dfid}`}
                                                             sx={
                                                                 columns[col].width
-                                                                    ? { minWidth: columns[col].width, maxWidth: columns[col].width }
+                                                                    ? {
+                                                                          minWidth: columns[col].width,
+                                                                          maxWidth: columns[col].width,
+                                                                      }
                                                                     : calcWidth
-                                                                    ? { width: calcWidth }
-                                                                    : undefined
+                                                                      ? { width: calcWidth }
+                                                                      : undefined
                                                             }
                                                             className={
                                                                 col === "EDIT_COL"
                                                                     ? getSuffixedClassNames(className, "-action")
                                                                     : getSuffixedClassNames(
                                                                           className,
-                                                                          generateHeaderClassName(columns[col].dfid)
+                                                                          generateHeaderClassName(columns[col].dfid),
                                                                       )
                                                             }
                                                         >
@@ -730,17 +722,20 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                         sortDirection={orderBy === columns[col].dfid && order}
                                                         sx={
                                                             columns[col].width
-                                                                ? { minWidth: columns[col].width, maxWidth: columns[col].width }
+                                                                ? {
+                                                                      minWidth: columns[col].width,
+                                                                      maxWidth: columns[col].width,
+                                                                  }
                                                                 : calcWidth
-                                                                ? { width: calcWidth }
-                                                                : undefined
+                                                                  ? { width: calcWidth }
+                                                                  : undefined
                                                         }
                                                         className={
                                                             col === "EDIT_COL"
                                                                 ? getSuffixedClassNames(className, "-action")
                                                                 : getSuffixedClassNames(
                                                                       className,
-                                                                      generateHeaderClassName(columns[col].dfid)
+                                                                      generateHeaderClassName(columns[col].dfid),
                                                                   )
                                                         }
                                                     >
@@ -832,33 +827,16 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                 })}
                             </TableHead>
                         </MuiTable>
-                        <Box sx={boxBodySx}>
-                            <AutoSizer>
-                                {({ height, width }) => (
-                                    <InfiniteLoader
-                                        ref={infiniteLoaderRef}
-                                        isItemLoaded={isItemLoaded}
-                                        itemCount={rowCount}
-                                        loadMoreItems={loadMoreItems}
-                                        minimumBatchSize={pageSize}
-                                    >
-                                        {({ onItemsRendered, ref }) => (
-                                            <FixedSizeList
-                                                height={height || 100}
-                                                width={width || 100}
-                                                itemCount={rowCount}
-                                                itemSize={getRowHeight(size)}
-                                                onItemsRendered={onTaipyItemsRendered(onItemsRendered)}
-                                                ref={ref}
-                                                itemData={rowData}
-                                            >
-                                                {Row}
-                                            </FixedSizeList>
-                                        )}
-                                    </InfiniteLoader>
-                                )}
-                            </AutoSizer>
-                        </Box>
+                        <TableBody component="div" sx={boxBodySx}>
+                            <List
+                                rowCount={rowCount}
+                                rowHeight={getRowHeight(size)}
+                                onRowsRendered={onRowsRendered}
+                                listRef={listRef}
+                                rowComponent={Row}
+                                rowProps={rowData}
+                            ></List>
+                        </TableBody>
                     </TableContainer>
                 </Tooltip>
             </Paper>

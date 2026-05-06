@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react";
+import { render, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -210,7 +210,7 @@ describe("Selector Component", () => {
                 type: "SEND_UPDATE_ACTION",
             });
         });
-    }); 
+    });
     describe("Selector Component with dropdown", () => {
         //dropdown
         it("displays as an empty control with arrow", async () => {
@@ -405,7 +405,7 @@ describe("Selector Component", () => {
             expect(elt.parentElement?.querySelector("span.Mui-checked")).not.toBeNull();
         });
         it("selects on click", async () => {
-            const { getByText, getByRole, queryAllByRole } = render(
+            const { getByText } = render(
                 <Selector lov={lov} defaultValue="id1" mode="radio" />
             );
             const elt = getByText("Item 2");
@@ -436,7 +436,7 @@ describe("Selector Component", () => {
             expect(elt.parentElement?.querySelector("span.Mui-checked")).not.toBeNull();
         });
         it("selects on click", async () => {
-            const { getByText, getByRole, queryAllByRole } = render(
+            const { getByText } = render(
                 <Selector lov={lov} defaultValue="id1" mode="check" />
             );
             const elt1 = getByText("Item 1");

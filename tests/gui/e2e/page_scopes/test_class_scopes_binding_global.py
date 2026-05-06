@@ -18,7 +18,7 @@ import pytest
 from taipy.gui import Gui
 
 if util.find_spec("playwright"):
-    from playwright._impl._page import Page
+    from playwright.sync_api import Page
 
 from .assets2_class_scopes.page1 import Page1
 from .assets2_class_scopes.page2 import Page2

@@ -32,16 +32,22 @@ class _TaskFunctionWrapper:
         self.task = task
 
     def __call__(self, **kwargs):
-        """Make this object callable as a function. Actually calls `execute`."""
+        """
+        Make the '_TaskFunctionWrapper' callable as a function.
+
+        This is intended to be executed within a subprocess, where the configuration
+        needs to be reapplied before executing the task function. So, if
+        `config_as_string` is given in the keyword arguments, it will be deserialized
+        and applied to the configuration before executing the task function.
+        """
+        if config_as_string := kwargs.get("config_as_string"):
+            Config._applied_config._update(_TomlSerializer()._deserialize(config_as_string))
+            Config.block_update()
         return self.execute(**kwargs)
 
     def execute(self, **kwargs):
-        """Execute the wrapped function. If `config_as_string` is given, then it will be reapplied to the config."""
+        """Execute the wrapped function. """
         try:
-            if config_as_string := kwargs.pop("config_as_string", None):
-                Config._applied_config._update(_TomlSerializer()._deserialize(config_as_string))
-                Config.block_update()
-
             inputs = list(self.task.input.values())
             outputs = list(self.task.output.values())
 

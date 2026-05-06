@@ -19,7 +19,7 @@ import { createContext } from "react";
 import ScenarioSelector from "./ScenarioSelector";
 import { useDispatchRequestUpdateOnFirstRender } from "taipy-gui";
 
-const TaipyContext = createContext<{}>({ state: {}, dispatch: () => null });
+const TaipyContext = createContext<object>({ state: {}, dispatch: () => null });
 
 describe("ScenarioSelector Component", () => {
     it("renders", async () => {

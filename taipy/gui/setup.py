@@ -37,7 +37,7 @@ def get_requirements():
 
     return [r for r in reqs if r and not r.startswith("taipy")]
 
-test_requirements = ["pytest>=3.8"]
+test_requirements = ["pytest>=6.0"]
 
 extras_require = {
     "ngrok": ["pyngrok>=5.1,<6.0"],

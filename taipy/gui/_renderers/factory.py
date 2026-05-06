@@ -217,7 +217,7 @@ class _Factory:
         .set_attributes(
             [
                 ("page",),
-                ("title",),
+                ("title", PropertyType.dynamic_string),
                 ("on_action", PropertyType.function),
                 ("close_label", PropertyType.string),
                 ("labels", PropertyType.string_list),

@@ -194,7 +194,7 @@ const TreeView = (props: TreeViewProps) => {
                     }
                     refExp = true;
                 } catch (e) {
-                    console.info(`Tree.expanded cannot parse property\n${(e as Error).message || e}`);
+                    console.info("Tree.expanded cannot parse property", e);
                 }
             }
         } else if (typeof props.expanded === "boolean") {
@@ -208,7 +208,7 @@ const TreeView = (props: TreeViewProps) => {
                 }
                 refExp = true;
             } catch (e) {
-                console.info(`Tree.expanded wrongly formatted property\n${(e as Error).message || e}`);
+                console.info("Tree.expanded wrongly formatted property", e);
             }
         }
         setOneExpanded(oneExp);

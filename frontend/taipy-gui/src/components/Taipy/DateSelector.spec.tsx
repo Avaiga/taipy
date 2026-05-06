@@ -22,7 +22,6 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import DateSelector from "./DateSelector";
 import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
-import { getClientServerTimeZoneOffset } from "../../utils";
 
 jest.mock("../../utils", () => {
     const originalModule = jest.requireActual("../../utils");
@@ -56,7 +55,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-    // @ts-ignore
+    // @ts-expect-error
     delete window.matchMedia;
 });
 

@@ -22,7 +22,6 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import DateRange from "./DateRange";
 import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
-import { getClientServerTimeZoneOffset } from "../../utils";
 
 jest.mock("../../utils", () => {
     const originalModule = jest.requireActual("../../utils");
@@ -56,7 +55,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-    // @ts-ignore
+    // @ts-expect-error
     delete window.matchMedia;
 });
 
@@ -336,7 +335,7 @@ describe("DateRange with time Component", () => {
         expect(cleanText(input2?.value || "").toLocaleLowerCase()).toEqual("31-01-2001 11");
     });
     it("shows labels", async () => {
-        const { getByLabelText } = render(
+        render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateRange
                     defaultDates='["2001-01-01T00:00:01.001Z","2001-01-31T00:00:01.001Z"]'

@@ -42,33 +42,33 @@
 
 /* Soft header on rows as Stylekit default */
 /* "header-plain" class to return to MUI default plain header */
-.taipy-table:where(:not(.header-plain)) thead th,
-.taipy-table:where(:not(.header-plain)) tbody th {
+.taipy-table:where(:not(.header-plain)) .MuiTableHead-root .MuiTableCell-head,
+.taipy-table:where(:not(.header-plain)) .MuiTableBody-root .MuiTableCell-head {
   background: var(--color-paper);
   font-weight: bold;
 }
 
 
-.MuiTableRow-root.Mui-selected td:first-child {
+.MuiTableRow-root.Mui-selected .MuiTableCell-root:first-child {
   box-shadow: inset 5px 0 0 0 var(--color-primary);
 }
 
 
 /* No borders on rows as Stylekit default */
 /* "rows-bordered" class to return to MUI default rows with borders */
-.taipy-table:where(:not(.rows-bordered)) thead th,
-.taipy-table:where(:not(.rows-bordered)) tbody td,
-.taipy-table:where(:not(.rows-bordered)) tbody th {
+.taipy-table:where(:not(.rows-bordered)) .MuiTableHead-root .MuiTableCell-head,
+.taipy-table:where(:not(.rows-bordered)) .MuiTableBody-root .MuiTableCell-root,
+.taipy-table:where(:not(.rows-bordered)) .MuiTableBody-root .MuiTableCell-head {
   border-bottom: none;
 }
 
 /* Striped rows as Stylekit default */
 /* "rows-similar" to return to MUI default similar looking rows */
-.taipy-table:where(:not(.rows-similar)) tbody tr:nth-child(odd) {
+.taipy-table:where(:not(.rows-similar)) tbody .MuiTableRow-root:nth-child(odd) {
   position: relative;
   z-index: 0;
 }
-.taipy-table:where(:not(.rows-similar)) tbody tr:nth-child(odd)::after {
+.taipy-table:where(:not(.rows-similar)) .MuiTableBody-root .MuiTableRow-root:nth-child(odd)::after {
   content: '';
   position: absolute;
   top: 0;

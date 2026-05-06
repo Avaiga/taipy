@@ -96,4 +96,4 @@ class OperatorSchema(Schema):
 
 class DataNodeFilterSchema(DataNodeConfigSchema):
     operators = fields.List(fields.Nested(OperatorSchema))
-    join_operator = fields.String(default="AND")
+    join_operator = fields.String(dump_default="AND")

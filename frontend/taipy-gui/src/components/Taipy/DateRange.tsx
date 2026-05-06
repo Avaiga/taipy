@@ -16,7 +16,7 @@ import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
-import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+import { DateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker";
 import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers/DateTimePicker";
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import { isValid } from "date-fns";
@@ -44,7 +44,7 @@ interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
     analogic?: boolean;
 }
 
-const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps;
+const textFieldProps = { textField: { margin: "dense" } } as DateTimePickerSlotProps<boolean>;
 
 const getRangeDateTime = (
     json: string | string[] | undefined,

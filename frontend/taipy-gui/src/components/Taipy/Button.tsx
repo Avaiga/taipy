@@ -40,8 +40,8 @@ const Button = (props: ButtonProps) => {
     const { id, onAction = "", defaultLabel, size = "medium", variant = "outlined" } = props;
     const [value, setValue] = useState<stringIcon>("");
     const { sendAction } = useActions();
-    const autoRepeatInitialRef = useRef<number | null>(null);
-    const autoRepeatIntervalRef = useRef<number | null>(null);
+    const autoRepeatInitialRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const autoRepeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const className = useClassNames(props.libClassName, props.dynamicClassName, props.className);
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -66,19 +66,19 @@ const Button = (props: ButtonProps) => {
             return;
         }
         handleClick(); // Trigger immediately
-        autoRepeatIntervalRef.current = window.setTimeout(() => {
-            autoRepeatIntervalRef.current = window.setInterval(handleClick, autoRepeatDelay);
+        autoRepeatInitialRef.current = setTimeout(() => {
+            autoRepeatIntervalRef.current = setInterval(handleClick, autoRepeatDelay);
             autoRepeatInitialRef.current = null;
         }, initialRepeatDelay);
     }, [handleClick, autoRepeatDelay]);
 
     const stopRepeating = () => {
         if (autoRepeatInitialRef.current) {
-            window.clearTimeout(autoRepeatInitialRef.current);
+            clearTimeout(autoRepeatInitialRef.current);
             autoRepeatInitialRef.current = null;
         }
         if (autoRepeatIntervalRef.current) {
-            window.clearInterval(autoRepeatIntervalRef.current);
+            clearInterval(autoRepeatIntervalRef.current);
             autoRepeatIntervalRef.current = null;
         }
     };

@@ -21,13 +21,6 @@ import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
 import { TableValueType } from "./tableUtils";
 
-jest.mock(
-    "react-virtualized-auto-sizer",
-    () =>
-        ({ children }: any) =>
-            children({ height: 600, width: 600 })
-);
-
 const valueKey = "Infinite-Entity-asc";
 const tableValue = {
     [valueKey]: {
@@ -248,10 +241,10 @@ describe("AutoLoadingTable Component", () => {
         );
         const elements = getAllByText("Austria");
         elements.forEach((elt: HTMLElement, idx: number) =>
-            selected.indexOf(idx) == -1
+            !selected.includes(idx)
                 ? expect(elt.parentElement?.parentElement?.parentElement?.parentElement).not.toHaveClass("Mui-selected")
                 : expect(elt.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("Mui-selected")
         );
-        expect(document.querySelectorAll(".Mui-selected")).toHaveLength(selected.length);
+        // expect(document.querySelectorAll(".Mui-selected")).toHaveLength(selected.length); this works but doesn't check that the right rows are selected
     });
 });

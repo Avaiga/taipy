@@ -109,7 +109,7 @@ class _FlaskServer(_Server):
 
         # set json encoder (for Taipy specific types)
         self._server.json_provider_class = _TaipyJsonProvider
-        self._server.json = self._server.json_provider_class(self._server)
+        self._server.json = self._server.json_provider_class(self.get_server_instance())
 
         self.__path_mapping = path_mapping or {}
         self.__ssl_context = server_config.get("ssl_context", None)
@@ -166,13 +166,9 @@ class _FlaskServer(_Server):
                         "index.html",
                         title=title,
                         favicon=f"{favicon}?version={version}",
-                        root_margin=root_margin,
-                        watermark=watermark,
                         config=client_config,
                         scripts=scripts,
                         styles=styles,
-                        version=version,
-                        css_vars=css_vars,
                         base_url=base_url,
                     )
                 except Exception:
@@ -381,10 +377,10 @@ class _FlaskServer(_Server):
             log = logging.getLogger("werkzeug")
             log.disabled = True
             operation = "reloaded" if self.is_running_from_reloader() else "starting"
-            _TaipyLogger._get_logger().info(f" * Server {operation} on {server_url}{message_details}")
+            _TaipyLogger._get_logger().info(" * Server %s on %s%s", operation, server_url, message_details)
             if client_url is not None:
                 client_url = client_url.format(port=port)
-                _TaipyLogger._get_logger().info(f" * Application is accessible at {client_url}")
+                _TaipyLogger._get_logger().info(" * Application is accessible at %s", client_url)
         if not self.is_running_from_reloader() and self._gui._get_config("run_browser", False):  # type: ignore[attr-defined]
             webbrowser.open(client_url or server_url, new=2)
         if _is_in_notebook() or run_in_thread:

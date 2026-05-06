@@ -30,7 +30,7 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Input from "@mui/material/Input";
 import Switch from "@mui/material/Switch";
-import TableCell, { TableCellProps } from "@mui/material/TableCell";
+import TableCell, { TableCellBaseProps, TableCellProps } from "@mui/material/TableCell";
 import TextField from "@mui/material/TextField";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -38,7 +38,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { BaseDateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker/shared";
+import { DateTimePickerSlotProps } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
 
 import { FormatConfig } from "../../context/taipyReducers";
@@ -228,6 +228,7 @@ interface EditableCellProps {
     useCheckbox?: boolean;
     formattedVal?: string;
     rowSpan?: number;
+    component?: React.ElementType<TableCellBaseProps>;
 }
 
 export interface FilterDesc {
@@ -394,7 +395,7 @@ export const getColumnHeader = (columns: Record<string, ColumnDesc>, columnKey: 
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
-const textFieldProps = { textField: { margin: "dense" } } as BaseDateTimePickerSlotProps;
+const textFieldProps = { textField: { margin: "dense" } } as DateTimePickerSlotProps<boolean>;
 
 const filter = createFilterOptions<string>();
 const getOptionKey = (option: string) => (Array.isArray(option) ? option[0] : option);
@@ -422,6 +423,7 @@ export const EditableCell = (props: EditableCellProps) => {
         useCheckbox = false,
         formattedVal: formattedValue,
         rowSpan = 1,
+        component,
     } = props;
     const [val, setVal] = useState<RowValue | Date>(value);
     const [edit, setEdit] = useState(false);
@@ -605,7 +607,7 @@ export const EditableCell = (props: EditableCellProps) => {
                       }`
                     : undefined
             }
-            component={colDesc.multi !== undefined ? "th" : undefined}
+            component={component || (colDesc.multi !== undefined ? "th" : undefined)}
             rowSpan={rowSpan}
         >
             <Badge

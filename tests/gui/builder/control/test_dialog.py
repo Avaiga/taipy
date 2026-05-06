@@ -24,7 +24,7 @@ def test_dialog_builder_1(gui: Gui, helpers):
         "<Dialog",
         'onAction="validate_action"',
         'page="page_test"',
-        'title="This is a Dialog"',
+        'defaultTitle="This is a Dialog"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
     ]
@@ -35,9 +35,10 @@ def test_dialog_builder_2(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     partial = gui.add_partial(Markdown("# A partial"))  # noqa: F841
     dialog_open = False  # noqa: F841
+    title = "Another Dialog"  # noqa: F841
     with tgb.Page(frame=None) as page:
         tgb.dialog(  # type: ignore[attr-defined]
-            title="Another Dialog",
+            title="{title}",
             open="{dialog_open}",
             partial="{partial}",
             on_action="validate_action",
@@ -45,7 +46,8 @@ def test_dialog_builder_2(gui: Gui, helpers):
     expected_list = [
         "<Dialog",
         'page="TaiPy_partials',
-        'title="Another Dialog"',
+        'defaultTitle="Another Dialog"',
+        'title="{!',
         'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'open="{!_TpB_tpec_TpExPr_dialog_open_TPMDL_0',
@@ -67,7 +69,7 @@ def test_dialog_labels_builder(gui: Gui, helpers):
     expected_list = [
         "<Dialog",
         'page="page_test"',
-        'title="Another Dialog"',
+        'defaultTitle="Another Dialog"',
         'labels="[&quot;Cancel&quot;, &quot;Validate&quot;]"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         'closeLabel="MYClose"',
@@ -80,7 +82,7 @@ def test_dialog_builder_block(gui: Gui, helpers):
         tgb.text(value="This is in a dialog")  # type: ignore[attr-defined]
     expected_list = [
         "<Dialog",
-        'title="Another Dialog"',
+        'defaultTitle="Another Dialog"',
         "This is in a dialog",
     ]
     helpers.test_control_builder(gui, tgb.Page(content, frame=None), expected_list)

@@ -13,6 +13,7 @@
 
 import { createContext, Dispatch } from "react";
 import { TaipyBaseAction, TaipyState } from "./taipyReducers";
+import { TaipyConfig } from "../utils";
 
 /**
  * The Taipy Store.
@@ -22,6 +23,10 @@ export interface TaipyStore {
     state: TaipyState;
     /** The React *dispatch* function. */
     dispatch: Dispatch<TaipyBaseAction>;
+    /** The URL of the Taipy server. */
+    serverUrl?: string;
+    /** The Taipy configuration. */
+    config?: TaipyConfig;
 }
 
 /**

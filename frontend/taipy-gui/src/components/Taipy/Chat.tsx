@@ -57,7 +57,7 @@ import { getComponentClassName } from "./TaipyStyle";
 import { noDisplayStyle } from "./utils";
 import { toDataUrl } from "../../utils/image";
 
-const Markdown = lazy(() => import("react-markdown"));
+const Markdown = lazy(() => import(/* webpackChunkName: "react-markdown" */"react-markdown"));
 
 interface ChatProps extends TaipyActiveProps {
     messages?: TableValueType;
@@ -302,7 +302,7 @@ const Chat = (props: ChatProps) => {
                         });
                         fileInputRef.current && (fileInputRef.current.value = "");
                     })
-                    .catch(console.log);
+                    .catch(console.debug);
             }
         },
         [imagePreview, updateVarName, onAction, senderId, id, dispatch, module]

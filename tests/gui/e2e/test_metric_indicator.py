@@ -14,13 +14,13 @@ from importlib import util
 import pytest
 
 if util.find_spec("playwright"):
-    from playwright._impl._page import Page
+    from playwright.sync_api import Page
 
 from taipy.gui import Gui
 
 
-@pytest.mark.extension
-def test_has_default_value(page: Page, gui: Gui, helpers):
+@pytest.mark.teste2e
+def test_has_default_value(page: "Page", gui: Gui, helpers):
     page_md = """
 <|100|metric|>
 """
@@ -34,8 +34,8 @@ def test_has_default_value(page: Page, gui: Gui, helpers):
     assert gauge_value == "100"
 
 
-@pytest.mark.extension
-def test_show_increase_delta_value(page: Page, gui: Gui, helpers):
+@pytest.mark.teste2e
+def test_show_increase_delta_value(page: "Page", gui: Gui, helpers):
     page_md = """
 <|100|metric|delta=20|type=linear|>
 """
@@ -49,8 +49,8 @@ def test_show_increase_delta_value(page: Page, gui: Gui, helpers):
     assert delta_value == "▲20"
 
 
-@pytest.mark.extension
-def test_show_decrease_delta_value(page: Page, gui: Gui, helpers):
+@pytest.mark.teste2e
+def test_show_decrease_delta_value(page: "Page", gui: Gui, helpers):
     page_md = """
 <|100|metric|delta=-20|type=linear|>
 """
@@ -65,7 +65,7 @@ def test_show_decrease_delta_value(page: Page, gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
-def test_show_linear_chart(page: Page, gui: Gui, helpers):
+def test_show_linear_chart(page: "Page", gui: Gui, helpers):
     page_md = """
 <|100|metric|delta=-20|type=linear|>
 """
@@ -79,7 +79,7 @@ def test_show_linear_chart(page: Page, gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
-def test_show_circular_chart_as_default_type(page: Page, gui: Gui, helpers):
+def test_show_circular_chart_as_default_type(page: "Page", gui: Gui, helpers):
     page_md = """
 <|100|metric|>
 """
@@ -93,7 +93,7 @@ def test_show_circular_chart_as_default_type(page: Page, gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
-def test_format_converter_integer_to_binary(page: Page, gui: Gui, helpers):
+def test_format_converter_integer_to_binary(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%b|>
 """
@@ -107,7 +107,7 @@ def test_format_converter_integer_to_binary(page: Page, gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
-def test_format_converter_integer_to_signed_decimal_d_type(page: Page, gui: Gui, helpers):
+def test_format_converter_integer_to_signed_decimal_d_type(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%d|>
 """
@@ -121,7 +121,7 @@ def test_format_converter_integer_to_signed_decimal_d_type(page: Page, gui: Gui,
 
 
 @pytest.mark.teste2e
-def test_format_converter_integer_to_signed_decimal_i_type(page: Page, gui: Gui, helpers):
+def test_format_converter_integer_to_signed_decimal_i_type(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%i|>
 """
@@ -135,7 +135,7 @@ def test_format_converter_integer_to_signed_decimal_i_type(page: Page, gui: Gui,
 
 
 @pytest.mark.teste2e
-def test_format_converter_yields_float_using_science_notation(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_float_using_science_notation(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%e|>
 """
@@ -149,7 +149,7 @@ def test_format_converter_yields_float_using_science_notation(page: Page, gui: G
 
 
 @pytest.mark.teste2e
-def test_format_converter_yields_float_using_fixed_point_notation_f_type(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_float_using_fixed_point_notation_f_type(page: "Page", gui: Gui, helpers):
     page_md = """
 <|99.99|metric|show_value=True|delta=20|format=%.2f|>
 """
@@ -163,7 +163,7 @@ def test_format_converter_yields_float_using_fixed_point_notation_f_type(page: P
 
 
 @pytest.mark.teste2e
-def test_format_converter_yields_float_using_fixed_point_notation_g_type(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_float_using_fixed_point_notation_g_type(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50.555|metric|show_value=True|delta=20|format=%.2g|>
 """
@@ -177,7 +177,7 @@ def test_format_converter_yields_float_using_fixed_point_notation_g_type(page: P
 
 
 @pytest.mark.teste2e
-def test_format_converter_yields_integer_as_octal(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_integer_as_octal(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%o|>
 """
@@ -191,7 +191,7 @@ def test_format_converter_yields_integer_as_octal(page: Page, gui: Gui, helpers)
 
 
 @pytest.mark.teste2e
-def test_format_converter_yields_integer_as_hexadecimal(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_integer_as_hexadecimal(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%x|>
 """
@@ -205,7 +205,7 @@ def test_format_converter_yields_integer_as_hexadecimal(page: Page, gui: Gui, he
 
 
 @pytest.mark.teste2e
-def test_format_converter_yields_integer_as_uppercase_hexadecimal(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_integer_as_uppercase_hexadecimal(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|delta=20|format=%X|>
 """
@@ -219,7 +219,7 @@ def test_format_converter_yields_integer_as_uppercase_hexadecimal(page: Page, gu
 
 
 @pytest.mark.teste2e
-def test_format_converter_yields_integer_as_unsigned_decimal(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_integer_as_unsigned_decimal(page: "Page", gui: Gui, helpers):
     page_md = """
 <|-50|metric|show_value=True|delta=20|format=%u|>
 """
@@ -233,7 +233,7 @@ def test_format_converter_yields_integer_as_unsigned_decimal(page: Page, gui: Gu
 
 
 @pytest.mark.teste2e
-def test_format_converter_yields_edge_cases(page: Page, gui: Gui, helpers):
+def test_format_converter_yields_edge_cases(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|show_value=True|format=a%%b%dc%%d|>
 """
@@ -247,7 +247,7 @@ def test_format_converter_yields_edge_cases(page: Page, gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
-def test_negative_delta_color(page: Page, gui: Gui, helpers):
+def test_negative_delta_color(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|negative_delta_color=#3D9970|delta=-20|>
 """
@@ -264,7 +264,7 @@ def test_negative_delta_color(page: Page, gui: Gui, helpers):
 
 
 @pytest.mark.teste2e
-def test_delta_color_invert(page: Page, gui: Gui, helpers):
+def test_delta_color_invert(page: "Page", gui: Gui, helpers):
     page_md = """
 <|50|metric|delta_color=invert|delta=-20|>
 """

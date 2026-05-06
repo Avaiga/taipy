@@ -17,7 +17,7 @@ const getGuiEnv = (log = true) => {
             .trim();
         return pipGuiDir.substring(9).trim();
     } catch (e) {
-        log && console.info("taipy-gui pip package is not installed.");
+        log && console.info("taipy-gui pip package is not installed.", e);
         const base = existsSync("package.json") ? `..${sep}..` : existsSync("frontend") ? "." : sep;
         if (existsSync(resolve(base, "taipy", "gui", "webapp", "package.json"))) {
             log && console.info(`Found npm package for taipy-gui in ${resolve(base, "taipy", "gui", "webapp")}`);

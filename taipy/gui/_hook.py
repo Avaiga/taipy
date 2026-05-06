@@ -28,7 +28,7 @@ class _Hooks(object, metaclass=_Singleton):
         # Prevent duplicated hooks
         for h in self.__hooks:
             if type(hook) is type(h):
-                _TaipyLogger._get_logger().info(f"Failed to register duplicated hook of type '{type(h)}'")
+                _TaipyLogger._get_logger().info("Failed to register duplicated hook of type '%s'", type(hook).__name__)
                 return
         self.__hooks.append(hook)
 
@@ -43,8 +43,8 @@ class _Hooks(object, metaclass=_Singleton):
                     if not callable(func):
                         raise Exception(f"'{name}' hook is not callable")
                     res = func(*args, **kwargs)
-                except Exception as e:
-                    _TaipyLogger._get_logger().error(f"Error while calling hook '{name}': {e}")
+                except Exception:
+                    _TaipyLogger._get_logger().exception("Error while calling hook '%s':", name)
                     return
                 # check if the hook returns True -> stop the chain
                 if res is True:

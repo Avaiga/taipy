@@ -255,7 +255,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     headersInfo,
                 ];
             } catch (e) {
-                console.info("PaginatedTable.columns: ", (e as Error).message || e);
+                console.info("PaginatedTable.columns: ", e);
             }
         }
         return [
@@ -766,7 +766,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                             key={`row${index}`}
                                             selected={sel > -1}
                                             ref={sel == 0 ? selectedRowRef : undefined}
-                                            className={getClassName(row, props.rowClassName)}
+                                            className={getClassName(row, props.rowClassName) || ""}
                                             data-index={index}
                                             onClick={active && onAction ? onRowClick : undefined}
                                         >

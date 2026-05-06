@@ -117,7 +117,7 @@ const StatusList = (props: StatusListProps) => {
                 });
                 return res;
             } catch (e) {
-                console.info(`Error parsing icons\n${(e as Error).message || e}`);
+                console.info("Error parsing icons", e);
             }
             return [false, false, false, false];
         }
@@ -131,7 +131,7 @@ const StatusList = (props: StatusListProps) => {
             try {
                 val = (defaultValue ? JSON.parse(defaultValue) : []) as StatusType[] | StatusType;
             } catch (e) {
-                console.info(`Cannot parse status value: ${(e as Error).message || e}`);
+                console.info("Cannot parse status value:", e);
                 val = [] as StatusType[];
             }
         } else {

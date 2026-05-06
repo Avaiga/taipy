@@ -74,7 +74,7 @@ describe("Field Component", () => {
         expect(elt).toHaveStyle("width: 500px");
     });
     it("can render markdown", async () => {
-        const { container, getByText, findByText } = render(<Field value="titi" className="taipy-text" mode="md" />);
+        const { getByText } = render(<Field value="titi" className="taipy-text" mode="md" />);
         getByText(/markdown/i);
         // https://stackoverflow.com/questions/72382316/jest-encountered-an-unexpected-token-react-markdown
         // expect(await findByText(/titi/i)).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe("Field Component", () => {
     });
     describe("latex mode", () => {
         it("renders LaTeX as block math", async () => {
-            const { container, getByText } = render(
+            const { container } = render(
                 <MathJaxContext config={mathJaxConfig}>
                     <Field value={"$$x = y + 1$$"} className="taipy-text" mode="latex" />
                 </MathJaxContext>

@@ -21,7 +21,7 @@ import { nanoid } from "nanoid";
 import { FilterDesc } from "../components/Taipy/tableUtils";
 import { stylekitModeThemes, stylekitTheme } from "../themes/stylekit";
 import { patchValue, PatchChange, PatchRemove } from "./patch";
-import { getBaseURL, TIMEZONE_CLIENT } from "../utils";
+import { getBaseURL, TaipyConfig, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 import { changeFavicon, getLocalStorageValue, IdMessage, storeClientId } from "./utils";
@@ -52,6 +52,11 @@ export enum Types {
     LocalStorage = "LOCAL_STORAGE",
     RefreshThemes = "REFRESH_THEMES",
     Patch = "PATCH",
+    CleanAckList = "CLEAN_ACK_LIST",
+}
+
+export interface OnAction {
+    (id: string, payload?: Record<string, unknown>, context?: string): void;
 }
 
 /**
@@ -78,6 +83,7 @@ export interface TaipyState {
     menu: MenuProps;
     download?: FileDownloadProps;
     ackList: string[];
+    onAction?: OnAction;
 }
 
 /**
@@ -178,11 +184,11 @@ export interface FormatConfig {
     number: string;
 }
 
-const getUserTheme = (mode: PaletteMode) => {
-    const tkTheme = (window.taipyConfig?.stylekit && stylekitTheme()) || {};
-    const tkModeTheme = (window.taipyConfig?.stylekit && stylekitModeThemes()[mode]) || {};
-    const userTheme = window.taipyConfig?.themes?.base || {};
-    const modeTheme = (window.taipyConfig?.themes && window.taipyConfig.themes[mode]) || {};
+const getUserTheme = (mode: PaletteMode, config?: TaipyConfig) => {
+    const tkTheme = (config?.stylekit && stylekitTheme(config)) || {};
+    const tkModeTheme = (config?.stylekit && stylekitModeThemes(config)[mode]) || {};
+    const userTheme = config?.themes?.base || {};
+    const modeTheme = (config?.themes && config.themes[mode]) || {};
     return createTheme(
         merge(tkTheme, tkModeTheme, userTheme, modeTheme, {
             palette: {
@@ -199,32 +205,37 @@ const getUserTheme = (mode: PaletteMode) => {
     );
 };
 
-const themes = {
-    light: getUserTheme("light"),
-    dark: getUserTheme("dark"),
-};
-
 export const INITIAL_STATE: TaipyState = {
     data: {},
-    themes: themes,
-    theme: window.taipyConfig?.darkMode ? themes.dark : themes.light,
     locations: {},
-    timeZone: window.taipyConfig?.timeZone
-        ? window.taipyConfig.timeZone === "client"
-            ? TIMEZONE_CLIENT
-            : window.taipyConfig.timeZone
-        : undefined,
+    themes: {} as Record<PaletteMode, Theme>,
+    theme: {} as Theme,
     id: getLocalStorageValue(TAIPY_CLIENT_ID, ""),
     menu: {},
     ackList: [],
     notifications: [],
 };
 
-export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
-    ...initialState,
-    isSocketConnected: false,
-    socket: io("/", { autoConnect: false, path: `${getBaseURL()}socket.io` }),
-});
+export const taipyInitialize = (
+    initialState: TaipyState,
+    config?: TaipyConfig,
+    serverUrl?: string,
+    onAction?: OnAction,
+): TaipyState => {
+    const themes = { light: getUserTheme("light", config), dark: getUserTheme("dark", config) };
+    return {
+        ...initialState,
+        themes: themes,
+        theme: config?.darkMode ? themes.dark : themes.light,
+        timeZone: config?.timeZone ? (config.timeZone === "client" ? TIMEZONE_CLIENT : config.timeZone) : undefined,
+        isSocketConnected: false,
+        socket: io(serverUrl ? `${serverUrl}/` : "/", {
+            autoConnect: false,
+            path: `${config?.baseURL || ""}socket.io`,
+        }),
+        onAction: onAction,
+    };
+};
 
 export const messageToAction = (message: WsMessage) => {
     if (message.type) {
@@ -266,6 +277,7 @@ export const messageToAction = (message: WsMessage) => {
 
 export const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
     const dispatchWsMessage = (message: WsMessage) => {
+        console.debug("Received WebSocket message:", message);
         if (message.type === "MU" && Array.isArray(message.payload)) {
             const payloads = message.payload as NamePayload[];
             Promise.all(payloads.map((pl) => parseData(pl.payload.value as Record<string, unknown>)))
@@ -273,7 +285,7 @@ export const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
                     values.forEach((val, idx) => (payloads[idx].payload.value = val));
                     dispatch(messageToAction(message));
                 })
-                .catch(console.warn);
+                .catch(console.debug);
             return;
         } else if (message.type === "MS" && Array.isArray(message.payload)) {
             (message.payload as WsMessage[]).forEach((msg) => dispatchWsMessage(msg));
@@ -321,6 +333,17 @@ const checkGuiAddr = (guiAddr: string) => {
 
 let lastReasonServer = false;
 
+export const shutdownWebSocket = (socket: Socket | undefined) => {
+    if (socket) {
+        console.debug("Shutting down WebSocket connection...");
+        socket.close();
+        socket.off("connect");
+        socket.off("connect_error");
+        socket.off("disconnect");
+        socket.off("message");
+    }
+};
+
 // web socket
 export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
     if (socket) {
@@ -344,6 +367,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         });
         // try to reconnect on server disconnection
         socket.on("disconnect", (reason) => {
+            console.debug("WebSocket disconnected:", reason);
             if (reason === "io server disconnect") {
                 lastReasonServer = true;
                 socket.connect();
@@ -480,13 +504,22 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.Acknowledgement:
             const ackList = state.ackList.filter((v) => v !== (action as unknown as TaipyAckAction).id);
             return ackList.length < state.ackList.length ? { ...state, ackList } : state;
+        case Types.CleanAckList:
+            if (state.ackList.length === 0) {
+                return state;
+            }
+            console.debug(
+                "Acknowledgement list cleaned without receiving expected acknowledgements for ids:",
+                state.ackList.join(", "),
+            );
+            return { ...state, ackList: [] };
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
             if (action.payload.fromBackend) {
                 mode = getLocalStorageValue("theme", mode, ["light", "dark"]);
             }
             localStorage && localStorage.setItem("theme", mode);
-            if (mode !== state.theme.palette.mode) {
+            if (state.theme?.palette?.mode && mode !== state.theme.palette.mode) {
                 return {
                     ...state,
                     theme: state.themes[mode],
@@ -496,8 +529,8 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         }
         case Types.RefreshThemes: {
             const tempThemes = {
-                light: getUserTheme("light"),
-                dark: getUserTheme("dark"),
+                light: getUserTheme("light", window.taipyConfig!),
+                dark: getUserTheme("dark", window.taipyConfig!),
             };
             return {
                 ...state,
@@ -600,6 +633,10 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             );
             break;
         case Types.Action:
+            if (state.onAction) {
+                const onAction = state.onAction;
+                setTimeout(() => onAction(action.name, action.payload, action.context), 0);
+            }
             ackId = sendWsMessage(state.socket, "A", action.name, action.payload, state.id, action.context);
             break;
         case Types.RequestDataUpdate:
@@ -656,6 +693,10 @@ export const createSendUpdateAction = (
     context: context,
     propagate: propagate,
     payload: getPayload(value, onChange, relName),
+});
+
+export const createCleanAckListAction = (): TaipyBaseAction => ({
+    type: Types.CleanAckList,
 });
 
 export const getPayload = (value: unknown, onChange?: string, relName?: string) => {

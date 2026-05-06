@@ -57,7 +57,7 @@ import { ColumnDesc } from "./tableUtils";
 import { getComponentClassName } from "./TaipyStyle";
 import { getArrayValue, getUpdateVar, TaipyActiveProps, TaipyChangeProps } from "./utils";
 
-const Plot = lazy(() => import("react-plotly.js"));
+const Plot = lazy(() => import(/* webpackChunkName: "react-plotly" */ "react-plotly.js"));
 
 interface PlotlyObject {
     animate: (
@@ -167,7 +167,7 @@ export const getAxis = (traces: string[][], idx: number, columns: Record<string,
 
 const getDecimatorsPayload = (
     decimators: string[] | undefined,
-    plotDiv: HTMLDivElement | null,
+    plotDiv: PlotlyHTMLElement | null,
     modes: string[],
     columns: Record<string, ColumnDesc>,
     traces: string[][],
@@ -347,8 +347,8 @@ const Chart = (props: ChartProp) => {
     } = props;
     const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
-    const plotRef = useRef<HTMLDivElement | null>(null);
-    const plotlyRef = useRef<PlotlyObject | null>(null);
+    const plotRef = useRef<PlotlyHTMLElement>(null);
+    const plotlyRef = useRef<PlotlyObject>(null);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
 
     // animation
@@ -393,7 +393,7 @@ const Chart = (props: ChartProp) => {
         try {
             return JSON.parse(props.figure) as Partial<Figure>;
         } catch (e) {
-            console.warn(`Error while parsing Chart.figure\n${(e as Error).message || e}\nUsing empty figure instead.`);
+            console.warn("Error while parsing Chart.figure\n", e, "\nUsing empty figure instead.");
             return undefined;
         }
     }, [props.figure]);
@@ -501,7 +501,7 @@ const Chart = (props: ChartProp) => {
                     : props.template_Light_ && JSON.parse(props.template_Light_);
             template = tpl ? (tplTheme ? { ...tpl, ...tplTheme } : tpl) : tplTheme ? tplTheme : undefined;
         } catch (e) {
-            console.info(`Error while parsing Chart.template\n${(e as Error).message || e}`);
+            console.info("Error while parsing Chart.template", e);
         }
         if (template) {
             layout.template = template;
@@ -559,7 +559,7 @@ const Chart = (props: ChartProp) => {
             toFrame.data &&
             (toFrame.traces && toFrame.traces.length > 0 ? true : null) &&
             plotlyRef.current.animate(
-                plotRef.current as unknown as PlotlyHTMLElement,
+                plotRef.current,
                 {
                     ...toFrame,
                     layout: layout,
@@ -595,12 +595,11 @@ const Chart = (props: ChartProp) => {
             if (!lData || isDataRefresh(lData) || !Object.keys(lData).length) {
                 return currentData;
             }
-            const dtKey = getDataKey(
-                idx < config.columns?.length ? config.columns[idx] : undefined,
-                config.decimators,
-            )[1];
-            if (!dataKey.startsWith(dtKey)) {
-                return currentData;
+            if (idx < config.columns?.length && config.columns[idx]) {
+                const dtKey = getDataKey(config.columns[idx], config.decimators)[1];
+                if (!dataKey.startsWith(dtKey)) {
+                    return currentData;
+                }
             }
             changed = true;
             const datum = lData[dataKey];
@@ -701,7 +700,7 @@ const Chart = (props: ChartProp) => {
             try {
                 plConf = JSON.parse(props.plotConfig);
             } catch (e) {
-                console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
+                console.info("Error while parsing Chart.plot_config", e);
             }
             if (typeof plConf !== "object" || plConf === null || Array.isArray(plConf)) {
                 console.info("Error Chart.plot_config is not a dictionary");
@@ -809,8 +808,8 @@ const Chart = (props: ChartProp) => {
     const onInitialized = useCallback(
         (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
             onClick && graphDiv.addEventListener("click", clickHandler);
-            plotRef.current = graphDiv as HTMLDivElement;
-            plotlyRef.current = window.Plotly as unknown as PlotlyObject;
+            plotRef.current = graphDiv as PlotlyHTMLElement;
+            plotlyRef.current = window.Plotly;
 
             if (animationData) {
                 runAnimation()?.catch(console.error);

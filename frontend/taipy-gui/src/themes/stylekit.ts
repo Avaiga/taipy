@@ -12,35 +12,36 @@
  */
 
 import { lighten } from "@mui/material";
+import { TaipyConfig } from "../utils";
 
-export const stylekitTheme = () => ({
+export const stylekitTheme = (config?: TaipyConfig) => ({
     palette: {
         // Primary and secondary colors
         primary: {
-            main: window.taipyConfig?.stylekit?.colorPrimary,
+            main: config?.stylekit?.colorPrimary,
         },
         secondary: {
-            main: window.taipyConfig?.stylekit?.colorSecondary,
+            main: config?.stylekit?.colorSecondary,
         },
         error: {
-            main: window.taipyConfig?.stylekit?.colorError,
+            main: config?.stylekit?.colorError,
         },
         warning: {
-            main: window.taipyConfig?.stylekit?.colorWarning,
+            main: config?.stylekit?.colorWarning,
         },
         success: {
-            main: window.taipyConfig?.stylekit?.colorSuccess,
+            main: config?.stylekit?.colorSuccess,
         },
     },
     typography: {
         // Custom font
-        fontFamily: window.taipyConfig?.stylekit?.fontFamily,
+        fontFamily: config?.stylekit?.fontFamily,
         h6: {
             fontSize: "1rem",
         },
     },
     shape: {
-        borderRadius: window.taipyConfig?.stylekit?.borderRadius,
+        borderRadius: config?.stylekit?.borderRadius,
     },
     // Components normalization
     components: {
@@ -90,7 +91,7 @@ export const stylekitTheme = () => ({
                     display: "flex",
                 },
                 input: {
-                    minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    minHeight: config?.stylekit?.inputButtonHeight,
                     boxSizing: "border-box",
 
                     // for textarea height calculation
@@ -109,7 +110,7 @@ export const stylekitTheme = () => ({
                 select: {
                     display: "flex",
                     alignItems: "center",
-                    minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
+                    minHeight: config?.stylekit?.inputButtonHeight,
                     boxSizing: "border-box",
                     paddingTop: 8,
                     paddingBottom: 8,
@@ -123,10 +124,10 @@ export const stylekitTheme = () => ({
                     height: "auto",
                     marginBottom: 4,
                     "&.MuiButton-sizeMedium": {
-                        minHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
+                        minHeight: config?.stylekit?.inputButtonHeight,
                     },
                     "&.MuiButton-sizeLarge": {
-                        lineHeight: window.taipyConfig?.stylekit?.inputButtonHeight,
+                        lineHeight: config?.stylekit?.inputButtonHeight,
                     },
                 },
             },
@@ -139,9 +140,9 @@ export const stylekitTheme = () => ({
                         // Use success and error color for heat gradient
                         background:
                             "linear-gradient(90deg, " +
-                            window.taipyConfig?.stylekit?.colorError +
+                            config?.stylekit?.colorError +
                             " 0%, " +
-                            window.taipyConfig?.stylekit?.colorSuccess +
+                            config?.stylekit?.colorSuccess +
                             " 100%)",
                     },
                 },
@@ -184,14 +185,14 @@ export const stylekitTheme = () => ({
     },
 });
 
-export const stylekitModeThemes = () => ({
+export const stylekitModeThemes = (config: TaipyConfig) => ({
     light: {
         palette: {
             background: {
                 // Main background
-                default: window.taipyConfig?.stylekit?.colorBackgroundLight,
+                default: config?.stylekit?.colorBackgroundLight,
                 // Cards background
-                paper: window.taipyConfig?.stylekit?.colorPaperLight,
+                paper: config?.stylekit?.colorPaperLight,
             },
         },
         components: {
@@ -199,8 +200,8 @@ export const stylekitModeThemes = () => ({
             MuiPopover: {
                 styleOverrides: {
                     paper: {
-                        backgroundColor: window.taipyConfig?.stylekit?.colorPaperLight
-                            ? lighten(window.taipyConfig.stylekit.colorPaperLight, 0.5)
+                        backgroundColor: config?.stylekit?.colorPaperLight
+                            ? lighten(config?.stylekit.colorPaperLight, 0.5)
                             : undefined,
                     },
                 },
@@ -210,7 +211,7 @@ export const stylekitModeThemes = () => ({
                 styleOverrides: {
                     thumb: {
                         ".Mui-disabled &::before": {
-                            backgroundColor: window.taipyConfig?.stylekit?.colorPaperLight,
+                            backgroundColor: config?.stylekit?.colorPaperLight,
                         },
                     },
                 },
@@ -221,9 +222,9 @@ export const stylekitModeThemes = () => ({
         palette: {
             background: {
                 // Main background
-                default: window.taipyConfig?.stylekit?.colorBackgroundDark,
+                default: config?.stylekit?.colorBackgroundDark,
                 // Cards background
-                paper: window.taipyConfig?.stylekit?.colorPaperDark,
+                paper: config?.stylekit?.colorPaperDark,
             },
         },
         components: {
@@ -231,8 +232,8 @@ export const stylekitModeThemes = () => ({
             MuiPopover: {
                 styleOverrides: {
                     paper: {
-                        backgroundColor: window.taipyConfig?.stylekit?.colorPaperDark
-                            ? lighten(window.taipyConfig.stylekit.colorPaperDark, 0.05)
+                        backgroundColor: config?.stylekit?.colorPaperDark
+                            ? lighten(config?.stylekit?.colorPaperDark, 0.05)
                             : undefined,
                     },
                 },
@@ -242,7 +243,7 @@ export const stylekitModeThemes = () => ({
                 styleOverrides: {
                     thumb: {
                         ".Mui-disabled &::before": {
-                            backgroundColor: window.taipyConfig?.stylekit?.colorPaperDark,
+                            backgroundColor: config?.stylekit?.colorPaperDark,
                         },
                     },
                 },

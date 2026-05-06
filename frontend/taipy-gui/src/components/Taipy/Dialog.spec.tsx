@@ -44,7 +44,7 @@ describe("Dialog Component", () => {
         const { getByText } = render(
             <HelmetProvider>
                 <Dialog title="Dialog-Test-Title" page="page" open={true} />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         const elt = getByText("Dialog-Test-Title");
         expect(elt.tagName).toBe("H2");
@@ -54,7 +54,7 @@ describe("Dialog Component", () => {
         const { queryAllByText } = render(
             <HelmetProvider>
                 <Dialog title="Dialog-Test-Title" page="page" open={false} />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         expect(queryAllByText("Dialog-Test-Title")).toHaveLength(0);
         const divs = document.getElementsByTagName("div");
@@ -62,10 +62,10 @@ describe("Dialog Component", () => {
         expect(divs[0].childElementCount).toBe(0);
     });
     it("displays the right info for class", async () => {
-        const wrapper = render(
+        render(
             <HelmetProvider>
                 <Dialog title="Dialog-Test-Title" page="page" open={true} className="taipy-dialog" />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         const elt = document.querySelector(".MuiDialog-root");
         expect(elt).toHaveClass("taipy-dialog");
@@ -79,7 +79,7 @@ describe("Dialog Component", () => {
                     defaultOpen="true"
                     open={undefined as unknown as boolean}
                 />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         getByText("Dialog-Test-Title");
     });
@@ -92,7 +92,7 @@ describe("Dialog Component", () => {
                     defaultOpen="true"
                     open={undefined as unknown as boolean}
                 />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         expect(getAllByRole("button")).toHaveLength(1);
     });
@@ -106,7 +106,7 @@ describe("Dialog Component", () => {
                     open={undefined as unknown as boolean}
                     labels={JSON.stringify(["toto"])}
                 />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         expect(getAllByRole("button")).toHaveLength(2);
     });
@@ -120,7 +120,7 @@ describe("Dialog Component", () => {
                     open={undefined as unknown as boolean}
                     labels={JSON.stringify(["toto", "titi", "toto"])}
                 />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         expect(getAllByRole("button")).toHaveLength(4);
     });
@@ -134,7 +134,7 @@ describe("Dialog Component", () => {
                     active={false}
                     labels={JSON.stringify(["testValidate", "testCancel"])}
                 />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         expect(getByText("testValidate")).toBeDisabled();
         expect(getByText("testCancel")).toBeDisabled();
@@ -148,7 +148,7 @@ describe("Dialog Component", () => {
                     open={true}
                     labels={JSON.stringify(["testValidate", "testCancel"])}
                 />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         expect(getByText("testValidate")).not.toBeDisabled();
         expect(getByText("testCancel")).not.toBeDisabled();
@@ -163,7 +163,7 @@ describe("Dialog Component", () => {
                     active={true}
                     labels={JSON.stringify(["testValidate", "testCancel"])}
                 />
-            </HelmetProvider>
+            </HelmetProvider>,
         );
         expect(getByText("testValidate")).not.toBeDisabled();
         expect(getByText("testCancel")).not.toBeDisabled();
@@ -183,7 +183,7 @@ describe("Dialog Component", () => {
                         onAction="testValidateAction"
                     />
                 </HelmetProvider>
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         await userEvent.click(getByTitle("Close"));
         expect(dispatch).toHaveBeenLastCalledWith({
@@ -208,7 +208,7 @@ describe("Dialog Component", () => {
                         onAction="testValidateAction"
                     />
                 </HelmetProvider>
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         await userEvent.click(getByText("testValidate"));
         expect(dispatch).toHaveBeenLastCalledWith({
@@ -233,7 +233,7 @@ describe("Dialog Component", () => {
                         onAction="testValidateAction"
                     />
                 </HelmetProvider>
-            </TaipyContext.Provider>
+            </TaipyContext.Provider>,
         );
         await userEvent.click(getByText("Another One"));
         expect(dispatch).toHaveBeenLastCalledWith({
@@ -245,7 +245,10 @@ describe("Dialog Component", () => {
     it("should log an error when labels prop is not a valid JSON string", () => {
         const consoleSpy = jest.spyOn(console, "info");
         render(<Dialog title={"Dialog-Test-Title"} labels={"not a valid JSON string"} />);
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Error parsing dialog.labels"));
+        expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining("Error parsing dialog.labels"),
+            expect.any(SyntaxError),
+        );
     });
     it("should apply width and height styles when they are provided", async () => {
         const { findByRole } = render(<Dialog title="Dialog-Test-Title" width="500px" height="300px" open={true} />);
@@ -262,7 +265,7 @@ describe("Dialog Component", () => {
     it("calls localAction prop when handleAction is triggered", async () => {
         const localActionMock = jest.fn();
         const { getByLabelText } = render(
-            <Dialog id="test-dialog" title="Test Dialog" localAction={localActionMock} open={true} />
+            <Dialog id="test-dialog" title="Test Dialog" localAction={localActionMock} open={true} />,
         );
         const closeButton = getByLabelText("close");
         await fireEvent.click(closeButton);
@@ -276,11 +279,17 @@ describe("Dialog Component", () => {
                     Hello
                 </Dialog>
                 <div>Outside</div>
-            </>
+            </>,
         );
-        const Hello = getByText("Hello");
-        const Outside = getByText("Outside");
-        await userEvent.keyboard("{Escape}")
+        getByText("Hello");
+        getByText("Outside");
+        await userEvent.keyboard("{Escape}");
         expect(localActionMock).toHaveBeenCalledWith(-1);
+    });
+    it("shows dynamic title", async () => {
+        const { getByText, rerender } = render(<Dialog defaultTitle={"Dynamic Title"} page="page" open={true} />);
+        getByText("Dynamic Title");
+        rerender(<Dialog defaultTitle={"Dynamic Title"} page="page" open={true} title={"Updated Title"} />);
+        getByText("Updated Title");
     });
 });

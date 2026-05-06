@@ -83,7 +83,7 @@ const Part = (props: PartProps) => {
                     return [drops];
                 }
             } catch (e) {
-                console.error("Error parsing dropTypes: ", e);
+                console.error("Error parsing dropTypes:", e);
             }
         }
         return undefined;
