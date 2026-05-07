@@ -81,7 +81,7 @@ const CustomTreeItem = forwardRef(function CustomTreeItem(props: TreeItemProps, 
 });
 
 const treeSlots = { expandIcon: ChevronRightIcon, item: CustomTreeItem };
-type MyTreeItem = {id: string; label: string; lovIcon?: Icon; height?: string; children?: MyTreeItem[]};
+type TaipyTreeItem = {id: string; label: string; lovIcon?: Icon; height?: string; children?: TaipyTreeItem[]};
 const renderTree = (
     lov: LovItem[],
     searchValue: string,
@@ -106,10 +106,10 @@ const renderTree = (
                 lovIcon: typeof li.item !== "string" ? (li.item as Icon) : undefined,
                 height: rowHeight,
                 children,
-            } as MyTreeItem;
+            } as TaipyTreeItem;
         })
-        .filter((c) => c) as MyTreeItem[];
-    return [items, forbidSelections] as [MyTreeItem[], Record<string, true>];
+        .filter((c) => c) as TaipyTreeItem[];
+    return [items, forbidSelections] as [TaipyTreeItem[], Record<string, true>];
 };
 
 const boxSx = { width: "100%" } as CSSProperties;
