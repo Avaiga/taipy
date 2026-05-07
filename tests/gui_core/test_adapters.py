@@ -335,6 +335,42 @@ class TestInvokeAction:
         result = _invoke_action(mock_entity, "missing_prop", "any", False, "==", "value")
         assert result is False
 
+    def test_invoke_action_with_any_type_custom_property_contains(self):
+        scenario = Scenario("test_config", None, {"region": "us-east"})
+
+        result = _invoke_action(scenario, "region", "any", False, "contains", "us")
+        assert result is True
+
+        result = _invoke_action(scenario, "region", "any", False, "contains", "eu")
+        assert result is False
+
+    def test_invoke_action_with_any_type_custom_property_equals(self):
+        scenario = Scenario("test_config", None, {"status": "active"})
+
+        result = _invoke_action(scenario, "status", "any", False, "==", "active")
+        assert result is True
+
+        result = _invoke_action(scenario, "status", "any", False, "==", "inactive")
+        assert result is False
+
+    def test_invoke_action_with_any_type_custom_property_not_equals(self):
+        scenario = Scenario("test_config", None, {"status": "active"})
+
+        result = _invoke_action(scenario, "status", "any", False, "!=", "inactive")
+        assert result is True
+
+        result = _invoke_action(scenario, "status", "any", False, "!=", "active")
+        assert result is False
+
+    def test_invoke_action_with_any_type_custom_property_case_insensitive(self):
+        scenario = Scenario("test_config", None, {"region": "US-East"})
+
+        result = _invoke_action(scenario, "region", "any", False, "contains", "us-east", match_case=False)
+        assert result is True
+
+        result = _invoke_action(scenario, "region", "any", False, "contains", "us-east", match_case=True)
+        assert result is False
+
     def test_invoke_action_with_exception(self):
         mock_entity = Mock()
         mock_entity.test_value = Mock(side_effect=Exception("Test error"))

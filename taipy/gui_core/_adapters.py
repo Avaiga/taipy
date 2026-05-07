@@ -349,11 +349,13 @@ def _invoke_action(
     try:
         if col_type == "any":
             # when a property is not found, return True only if action is "not equal"
-            if not is_dn and not hasattr(ent, "properties") or not ent.properties.get(col_fn or col):
+            if (not is_dn and not hasattr(ent, "properties")) or not ent.properties.get(col_fn or col):
                 return action == "!="
         if op := _operators.get(action):
             if callable(col):
                 cur_val = col(ent)
+            elif col_type == "any":
+                cur_val = ent.properties.get(col_fn or col)
             else:
                 cur_val = attrgetter(col_fn or col)(ent)
                 cur_val = cur_val() if col_fn else cur_val

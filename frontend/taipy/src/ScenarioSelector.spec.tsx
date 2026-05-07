@@ -17,6 +17,7 @@ import "@testing-library/jest-dom";
 import { createContext } from "react";
 
 import ScenarioSelector from "./ScenarioSelector";
+import { getEmptyScenario } from "./ScenarioSelector";
 import { useDispatchRequestUpdateOnFirstRender } from "taipy-gui";
 
 const TaipyContext = createContext<object>({ state: {}, dispatch: () => null });
@@ -112,5 +113,28 @@ describe("ScenarioSelector Component", () => {
         );
         const elt = getByText("Add scenario");
         expect(elt).toBeDisabled();
+    });
+});
+
+describe("getEmptyScenario", () => {
+    it("returns a fresh date on each call", async () => {
+        const first = getEmptyScenario();
+        // Wait a small amount to ensure timestamps differ
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        const second = getEmptyScenario();
+
+        expect(first.date).not.toBe(second.date);
+        expect(new Date(second.date).getTime()).toBeGreaterThan(new Date(first.date).getTime());
+    });
+
+    it("returns default empty values", () => {
+        const scenario = getEmptyScenario();
+
+        expect(scenario.config).toBe("");
+        expect(scenario.name).toBe("");
+        expect(scenario.properties).toEqual([]);
+        expect(scenario.date).toBeTruthy();
+        // Verify date is a valid ISO string
+        expect(new Date(scenario.date).toISOString()).toBe(scenario.date);
     });
 });

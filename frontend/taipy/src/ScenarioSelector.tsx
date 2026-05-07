@@ -107,12 +107,12 @@ interface ScenarioEditDialogProps {
     close: () => void;
 }
 
-const emptyScenario: ScenarioDict = {
+export const getEmptyScenario = (): ScenarioDict => ({
     config: "",
     name: "",
     date: new Date().toISOString(),
     properties: [],
-};
+});
 
 const ActionContentSx = { mr: 2, ml: 2, width: "100%" };
 
@@ -186,12 +186,12 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
     }, []);
 
     const form = useFormik({
-        initialValues: emptyScenario,
+        initialValues: getEmptyScenario(),
         onSubmit: (values: ScenarioDict) => {
             values.properties = [...properties];
             setProperties([]);
             submit(actionEdit, false, values);
-            form.resetForm({ values: { ...emptyScenario, config: configs?.length === 1 ? configs[0][0] : "" } });
+            form.resetForm({ values: { ...getEmptyScenario(), config: configs?.length === 1 ? configs[0][0] : "" } });
             close();
         },
     });
@@ -206,7 +206,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                       date: scenario[ScFProps.creation_date],
                       properties: [],
                   }
-                : { ...emptyScenario, config: configs?.length === 1 ? configs[0][0] : "" },
+                : { ...getEmptyScenario(), config: configs?.length === 1 ? configs[0][0] : "" },
         );
         setProperties(
             actionEdit && scenario ? scenario[ScFProps.properties].map(([k, v], i) => ({ id: i + "", key: k, value: v })) : [],
