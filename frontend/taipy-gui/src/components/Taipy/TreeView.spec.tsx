@@ -78,14 +78,14 @@ describe("TreeView Component", () => {
     it("shows a selection at start", async () => {
         const { getByText } = render(<TreeView defaultValue="id1" lov={lov} />);
         const elt = getByText("Item 1");
-        expect(elt.parentElement).toHaveClass("Mui-selected");
+        expect(elt.parentElement).toHaveAttribute("data-selected");
     });
     it("shows a selection at start through value", async () => {
         const { getByText } = render(<TreeView defaultValue="id1" value="id2" lov={lov} />);
         const elt = getByText("Item 1");
-        expect(elt.parentElement).not.toHaveClass("Mui-selected");
+        expect(elt.parentElement).not.toHaveAttribute("data-selected");
         const elt2 = getByText("Item 2");
-        expect(elt2.parentElement).toHaveClass("Mui-selected");
+        expect(elt2.parentElement).toHaveAttribute("data-selected");
     });
     it("is disabled", async () => {
         const { getByText } = render(<TreeView lov={lov} active={false} />);
