@@ -1,0 +1,9 @@
+{
+  "name": "taipy-gui",
+  "version": "4.2.0",
+  "description": "Taipy GUI",
+  "private": true,
+  "main": "./taipy-gui.js",
+  "types": "./taipy-gui.d.ts",
+  "dependencies": {}
+}
