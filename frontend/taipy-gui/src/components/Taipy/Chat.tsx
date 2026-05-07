@@ -170,17 +170,17 @@ const ChatRow = (props: ChatRowProps) => {
             container
             className={getSuffixedClassNames(className, sender ? "-sent" : "-received")}
             size={12}
-            sx={noAnchorSx}
-            justifyContent={sender ? "flex-end" : undefined}
+            sx={sender ? { ...noAnchorSx, justifyContent: "flex-end" } : noAnchorSx}
+
         >
             <Grid sx={sender ? senderMsgSx : undefined}>
                 {image ? (
-                    <Grid container justifyContent={sender ? "flex-end" : undefined}>
+                    <Grid container sx={sender ? { justifyContent: "flex-end" } : undefined}>
                         <Box component="img" sx={imageSx} alt="Uploaded image" src={image} />
                     </Grid>
                 ) : null}
                 {(!sender || showSender) && avatar ? (
-                    <Stack direction="row" gap={1} justifyContent={sender ? "flex-end" : undefined}>
+                    <Stack direction="row" sx={{ gap: 1, justifyContent: sender ? "flex-end" : undefined }}>
                         {!sender ? <Box sx={avatarColSx}>{avatar}</Box> : null}
                         <Stack>
                             <Box sx={sender ? rightNameSx : leftNameSx}>{name}</Box>
@@ -549,7 +549,7 @@ const Chat = (props: ChatProps) => {
                 {withInput ? (
                     <>
                         {imagePreview && (
-                            <Box mb={1}>
+                            <Box sx={{ mb: 1 }}>
                                 <Chip
                                     label={selectedFile?.name}
                                     avatar={<Avatar alt="Image preview" src={imagePreview} />}

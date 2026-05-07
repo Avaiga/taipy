@@ -167,7 +167,7 @@ export const getAxis = (traces: string[][], idx: number, columns: Record<string,
 
 const getDecimatorsPayload = (
     decimators: string[] | undefined,
-    plotDiv: HTMLDivElement | null,
+    plotDiv: PlotlyHTMLElement | null,
     modes: string[],
     columns: Record<string, ColumnDesc>,
     traces: string[][],
@@ -347,8 +347,8 @@ const Chart = (props: ChartProp) => {
     } = props;
     const dispatch = useDispatch();
     const [selected, setSelected] = useState<number[][]>([]);
-    const plotRef = useRef<HTMLDivElement | null>(null);
-    const plotlyRef = useRef<PlotlyObject | null>(null);
+    const plotRef = useRef<PlotlyHTMLElement>(null);
+    const plotlyRef = useRef<PlotlyObject>(null);
     const [dataKeys, setDataKeys] = useState<string[]>([]);
 
     // animation
@@ -559,7 +559,7 @@ const Chart = (props: ChartProp) => {
             toFrame.data &&
             (toFrame.traces && toFrame.traces.length > 0 ? true : null) &&
             plotlyRef.current.animate(
-                plotRef.current as unknown as PlotlyHTMLElement,
+                plotRef.current,
                 {
                     ...toFrame,
                     layout: layout,
@@ -808,8 +808,8 @@ const Chart = (props: ChartProp) => {
     const onInitialized = useCallback(
         (figure: Readonly<Figure>, graphDiv: Readonly<HTMLElement>) => {
             onClick && graphDiv.addEventListener("click", clickHandler);
-            plotRef.current = graphDiv as HTMLDivElement;
-            plotlyRef.current = window.Plotly as unknown as PlotlyObject;
+            plotRef.current = graphDiv as PlotlyHTMLElement;
+            plotlyRef.current = window.Plotly;
 
             if (animationData) {
                 runAnimation()?.catch(console.error);

@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
+from math import ceil
 
 import numpy as np
 
@@ -58,16 +59,16 @@ class MinMaxDecimator(Decimator):
         x = data[:, 0]
         y = data[:, 1]
         num_bins = self._n_out
-        pts_per_bin = x.size // num_bins
+        pts_per_bin = ceil(x.size / num_bins)
         # Create temp to hold the reshaped & slightly cropped y
-        y_temp = y[: num_bins * pts_per_bin].reshape((num_bins, pts_per_bin))
+        y_temp = np.pad(y, (0, num_bins * pts_per_bin - y.size), mode="edge").reshape((num_bins, pts_per_bin))
         # use argmax/min to get column locations
         cc_max = np.argmax(y_temp, axis=1)
         cc_min = np.argmin(y_temp, axis=1)
         rr = np.arange(0, num_bins)
         # compute the flat index to where these are
-        flat_max = cc_max + rr * pts_per_bin
-        flat_min = cc_min + rr * pts_per_bin
+        flat_max = np.clip(cc_max + rr * pts_per_bin, a_min=None, a_max=x.size - 1)
+        flat_min = np.clip(cc_min + rr * pts_per_bin, a_min=None, a_max=x.size - 1)
         mm_mask = np.full((x.size,), False)
         mm_mask[flat_max] = True
         mm_mask[flat_min] = True

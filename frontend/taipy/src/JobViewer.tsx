@@ -134,7 +134,7 @@ const JobViewer = (props: JobViewerProps) => {
                     <ListItemText
                         primary={entityName}
                         secondary={entityId}
-                        secondaryTypographyProps={SecondaryEllipsisProps}
+                        slotProps={SecondaryEllipsisProps}
                     />
                 </Tooltip>
             </Grid>
@@ -161,7 +161,7 @@ const JobViewer = (props: JobViewerProps) => {
                 <Typography>Stack Trace</Typography>
             </Grid>
             <Grid size={12}>
-                <Typography variant="caption" component="pre" overflow="auto" maxHeight="50vh">
+                <Typography variant="caption" component="pre" sx={{ overflow: "auto", maxHeight: "50vh" }}>
                     {stacktrace.join("<br/>")}
                 </Typography>
             </Grid>

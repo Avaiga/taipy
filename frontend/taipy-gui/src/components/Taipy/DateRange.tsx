@@ -44,7 +44,7 @@ interface DateRangeProps extends TaipyActiveProps, TaipyChangeProps {
     analogic?: boolean;
 }
 
-const textFieldProps = { textField: { margin: "dense" } } as DateTimePickerSlotProps<boolean>;
+const textFieldProps = { textField: { margin: "dense" } } as DateTimePickerSlotProps;
 
 const getRangeDateTime = (
     json: string | string[] | undefined,
@@ -142,11 +142,7 @@ const DateRange = (props: DateRangeProps) => {
                 <Stack
                     id={id}
                     className={`${className} ${getComponentClassName(props.children)}`}
-                    gap={0.5}
-                    direction="row"
-                    display="inline-flex"
-                    alignItems="center"
-                    width={props.width ? getCssSize(props.width) : undefined}
+                    sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, width: props.width ? getCssSize(props.width) : undefined }}
                 >
                     {editable ? (
                         withTime ? (

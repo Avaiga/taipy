@@ -18,5 +18,13 @@ import { Router } from "taipy-gui";
 const container = document.getElementById("root");
 if (container) {
     const root = createRoot(container);
-    root.render(<React.StrictMode><Router /></React.StrictMode>);
+    root.render(
+        process.env.NODE_ENV === "development" && new URLSearchParams(window.location.search).get("disableStrict") === "true" ? (
+            <Router />
+        ) : (
+            <React.StrictMode>
+                <Router />
+            </React.StrictMode>
+        ),
+    );
 }
