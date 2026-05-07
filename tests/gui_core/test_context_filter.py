@@ -54,6 +54,46 @@ class TestGuiCoreContext_filter_scenarios:
         )
         assert len(res) == 0
 
+    def test_get_filtered_scenario_list_custom_property_contains(self):
+        gui_core_context = _GuiCoreContext(Mock())
+        res = gui_core_context.get_filtered_scenario_list(
+            scenarios, [{"col": "a_prop", "type": "any", "value": "a", "action": "=="}]
+        )
+        assert len(res) == 1
+        assert res[0] is scenario_a
+
+    def test_get_filtered_scenario_list_custom_property_contains_partial(self):
+        gui_core_context = _GuiCoreContext(Mock())
+        scenario_x = Scenario("x_config", None, {"another_key": "another_value"})
+        scenario_y = Scenario("y_config", None, {"another_key": "different"})
+        custom_scenarios: t.List[t.Union[t.List, Scenario, None]] = [scenario_x, scenario_y]
+
+        res = gui_core_context.get_filtered_scenario_list(
+            custom_scenarios, [{"col": "another_key", "type": "any", "value": "another", "action": "contains"}]
+        )
+        assert len(res) == 1
+        assert res[0] is scenario_x
+
+    def test_get_filtered_scenario_list_custom_property_not_equal(self):
+        gui_core_context = _GuiCoreContext(Mock())
+        res = gui_core_context.get_filtered_scenario_list(
+            scenarios, [{"col": "a_prop", "type": "any", "value": "a", "action": "!="}]
+        )
+        assert len(res) == 1
+        assert res[0] is scenario_b
+
+    def test_get_filtered_scenario_list_custom_property_missing(self):
+        gui_core_context = _GuiCoreContext(Mock())
+        res = gui_core_context.get_filtered_scenario_list(
+            scenarios, [{"col": "nonexistent", "type": "any", "value": "x", "action": "=="}]
+        )
+        assert len(res) == 0
+
+        res = gui_core_context.get_filtered_scenario_list(
+            scenarios, [{"col": "nonexistent", "type": "any", "value": "x", "action": "!="}]
+        )
+        assert len(res) == 2
+
 
 datanode_a = PickleDataNode("datanode_a_config_id", Scope.SCENARIO)
 datanode_b = PickleDataNode("datanode_b_config_id", Scope.SCENARIO)
