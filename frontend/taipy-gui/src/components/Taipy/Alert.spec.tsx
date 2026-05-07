@@ -21,14 +21,14 @@ describe("TaipyAlert Component", () => {
         const { getByRole } = render(<TaipyAlert message="Default Alert" />);
         const alert = getByRole("alert");
         expect(alert).toBeInTheDocument();
-        expect(alert).toHaveClass("MuiAlert-filledError");
+        expect(alert).toHaveClass("MuiAlert-colorError");
     });
 
     it("applies the correct severity", () => {
         const { getByRole } = render(<TaipyAlert message="Warning Alert" severity="warning" />);
         const alert = getByRole("alert");
         expect(alert).toBeInTheDocument();
-        expect(alert).toHaveClass("MuiAlert-filledWarning");
+        expect(alert).toHaveClass("MuiAlert-colorWarning");
     });
 
     it("applies the correct variant", () => {
