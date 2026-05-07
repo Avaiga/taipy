@@ -15,7 +15,7 @@ import React, { useEffect, useState, useCallback, useMemo, MouseEvent, Fragment,
 
 import Add from "@mui/icons-material/Add";
 import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
 import RefreshOutlined from "@mui/icons-material/RefreshOutlined";
 import TableChartOutlined from "@mui/icons-material/TableChartOutlined";
 
@@ -403,7 +403,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                 </Grid>
             </Grid>
             <Paper>
-                <Grid container alignItems="center">
+                <Grid container sx={{ alignItems: "center" }}>
                     {config?.traces && config?.types
                         ? config?.traces.map((tc, idx) => {
                               const baseLabelId = `${uniqId}-trace${idx}-"`;
@@ -448,7 +448,7 @@ const DataNodeChart = (props: DataNodeChartProps) => {
                                           {config.traces && config.traces.length > 1 ? (
                                               <Tooltip title="Remove Trace">
                                                   <IconButton onClick={onRemoveTrace} data-idx={idx}>
-                                                      <DeleteOutline color="primary" />
+                                                      <DeleteOutlined color="primary" />
                                                   </IconButton>
                                               </Tooltip>
                                           ) : null}

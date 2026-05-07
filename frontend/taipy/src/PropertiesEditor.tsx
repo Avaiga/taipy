@@ -18,7 +18,7 @@ import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import Cancel from "@mui/icons-material/Cancel";
 
@@ -192,11 +192,10 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                   size={12}
                                   spacing={1}
                                   container
-                                  justifyContent="space-between"
+                                  sx={{...hoverSx, justifyContent: "space-between" }}
                                   key={property.id}
                                   data-focus={propName}
                                   onClick={onFocus}
-                                  sx={hoverSx}
                               >
                                   {active && !notEditableReason && focusName === propName ? (
                                       <>
@@ -229,9 +228,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                           <Grid
                                               size={2}
                                               container
-                                              alignContent="center"
-                                              alignItems="center"
-                                              justifyContent="center"
+                                              sx={{ justifyContent: "center", alignContent: "center", alignItems: "center" }}
                                           >
                                               <Tooltip title="Apply">
                                                   <IconButton
@@ -258,9 +255,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                           <Grid
                                               size={1}
                                               container
-                                              alignContent="center"
-                                              alignItems="center"
-                                              justifyContent="center"
+                                              sx={{ justifyContent: "center", alignContent: "center", alignItems: "center" }}
                                           >
                                               <Tooltip title="Delete property">
                                                   <span>
@@ -270,7 +265,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                                           onClick={deleteProperty}
                                                           disabled={!isDefined}
                                                       >
-                                                          <DeleteOutline
+                                                          <DeleteOutlined
                                                               fontSize="small"
                                                               color={disableColor("primary", !isDefined)}
                                                           />
@@ -298,10 +293,9 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                     size={12}
                     spacing={1}
                     container
-                    justifyContent="space-between"
+                    sx={{...hoverSx, justifyContent: "space-between" }}
                     data-focus="new-property"
                     onClick={onFocus}
-                    sx={hoverSx}
                 >
                     {active && !notEditableReason && focusName == "new-property" ? (
                         <>
@@ -329,7 +323,7 @@ const PropertiesEditor = (props: PropertiesEditorProps) => {
                                     slotProps={{ htmlInput: { onKeyDown, "data-enter": true } }}
                                 />
                             </Grid>
-                            <Grid size={2} container alignContent="center" alignItems="center" justifyContent="center">
+                            <Grid size={2} container sx={{ justifyContent: "center", alignContent: "center", alignItems: "center" }}>
                                 <Tooltip title="Apply">
                                     <span>
                                         <IconButton

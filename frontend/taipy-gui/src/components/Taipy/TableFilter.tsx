@@ -86,7 +86,6 @@ const actionsByType = {
     },
 } as Record<string, Record<string, string>>;
 
-const gridSx = { p: "0.5em", minWidth: "36rem" };
 const autocompleteSx = { "& .MuiInputBase-root": { padding: "0" } };
 const badgeSx = {
     "& .MuiBadge-badge": {
@@ -106,7 +105,7 @@ const getFilterDesc = (
     colId?: string,
     act?: string,
     val?: string,
-    matchCase?: boolean
+    matchCase?: boolean,
 ) => {
     if (colId && act && val !== undefined) {
         const colType = getTypeFromDf(columns[colId].type);
@@ -122,10 +121,10 @@ const getFilterDesc = (
                         ? colType === "number"
                             ? parseFloat(val)
                             : colType === "boolean"
-                            ? val === "1"
-                            : colType === "date"
-                            ? getDateTime(val)
-                            : val
+                              ? val === "1"
+                              : colType === "date"
+                                ? getDateTime(val)
+                                : val
                         : val,
                 type: colType,
                 matchCase: !!matchCase,
@@ -157,7 +156,7 @@ const FilterRow = (props: FilterRowProps) => {
             setColId(e.target.value);
             setEnableCheck(!!getFilterDesc(columns, e.target.value, action, val));
         },
-        [columns, action, val]
+        [columns, action, val],
     );
 
     const onActSelect = useCallback(
@@ -165,7 +164,7 @@ const FilterRow = (props: FilterRowProps) => {
             setAction(e.target.value);
             setEnableCheck(!!getFilterDesc(columns, colId, e.target.value, val));
         },
-        [columns, colId, val]
+        [columns, colId, val],
     );
 
     const onValueChange = useCallback(
@@ -173,7 +172,7 @@ const FilterRow = (props: FilterRowProps) => {
             setVal(e.target.value);
             setEnableCheck(!!getFilterDesc(columns, colId, action, e.target.value));
         },
-        [columns, colId, action]
+        [columns, colId, action],
     );
 
     const onValueAutoComp = useCallback(
@@ -182,7 +181,7 @@ const FilterRow = (props: FilterRowProps) => {
             setVal(inputValue);
             setEnableCheck(!!getFilterDesc(columns, colId, action, inputValue));
         },
-        [columns, colId, action]
+        [columns, colId, action],
     );
 
     const onValueSelect = useCallback(
@@ -190,7 +189,7 @@ const FilterRow = (props: FilterRowProps) => {
             setVal(e.target.value);
             setEnableCheck(!!getFilterDesc(columns, colId, action, e.target.value));
         },
-        [columns, colId, action]
+        [columns, colId, action],
     );
 
     const onDateChange = useCallback(
@@ -199,7 +198,7 @@ const FilterRow = (props: FilterRowProps) => {
             setVal(dv);
             setEnableCheck(!!getFilterDesc(columns, colId, action, dv));
         },
-        [columns, colId, action]
+        [columns, colId, action],
     );
 
     const onDeleteClick = useCallback(() => setFilter(idx, undefined as unknown as FilterDesc, true), [idx, setFilter]);
@@ -231,7 +230,7 @@ const FilterRow = (props: FilterRowProps) => {
     const colLov = colId in columns && columns[colId].lov ? columns[colId].lov : undefined;
 
     return (
-        <Grid container size={12} alignItems="center">
+        <Grid container size={12} sx={{ alignItems: "center" }}>
             <Grid size={3.5}>
                 <FormControl margin="dense">
                     <InputLabel>{fieldHeader}</InputLabel>
@@ -246,7 +245,7 @@ const FilterRow = (props: FilterRowProps) => {
                                     <MenuItem key={col} value={col}>
                                         {columns[col].title || columns[col].dfid}
                                     </MenuItem>
-                                ) : null
+                                ) : null,
                             )}
                         </Select>
                     </Tooltip>
@@ -397,7 +396,7 @@ const TableFilter = (props: TableFilterProps) => {
                 return newFds;
             });
         },
-        [onValidate]
+        [onValidate],
     );
 
     useEffect(() => {
@@ -433,7 +432,7 @@ const TableFilter = (props: TableFilterProps) => {
                 onClose={onShowFilterClick}
                 className={getSuffixedClassNames(className, "-filter")}
             >
-                <Grid container sx={gridSx} gap={0.5}>
+                <Grid container sx={{ p: "0.5em", minWidth: "36rem", gap: 0.5 }}>
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         {filters.map((fd, idx) => (
                             <FilterRow

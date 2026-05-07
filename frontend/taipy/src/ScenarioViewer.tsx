@@ -32,7 +32,7 @@ import Add from "@mui/icons-material/Add";
 import ArrowForwardIosSharp from "@mui/icons-material/ArrowForwardIosSharp";
 import Cancel from "@mui/icons-material/Cancel";
 import CheckCircle from "@mui/icons-material/CheckCircle";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
 import FlagOutlined from "@mui/icons-material/FlagOutlined";
 import Send from "@mui/icons-material/Send";
 import deepEqual from "fast-deep-equal/es6";
@@ -196,7 +196,13 @@ const SequenceRow = ({
     const disabledSubmit = disabled || !!notSubmittableReason;
 
     return (
-        <Grid size={12} container justifyContent="space-between" data-focus={name} onClick={onFocus} sx={hoverSx}>
+        <Grid
+            size={12}
+            container
+            data-focus={name}
+            onClick={onFocus}
+            sx={{ ...hoverSx, justifyContent: "space-between" }}
+        >
             {active && !notEditableReason && focusName === name ? (
                 <>
                     <Grid size={4}>
@@ -217,7 +223,7 @@ const SequenceRow = ({
                             multiple
                             options={Object.keys(tasks)}
                             getOptionLabel={getTaskLabel}
-                            renderTags={(values: readonly string[], getTagProps) =>
+                            renderValue={(values: readonly string[], getItemProps) =>
                                 values.map((id: string, index: number) => {
                                     return (
                                         // eslint-disable-next-line react/jsx-key
@@ -225,7 +231,7 @@ const SequenceRow = ({
                                             variant="outlined"
                                             label={tasks[id]}
                                             sx={IconPaddingSx}
-                                            {...getTagProps({ index })}
+                                            {...getItemProps({ index })}
                                         />
                                     );
                                 })
@@ -245,7 +251,10 @@ const SequenceRow = ({
                             disabled={disabled}
                         />
                     </Grid>
-                    <Grid size={2} container alignContent="center" alignItems="center" justifyContent="center">
+                    <Grid
+                        size={2}
+                        sx={{ alignContent: "center", alignItems: "center", justifyContent: "center" }}
+                    >
                         <Tooltip title="Apply">
                             <IconButton sx={IconPaddingSx} onClick={onSaveSequence} size="small" disabled={!valid}>
                                 <CheckCircle color={disableColor("primary", !valid)} />
@@ -268,16 +277,19 @@ const SequenceRow = ({
                             tasks[id] ? <Chip key={id} label={tasks[id]} variant="outlined" /> : null,
                         )}
                     </Grid>
-                    <Grid size={1} alignContent="center" alignItems="center" justifyContent="center">
+                    <Grid
+                        size={1}
+                        sx={{ alignContent: "center", alignItems: "center", justifyContent: "center" }}
+                    >
                         <Tooltip title={`Delete Sequence '${label}'`}>
                             <span>
                                 <IconButton size="small" onClick={onDeleteSequence} disabled={disabled}>
-                                    <DeleteOutline color={disableColor("primary", disabled)} />
+                                    <DeleteOutlined color={disableColor("primary", disabled)} />
                                 </IconButton>
                             </span>
                         </Tooltip>
                     </Grid>
-                    <Grid size={1} alignContent="center" alignItems="center" justifyContent="center">
+                    <Grid size={1} sx={{ alignContent: "center", alignItems: "center", justifyContent: "center" }}>
                         {pLabel && submit ? (
                             <Tooltip
                                 title={
@@ -637,7 +649,10 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
-                        <Stack direction="row" justifyContent="space-between" width="100%" alignItems="baseline">
+                        <Stack
+                            direction="row"
+                            sx={{ justifyContent: "space-between", width: "100%", alignItems: "baseline" }}
+                        >
                             <Stack direction="row" spacing={1}>
                                 <Typography>{scLabel}</Typography>
                                 {scPrimary ? (
@@ -674,8 +689,8 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                     <AccordionDetails>
                         <Grid container rowSpacing={2}>
                             {showConfig ? (
-                                <Grid size={12} container justifyContent="space-between">
-                                    <Grid size={4} pb={2}>
+                                <Grid size={12} container sx={{ justifyContent: "space-between" }}>
+                                    <Grid size={4} sx={{ pb: 2 }}>
                                         <Typography variant="subtitle2">Config ID</Typography>
                                     </Grid>
                                     <Grid size={8}>
@@ -684,7 +699,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 </Grid>
                             ) : null}
                             {showCreationDate ? (
-                                <Grid size={12} container justifyContent="space-between">
+                                <Grid size={12} container sx={{ justifyContent: "space-between" }}>
                                     <Grid size={4}>
                                         <Typography variant="subtitle2">Creation Date</Typography>
                                     </Grid>
@@ -694,7 +709,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                 </Grid>
                             ) : null}
                             {showCycle ? (
-                                <Grid size={12} container justifyContent="space-between">
+                                <Grid size={12} container sx={{ justifyContent: "space-between" }}>
                                     <Grid size={4}>
                                         <Typography variant="subtitle2">Cycle / Frequency</Typography>
                                     </Grid>
@@ -703,14 +718,13 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     </Grid>
                                 </Grid>
                             ) : null}
-                            <Grid size={12} container justifyContent="space-between" spacing={1}>
+                            <Grid size={12} container sx={{ justifyContent: "space-between" }} spacing={1}>
                                 <Grid
                                     size={12}
                                     container
-                                    justifyContent="space-between"
                                     data-focus="label"
                                     onClick={onFocus}
-                                    sx={hoverSx}
+                                    sx={{ ...hoverSx, justifyContent: "space-between" }}
                                 >
                                     {active && !scNotEditableReason && focusName === "label" ? (
                                         <TextField
@@ -764,17 +778,16 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     <Grid
                                         size={12}
                                         container
-                                        justifyContent="space-between"
                                         data-focus="tags"
                                         onClick={onFocus}
-                                        sx={hoverSx}
+                                        sx={{ ...hoverSx, justifyContent: "space-between" }}
                                     >
                                         {active && !scNotEditableReason && focusName === "tags" ? (
                                             <Autocomplete
                                                 multiple
                                                 options={scAuthorizedTags}
                                                 freeSolo={!scAuthorizedTags.length}
-                                                renderTags={(value: readonly string[], getTagProps) =>
+                                                renderValue={(value: readonly string[], getItemProps) =>
                                                     value.map((option: string, index: number) => {
                                                         return (
                                                             // eslint-disable-next-line react/jsx-key
@@ -782,7 +795,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                                 variant="outlined"
                                                                 label={option}
                                                                 sx={IconPaddingSx}
-                                                                {...getTagProps({ index })}
+                                                                {...getItemProps({ index })}
                                                             />
                                                         );
                                                     })
@@ -798,8 +811,9 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                                         sx={tagsAutocompleteSx}
                                                         fullWidth
                                                         slotProps={{
+                                                            ...params.slotProps,
                                                             input: {
-                                                                ...params.InputProps,
+                                                                ...params.slotProps?.input,
                                                                 onKeyDown: onTagsKeyDown,
                                                                 endAdornment: (
                                                                     <>
@@ -863,7 +877,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                             />
                             {showSequences ? (
                                 <>
-                                    <Grid size={12} container justifyContent="space-between">
+                                    <Grid size={12} container sx={{ justifyContent: "space-between" }}>
                                         <Grid size={9}>
                                             <Typography variant="h6">Sequences</Typography>
                                         </Grid>
@@ -919,7 +933,7 @@ const ScenarioViewer = (props: ScenarioViewerProps) => {
                                     </Grid>
                                 </>
                             ) : null}
-                            <Grid size={12} container justifyContent="space-between">
+                            <Grid size={12} container sx={{ justifyContent: "space-between" }}>
                                 {showDelete ? (
                                     <Tooltip title={scDeletableReason}>
                                         <span>

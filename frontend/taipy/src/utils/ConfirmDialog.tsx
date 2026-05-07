@@ -24,7 +24,7 @@ interface ConfirmDialogProps {
 const ConfirmDialog = ({ title, message, confirm, open, onClose, onConfirm }: ConfirmDialogProps) => (
     <Dialog onClose={onClose} open={open}>
         <DialogTitle>
-            <Grid container direction="row" justifyContent="space-between" alignItems="center">
+            <Grid container direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
                 <Typography variant="h5">{title}</Typography>
                 <Tooltip title="close">
                     <IconButton onClick={onClose} sx={IconButtonSx}>

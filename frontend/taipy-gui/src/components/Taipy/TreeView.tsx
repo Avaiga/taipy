@@ -30,7 +30,6 @@ import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import { TreeItem, TreeItemProps } from "@mui/x-tree-view/TreeItem";
-import { TreeViewBaseItem } from "@mui/x-tree-view/models";
 import { useTreeItemModel } from "@mui/x-tree-view/hooks";
 
 import { createSendUpdateAction } from "../../context/taipyReducers";
@@ -82,7 +81,7 @@ const CustomTreeItem = forwardRef(function CustomTreeItem(props: TreeItemProps, 
 });
 
 const treeSlots = { expandIcon: ChevronRightIcon, item: CustomTreeItem };
-
+type MyTreeItem = {id: string; label: string; lovIcon?: Icon; height?: string; children?: MyTreeItem[]};
 const renderTree = (
     lov: LovItem[],
     searchValue: string,
@@ -107,10 +106,10 @@ const renderTree = (
                 lovIcon: typeof li.item !== "string" ? (li.item as Icon) : undefined,
                 height: rowHeight,
                 children,
-            } as TreeViewBaseItem<TreeItemWithLabel>;
+            } as MyTreeItem;
         })
-        .filter((c) => c) as TreeViewBaseItem<TreeItemWithLabel>[];
-    return [items, forbidSelections] as [TreeViewBaseItem<TreeItemWithLabel>[], Record<string, true>];
+        .filter((c) => c) as MyTreeItem[];
+    return [items, forbidSelections] as [MyTreeItem[], Record<string, true>];
 };
 
 const boxSx = { width: "100%" } as CSSProperties;

@@ -395,7 +395,7 @@ export const getColumnHeader = (columns: Record<string, ColumnDesc>, columnKey: 
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
-const textFieldProps = { textField: { margin: "dense" } } as DateTimePickerSlotProps<boolean>;
+const textFieldProps = { textField: { margin: "dense" } } as DateTimePickerSlotProps;
 
 const filter = createFilterOptions<string>();
 const getOptionKey = (option: string) => (Array.isArray(option) ? option[0] : option);
@@ -636,7 +636,7 @@ export const EditableCell = (props: EditableCellProps) => {
                                     title={boolTitle}
                                     sx={iconInRowSx}
                                     onChange={onBoolChange}
-                                    inputRef={setInputFocus}
+                                    slotProps={{input: {ref: setInputFocus}}}
                                     className={getSuffixedClassNames(tableClassName, "-bool")}
                                 />
                             )}

@@ -117,7 +117,6 @@ const tinyPinIconButtonSx = (theme: Theme) => ({
     },
 });
 
-const switchBoxSx = { ml: 2, width: (theme: Theme) => `calc(100% - ${theme.spacing(2)})` };
 const iconInRowSx = { fontSize: "body2.fontSize" };
 const labelInRowSx = { "& .MuiFormControlLabel-label": iconInRowSx };
 
@@ -162,7 +161,7 @@ const CoreItem = (props: {
             itemId={id}
             data-selectable={nodeType === props.leafType}
             label={
-                <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
+                <Grid container sx={{ alignItems: "center", flexWrap: "nowrap" }} direction="row" spacing={1}>
                     <Grid size="grow" sx={iconLabelSx}>
                         {nodeType === NodeType.CYCLE ? (
                             <CycleIcon fontSize="small" color="primary" />
@@ -638,7 +637,7 @@ const CoreSelector = (props: CoreSelectorProps) => {
 
     return (
         <>
-            <Grid container sx={switchBoxSx} gap={1}>
+            <Grid container sx={{ ml: 2, width: (theme: Theme) => `calc(100% - ${theme.spacing(2)})`, gap: 1 }} >
                 {active && colFilters ? (
                     <Grid>
                         <TableFilter

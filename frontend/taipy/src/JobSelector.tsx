@@ -15,7 +15,7 @@ import React, { useEffect, useState, useCallback, useMemo, MouseEvent, useRef } 
 
 import Add from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import FilterList from "@mui/icons-material/FilterList";
 import StopCircleOutlined from "@mui/icons-material/StopCircleOutlined";
@@ -117,7 +117,6 @@ const JobLength = Object.keys(JobProps).length / 2;
 
 const containerSx = { width: "100%", mb: 2 };
 const selectSx = { height: 50 };
-const containerPopupSx = { width: "619px" };
 const tableWidthSx = { minWidth: 750 };
 
 type JobSelectorColumns = {
@@ -125,7 +124,7 @@ type JobSelectorColumns = {
     primaryLabel: string;
     showPrimaryLabel?: boolean;
     secondaryLabel?: string;
-    showSecondayLabel?: boolean;
+    showSecondaryLabel?: boolean;
     columnIndex: number;
 };
 
@@ -207,11 +206,11 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
             anchorOrigin={popoverOrigin}
         >
             <form onSubmit={form.handleSubmit}>
-                <Grid container p={3} sx={containerPopupSx}>
+                <Grid container sx={{ width: "619px", p: 3 }}>
                     {form && form.values.filters && form.values.filters.length > 0
                         ? form.values.filters.map((filter, index) => {
                               return (
-                                  <Grid size={12} container spacing={2} mb={1} key={index}>
+                                  <Grid size={12} container sx={{ spacing: 2, mb: 1 }} key={index}>
                                       <Grid size={3}>
                                           <FormControl fullWidth>
                                               <InputLabel id="data">Column</InputLabel>
@@ -225,7 +224,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                                       .filter(
                                                           (item) =>
                                                               item.columnIndex >= 0 &&
-                                                              (item.showPrimaryLabel || item.showSecondayLabel),
+                                                              (item.showPrimaryLabel || item.showSecondaryLabel),
                                                       )
                                                       .map((item) => (
                                                           <MenuItem key={item.id} value={item.columnIndex}>
@@ -259,7 +258,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                       <Grid size={1}>
                                           <Tooltip title="Delete Filter">
                                               <IconButton data-idx={index} onClick={removeFilter}>
-                                                  <DeleteOutline />
+                                                  <DeleteOutlined />
                                               </IconButton>
                                           </Tooltip>
                                       </Grid>
@@ -267,7 +266,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                               );
                           })
                         : null}
-                    <Grid size={12} container spacing={2} justifyContent="space-between">
+                    <Grid size={12} container spacing={2} sx={{ justifyContent: "space-between" }}>
                         <Grid size={3}>
                             <FormControl fullWidth>
                                 <InputLabel id="data-new">Column</InputLabel>
@@ -281,7 +280,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                                         .filter(
                                             (item) =>
                                                 item.columnIndex >= 0 &&
-                                                (item.showPrimaryLabel || item.showSecondayLabel),
+                                                (item.showPrimaryLabel || item.showSecondaryLabel),
                                         )
                                         .map((item) => (
                                             <MenuItem key={item.id} value={item.columnIndex}>
@@ -318,7 +317,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                             </Tooltip>
                         </Grid>
                     </Grid>
-                    <Grid size={12} container justifyContent="space-between" mt={2}>
+                    <Grid size={12} container sx={{ justifyContent: "space-between", mt: 2 }}>
                         <Button
                             variant="outlined"
                             color="inherit"
@@ -355,7 +354,7 @@ const JobSelectedTableHead = ({ jobs, selected, handleSelectAllClick, columns }:
                 />
             </TableCell>
             {columns
-                .filter((c) => c.showPrimaryLabel || c.showSecondayLabel)
+                .filter((c) => c.showPrimaryLabel || c.showSecondaryLabel)
                 .map((col) => (
                     <TableCell key={col.id}>
                         {col.secondaryLabel ? (
@@ -420,7 +419,7 @@ const JobSelectedTableRow = ({
             </TableCell>
             {showId ? (
                 <TableCell component="th" scope="row" padding="none">
-                    <ListItemText primary={jobName} secondary={id} secondaryTypographyProps={SecondaryEllipsisProps} />
+                    <ListItemText primary={jobName} secondary={id} slotProps={SecondaryEllipsisProps} />
                 </TableCell>
             ) : null}
             {showSubmissionId ? <TableCell>{submitId}</TableCell> : null}
@@ -434,7 +433,7 @@ const JobSelectedTableRow = ({
                         <ListItemText
                             primary={entityName}
                             secondary={entityId}
-                            secondaryTypographyProps={SecondaryEllipsisProps}
+                            slotProps={SecondaryEllipsisProps}
                         />
                     )}
                 </TableCell>
@@ -465,7 +464,7 @@ const JobSelectedTableRow = ({
                     ) : showDelete ? (
                         <Tooltip title="Delete Job">
                             <IconButton data-id={id} onClick={handleDeleteJobs}>
-                                <DeleteOutline color="primary" />
+                                <DeleteOutlined color="primary" />
                             </IconButton>
                         </Tooltip>
                     ) : null}
@@ -835,7 +834,7 @@ const JobSelector = (props: JobSelectorProps) => {
             ) : null}
             <Paper sx={containerSx}>
                 <Toolbar sx={headerToolbarSx}>
-                    <Stack direction="row" justifyContent="space-between" width="100%" marginRight={4}>
+                    <Stack direction="row" sx={{ justifyContent: "space-between", width: "100%", marginRight: 4 }}>
                         <Tooltip title="Filter">
                             <IconButton onClick={handleFilterOpen}>
                                 <FilterList />
@@ -847,7 +846,7 @@ const JobSelector = (props: JobSelectorProps) => {
                             </Typography>
                         ) : null}
                         {checked.length ? (
-                            <Stack direction="row" alignItems="center">
+                            <Stack direction="row" sx={{ alignItems: "center" }}>
                                 <Typography variant="subtitle1">{checked.length} selected</Typography>
                                 {showCancel ? (
                                     <Tooltip title="Cancel Jobs">
@@ -872,7 +871,7 @@ const JobSelector = (props: JobSelectorProps) => {
                                                 data-multiple
                                                 onClick={handleDeleteJobs}
                                             >
-                                                <DeleteOutline color={disableColor("primary", !allowDeleteJobs)} />
+                                                <DeleteOutlined color={disableColor("primary", !allowDeleteJobs)} />
                                             </IconButton>
                                         </span>
                                     </Tooltip>

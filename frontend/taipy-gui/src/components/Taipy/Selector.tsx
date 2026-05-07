@@ -140,13 +140,6 @@ const MultipleItem = ({
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const getMenuProps = (height?: string | number) => ({
-    PaperProps: {
-        style: {
-            maxHeight: height || ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        },
-    },
-});
 
 const getStyles = (id: string, ids: readonly string[], theme: Theme) => ({
     fontWeight: ids.indexOf(id) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
@@ -486,18 +479,19 @@ const Selector = (props: SelectorProps) => {
     );
     const renderAutoInput = useCallback(
         (params: AutocompleteRenderInputParams) => {
-            if (params.InputProps) {
+            if (params.slotProps && params.slotProps.input) {
                 if (selectionMessage) {
-                    params.InputProps.startAdornment = [<Chip key="selectionMessage" label={selectionMessage}></Chip>];
+                    params.slotProps.input.startAdornment = [
+                        <Chip key="selectionMessage" label={selectionMessage}></Chip>,
+                    ];
                 } else {
-                    if (!params.InputProps.startAdornment) {
-                        params.InputProps.startAdornment = [];
-                    } else if (!Array.isArray(params.InputProps.startAdornment)) {
-                        params.InputProps.startAdornment = [params.InputProps.startAdornment];
+                    if (!params.slotProps.input.startAdornment) {
+                        params.slotProps.input.startAdornment = [];
+                    } else if (!Array.isArray(params.slotProps.input.startAdornment)) {
+                        params.slotProps.input.startAdornment = [params.slotProps.input.startAdornment];
                     }
                 }
-                // will need to move to slotProps { input: { startAdornment: (
-                (params.InputProps.startAdornment as Array<ReactNode>).unshift(
+                (params.slotProps.input.startAdornment as Array<ReactNode>).unshift(
                     <SelectAll
                         multiple={multiple}
                         showSelectAll={showSelectAll}
@@ -509,7 +503,10 @@ const Selector = (props: SelectorProps) => {
                     />,
                 );
             } else {
-                console.log("selector autocomplete needs to update params for slotProps.input.startAdornment\nrenderAutoInput", params);
+                console.debug(
+                    "selector autocomplete needs to update params for slotProps.input.startAdornment\nrenderAutoInput",
+                    params,
+                );
             }
             return <TextField {...params} label={props.label} margin="dense" />;
         },
@@ -734,7 +731,15 @@ const Selector = (props: SelectorProps) => {
                                         )}
                                     </Box>
                                 )}
-                                MenuProps={getMenuProps(height)}
+                                MenuProps={{
+                                        slotProps: {
+                                            paper: {
+                                                sx: {
+                                                    maxHeight: height || ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+                                                },
+                                            },
+                                        },
+                                }}
                             >
                                 {lovList.map((item) => (
                                     <MenuItem
@@ -796,7 +801,7 @@ const Selector = (props: SelectorProps) => {
                                     />
                                 </Box>
                             ) : multiple && showSelectAll ? (
-                                <Box paddingLeft={1}>
+                                <Box sx={{ paddingLeft: 1 }}>
                                     <FormControlLabel
                                         control={
                                             <Checkbox
