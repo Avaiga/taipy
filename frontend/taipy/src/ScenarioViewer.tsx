@@ -253,6 +253,7 @@ const SequenceRow = ({
                     </Grid>
                     <Grid
                         size={2}
+                        container
                         sx={{ alignContent: "center", alignItems: "center", justifyContent: "center" }}
                     >
                         <Tooltip title="Apply">

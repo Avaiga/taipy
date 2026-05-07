@@ -210,7 +210,7 @@ const Filter = ({ open, anchorEl, handleFilterClose, handleApplyFilter, columns 
                     {form && form.values.filters && form.values.filters.length > 0
                         ? form.values.filters.map((filter, index) => {
                               return (
-                                  <Grid size={12} container sx={{ spacing: 2, mb: 1 }} key={index}>
+                                  <Grid size={12} container spacing={2} sx={{ mb: 1 }} key={index}>
                                       <Grid size={3}>
                                           <FormControl fullWidth>
                                               <InputLabel id="data">Column</InputLabel>
@@ -430,11 +430,7 @@ const JobSelectedTableRow = ({
                     ) : !showSubmittedId && showSubmittedLabel ? (
                         <Typography>{entityName}</Typography>
                     ) : (
-                        <ListItemText
-                            primary={entityName}
-                            secondary={entityId}
-                            slotProps={SecondaryEllipsisProps}
-                        />
+                        <ListItemText primary={entityName} secondary={entityId} slotProps={SecondaryEllipsisProps} />
                     )}
                 </TableCell>
             ) : null}
@@ -523,7 +519,7 @@ const JobSelector = (props: JobSelectorProps) => {
                 primaryLabel: "Job",
                 showPrimaryLabel: showId,
                 secondaryLabel: "ID",
-                showSecondayLabel: showId,
+                showSecondaryLabel: showId,
                 columnIndex: JobProps.id,
             },
             {
@@ -531,7 +527,7 @@ const JobSelector = (props: JobSelectorProps) => {
                 primaryLabel: "Submission ID",
                 columnIndex: JobProps.submission_id,
                 showPrimaryLabel: showSubmissionId,
-                showSecondayLabel: showSubmissionId,
+                showSecondaryLabel: showSubmissionId,
             },
             {
                 id: "submitEntity",
@@ -539,28 +535,28 @@ const JobSelector = (props: JobSelectorProps) => {
                 secondaryLabel: "ID",
                 columnIndex: JobProps.submitted_id,
                 showPrimaryLabel: showSubmittedLabel,
-                showSecondayLabel: showSubmittedId,
+                showSecondaryLabel: showSubmittedId,
             },
             {
                 id: "createdDt",
                 primaryLabel: "Creation date",
                 columnIndex: JobProps.creation_date,
                 showPrimaryLabel: showDate,
-                showSecondayLabel: showDate,
+                showSecondaryLabel: showDate,
             },
             {
                 id: "status",
                 primaryLabel: "Status",
                 columnIndex: JobProps.status,
                 showPrimaryLabel: true,
-                showSecondayLabel: true,
+                showSecondaryLabel: true,
             },
             {
                 id: "actions",
                 columnIndex: -1,
                 primaryLabel: "Actions",
                 showPrimaryLabel: showCancel,
-                showSecondayLabel: showDelete,
+                showSecondaryLabel: showDelete,
             },
         ],
         [showDate, showSubmittedId, showSubmittedLabel, showId, showSubmissionId, showCancel, showDelete],
