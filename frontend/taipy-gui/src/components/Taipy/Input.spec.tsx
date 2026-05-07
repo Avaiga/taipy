@@ -68,7 +68,7 @@ describe("Input Component", () => {
         const { getByRole } = render(<Input value="val" type="text" size="small" />);
         const elt = getByRole("textbox");
         expect(elt).toBeInTheDocument();
-        expect(elt).toHaveClass("MuiInputBase-inputSizeSmall");
+        expect(elt.parentElement).toHaveClass("MuiInputBase-sizeSmall");
     });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
