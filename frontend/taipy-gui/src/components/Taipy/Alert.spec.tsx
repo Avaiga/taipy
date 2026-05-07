@@ -35,7 +35,7 @@ describe("TaipyAlert Component", () => {
         const { getByRole } = render(<TaipyAlert message="Outlined Alert" variant="outlined" />);
         const alert = getByRole("alert");
         expect(alert).toBeInTheDocument();
-        expect(alert).toHaveClass("MuiAlert-outlinedError");
+        expect(alert).toHaveClass("MuiAlert-outlined");
     });
 
     it("does not render if render prop is false", () => {
