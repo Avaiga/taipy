@@ -729,19 +729,19 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                         expandIcon={expandable ? <ArrowForwardIosSharp sx={AccordionIconSx} /> : null}
                         sx={AccordionSummarySx}
                     >
-                        <Stack direction="row" spacing={1} alignItems="baseline">
+                        <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
                             {showOwnerLabel ? <Typography>{dnOwnerLabel} &gt;</Typography> : null}
                             <Typography>{dnLabel}</Typography>
-                            <Typography fontSize="smaller">{dnType}</Typography>
+                            <Typography sx={{ fontSize: "smaller" }}>{dnType}</Typography>
                         </Stack>
                     </AccordionSummary>
                     <AccordionDetails>
                         <Box sx={tabBoxSx}>
-                            <Stack direction="row" justifyContent="space-between">
+                            <Stack direction="row" sx={{ justifyContent: "space-between" }}>
                                 <Tabs value={tabValue} onChange={handleTabChange}>
                                     <Tab
                                         label={
-                                            <Grid container alignItems="center">
+                                            <Grid container sx={{ alignItems: "center" }}>
                                                 <Grid>Data</Grid>
                                                 {dnEditInProgress ? (
                                                     <Grid>
@@ -815,14 +815,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             aria-labelledby={`${uniqId}-properties`}
                         >
                             <Grid container rowSpacing={2} sx={gridSx}>
-                                <Grid size={12} container justifyContent="space-between" spacing={1}>
+                                <Grid size={12} container sx={{ justifyContent: "space-between" }} spacing={1}>
                                     <Grid
                                         size={12}
                                         container
-                                        justifyContent="space-between"
                                         data-focus="label"
                                         onClick={onFocus}
-                                        sx={hoverSx}
+                                        sx={{ ...hoverSx, justifyContent: "space-between" }}
                                     >
                                         {active && !dnNotEditableReason && focusName === "label" ? (
                                             <TextField
@@ -873,7 +872,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     </Grid>
                                 </Grid>
                                 {showEditDate ? (
-                                    <Grid size={12} container justifyContent="space-between">
+                                    <Grid size={12} container sx={{ justifyContent: "space-between" }}>
                                         <Grid size={4}>
                                             <Typography variant="subtitle2">Last edit date</Typography>
                                         </Grid>
@@ -883,7 +882,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     </Grid>
                                 ) : null}
                                 {showExpirationDate ? (
-                                    <Grid size={12} container justifyContent="space-between">
+                                    <Grid size={12} container sx={{ justifyContent: "space-between" }}>
                                         <Grid size={4}>
                                             <Typography variant="subtitle2">Expiration date</Typography>
                                         </Grid>
@@ -893,8 +892,8 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     </Grid>
                                 ) : null}
                                 {showConfig ? (
-                                    <Grid size={12} container justifyContent="space-between">
-                                        <Grid size={4} pb={2}>
+                                    <Grid size={12} container sx={{ justifyContent: "space-between" }}>
+                                        <Grid size={4} sx={{ pb: 2 }}>
                                             <Typography variant="subtitle2">Config ID</Typography>
                                         </Grid>
                                         <Grid size={8}>
@@ -903,7 +902,7 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                     </Grid>
                                 ) : null}
                                 {showOwner ? (
-                                    <Grid size={12} container justifyContent="space-between">
+                                    <Grid size={12} container sx={{ justifyContent: "space-between" }}>
                                         <Grid size={4}>
                                             <Typography variant="subtitle2">Owner</Typography>
                                         </Grid>
@@ -1006,7 +1005,9 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                                                     {edit[2] ? <Grid size={12}>{edit[2]}</Grid> : null}
                                                     {edit[1] ? (
                                                         <Grid size={12}>
-                                                            <Typography fontSize="smaller">{edit[1]}</Typography>
+                                                            <Typography sx={{ fontSize: "smaller" }}>
+                                                                {edit[1]}
+                                                            </Typography>
                                                         </Grid>
                                                     ) : null}
                                                 </Grid>
@@ -1025,14 +1026,13 @@ const DataNodeViewer = (props: DataNodeViewerProps) => {
                             aria-labelledby={`${uniqId}-data`}
                         >
                             {dtValue !== undefined ? (
-                                <Grid container justifyContent="space-between" spacing={1}>
+                                <Grid container sx={{ justifyContent: "space-between" }} spacing={1}>
                                     <Grid
                                         container
                                         size={12}
-                                        justifyContent="space-between"
                                         data-focus={dataValueFocus}
                                         onClick={dtIsJson || dtTypeIsNull ? undefined : onFocus}
-                                        sx={hoverSx}
+                                        sx={{ ...hoverSx, justifyContent: "space-between" }}
                                     >
                                         {active &&
                                         !dnNotEditableReason &&

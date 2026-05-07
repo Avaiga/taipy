@@ -161,7 +161,7 @@ const Dialog = (props: DialogProps) => {
             onClose={handleAction}
             open={open === undefined ? defaultOpen === "true" || defaultOpen === true : !!open}
             className={`${className} ${getComponentClassName(props.children)}`}
-            PaperProps={paperProps}
+            slotProps={{ paper: paperProps }}
         >
             <Tooltip title={hover || ""}>
                 <DialogTitle sx={titleSx}>

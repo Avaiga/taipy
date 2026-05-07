@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Theme, Tooltip, alpha } from "@mui/material";
 import Add from "@mui/icons-material/Add";
 import Close from "@mui/icons-material/Close";
-import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
 import EditOutlined from "@mui/icons-material/EditOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -113,8 +113,6 @@ const emptyScenario: ScenarioDict = {
     date: new Date().toISOString(),
     properties: [],
 };
-
-const ActionContentSx = { mr: 2, ml: 2, width: "100%" };
 
 const DialogContentSx = {
     maxHeight: "calc(100vh - 256px)",
@@ -228,7 +226,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
         <>
             <Dialog onClose={close} open={open} maxWidth="sm">
                 <DialogTitle>
-                    <Grid container direction="row" justifyContent="space-between" alignItems="center">
+                    <Grid container direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
                         <Typography variant="h5">{`${actionEdit ? `Edit` : `Create`} scenario`}</Typography>
                         <Tooltip title="close">
                             <IconButton onClick={close} sx={IconButtonSx}>
@@ -293,12 +291,12 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                     </LocalizationProvider>
                                 </FormGroup>
                             </Grid>
-                            <Grid size={12} container justifyContent="space-between">
+                            <Grid size={12} container sx={{ justifyContent: "space-between" }}>
                                 <Typography variant="h6">Custom Properties</Typography>
                             </Grid>
                             {properties
                                 ? properties.map((item, index) => (
-                                      <Grid size={12} key={item.id} container spacing={1} alignItems="end">
+                                      <Grid size={12} key={item.id} container spacing={1} sx={{ alignItems: "end" }}>
                                           <Grid size={4}>
                                               <TextField
                                                   value={item.key}
@@ -328,14 +326,14 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                                                       onClick={propertyDelete}
                                                       sx={SquareButtonSx}
                                                   >
-                                                      <DeleteOutline />
+                                                      <DeleteOutlined />
                                                   </Button>
                                               </Tooltip>
                                           </Grid>
                                       </Grid>
                                   ))
                                 : null}
-                            <Grid size={12} container spacing={1} justifyContent="space-between" alignItems="end">
+                            <Grid size={12} container spacing={1} sx={{ justifyContent: "space-between", alignItems: "end" }}>
                                 <Grid size={4}>
                                     <TextField
                                         value={newProp.key}
@@ -373,7 +371,7 @@ const ScenarioEditDialog = ({ scenario, submit, open, actionEdit, configs, close
                     </DialogContent>
 
                     <DialogActions>
-                        <Stack direction="row" justifyContent="space-between" sx={ActionContentSx}>
+                        <Stack direction="row" sx={{ mr: 2, ml: 2, width: "100%", justifyContent: "space-between" }}>
                             {actionEdit && (
                                 <Tooltip title={scenario && scenario[ScFProps.deletable]}>
                                     <span>

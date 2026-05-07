@@ -230,10 +230,12 @@ export const ChartViewType = "chart";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 export const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
+    slotProps: {
+        paper: {
+            sx: {
+                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+                width: 250,
+            },
         },
     },
 };
@@ -247,4 +249,4 @@ export const getUpdateVarNames = (updateVars: string, ...vars: string[]) =>
     vars.map((v) => getUpdateVar(updateVars, v) || "").filter((v) => v);
 
 export const EllipsisSx = { textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" };
-export const SecondaryEllipsisProps = { sx: EllipsisSx };
+export const SecondaryEllipsisProps = {secondary: { sx: EllipsisSx } };

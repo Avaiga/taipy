@@ -50,7 +50,7 @@ interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
 }
 
 const boxSx = { display: "inline-block" };
-const textFieldProps = { textField: { margin: "dense" } } as DateTimePickerSlotProps<boolean>;
+const textFieldProps = { textField: { margin: "dense" } } as DateTimePickerSlotProps;
 
 const analogicRenderers = {
     hours: renderTimeViewClock,

@@ -74,7 +74,8 @@ describe("Button Component", () => {
         const elt = getByRole("button");
         expect(elt).toBeInTheDocument();
         expect(elt).toHaveClass("MuiButton-sizeMedium");
-        expect(elt).toHaveClass("MuiButton-outlinedPrimary");
+        expect(elt).toHaveClass("MuiButton-outlined");
+        expect(elt).toHaveClass("MuiButton-colorPrimary");
     });
     it("applies correct size", () => {
         const { getByRole } = render(<Button label="val" size="large" />);
@@ -86,7 +87,8 @@ describe("Button Component", () => {
         const { getByRole } = render(<Button label="val" variant="text" />);
         const elt = getByRole("button");
         expect(elt).toBeInTheDocument();
-        expect(elt).toHaveClass("MuiButton-textPrimary");
+        expect(elt).toHaveClass("MuiButton-text");
+        expect(elt).toHaveClass("MuiButton-colorPrimary");
     });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();

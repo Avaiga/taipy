@@ -67,7 +67,6 @@ const anchorOrigin = {
     horizontal: "right",
 } as PopoverOrigin;
 
-const gridSx = { p: "0.5em", minWidth: "36rem" };
 const badgeSx = {
     "& .MuiBadge-badge": {
         height: "10px",
@@ -107,14 +106,14 @@ const SortRow = (props: SortRowProps) => {
             setColId(e.target.value);
             setEnableCheck(!!getSortDesc(columns, e.target.value, order));
         },
-        [columns, order]
+        [columns, order],
     );
     const onOrderSwitch = useCallback(
         (e: ChangeEvent<HTMLInputElement>) => {
             setOrder(e.target.checked);
             setEnableCheck(!!getSortDesc(columns, colId, e.target.checked));
         },
-        [columns, colId]
+        [columns, colId],
     );
 
     const onDeleteClick = useCallback(() => setSort(idx, undefined as unknown as SortDesc, true), [idx, setSort]);
@@ -139,7 +138,7 @@ const SortRow = (props: SortRowProps) => {
     }, [columns, sort, idx]);
 
     return cols.length ? (
-        <Grid container size={12} alignItems="center">
+        <Grid container size={12} sx={{ alignItems: "center" }}>
             <Grid size={6}>
                 <FormControl margin="dense">
                     <InputLabel>{fieldHeader}</InputLabel>
@@ -229,7 +228,7 @@ const TableSort = (props: TableSortProps) => {
                 return newSds;
             });
         },
-        [onValidate]
+        [onValidate],
     );
 
     useEffect(() => {
@@ -260,7 +259,7 @@ const TableSort = (props: TableSortProps) => {
                 onClose={onShowSortClick}
                 className={getSuffixedClassNames(className, "-sort")}
             >
-                <Grid container sx={gridSx} gap={0.5}>
+                <Grid container sx={{ p: "0.5em", minWidth: "36rem", gap: 0.5 }}>
                     {sorts.map((sd, idx) => (
                         <SortRow
                             key={"fd" + idx}
