@@ -11,7 +11,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import logging
 import os
 import pathlib
@@ -148,6 +147,7 @@ class _FlaskServer(_Server):
         base_url: str,
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
+
         # Serve static react build
 
         @taipy_bp.route("/", defaults={"path": ""})
@@ -173,11 +173,13 @@ class _FlaskServer(_Server):
                     )
                 except Exception:
                     raise RuntimeError(
-                        "Something is wrong with the taipy-gui front-end installation. Check that the js bundle has been properly built (is Node.js installed?)."  # noqa: E501
+                        "Something is wrong with the taipy-gui front-end installation. "
+                        "Check that the js bundle has been properly built (is Node.js installed?)."
                     ) from None
 
             if path == "taipy.status.json":
-                return self.direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))  # type: ignore[attr-defined]
+                return self.direct_render_json(
+                    self._gui._serve_status(pathlib.Path(template_folder) / path))  # type: ignore[attr-defined]
             if (file_path := str(os.path.normpath((base_path := static_folder + os.path.sep) + path))).startswith(
                 base_path
             ) and os.path.isfile(file_path):
@@ -187,25 +189,26 @@ class _FlaskServer(_Server):
                 if (
                     path.startswith(f"{k}/")
                     and (
-                        file_path := str(os.path.normpath((base_path := v + os.path.sep) + path[len(k) + 1 :]))
-                    ).startswith(base_path)
+                    file_path := str(os.path.normpath((base_path := v + os.path.sep) + path[len(k) + 1:]))
+                ).startswith(base_path)
                     and os.path.isfile(file_path)
                 ):
-                    return send_from_directory(base_path, path[len(k) + 1 :])
+                    return send_from_directory(base_path, path[len(k) + 1:])
             if (
                 hasattr(__main__, "__file__")
                 and (
-                    file_path := str(
-                        os.path.normpath((base_path := os.path.dirname(__main__.__file__) + os.path.sep) + path)
-                    )
-                ).startswith(base_path)
+                file_path := str(
+                    os.path.normpath((base_path := os.path.dirname(__main__.__file__) + os.path.sep) + path)
+                )
+            ).startswith(base_path)
                 and os.path.isfile(file_path)
                 and not self._is_ignored(file_path)
             ):
                 return send_from_directory(base_path, path)
             if (
                 (
-                    file_path := str(os.path.normpath((base_path := self._gui._root_dir + os.path.sep) + path))  # type: ignore[attr-defined]
+                    file_path := str(os.path.normpath((base_path := self._gui._root_dir + os.path.sep) + path))
+                # type: ignore[attr-defined]
                 ).startswith(base_path)
                 and os.path.isfile(file_path)
                 and not self._is_ignored(file_path)
@@ -239,7 +242,15 @@ class _FlaskServer(_Server):
 
     def _run_notebook(self):
         self._is_running = True
-        self._ws.run(self._server, host=self._host, port=self._port, debug=False, use_reloader=False)
+        self._ws.run(
+            self._server,
+            host=self._host,
+            port=self._port,
+            debug=False,
+            use_reloader=False,
+            allow_unsafe_werkzeug=True,
+            log_output=True
+        )
 
     def _get_async_mode(self) -> str:
         return self._ws.async_mode  # type: ignore[attr-defined]
@@ -384,9 +395,14 @@ class _FlaskServer(_Server):
         if not self.is_running_from_reloader() and self._gui._get_config("run_browser", False):  # type: ignore[attr-defined]
             webbrowser.open(client_url or server_url, new=2)
         if _is_in_notebook() or run_in_thread:
-            self._thread = KThread(target=self._run_notebook)
+            self._thread = KThread(
+                target=self._run_notebook,
+                daemon=True,
+                name=f"TaipyGUI-{port}"
+            )
             self._thread.start()
             return
+
         self._is_running = True
         run_config = {
             "app": self._server,
@@ -411,17 +427,44 @@ class _FlaskServer(_Server):
     def stop_thread(self):
         if hasattr(self, "_thread") and self._thread.is_alive() and self._is_running:
             self._is_running = False
-            with contextlib.suppress(Exception):
+
+            try:
                 if self._get_async_mode() == "gevent":
-                    if self._ws.wsgi_server is not None:  # type: ignore[attr-defined]
-                        self._ws.wsgi_server.stop()  # type: ignore[attr-defined]
+                    if hasattr(self._ws, 'wsgi_server') and self._ws.wsgi_server is not None:
+                        self._ws.wsgi_server.stop()
                     else:
                         self._thread.kill()
                 else:
                     self._thread.kill()
+            except Exception as e:
+                _TaipyLogger._get_logger().warning(f"Error stopping thread: {e}")
+
+            timeout_start = time.time()
+            timeout_duration = 5.0  # 5 seconds timeout
+
             while _is_port_open(self._host, self._port):
+                if time.time() - timeout_start > timeout_duration:
+                    _TaipyLogger._get_logger().warning(
+                        f"Port {self._port} still occupied after {timeout_duration}s timeout"
+                    )
+                    break
                 time.sleep(0.1)
+
+    def __del__(self):
+        try:
+            if hasattr(self, '_thread') and self._thread and self._thread.is_alive():
+                self.stop_thread()
+            if hasattr(self, '_proxy'):
+                self.stop_proxy()
+        except Exception:
+            pass
 
     def stop_proxy(self):
         if hasattr(self, "_proxy"):
-            self._proxy.stop()
+            try:
+                self._proxy.stop()
+            except Exception as e:
+                _TaipyLogger._get_logger().warning(f"Error stopping proxy: {e}")
+            finally:
+                if hasattr(self, "_proxy"):
+                    delattr(self, "_proxy")

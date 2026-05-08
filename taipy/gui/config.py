@@ -255,11 +255,12 @@ class _Config(object):
                     elif key == "port" and str(value).strip() == "auto":
                         config["port"] = "auto"
                     else:
-                        config[key] = value if config.get(key) is None else type(config.get(key))(value)  # type: ignore[reportCallIssue]
+                        config[key] = value if config.get(key) is None else type(config.get(key))(
+                            value)  # type: ignore[reportCallIssue]
                 except Exception as e:
                     _warn(
-                        f"Invalid keyword arguments value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
-                        e,
+                        f"Invalid keyword arguments value in Gui.run(): {key} - {value}. "
+                        f"Unable to parse value to the correct type: {e}",
                     )
         # Load config from env file
         if os.path.isfile(env_file_abs_path):
@@ -273,11 +274,12 @@ class _Config(object):
                             if isinstance(config[key], bool):
                                 config[key] = _is_true(value)
                             else:
-                                config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore[reportCallIssue]
+                                config[key] = value if config[key] is None else type(config[key])(
+                                    value)  # type: ignore[reportCallIssue]
                     except Exception as e:
                         _warn(
-                            f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
-                            e,
+                            f"Invalid env value in Gui.run(): {key} - {value}. "
+                            f"Unable to parse value to the correct type: {e}",
                         )
 
         # Taipy-config
