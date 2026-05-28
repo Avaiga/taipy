@@ -13,11 +13,15 @@ import typing as t
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+# Represents a JSON-serializable data structure
+Jsonable = t.Union[t.Dict[str, t.Any],
+                   t.List[t.Any], str, int, float, bool, None]
+
 
 class JsonableProperty(ABC):
     # Support for making the class JSON-serializable
     @abstractmethod
-    def to_jsonable(self) -> t.Any:  # TODO: better type hint for return type
+    def to_jsonable(self) -> Jsonable:         # better type hint for return type
         raise NotImplementedError()
 
 
