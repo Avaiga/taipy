@@ -2079,7 +2079,7 @@
                     {
                         "name": "on_action",
                         "type": "Union[str, Callable]",
-                        "doc": "A function or the name of a function that is triggered when a specific key is pressed.<br/>The callback function is invoked with the following parameters:<ul><li><i>state</i> (<code>State^</code>): the state instance.</li><li><i>id</i> (str): the identifier of the control if it has one.</li><li><i>payload</i> (dict): the callback details<br/>This dictionary has the following keys:<ul><li><i>action</i>: the name of the action that triggered this callback.</li><li><i>args</i> (list):<ul><li><i>[0]</i>: The key name pressed.</li><li><i>[1]</i>: The variable name.</li><li><i>[2]</i>: The current value of the variable.</li></ul></li></ul></li></ul>",
+                        "doc": "A function or the name of a function that is triggered when a specific key is pressed.<br/>The callback function is invoked with the following parameters:\n\n* *state* (`State^`): the state instance.\n* *id* (str): the identifier of the control if it has one.\n* *payload* (dict): the callback details\n  This dictionary has the following keys:\n  * *action*: the name of the action that triggered this callback.\n  * *args* (list):\n    * *[0]*: The key name pressed.\n    * *[1]*: The variable name.\n    * *[2]*: The current value of the variable.",
                         "signature": [
                             ["state", "State"],
                             ["id", "str"],
