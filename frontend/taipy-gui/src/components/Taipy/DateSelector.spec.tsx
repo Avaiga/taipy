@@ -250,6 +250,7 @@ describe("DateSelector with time Component", () => {
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DateSelector
                     defaultDate="2011-01-01T00:10:01.001Z"
+                    withTime={true}
                     date={undefined as unknown as string}
                     format="yy-MM-dd mm"
                 />
