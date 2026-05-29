@@ -14,7 +14,7 @@
 import "@testing-library/jest-dom";
 import { FormatConfig } from "../context/taipyReducers";
 
-import { getNumberString, getDateTimeString } from "./index";
+import { getNumberString, getDateTimeString, getDateTime, getTimeZonedDate } from "./index";
 
 let myWarn: jest.Mock;
 
@@ -108,3 +108,33 @@ describe("getDateTimeString", () => {
         expect(myWarn).toHaveBeenCalledWith("Invalid date format:", "Invalid time value")
     });
 });
+
+describe("getDateTime and getTimeZonedDate date-only parsing and formatting", () => {
+    it("getDateTime parses date-only string as local midnight without timezone offset when withTime is false", () => {
+        const dateVal = getDateTime("2025-06-06", "UTC", false);
+        expect(dateVal).not.toBeNull();
+        expect(dateVal!.getFullYear()).toBe(2025);
+        expect(dateVal!.getMonth()).toBe(5); // 0-based June is 5
+        expect(dateVal!.getDate()).toBe(6);
+    });
+
+    it("getTimeZonedDate keeps local date components exactly as selected and sets time to 00:00 when withTime is false", () => {
+        const localDate = new Date(2025, 5, 6, 12, 30, 15);
+        const result = getTimeZonedDate(localDate, "America/Los_Angeles", false);
+        expect(result.getFullYear()).toBe(2025);
+        expect(result.getMonth()).toBe(5);
+        expect(result.getDate()).toBe(6);
+        expect(result.getHours()).toBe(0);
+        expect(result.getMinutes()).toBe(0);
+        expect(result.getSeconds()).toBe(0);
+    });
+
+    it("getTimeZonedDate clones the date object to prevent in-place mutation of the original date object", () => {
+        const localDate = new Date(2025, 5, 6);
+        const originalTime = localDate.getTime();
+        const result = getTimeZonedDate(localDate, "America/Los_Angeles", false);
+        expect(result).not.toBe(localDate);
+        expect(localDate.getTime()).toBe(originalTime);
+    });
+});
+

@@ -72,20 +72,20 @@ interface StyleKit {
 
 // return date with right time and tz
 export const getTimeZonedDate = (d: Date, tz: string, withTime: boolean): Date => {
-    const newDate = d;
-    // dispatch new date which offset by the timeZone differences between client and server
-    const hours = getClientServerTimeZoneOffset(tz) / 60;
-    const minutes = getClientServerTimeZoneOffset(tz) % 60;
+    const newDate = new Date(d);
     newDate.setSeconds(0);
     newDate.setMilliseconds(0);
     if (withTime) {
+        // dispatch new date which offset by the timeZone differences between client and server
+        const hours = getClientServerTimeZoneOffset(tz) / 60;
+        const minutes = getClientServerTimeZoneOffset(tz) % 60;
         // Parse data with selected time if it is a datetime selector
         newDate.setHours(newDate.getHours() + hours);
         newDate.setMinutes(newDate.getMinutes() + minutes);
     } else {
-        // Parse data with 00:00 UTC time if it is a date selector
-        newDate.setHours(hours);
-        newDate.setMinutes(minutes);
+        // Keep the local date components exactly as selected for date-only components
+        newDate.setHours(0);
+        newDate.setMinutes(0);
     }
     return newDate;
 };
@@ -103,6 +103,12 @@ export const getDateTime = (value: string | null | undefined, tz?: string, withT
         return null;
     }
     try {
+        if (!withTime) {
+            const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+                return new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
+            }
+        }
         return tz && tz !== "Etc/Unknown" && withTime ? toZonedTime(value, tz) : new Date(value);
     } catch {
         return null;
