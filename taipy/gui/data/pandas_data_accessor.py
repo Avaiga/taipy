@@ -550,14 +550,14 @@ class _PandasDataAccessor(_DataAccessor):
 
     def on_edit(self, value: t.Any, payload: t.Dict[str, t.Any]):
         df = self.to_pandas(value)
-        if not isinstance(df, pd.DataFrame) or not isinstance(payload.get("index"), (int, float)):
+        if not isinstance(df, pd.DataFrame) or "index" not in payload:
             raise ValueError(f"Cannot edit {type(value)} at {payload.get('index')}.")
         df.at[self._get_index_value(payload.get("index", 0)), payload["col"]] = payload["value"]
         return self._from_pandas(df, type(value))
 
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         df = self.to_pandas(value)
-        if not isinstance(df, pd.DataFrame) or not isinstance(payload.get("index"), (int, float)):
+        if not isinstance(df, pd.DataFrame) or "index" not in payload:
             raise ValueError(f"Cannot delete a row from {type(value)} at {payload.get('index')}.")
         return self._from_pandas(df.drop(self._get_index_value(payload.get("index", 0))), type(value))
 
