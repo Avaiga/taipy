@@ -383,6 +383,18 @@ def test_edit(gui, small_dataframe):
     assert ret_data["value"].iloc[0] == 10
 
 
+def test_edit_dataframe_with_string_index(gui, small_dataframe):
+    accessor = _PandasDataAccessor(gui)
+    pd = pandas.DataFrame(small_dataframe, index=["row-a", "row-b", "row-c"])
+    ln = len(pd)
+
+    ret_data = accessor.on_edit(pd, {"index": "row-b", "col": "value", "value": 10})
+
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert len(ret_data) == ln
+    assert ret_data.at["row-b", "value"] == 10
+
+
 def test_delete(gui, small_dataframe):
     accessor = _PandasDataAccessor(gui)
     pd = pandas.DataFrame(small_dataframe)
@@ -390,6 +402,18 @@ def test_delete(gui, small_dataframe):
     ret_data = accessor.on_delete(pd, {"index": 0})
     assert isinstance(ret_data, pandas.DataFrame)
     assert len(ret_data) == ln - 1
+
+
+def test_delete_dataframe_with_string_index(gui, small_dataframe):
+    accessor = _PandasDataAccessor(gui)
+    pd = pandas.DataFrame(small_dataframe, index=["row-a", "row-b", "row-c"])
+    ln = len(pd)
+
+    ret_data = accessor.on_delete(pd, {"index": "row-b"})
+
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert len(ret_data) == ln - 1
+    assert "row-b" not in ret_data.index
 
 
 def test_add(gui, small_dataframe):
