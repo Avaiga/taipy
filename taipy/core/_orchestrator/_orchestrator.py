@@ -289,6 +289,19 @@ class _Orchestrator(_AbstractOrchestrator):
                 cls._unlock_edit_on_jobs_outputs(to_cancel_or_abandon_jobs)
 
     @classmethod
+    def _remove_jobs(cls, jobs: Iterable[Union[Job, JobId]]) -> None:
+        with cls.lock:
+            job_ids = {job.id if isinstance(job, Job) else job for job in jobs}
+            cls.blocked_jobs = [job for job in cls.blocked_jobs if job.id not in job_ids]
+
+            new_jobs_to_run: Queue = Queue()
+            while not cls.jobs_to_run.empty():
+                current_job = cls.jobs_to_run.get()
+                if current_job.id not in job_ids:
+                    new_jobs_to_run.put(current_job)
+            cls.jobs_to_run = new_jobs_to_run
+
+    @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
         next_output_dn_config_ids = set()
         subsequent_jobs = set()
