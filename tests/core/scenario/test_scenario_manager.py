@@ -257,7 +257,9 @@ def test_get_all_on_multiple_versions_environment():
     for version in range(1, 3):
         for i in range(5):
             _ScenarioManager._repository._save(
-                Scenario(f"config_id_{i+version}", [], {}, [], ScenarioId(f"id{i}_v{version}"), version=f"{version}.0")
+                Scenario(
+                    f"config_id_{i + version}", [], {}, [], ScenarioId(f"id{i}_v{version}"), version=f"{version}.0"
+                )
             )
 
     _VersionManager._set_experiment_version("1.0")
@@ -1042,6 +1044,36 @@ def test_hard_delete_shared_entities():
     assert len(_TaskManager._get_all()) == 4
     assert len(_DataManager._get_all()) == 4
     assert len(_JobManager._get_all()) == 6
+
+
+def test_hard_delete_scenario_while_jobs_are_blocked():
+    input_dn_config = Config.configure_data_node("input_dn", "in_memory", scope=Scope.SCENARIO)
+    output_dn_config = Config.configure_data_node("output_dn", "in_memory", scope=Scope.SCENARIO)
+    task_config = Config.configure_task("task_cfg", print, input_dn_config, output_dn_config)
+    scenario_config = Config.configure_scenario("scenario_cfg", [task_config])
+
+    scenario_1 = _ScenarioManager._create(scenario_config)
+    scenario_2 = _ScenarioManager._create(scenario_config)
+
+    # Submit both scenarios. Their jobs will be blocked because the input data nodes are not ready.
+    _ScenarioManager._submit(scenario_1.id)
+    _ScenarioManager._submit(scenario_2.id)
+
+    # Both jobs should be in the blocked list.
+    assert len(_Orchestrator.blocked_jobs) == 2
+
+    # Hard delete Scenario 1. This should trigger cleanup of jobs.
+    _ScenarioManager._hard_delete(scenario_1.id)
+
+    # Let's check that we don't crash when unblocking jobs are processed
+    # In the bug, this raises AttributeError.
+    # Note: under the hood, this will iterate through blocked_jobs.
+    # After the fix, blocked_jobs should only contain the job of scenario_2.
+    _Orchestrator._Orchestrator__unblock_jobs()
+
+    # The blocked job list should only contain the job of scenario_2.
+    assert len(_Orchestrator.blocked_jobs) == 1
+    assert _Orchestrator.blocked_jobs[0].submit_entity_id == scenario_2.id
 
 
 def test_is_submittable():

@@ -60,14 +60,25 @@ class _JobManager(_Manager[Job], _VersionMixin):
 
     @classmethod
     def _delete(cls, job: Union[Job, JobId], force=False) -> None:
+        job_id = job.id if isinstance(job, Job) else JobId(job)
         if isinstance(job, str):
             job = cls._get(job)
         if cls._is_deletable(job) or force:
-            super()._delete(job.id)
+            super()._delete(job_id)
+            from .._orchestrator._orchestrator_factory import _OrchestratorFactory
+
+            _OrchestratorFactory._build_orchestrator()._remove_jobs([job_id])
         else:
-            err = JobNotDeletedException(job.id)
+            err = JobNotDeletedException(job_id)
             cls._logger.error(err)
             raise err
+
+    @classmethod
+    def _delete_many(cls, ids: Iterable[JobId]) -> None:
+        super()._delete_many(ids)
+        from .._orchestrator._orchestrator_factory import _OrchestratorFactory
+
+        _OrchestratorFactory._build_orchestrator()._remove_jobs(ids)
 
     @classmethod
     def _cancel(cls, job: Union[str, Job]) -> None:
