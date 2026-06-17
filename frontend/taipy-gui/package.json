@@ -24,7 +24,7 @@
         "react-helmet-async": "^3.0.0",
         "react-markdown": "^10.1.0",
         "react-plotly.js": "^2.5.1",
-        "react-router": "^7.12.0",
+        "react-router": "^7.15.1",
         "react-window": "^2.2.7",
         "react-window-infinite-loader": "^2.0.1",
         "socket.io-client": "^4.3.2",
