@@ -76,3 +76,31 @@ def test_update_job_status_with_exceptions():
     assert len(job.stacktrace) == 2
     assert job.stacktrace[0] == "".join(traceback.format_exception(type(e_1), value=e_1, tb=e_1.__traceback__))
     assert job.stacktrace[1] == "".join(traceback.format_exception(type(e_2), value=e_2, tb=e_2.__traceback__))
+
+
+_observed_stacktrace = None
+
+
+def subscriber(job):
+    global _observed_stacktrace
+    _observed_stacktrace = list(job.stacktrace)
+
+
+def test_update_job_status_callback_receives_stacktrace():
+    global _observed_stacktrace
+    _observed_stacktrace = None
+
+    task = Task("config_id", {}, nothing)
+    _TaskManagerFactory._build_manager()._repository._save(task)
+
+    job = Job(JobId("id"), task, "s_id", task.id)
+    _JobManagerFactory._build_manager()._repository._save(job)
+
+    e = Exception("test")
+
+    job._subscribers.append(subscriber)
+
+    _JobDispatcher(_OrchestratorFactory._orchestrator)._update_job_status(job, [e])
+
+    assert len(_observed_stacktrace) == 1
+    assert "Exception: test" in _observed_stacktrace[0]

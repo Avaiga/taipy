@@ -151,13 +151,13 @@ class _JobDispatcher(threading.Thread):
     def _update_job_status(job: Job, exceptions):
         """Update the job status based on the success or the failure of its execution."""
         if exceptions:
-            job.failed()
             _TaipyLogger._get_logger().error(f" {len(exceptions)} errors occurred during execution of job {job.id}")
             for e in exceptions:
                 st = "".join(traceback.format_exception(type(e), value=e, tb=e.__traceback__))
                 job._stacktrace.append(st)
                 _TaipyLogger._get_logger().error(st)
             _JobManagerFactory._build_manager()._update(job)
+            job.failed()
         else:
             for output in job.task.output.values():
                 output.track_edit(job_id=job.id)
