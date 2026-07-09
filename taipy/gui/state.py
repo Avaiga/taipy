@@ -358,21 +358,32 @@ class _AsyncState(_GuiState):
         self._set_placeholder("__state_id", state.get_gui()._get_client_id())  # type: ignore[attr-defined]
 
     @staticmethod
-    def __set_var_in_state(state: State, var_name: str, value: t.Any):
-        setattr(state, var_name, value)
+    def __set_var_in_state(state: State, var_name: str, value: t.Any, ctx: t.Optional[str] = None):
+        if ctx is not None:
+            setattr(state[ctx], var_name, value)
+        else:
+            setattr(state, var_name, value)
 
     @staticmethod
-    def __get_var_from_state(state: State, var_name: str):
+    def __get_var_from_state(state: State, var_name: str, ctx: t.Optional[str] = None):
+        if ctx is not None:
+            return getattr(state[ctx], var_name)
         return getattr(state, var_name)
 
     def __setattr__(self, var_name: str, var_value: t.Any) -> None:
+        ctx = None
+        if len(inspect.stack()) > 1:
+            ctx = _get_module_name_from_frame(t.cast(FrameType, inspect.stack()[1].frame))
         self.get_gui().invoke_callback(
-            t.cast(str, self._get_placeholder("__state_id")), _AsyncState.__set_var_in_state, [var_name, var_value]
+            t.cast(str, self._get_placeholder("__state_id")), _AsyncState.__set_var_in_state, [var_name, var_value, ctx]
         )
 
     def __getattr__(self, var_name: str) -> t.Any:
+        ctx = None
+        if len(inspect.stack()) > 1:
+            ctx = _get_module_name_from_frame(t.cast(FrameType, inspect.stack()[1].frame))
         return self.get_gui().invoke_callback(
-            t.cast(str, self._get_placeholder("__state_id")), _AsyncState.__get_var_from_state, [var_name]
+            t.cast(str, self._get_placeholder("__state_id")), _AsyncState.__get_var_from_state, [var_name, ctx]
         )
 
     def _invoke_on_gui(self, method: t.Callable, *args):
