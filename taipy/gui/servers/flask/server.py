@@ -60,6 +60,27 @@ class _TaipyJsonProvider(DefaultJSONProvider):
 class _FlaskServer(_Server):
     type = "flask"
     server_base_class = Flask
+    _SAFE_STATIC_EXTENSIONS = {
+        ".avif",
+        ".bmp",
+        ".css",
+        ".eot",
+        ".gif",
+        ".ico",
+        ".jpeg",
+        ".jpg",
+        ".js",
+        ".json",
+        ".map",
+        ".mjs",
+        ".otf",
+        ".png",
+        ".svg",
+        ".ttf",
+        ".webp",
+        ".woff",
+        ".woff2",
+    }
 
     def __init__(
         self,
@@ -150,6 +171,9 @@ class _FlaskServer(_Server):
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
         # Serve static react build
 
+        def _is_safe_static_file(requested_path: str) -> bool:
+            return pathlib.Path(requested_path).suffix.lower() in self._SAFE_STATIC_EXTENSIONS
+
         @taipy_bp.route("/", defaults={"path": ""})
         @taipy_bp.route("/<path:path>")
         def my_index(path):
@@ -178,14 +202,19 @@ class _FlaskServer(_Server):
 
             if path == "taipy.status.json":
                 return self.direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))  # type: ignore[attr-defined]
-            if (file_path := str(os.path.normpath((base_path := static_folder + os.path.sep) + path))).startswith(
-                base_path
-            ) and os.path.isfile(file_path):
+            if (
+                _is_safe_static_file(path)
+                and (file_path := str(os.path.normpath((base_path := static_folder + os.path.sep) + path))).startswith(
+                    base_path
+                )
+                and os.path.isfile(file_path)
+            ):
                 return send_from_directory(base_path, path)
             # use the path mapping to detect and find resources
             for k, v in self.__path_mapping.items():
                 if (
                     path.startswith(f"{k}/")
+                    and _is_safe_static_file(path)
                     and (
                         file_path := str(os.path.normpath((base_path := v + os.path.sep) + path[len(k) + 1 :]))
                     ).startswith(base_path)
@@ -200,6 +229,7 @@ class _FlaskServer(_Server):
                     )
                 ).startswith(base_path)
                 and os.path.isfile(file_path)
+                and _is_safe_static_file(path)
                 and not self._is_ignored(file_path)
             ):
                 return send_from_directory(base_path, path)
@@ -208,6 +238,7 @@ class _FlaskServer(_Server):
                     file_path := str(os.path.normpath((base_path := self._gui._root_dir + os.path.sep) + path))  # type: ignore[attr-defined]
                 ).startswith(base_path)
                 and os.path.isfile(file_path)
+                and _is_safe_static_file(path)
                 and not self._is_ignored(file_path)
             ):
                 return send_from_directory(base_path, path)
