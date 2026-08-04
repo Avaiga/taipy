@@ -11,6 +11,7 @@
 
 import inspect
 from os import path
+from pathlib import Path
 
 from taipy.gui import Gui
 
@@ -75,3 +76,23 @@ def test_get_status_with_user_status(gui: Gui, helpers):
     assert "user_status" in gui_ret, "json.gui has no key user_status"
     assert gui_ret.get("user_status") == user_status
     assert f"json.gui.user_status => {gui_ret.get('user_status')} != {user_status}"
+
+
+def test_root_file_disclosure_is_blocked(gui: Gui, tmp_path: Path):
+    (tmp_path / "style.css").write_text("body { color: green; }", encoding="utf-8")
+    (tmp_path / "secret.py").write_text("secret = 'hidden'\n", encoding="utf-8")
+    (tmp_path / ".env").write_text("SECRET=hidden\n", encoding="utf-8")
+
+    gui.run(run_server=False)
+    gui._root_dir = str(tmp_path)
+
+    server_test_client = gui._server.test_client()
+
+    allowed = server_test_client.get("/style.css")
+    assert allowed.status_code == 200, f"status_code => {allowed.status_code} != 200"
+
+    secret_py = server_test_client.get("/secret.py")
+    assert secret_py.status_code == 404, f"status_code => {secret_py.status_code} != 404"
+
+    env_file = server_test_client.get("/.env")
+    assert env_file.status_code == 404, f"status_code => {env_file.status_code} != 404"
