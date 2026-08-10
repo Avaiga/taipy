@@ -106,7 +106,7 @@ describe("Button Component", () => {
             type: "SEND_ACTION_ACTION",
         });
     });
-    it("trigger once in auto-repeat mode after holding for less that half a second", async () => {
+    it("does not trigger before initial repeat delay in auto-repeat mode", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
@@ -116,12 +116,25 @@ describe("Button Component", () => {
         );
         const elt = getByText("Button");
         await userEvent.pointer([{ target: elt, keys: "[MouseLeft>]" }]);
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise((r) => setTimeout(r, 300));
         await userEvent.pointer([{ target: elt, keys: "[/MouseLeft]" }]);
-        const nCalls = dispatch.mock.calls.length;
-        expect(nCalls).toBe(1);
+        expect(dispatch).not.toHaveBeenCalled();
     });
-    it("trigger multiple times in auto-repeat mode after holding for 1 second", async () => {
+    it("triggers exactly once after initial repeat delay in auto-repeat mode", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Button label="Button" onAction="on_action" autoRepeat={300} />
+            </TaipyContext.Provider>
+        );
+        const elt = getByText("Button");
+        await userEvent.pointer([{ target: elt, keys: "[MouseLeft>]" }]);
+        await new Promise((r) => setTimeout(r, 600));
+        await userEvent.pointer([{ target: elt, keys: "[/MouseLeft]" }]);
+        expect(dispatch).toHaveBeenCalledTimes(1);
+    });
+    it("triggers multiple times after holding past initial delay in auto-repeat mode", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
@@ -131,9 +144,23 @@ describe("Button Component", () => {
         );
         const elt = getByText("Button");
         await userEvent.pointer([{ target: elt, keys: "[MouseLeft>]" }]);
-        await new Promise((r) => setTimeout(r, 1000));
+        await new Promise((r) => setTimeout(r, 1200));
         await userEvent.pointer([{ target: elt, keys: "[/MouseLeft]" }]);
-        const nCalls = dispatch.mock.calls.length;
-        expect(nCalls).toBeGreaterThan(1);
+        expect(dispatch.mock.calls.length).toBeGreaterThan(1);
+    });
+    it("does not trigger after release if held less than initial delay", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Button label="Button" onAction="on_action" autoRepeat={200} />
+            </TaipyContext.Provider>
+        );
+        const elt = getByText("Button");
+        await userEvent.pointer([{ target: elt, keys: "[MouseLeft>]" }]);
+        await new Promise((r) => setTimeout(r, 100));
+        await userEvent.pointer([{ target: elt, keys: "[/MouseLeft]" }]);
+        await new Promise((r) => setTimeout(r, 200));
+        expect(dispatch).not.toHaveBeenCalled();
     });
 });

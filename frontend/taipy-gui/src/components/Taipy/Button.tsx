@@ -65,8 +65,8 @@ const Button = (props: ButtonProps) => {
             // Prevent simultaneous repeats
             return;
         }
-        handleClick(); // Trigger immediately
         autoRepeatInitialRef.current = setTimeout(() => {
+            handleClick();
             autoRepeatIntervalRef.current = setInterval(handleClick, autoRepeatDelay);
             autoRepeatInitialRef.current = null;
         }, initialRepeatDelay);
@@ -106,7 +106,7 @@ const Button = (props: ButtonProps) => {
                 variant={variant}
                 size={size}
                 className={`${className} ${getComponentClassName(props.children)}`}
-                onClick={handleClick}
+                onClick={autoRepeatDelay ? undefined : handleClick}
                 disabled={!active}
                 sx={buttonSx}
                 onMouseDown={autoRepeatDelay ? startRepeating : undefined}
