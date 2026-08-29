@@ -56,3 +56,17 @@ def test_favicon_fastapi(gui: Gui, helpers):
             assert msgs[0].get("args", {}).get("payload", {}).get("value", None) == "https://newfavicon.com/favicon.png"
         finally:
             ws_client.disconnect()
+
+@pytest.mark.skip_if_not_server("flask")
+def test_favicon_index_html(gui: Gui, helpers, tmp_path):
+    favicon_path = tmp_path / "custom_favicon.png"
+    favicon_path.write_text("fake_png_data")
+    
+    with warnings.catch_warnings(record=True):
+        gui._set_frame(inspect.currentframe())
+        gui.add_page("test", Markdown("#This is a page"))
+        gui.run(run_server=False, favicon=str(favicon_path))
+        client = gui._server.test_client()
+        response = client.get("/")
+        assert response.status_code == 200
+        assert f"/{Gui._CONTENT_ROOT}/" in response.data.decode("utf-8")

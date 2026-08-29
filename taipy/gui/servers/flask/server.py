@@ -313,12 +313,16 @@ class _FlaskServer(_Server):
         extension_bp.add_url_rule(f"/{Gui._EXTENSION_ROOT}/<path:path>", view_func=gui._serve_extension)  # pyright: ignore[reportAttributeAccessIssue]
         flask_blueprint.append(extension_bp)
 
+        favicon = gui._get_config("favicon", Gui._DEFAULT_FAVICON_URL)
+        if favicon:
+            favicon = gui._get_content("__taipy_favicon", favicon, True)  # pyright: ignore[reportAttributeAccessIssue]
+
         flask_blueprint.append(
             self._get_default_handler(
                 static_folder=gui._get_webapp_path(),  # pyright: ignore[reportAttributeAccessIssue]
                 template_folder=gui._get_webapp_path(),  # pyright: ignore[reportAttributeAccessIssue]
                 title=gui._get_config("title", "Taipy App"),  # pyright: ignore[reportAttributeAccessIssue]
-                favicon=gui._get_config("favicon", Gui._DEFAULT_FAVICON_URL),  # pyright: ignore[reportAttributeAccessIssue]
+                favicon=favicon,
                 root_margin=gui._get_config("margin", None),  # pyright: ignore[reportAttributeAccessIssue]
                 scripts=scripts,
                 styles=styles,
