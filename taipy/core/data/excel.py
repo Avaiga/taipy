@@ -169,6 +169,7 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         return None
 
     def _read_as(self, path: str):
+        excel_file = None
         try:
             properties = self.properties
             excel_file = load_workbook(path, read_only=True)
@@ -222,7 +223,8 @@ class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
                         res[i] = sheet_exposed_type(*row)
                 work_books[sheet_name] = res  # type: ignore
         finally:
-            excel_file.close()
+            if excel_file is not None:
+                excel_file.close()
 
         if len(user_provided_sheet_names) == 1:
             return work_books[cast(list, user_provided_sheet_names)[0]]
