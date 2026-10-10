@@ -660,3 +660,8 @@ class TestExcelDataNode:
 
         # The upload should succeed when check_data_is_positive() return True
         assert dn._upload(new_excel_path, upload_checker=check_data_is_positive)
+
+    def test_read_as_nonexistent_file_raises_filenotfounderror_not_unboundlocalerror(self):
+        dn = ExcelDataNode("test_dn", Scope.SCENARIO, properties={"path": "non_existent_file.xlsx", "exposed_type": MyCustomObject})
+        with pytest.raises(FileNotFoundError):
+            dn._read_as("non_existent_file.xlsx")
