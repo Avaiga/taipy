@@ -79,3 +79,13 @@ def test_sending_messages_in_group_fastapi(gui: Gui, helpers):
         helpers.assert_outward_ws_multiple_message(received_messages[0], "MS", 2)
     finally:
         ws_client.disconnect()
+
+
+def test_with_gui_propagates_exceptions(gui: Gui):
+    class CustomBatchUpdateError(Exception):
+        pass
+
+    with pytest.raises(CustomBatchUpdateError):
+        with gui:
+            raise CustomBatchUpdateError("Exception should propagate cleanly")
+
