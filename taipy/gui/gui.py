@@ -1558,7 +1558,8 @@ class Gui:
             _warn("Exception raised while sending messages", e)
         if exc_value:  # pragma: no cover
             _warn(f"An {exc_type or 'Exception'} was raised", exc_value)
-        return True
+            return False
+        return False
 
     def __hold_messages(self):
         grouping_message = self.__get_message_grouping()
