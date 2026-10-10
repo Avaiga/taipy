@@ -45,7 +45,7 @@ def _patch_value(value: t.Any, change: t.Optional[dict] = None, remove: t.Option
                     if idx < len(value):
                         if isinstance(v, dict):
                             _patch_value(value[idx], v)
-                        if isinstance(v, list):
+                        elif isinstance(v, list):
                             if insert:
                                 value[idx:idx] = v
                             else:
