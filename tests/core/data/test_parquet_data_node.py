@@ -408,3 +408,17 @@ class TestParquetDataNode:
 
         # The upload should succeed when check_data_is_positive() return True
         assert dn._upload(new_parquet_path, upload_checker=check_data_is_positive)
+
+    def test_read_with_kwargs_does_not_mutate_read_kwargs_properties(self, tmpdir_factory):
+        parquet_file_path = tmpdir_factory.mktemp("data").join("test_filter_leak.parquet").strpath
+        data = pd.DataFrame({"id": [1, 2], "name": ["Alice", "Bob"], "score": [95, 88]})
+        dn = ParquetDataNode("test_leak_dn", Scope.SCENARIO, properties={"path": parquet_file_path})
+        dn.write(data)
+
+        # Read 1 with columns filter kwarg
+        sliced_df = dn._read_from_path(parquet_file_path, dn._EXPOSED_TYPE_PANDAS_DATAFRAME, {"columns": ["id"]})
+        assert list(sliced_df.columns) == ["id"]
+
+        # Read 2 standard read must return all columns, not just leaked columns from Read 1
+        full_df = dn.read()
+        assert list(full_df.columns) == ["id", "name", "score"]
