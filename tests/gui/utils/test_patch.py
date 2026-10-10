@@ -69,6 +69,12 @@ def test_update_object_in_list():
     assert obj.get("a").get("b", [])[0].get("c") == 1  # pyright: ignore[reportOptionalMemberAccess]
 
 
+def test_update_object_in_list_preserves_unmodified_keys():
+    obj = {"a": {"b": [{"id": 1, "name": "foo", "status": "draft"}]}}
+    _patch_value(obj, {"a": {"b": {0: {"status": "published"}}}})
+    assert obj.get("a").get("b", [])[0] == {"id": 1, "name": "foo", "status": "published"}  # pyright: ignore[reportOptionalMemberAccess]
+
+
 def test_update_list_of_object():
     obj = {"a": {"b": [{"c": 1}, {"c": 2, "d": 3}, {"c": 4}]}}
     _patch_value(obj, {"a": {"b": {1: [{"c": -1}]}}})
