@@ -216,7 +216,7 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
 
         properties = self.properties
 
-        kwargs = properties[self.__READ_KWARGS_PROPERTY]
+        kwargs = properties[self.__READ_KWARGS_PROPERTY].copy()
         kwargs.update(
             {
                 self.__ENGINE_PROPERTY: properties[self.__ENGINE_PROPERTY],
