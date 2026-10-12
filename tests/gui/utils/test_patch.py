@@ -121,3 +121,14 @@ def test_update_list_of_list():
     assert len(obj[0]) == 0  # pyright: ignore[reportOptionalMemberAccess]
     assert obj[1] == [4, 5, 6]  # pyright: ignore[reportOptionalMemberAccess]
     assert len(obj) == 2  # pyright: ignore[reportOptionalMemberAccess]
+
+
+def test_update_object_in_list_preserves_other_keys():
+    items = [
+        {"id": 101, "title": "Quarterly Report", "author": "Alice", "status": "draft"}
+    ]
+    _patch_value(items, change={0: {"status": "published"}})
+    assert items[0]["id"] == 101
+    assert items[0]["title"] == "Quarterly Report"
+    assert items[0]["author"] == "Alice"
+    assert items[0]["status"] == "published"
