@@ -422,6 +422,37 @@ def test_add(gui, small_dataframe):
     assert ret_data["name"].iloc[2] == "New"
 
 
+def _indexed_dataframe():
+    return pandas.DataFrame({"A": ["a1", "a2", "a3"], "B": ["b1", "b2", "b3"]}).set_index("A")
+
+
+def test_edit_with_index(gui):
+    accessor = _PandasDataAccessor(gui)
+    ret_data = accessor.on_edit(_indexed_dataframe(), {"index": 1, "col": "B", "value": "NEW"})
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert len(ret_data) == 3
+    assert list(ret_data.index) == ["a1", "a2", "a3"]
+    assert list(ret_data["B"]) == ["b1", "NEW", "b3"]
+
+
+def test_delete_with_index(gui):
+    accessor = _PandasDataAccessor(gui)
+    ret_data = accessor.on_delete(_indexed_dataframe(), {"index": 1})
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert list(ret_data.index) == ["a1", "a3"]
+    assert list(ret_data["B"]) == ["b1", "b3"]
+
+
+def test_add_with_index(gui):
+    accessor = _PandasDataAccessor(gui)
+    ret_data = accessor.on_add(_indexed_dataframe(), {"index": 0}, ["new"])
+    assert isinstance(ret_data, pandas.DataFrame)
+    assert list(ret_data["B"]) == ["new", "b1", "b2", "b3"]
+
+    ret_data = accessor.on_add(_indexed_dataframe(), {"index": 2}, ["new"])
+    assert list(ret_data["B"]) == ["b1", "b2", "new", "b3"]
+
+
 def test_csv(gui, small_dataframe):
     accessor = _PandasDataAccessor(gui)
     pd = pandas.DataFrame(small_dataframe)
