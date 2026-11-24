@@ -552,14 +552,18 @@ class _PandasDataAccessor(_DataAccessor):
         df = self.to_pandas(value)
         if not isinstance(df, pd.DataFrame) or not isinstance(payload.get("index"), (int, float)):
             raise ValueError(f"Cannot edit {type(value)} at {payload.get('index')}.")
-        df.at[self._get_index_value(payload.get("index", 0)), payload["col"]] = payload["value"]
+        # payload["index"] is the row *position*, not an index label: use iloc so that
+        # dataframes with a custom index (strings, dates, ...) are edited on the right row.
+        df.iloc[int(payload.get("index", 0)), df.columns.get_loc(payload["col"])] = payload["value"]
         return self._from_pandas(df, type(value))
 
     def on_delete(self, value: t.Any, payload: t.Dict[str, t.Any]):
         df = self.to_pandas(value)
         if not isinstance(df, pd.DataFrame) or not isinstance(payload.get("index"), (int, float)):
             raise ValueError(f"Cannot delete a row from {type(value)} at {payload.get('index')}.")
-        return self._from_pandas(df.drop(self._get_index_value(payload.get("index", 0))), type(value))
+        # payload["index"] is the row *position*: drop by position, not by index label.
+        position = int(payload.get("index", 0))
+        return self._from_pandas(df.iloc[[i for i in range(len(df)) if i != position]], type(value))
 
     def on_add(self, value: t.Any, payload: t.Dict[str, t.Any], new_row: t.Optional[t.List[t.Any]] = None):
         df = self.to_pandas(value)
@@ -570,19 +574,12 @@ class _PandasDataAccessor(_DataAccessor):
         # Create the new row (Column value types must match the original DataFrame's)
         if list(df.columns):
             new_row = [0 if is_numeric_dtype(dt) else "" for dt in df.dtypes] if new_row is None else new_row
-            if index > 0:
-                # Column names and value types must match the original DataFrame
-                new_df = pd.DataFrame([new_row], columns=df.columns.copy())
-                # Split the DataFrame
-                rows_before = df.iloc[:index]
-                rows_after = df.iloc[index:]
-                return self._from_pandas(pd.concat([rows_before, new_df, rows_after], ignore_index=True), type(value))
-            else:
-                df = df.copy()
-                # Insert as the new first row
-                df.loc[-1] = new_row  # Insert the new row
-                df.index = df.index + 1  # Shift index
-                return self._from_pandas(df.sort_index(), type(value))
+            # Column names and value types must match the original DataFrame
+            new_df = pd.DataFrame([new_row], columns=df.columns.copy())
+            # Split the DataFrame at the insertion position (works with any kind of index)
+            rows_before = df.iloc[: int(index)]
+            rows_after = df.iloc[int(index) :]
+            return self._from_pandas(pd.concat([rows_before, new_df, rows_after], ignore_index=True), type(value))
         return value
 
     def to_csv(self, var_name: str, value: t.Any):
